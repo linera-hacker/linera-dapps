@@ -1,11 +1,10 @@
 use linera_sdk::base::{Account, Amount};
+use async_graphql::{Context, Error};
 
 pub trait ERC20QueryRoot {
-    fn total_supply(&self) -> Amount;
+    async fn total_supply(&self, ctx: &Context<'_>) -> Result<Amount, Error>;
 }
 
 pub trait ERC20MutationRoot {
-    type Error: std::fmt::Debug;
-
-    fn transfer(to: Account, amount: Amount) -> Vec<u8>;
+    async fn transfer(&self, ctx: &Context<'_>, to: Account, amount: Amount) -> Result<Vec<u8>, Error>;
 }

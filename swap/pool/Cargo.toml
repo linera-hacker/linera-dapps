@@ -1,5 +1,5 @@
 [package]
-name = "erc20"
+name = "swap-pool"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,17 +7,16 @@ edition = "2021"
 async-graphql.workspace = true
 linera-sdk.workspace = true
 interfaces.workspace = true
-thiserror.workspace = true
 
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }
 
 [[bin]]
-name = "erc20_contract"
+name = "swap_pool_contract"
 path = "src/contract.rs"
 
 [[bin]]
-name = "erc20_service"
+name = "swap_pool_service"
 path = "src/service.rs"
 
 [profile.release]

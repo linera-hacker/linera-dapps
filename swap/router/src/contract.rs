@@ -18,7 +18,7 @@ pub struct ApplicationContract {
 linera_sdk::contract!(ApplicationContract);
 
 impl WithContractAbi for ApplicationContract {
-    type Abi = swap::ApplicationAbi;
+    type Abi = swap_router::ApplicationAbi;
 }
 
 impl Contract for ApplicationContract {

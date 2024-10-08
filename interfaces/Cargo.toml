@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-linera-sdk = { workspace = true }
-linera-views = { workspace = true }
+async-graphql.workspace = true
+linera-sdk.workspace = true
+linera-views.workspace = true
 
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }

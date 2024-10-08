@@ -1,33 +1,38 @@
 use linera_sdk::base::{Account, Amount, ApplicationId, Timestamp};
+use async_graphql::{Context, Error};
 
 pub trait PoolQueryRoot {
-    fn get_pool(token_0: ApplicationId, token_1: ApplicationId) -> Option<u64>;
+    async fn get_pool(&self, ctx: &Context<'_>, token_0: ApplicationId, token_1: ApplicationId) -> Result<Option<u64>, Error>;
 
-    fn get_fee_to() -> Option<Account>;
+    async fn get_fee_to(&self, ctx: &Context<'_>) -> Result<Option<Account>, Error>;
 }
 
 pub trait PoolMutationRoot {
     // Just put all liquidity pool in one application
-    fn create_pool(token_0: ApplicationId, token_1: ApplicationId) -> Vec<u8>;
+    async fn create_pool(&self, ctx: &Context<'_>, token_0: ApplicationId, token_1: ApplicationId) -> Result<Vec<u8>, Error>;
 
-    fn set_fee_to(account: Account) -> Vec<u8>;
+    async fn set_fee_to(&self, ctx: &Context<'_>, account: Account) -> Result<Vec<u8>, Error>;
 
-    fn set_fee_to_setter(account: Account) -> Vec<u8>;
+    async fn set_fee_to_setter(&self, ctx: &Context<'_>, account: Account) -> Result<Vec<u8>, Error>;
 
     // Return minted liquidity
-    fn mint(to: Account) -> Vec<u8>;
+    async fn mint(&self, ctx: &Context<'_>, to: Account) -> Result<Vec<u8>, Error>;
 
     // Return pair token amount
-    fn burn(to: Account) -> Vec<u8>;
+    async fn burn(&self, ctx: &Context<'_>, to: Account) -> Result<Vec<u8>, Error>;
 
-    fn swap(amount_0_out: Amount, amount_1_out: Amount, to: Account) -> Vec<u8>;
+    async fn swap(&self, ctx: &Context<'_>, amount_0_out: Amount, amount_1_out: Amount, to: Account) -> Result<Vec<u8>, Error>;
 }
 
-pub trait RouterQueryRoot {}
+pub trait RouterQueryRoot {
+    async fn example_func(&self, ctx: &Context<'_>) -> Result<u64, Error>;
+}
 
 pub trait RouterMutationRoot {
     // Return pair token amount and liquidity
-    fn add_liquidity(
+    async fn add_liquidity(
+        &self,
+        ctx: &Context<'_>,
         token_0: ApplicationId,
         token_1: ApplicationId,
         amount_0_desired: Amount,
@@ -36,10 +41,12 @@ pub trait RouterMutationRoot {
         amount_1_min: Amount,
         to: Account,
         deadline: Timestamp,
-    ) -> Vec<u8>;
+    ) -> Result<Vec<u8>, Error>;
 
     // Return pair token amount
-    fn remove_liquidity(
+    async fn remove_liquidity(
+        &self,
+        ctx: &Context<'_>,
         token_0: ApplicationId,
         token_1: ApplicationId,
         liquidity: Amount,
@@ -47,5 +54,5 @@ pub trait RouterMutationRoot {
         amount_1_min: Amount,
         to: Account,
         deadline: Timestamp,
-    ) -> Vec<u8>;
+    ) -> Result<Vec<u8>, Error>;
 }

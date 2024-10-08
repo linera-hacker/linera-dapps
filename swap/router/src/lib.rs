@@ -1,6 +1,5 @@
 use linera_sdk::base::{ContractAbi, ServiceAbi};
 use async_graphql::{Request, Response};
-use thiserror::Error;
 
 pub struct ApplicationAbi;
 
@@ -13,7 +12,3 @@ impl ServiceAbi for ApplicationAbi {
     type Query = Request;
     type QueryResponse = Response;
 }
-
-#[derive(Debug, Error)]
-#[allow(dead_code)]
-pub enum ERC20Error {}
