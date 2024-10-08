@@ -2,6 +2,7 @@
 members = [
     "interfaces",
     "erc20",
+    "swap",
 ]
 resolver = "2"
 
