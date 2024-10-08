@@ -56,7 +56,7 @@ struct MutationRoot;
 
 #[Object]
 impl ERC20MutationRoot for MutationRoot {
-    async fn transfer(&self, ctx: &Context<'_>, to: Account, amount: Amount) -> Vec<u8> {
+    async fn transfer(&self, to: Account, amount: Amount) -> Vec<u8> {
         Vec::new()
     }
 }
