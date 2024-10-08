@@ -3,6 +3,8 @@
 mod state;
 
 use self::state::Application;
+use async_graphql::{EmptySubscription, Schema};
+use interfaces::swap::{PoolMutationRoot, PoolQueryRoot, RouterMutationRoot, RouterQueryRoot};
 use linera_sdk::{
     base::WithServiceAbi,
     views::{View, ViewStorageContext},
@@ -30,7 +32,23 @@ impl Service for ApplicationService {
         ApplicationService { state, runtime }
     }
 
-    async fn handle_query(&self, _query: Self::Query) -> Self::QueryResponse {
-        panic!("Queries not supported by application");
+    async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
+        let runtime = self.rumtime.clone();
+        let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
+        schema.execute(query).await
     }
 }
+
+struct QueryRoot;
+
+#[Object]
+impl PoolQueryRoot for QueryRoot {}
+
+#[Object]
+impl RouterQueryRoot for QueryRoot {}
+
+struct MutationRoot;
+
+impl PoolMutationRoot for MutationRoot {}
+
+impl RouterMutationRoot for MutationRoot {}

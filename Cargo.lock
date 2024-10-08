@@ -3895,6 +3895,7 @@ name = "swap"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
+ "interfaces",
  "linera-sdk",
 ]
 

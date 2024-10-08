@@ -3,7 +3,7 @@
 mod state;
 
 use self::state::Application;
-use interfaces::erc20::ERC20;
+use interfaces::erc20::{ERC20MutationRoot, ERC20QueryRoot};
 use linera_sdk::{
     base::{Amount, WithServiceAbi},
     views::View,
@@ -31,13 +31,21 @@ impl Service for ApplicationService {
         ApplicationService { state, runtime }
     }
 
-    async fn handle_query(&self, _query: Self::Query) -> Self::QueryResponse {
-        panic!("Queries not supported by application");
+    async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
+        let runtime = self.rumtime.clone();
+        let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
+        schema.execute(query).await
     }
 }
 
-impl ERC20 for ApplicationService {
+struct QueryRoot;
+
+impl ERC20QueryRoot for QueryRoot {
     fn total_supply(&self) -> Amount {
         Amount::ZERO
     }
 }
+
+struct MutationRoot;
+
+impl ERC20MutationRoot for MutationRoot {}
