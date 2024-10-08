@@ -1,4 +1,4 @@
-use linera_sdk::base::{Account, Amount, Timestamp, ApplicationId};
+use linera_sdk::base::{Account, Amount, ApplicationId, Timestamp};
 
 pub trait Pool {
     type Error: std::fmt::Debug;
@@ -17,6 +17,10 @@ pub trait Pool {
     fn burn(to: Account) -> Result<(Amount, Amount), Self::Error>;
 
     fn swap(amount_0_out: Amount, amount_1_out: Amount, to: Account) -> Result<(), Self::Error>;
+
+    fn get_pool(token_0: ApplicationId, token_1: ApplicationId) -> Option<u64>;
+
+    fn get_fee_to() -> Option<Account>;
 }
 
 pub trait Router {
