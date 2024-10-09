@@ -2,15 +2,15 @@
 
 mod state;
 
-use std::sync::{Arc, Mutex};
 use self::state::Application;
-use async_graphql::{EmptySubscription, Schema, Object};
-use interfaces::swap::{RouterMutationRoot, RouterQueryRoot};
+use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
-    base::{WithServiceAbi, Amount, ApplicationId, Account, Timestamp},
+    base::{Account, Amount, ApplicationId, Timestamp, WithServiceAbi},
     views::{View, ViewStorageContext},
     Service, ServiceRuntime,
 };
+use spec::swap::{RouterMutationRoot, RouterQueryRoot};
+use std::sync::{Arc, Mutex};
 
 pub struct ApplicationService {
     state: Arc<Application>,
@@ -85,4 +85,3 @@ impl RouterMutationRoot for MutationRoot {
         Vec::new()
     }
 }
-

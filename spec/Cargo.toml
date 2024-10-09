@@ -1,0 +1,14 @@
+[package]
+name = "spec"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-graphql.workspace = true
+linera-sdk.workspace = true
+linera-views.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+linera-sdk = { workspace = true, features = ["test"] }
+

@@ -1323,8 +1323,8 @@ name = "erc20"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
- "interfaces",
  "linera-sdk",
+ "spec",
  "thiserror",
 ]
 
@@ -1963,15 +1963,6 @@ dependencies = [
  "equivalent",
  "hashbrown 0.15.0",
  "serde",
-]
-
-[[package]]
-name = "interfaces"
-version = "0.1.0"
-dependencies = [
- "async-graphql",
- "linera-sdk",
- "linera-views",
 ]
 
 [[package]]
@@ -3790,6 +3781,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "spec"
+version = "0.1.0"
+dependencies = [
+ "async-graphql",
+ "linera-sdk",
+ "linera-views",
+ "serde",
+]
+
+[[package]]
 name = "spin"
 version = "0.9.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3897,8 +3898,8 @@ name = "swap-pool"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
- "interfaces",
  "linera-sdk",
+ "spec",
 ]
 
 [[package]]
@@ -3906,8 +3907,8 @@ name = "swap-router"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
- "interfaces",
  "linera-sdk",
+ "spec",
 ]
 
 [[package]]

@@ -2,15 +2,15 @@
 
 mod state;
 
-use std::sync::{Arc, Mutex};
-use async_graphql::{Context, Schema, EmptySubscription, Object};
 use self::state::Application;
-use interfaces::erc20::{ERC20MutationRoot, ERC20QueryRoot};
+use async_graphql::{Context, EmptySubscription, Object, Schema};
 use linera_sdk::{
-    base::{Amount, WithServiceAbi, Account},
+    base::{Account, Amount, WithServiceAbi},
     views::View,
     Service, ServiceRuntime,
 };
+use spec::erc20::{ERC20MutationRoot, ERC20QueryRoot};
+use std::sync::{Arc, Mutex};
 
 pub struct ApplicationService {
     state: Arc<Application>,

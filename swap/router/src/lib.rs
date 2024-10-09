@@ -1,5 +1,5 @@
-use linera_sdk::base::{ContractAbi, ServiceAbi};
 use async_graphql::{Request, Response};
+use linera_sdk::base::{ContractAbi, ServiceAbi};
 
 pub struct ApplicationAbi;
 

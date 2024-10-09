@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 async-graphql.workspace = true
 linera-sdk.workspace = true
-interfaces.workspace = true
+spec.workspace = true
 thiserror.workspace = true
 
 [dev-dependencies]

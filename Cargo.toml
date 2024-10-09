@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "interfaces",
+    "spec",
     "erc20",
     "swap/pool",
     "swap/router",
@@ -12,8 +12,9 @@ async-graphql = { version = "=7.0.2", default-features = false }
 linera-sdk = { version = "0.12.1", git = "https://github.com/respeer-ai/linera-protocol.git", branch = "respeer-maas-v0.12.1" }
 linera-views = { version = "0.12.1", git = "https://github.com/respeer-ai/linera-protocol.git", branch = "respeer-maas-v0.12.1" }
 thiserror = "1.0.57"
+serde = { version = "1.0.197", features = ["derive"] }
 
-interfaces = { path = "./interfaces" }
+spec = { path = "./spec" }
 
 [profile.release]
 debug = true
