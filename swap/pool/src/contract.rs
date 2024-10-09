@@ -3,7 +3,7 @@
 mod state;
 
 use linera_sdk::{
-    base::{Amount, ApplicationId, ChannelName, WithContractAbi},
+    base::{AccountOwner, Amount, ApplicationId, ChannelName, Destination, WithContractAbi},
     views::{RootView, View, ViewStorageContext},
     Contract, ContractRuntime,
 };
@@ -102,6 +102,7 @@ impl Contract for ApplicationContract {
                     amount_0_virtual,
                     amount_1_virtual,
                 )
+                .await
                 .expect("Failed MSG: create pool"),
         }
     }
@@ -188,7 +189,7 @@ impl ApplicationContract {
         Ok(())
     }
 
-    fn on_msg_create_pool(
+    async fn on_msg_create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: ApplicationId,
@@ -197,6 +198,42 @@ impl ApplicationContract {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
+        let owner = self.runtime.authenticated_signer().expect("Invalid owner");
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+
+        let creator = ChainAccountOwner {
+            chain_id: message_id.chain_id,
+            owner: Some(AccountOwner::User(owner)),
+        };
+
+        self.state
+            .create_pool(
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+                creator,
+            )
+            .await?;
+
+        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
+            return Ok(());
+        }
+
+        let dest = Destination::Subscribers(ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()));
+        self.runtime
+            .prepare_message(PoolMessage::CreatePool {
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+            })
+            .with_authentication()
+            .send_to(dest);
         Ok(())
     }
 }
