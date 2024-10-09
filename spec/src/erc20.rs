@@ -7,7 +7,7 @@ use linera_sdk::{
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
-pub enum Operation {
+pub enum ERC20Operation {
     Transfer {
         from: Option<AccountOwner>,
         amount: Amount,
@@ -23,7 +23,7 @@ pub trait ERC20MutationRoot {
     async fn transfer(
         &self,
         ctx: &Context<'_>,
-        to: Account,
+        to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<Vec<u8>, Error>;
 }

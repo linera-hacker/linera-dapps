@@ -5,11 +5,14 @@ mod state;
 use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
-    base::{Account, Amount, ApplicationId, Timestamp, WithServiceAbi},
+    base::{Amount, ApplicationId, Timestamp, WithServiceAbi},
     views::{View, ViewStorageContext},
     Service, ServiceRuntime,
 };
-use spec::swap::{RouterMutationRoot, RouterQueryRoot};
+use spec::{
+    swap::{RouterMutationRoot, RouterQueryRoot},
+    account::ChainAccountOwner,
+};
 use std::sync::{Arc, Mutex};
 
 pub struct ApplicationService {
@@ -65,7 +68,7 @@ impl RouterMutationRoot for MutationRoot {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: Account,
+        to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Vec<u8> {
         Vec::new()
@@ -79,7 +82,7 @@ impl RouterMutationRoot for MutationRoot {
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: Account,
+        to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Vec<u8> {
         Vec::new()

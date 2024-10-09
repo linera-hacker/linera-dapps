@@ -5,11 +5,14 @@ mod state;
 use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
-    base::{Account, Amount, ApplicationId, Timestamp, WithServiceAbi},
+    base::{Amount, ApplicationId, Timestamp, WithServiceAbi},
     views::{View, ViewStorageContext},
     Service, ServiceRuntime,
 };
-use spec::swap::{PoolMutationRoot, PoolQueryRoot};
+use spec::{
+    swap::{PoolMutationRoot, PoolQueryRoot},
+    account::ChainAccountOwner,
+};
 use std::sync::{Arc, Mutex};
 
 pub struct ApplicationService {
@@ -51,7 +54,7 @@ impl PoolQueryRoot for QueryRoot {
         None
     }
 
-    async fn get_fee_to(&self) -> Option<Account> {
+    async fn get_fee_to(&self) -> Option<ChainAccountOwner> {
         None
     }
 }
@@ -65,25 +68,25 @@ impl PoolMutationRoot for MutationRoot {
         Vec::new()
     }
 
-    async fn set_fee_to(&self, account: Account) -> Vec<u8> {
+    async fn set_fee_to(&self, account: ChainAccountOwner) -> Vec<u8> {
         Vec::new()
     }
 
-    async fn set_fee_to_setter(&self, account: Account) -> Vec<u8> {
+    async fn set_fee_to_setter(&self, account: ChainAccountOwner) -> Vec<u8> {
         Vec::new()
     }
 
     // Return minted liquidity
-    async fn mint(&self, to: Account) -> Vec<u8> {
+    async fn mint(&self, to: ChainAccountOwner) -> Vec<u8> {
         Vec::new()
     }
 
     // Return pair token amount
-    async fn burn(&self, to: Account) -> Vec<u8> {
+    async fn burn(&self, to: ChainAccountOwner) -> Vec<u8> {
         Vec::new()
     }
 
-    async fn swap(&self, amount_0_out: Amount, amount_1_out: Amount, to: Account) -> Vec<u8> {
+    async fn swap(&self, amount_0_out: Amount, amount_1_out: Amount, to: ChainAccountOwner) -> Vec<u8> {
         Vec::new()
     }
 }

@@ -9,7 +9,10 @@ use linera_sdk::{
     views::View,
     Service, ServiceRuntime,
 };
-use spec::erc20::{ERC20MutationRoot, ERC20QueryRoot};
+use spec::{
+    erc20::{ERC20MutationRoot, ERC20QueryRoot},
+    account::ChainAccountOwner,
+};
 use std::sync::{Arc, Mutex};
 
 pub struct ApplicationService {
@@ -56,7 +59,7 @@ struct MutationRoot;
 
 #[Object]
 impl ERC20MutationRoot for MutationRoot {
-    async fn transfer(&self, to: Account, amount: Amount) -> Vec<u8> {
+    async fn transfer(&self, to: ChainAccountOwner, amount: Amount) -> Vec<u8> {
         Vec::new()
     }
 }
