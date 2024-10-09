@@ -1,4 +1,5 @@
 use crate::account::ChainAccountOwner;
+use crate::base::{BaseMessage, BaseOperation};
 use async_graphql::{scalar, Context, Error};
 use linera_sdk::{
     base::{AccountOwner, Amount},
@@ -7,8 +8,9 @@ use linera_sdk::{
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
-pub enum ERC20Operation {
+#[derive(Debug, Deserialize, Serialize)]
+pub enum ERC20Message {
+    BaseMessage(BaseMessage),
     Transfer {
         from: Option<AccountOwner>,
         amount: Amount,
@@ -23,9 +25,24 @@ pub enum ERC20Operation {
         spender: ChainAccountOwner,
         value: Amount,
     },
-    Allowance {
-        owner: ChainAccountOwner,
+}
+
+#[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
+pub enum ERC20Operation {
+    BaseOperation(BaseOperation),
+    Transfer {
+        from: Option<AccountOwner>,
+        amount: Amount,
+        to: ChainAccountOwner,
+    },
+    TransferFrom {
+        from: ChainAccountOwner,
+        amount: Amount,
+        to: ChainAccountOwner,
+    },
+    Approve {
         spender: ChainAccountOwner,
+        value: Amount,
     },
 }
 
@@ -58,6 +75,12 @@ pub trait ERC20QueryRoot {
         ctx: &Context<'_>,
         owner: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+    fn allowance(
+        &self,
+        ctx: &Context<'_>,
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {
@@ -79,12 +102,6 @@ pub trait ERC20MutationRoot {
         ctx: &Context<'_>,
         spender: ChainAccountOwner,
         value: Amount,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-    fn allowance(
-        &self,
-        ctx: &Context<'_>,
-        owner: ChainAccountOwner,
-        spender: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 

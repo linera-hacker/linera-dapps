@@ -1,5 +1,5 @@
 use async_graphql::{Request, Response};
-use linera_sdk::base::{ContractAbi, ServiceAbi};
+use linera_sdk::base::{ContractAbi, ParseAmountError, ServiceAbi};
 use spec::erc20::{ERC20Operation, ERC20Response};
 use thiserror::Error;
 
@@ -17,4 +17,19 @@ impl ServiceAbi for ApplicationAbi {
 
 #[derive(Debug, Error)]
 #[allow(dead_code)]
-pub enum ERC20Error {}
+pub enum ERC20Error {
+    #[error("Invalid initial amount")]
+    InvalidInitialAmount,
+
+    #[error(transparent)]
+    ParseAmountError(#[from] ParseAmountError),
+
+    #[error(transparent)]
+    ViewError(#[from] linera_sdk::views::ViewError),
+
+    #[error("Already exists")]
+    AlreadyExists,
+
+    #[error("Permission denied")]
+    PermissionDenied,
+}

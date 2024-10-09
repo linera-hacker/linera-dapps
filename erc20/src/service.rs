@@ -3,9 +3,9 @@
 mod state;
 
 use self::state::{AllowanceKey, Application};
-use async_graphql::{Context, EmptySubscription, Object, Schema};
+use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
-    base::{Account, Amount, WithServiceAbi},
+    base::{Amount, WithServiceAbi},
     views::View,
     Service, ServiceRuntime,
 };
@@ -13,10 +13,7 @@ use spec::{
     account::ChainAccountOwner,
     erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
 };
-use std::{
-    fmt::format,
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
 pub struct ApplicationService {
     state: Arc<Application>,
@@ -81,6 +78,17 @@ impl ERC20QueryRoot for QueryRoot {
             Err(_) => Amount::ZERO,
         }
     }
+    async fn allowance(&self, 
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
+    ) -> Amount {
+        let allowance_key = AllowanceKey::new(owner, spender);
+        match self.state.allowances.get(&allowance_key).await {
+            Ok(Some(balance)) => balance,
+            Ok(None) => Amount::ZERO,
+            Err(_) => Amount::ZERO,
+        }
+    }
 }
 
 struct MutationRoot {}
@@ -105,8 +113,5 @@ impl ERC20MutationRoot for MutationRoot {
     }
     async fn approve(&self, spender: ChainAccountOwner, value: Amount) -> Vec<u8> {
         bcs::to_bytes(&ERC20Operation::Approve { spender, value }).unwrap()
-    }
-    async fn allowance(&self, owner: ChainAccountOwner, spender: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&ERC20Operation::Allowance { owner, spender }).unwrap()
     }
 }
