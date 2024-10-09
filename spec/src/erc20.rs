@@ -1,15 +1,10 @@
-use async_graphql::{Context, Error, InputObject};
+use crate::account::ChainAccountOwner;
+use async_graphql::{Context, Error};
 use linera_sdk::{
     base::{Account, AccountOwner, Amount, ChainId},
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
-
-#[derive(Debug, Deserialize, Serialize, InputObject)]
-pub struct ChainAccountOwner {
-    pub chain_id: ChainId,
-    pub owner: Option<AccountOwner>,
-}
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum Operation {
