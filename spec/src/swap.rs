@@ -1,5 +1,6 @@
 use crate::account::ChainAccountOwner;
-use async_graphql::{Context, Error};
+use crate::erc20::ERC20;
+use async_graphql::{Context, Error, SimpleObject};
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
@@ -40,11 +41,22 @@ pub enum PoolOperation {
     },
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
+pub struct Pool {
+    pub id: u64,
+    pub virtual_initial_liquidity: bool,
+    pub amount_0_initial: Amount,
+    pub amount_1_initial: Amount,
+    pub pool_fee_rate: Amount,
+    pub protocol_fee_rate: Amount,
+    pub erc20: ERC20,
+}
+
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub enum PoolResponse {
     #[default]
     Ok,
-    PoolId(u64),
+    Pool(Pool),
 }
 
 pub trait PoolQueryRoot {
@@ -53,7 +65,7 @@ pub trait PoolQueryRoot {
         ctx: &Context<'_>,
         token_0: ApplicationId,
         token_1: ApplicationId,
-    ) -> impl std::future::Future<Output = Result<Option<u64>, Error>> + Send;
+    ) -> impl std::future::Future<Output = Result<Option<Pool>, Error>> + Send;
 
     fn get_fee_to(
         &self,

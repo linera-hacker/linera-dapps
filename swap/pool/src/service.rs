@@ -11,7 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    swap::{PoolMutationRoot, PoolOperation, PoolQueryRoot},
+    swap::{Pool, PoolMutationRoot, PoolOperation, PoolQueryRoot},
 };
 use std::sync::{Arc, Mutex};
 
@@ -50,7 +50,7 @@ struct QueryRoot;
 
 #[Object]
 impl PoolQueryRoot for QueryRoot {
-    async fn get_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Option<u64> {
+    async fn get_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Option<Pool> {
         None
     }
 
