@@ -4,7 +4,7 @@ use linera_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ChainAccountOwner {
     pub chain_id: ChainId,
     pub owner: Option<AccountOwner>,
