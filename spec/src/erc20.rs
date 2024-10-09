@@ -1,7 +1,7 @@
 use crate::account::ChainAccountOwner;
 use async_graphql::{Context, Error};
 use linera_sdk::{
-    base::{Account, AccountOwner, Amount, ChainId},
+    base::{AccountOwner, Amount},
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
