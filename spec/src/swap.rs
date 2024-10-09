@@ -31,6 +31,13 @@ pub enum PoolOperation {
     },
 }
 
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub enum PoolResponse {
+    #[default]
+    Ok,
+    PoolId(u64),
+}
+
 pub trait PoolQueryRoot {
     fn get_pool(
         &self,
@@ -110,6 +117,13 @@ pub enum RouterOperation {
         to: ChainAccountOwner,
         deadline: Timestamp,
     },
+}
+
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub enum RouterResponse {
+    #[default]
+    Ok,
+    Liquidity((Amount, Amount, Amount)),
 }
 
 pub trait RouterQueryRoot {

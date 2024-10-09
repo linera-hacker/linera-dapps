@@ -15,6 +15,13 @@ pub enum ERC20Operation {
     },
 }
 
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub enum ERC20Response {
+    #[default]
+    Ok,
+    Balance(Amount),
+}
+
 pub trait ERC20QueryRoot {
     fn total_supply(
         &self,
