@@ -14,8 +14,10 @@ use swap_pool::PoolError;
 pub struct Application {
     pub pools: MapView<ApplicationId, HashMap<ApplicationId, Pool>>,
     pub pool_id: RegisterView<u64>,
+    pub indexed_pools: MapView<u64, Pool>,
 }
 
+#[allow(dead_code)]
 impl Application {
     pub(crate) async fn create_pool(
         &mut self,
@@ -48,6 +50,8 @@ impl Application {
 
         let mut pool = Pool {
             id: pool_id,
+            token_0,
+            token_1,
             virtual_initial_liquidity: amount_0_initial == amount_0_virtual
                 && amount_1_initial == amount_1_virtual,
             amount_0_initial,
@@ -55,6 +59,8 @@ impl Application {
             pool_fee_rate: Amount::from_str("0.3")?,
             protocol_fee_rate: Amount::from_str("0.05")?,
             erc20: ERC20::default(),
+            fee_to: creator.clone(),
+            fee_to_setter: creator.clone(),
         };
 
         if !pool.virtual_initial_liquidity {
@@ -77,8 +83,9 @@ impl Application {
             Some(_) => return Err(PoolError::AlreadyExists),
             _ => {}
         }
-        token_pools.insert(token_1, pool);
+        token_pools.insert(token_1, pool.clone());
         self.pools.insert(&token_0, token_pools)?;
+        self.indexed_pools.insert(&pool_id, pool)?;
 
         Ok(())
     }
@@ -87,7 +94,14 @@ impl Application {
         &mut self,
         pool_id: u64,
         account: ChainAccountOwner,
+        setter: ChainAccountOwner,
     ) -> Result<(), PoolError> {
+        let mut pool = self.indexed_pools.get(&pool_id).await?.expect("Invalid pool");
+        if pool.fee_to_setter != setter {
+            return Err(PoolError::PermissionDenied);
+        }
+        pool.fee_to = account;
+        // TODO: test if we need to insert again
         Ok(())
     }
 
@@ -95,7 +109,14 @@ impl Application {
         &mut self,
         pool_id: u64,
         account: ChainAccountOwner,
+        setter: ChainAccountOwner,
     ) -> Result<(), PoolError> {
+        let mut pool = self.indexed_pools.get(&pool_id).await?.expect("Invalid pool");
+        if pool.fee_to_setter != setter {
+            return Err(PoolError::PermissionDenied);
+        }
+        pool.fee_to_setter = account;
+        // TODO: test if we need to insert again
         Ok(())
     }
 

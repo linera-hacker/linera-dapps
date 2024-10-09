@@ -281,6 +281,16 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
+    fn message_owner(&mut self) -> ChainAccountOwner {
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+        ChainAccountOwner {
+            chain_id: message_id.chain_id,
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        }
+    }
+
     async fn on_msg_create_pool(
         &mut self,
         token_0: ApplicationId,
@@ -290,13 +300,7 @@ impl ApplicationContract {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
-        let owner = self.runtime.authenticated_signer().expect("Invalid owner");
-        let message_id = self.runtime.message_id().expect("Invalid message id");
-
-        let creator = ChainAccountOwner {
-            chain_id: message_id.chain_id,
-            owner: Some(AccountOwner::User(owner)),
-        };
+        let creator = self.message_owner();
 
         // TODO: transfer both token from creators' account
 
@@ -329,7 +333,10 @@ impl ApplicationContract {
         pool_id: u64,
         account: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        self.state.set_fee_to(pool_id, account.clone()).await?;
+        let setter = self.message_owner();
+        self.state
+            .set_fee_to(pool_id, account.clone(), setter)
+            .await?;
         self.publish_message(PoolMessage::SetFeeTo { pool_id, account });
         Ok(())
     }
@@ -339,8 +346,9 @@ impl ApplicationContract {
         pool_id: u64,
         account: ChainAccountOwner,
     ) -> Result<(), PoolError> {
+        let setter = self.message_owner();
         self.state
-            .set_fee_to_setter(pool_id, account.clone())
+            .set_fee_to_setter(pool_id, account.clone(), setter)
             .await?;
         self.publish_message(PoolMessage::SetFeeToSetter { pool_id, account });
         Ok(())

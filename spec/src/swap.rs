@@ -88,12 +88,16 @@ pub enum PoolOperation {
 #[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
 pub struct Pool {
     pub id: u64,
+    pub token_0: ApplicationId,
+    pub token_1: ApplicationId,
     pub virtual_initial_liquidity: bool,
     pub amount_0_initial: Amount,
     pub amount_1_initial: Amount,
     pub pool_fee_rate: Amount,
     pub protocol_fee_rate: Amount,
     pub erc20: ERC20,
+    pub fee_to: ChainAccountOwner,
+    pub fee_to_setter: ChainAccountOwner,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]

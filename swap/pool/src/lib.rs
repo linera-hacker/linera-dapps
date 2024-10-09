@@ -29,4 +29,10 @@ pub enum PoolError {
 
     #[error("Already exists")]
     AlreadyExists,
+
+    #[error("Invalid pool")]
+    InvalidPool,
+
+    #[error("Permission denied")]
+    PermissionDenied,
 }

@@ -5,8 +5,8 @@ mod state;
 use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
-    base::{Amount, ApplicationId, Timestamp, WithServiceAbi},
-    views::{View, ViewStorageContext},
+    base::{Amount, ApplicationId, WithServiceAbi},
+    views::View,
     Service, ServiceRuntime,
 };
 use spec::{
