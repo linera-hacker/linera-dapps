@@ -1,6 +1,6 @@
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
-use linera_sdk::base::{Amount, Account};
-use serde::{Deserialize, Serialize}; // 必须引入用于序列化/反序列化的宏
+use linera_sdk::base::Amount;
+use serde::{Deserialize, Serialize};
 use spec::account::ChainAccountOwner;
 
 #[derive(Serialize, Deserialize, Debug, Clone, async_graphql::SimpleObject, async_graphql::InputObject)]

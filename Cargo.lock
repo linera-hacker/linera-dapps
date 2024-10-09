@@ -1323,6 +1323,7 @@ name = "erc20"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
+ "bcs",
  "linera-sdk",
  "serde",
  "spec",

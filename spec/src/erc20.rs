@@ -14,6 +14,19 @@ pub enum ERC20Operation {
         amount: Amount,
         to: ChainAccountOwner,
     },
+    TransferFrom {
+        from: ChainAccountOwner,
+        amount: Amount,
+        to: ChainAccountOwner,
+    },
+    Approve {
+        spender: ChainAccountOwner,
+        value: Amount,
+    },
+    Allowance {
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]

@@ -11,7 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    erc20::{ERC20MutationRoot, ERC20QueryRoot},
+    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
 };
 use std::{fmt::format, sync::{Arc, Mutex}};
 
@@ -41,7 +41,7 @@ impl Service for ApplicationService {
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
         let runtime = self.runtime.clone();
-        let schema = Schema::build(QueryRoot {state: self.state.clone()}, MutationRoot{state: self.state.clone()}, EmptySubscription).finish();
+        let schema = Schema::build(QueryRoot {state: self.state.clone()}, MutationRoot{}, EmptySubscription).finish();
         schema.execute(query).await
     }
 }
@@ -73,86 +73,38 @@ impl ERC20QueryRoot for QueryRoot {
     }
 }
 
-struct MutationRoot {
-    state: Arc<Application>,
-}
+struct MutationRoot {}
 
 #[Object]
 impl ERC20MutationRoot for MutationRoot {
     async fn transfer(&self, to: ChainAccountOwner, amount: Amount) -> Vec<u8> {
-        let sender = ChainAccountOwner::clone(&self.);
-        let sender_balance = match self.state.balances.get(&sender).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
-        if sender_balance < amount {
-            return Vec::from("Insufficient balance");
-        }
-
-        let new_sender_balance = sender_balance - amount;
-        let receiver_balance = match self.state.balances.get(&to.into()).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
-        self.state.balances.insert(*sender, new_sender_balance);
-        self.state.balances.insert(*to, receiver_balance);
-        
-        Vec::from("Transfer successful".as_bytes())
+        bcs::to_bytes(&ERC20Operation::Transfer {
+            from: None,
+            to,
+            amount,
+        })
+        .unwrap()
     }
     async fn transfer_from(&self, from: ChainAccountOwner, to: ChainAccountOwner, amount: Amount) -> Vec<u8> {
-        let caller = Account::default();
-        let allowance_key = AllowanceKey::new(from.into(), caller);
-        let allowance = match self.state.allowances.get(&allowance_key).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
-        if allowance < amount {
-            return Vec::from("Allowance exceeded".as_bytes());
-        }
-
-        let from_balance = match self.state.balances.get(&from.into()).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
-        if from_balance < amount {
-            return Vec::from("Insufficient balance".as_bytes());
-        }
-
-        let new_from_balance = from_balance - amount;
-        let new_allowance = allowance - amount;
-        let to_balance = match self.state.balances.get(&to.into()).await {
-            Ok(Some(balance)) => balance + amount,
-            Ok(None) => amount,
-            Err(_) => amount,
-        };
-
-        self.state.balances.insert(from.into(), new_from_balance);
-        self.state.balances.insert(to.into(), to_balance);
-        self.state.allowances.insert(*allowance_key, new_allowance);
-
-        Vec::from("Transfer from successful")
+        bcs::to_bytes(&ERC20Operation::TransferFrom {
+            from,
+            to,
+            amount,
+        })
+        .unwrap()
     }
     async fn approve(&self, spender: ChainAccountOwner, value: Amount) -> Vec<u8> {
-        let owner = Account::default();
-        let allowance_key = AllowanceKey::new(owner, spender.into());
-        self.state.allowances.insert(*allowance_key, value);
-        Vec::from("Approval successful".as_bytes())
+        bcs::to_bytes(&ERC20Operation::Approve {
+            spender,
+            value,
+        })
+        .unwrap()
     }
     async fn allowance(&self, owner: ChainAccountOwner, spender: ChainAccountOwner) -> Vec<u8> {
-        let allowance_key = AllowanceKey::new(owner.into(), spender.into());
-        let allowance = match self.state.allowances.get(&allowance_key).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-        Vec::from(format!("Allowance: {:?}", allowance).as_bytes())
+        bcs::to_bytes(&ERC20Operation::Allowance {
+            owner,
+            spender,
+        })
+        .unwrap()
     }
 }
