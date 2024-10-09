@@ -82,4 +82,46 @@ impl Application {
 
         Ok(())
     }
+
+    pub(crate) async fn set_fee_to(
+        &mut self,
+        pool_id: u64,
+        account: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        Ok(())
+    }
+
+    pub(crate) async fn set_fee_to_setter(
+        &mut self,
+        pool_id: u64,
+        account: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        Ok(())
+    }
+
+    pub(crate) async fn mint(
+        &mut self,
+        pool_id: u64,
+        to: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        Ok(())
+    }
+
+    pub(crate) async fn burn(
+        &mut self,
+        pool_id: u64,
+        to: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        Ok(())
+    }
+
+    pub(crate) async fn swap(
+        &mut self,
+        pool_id: u64,
+        amount_0_out: Amount,
+        amount_1_out: Amount,
+        to: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        Ok(())
+    }
 }

@@ -84,31 +84,33 @@ impl PoolMutationRoot for MutationRoot {
         .unwrap()
     }
 
-    async fn set_fee_to(&self, account: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::SetFeeTo { account }).unwrap()
+    async fn set_fee_to(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::SetFeeTo { pool_id, account }).unwrap()
     }
 
-    async fn set_fee_to_setter(&self, account: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::SetFeeToSetter { account }).unwrap()
+    async fn set_fee_to_setter(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::SetFeeToSetter { pool_id, account }).unwrap()
     }
 
     // Return minted liquidity
-    async fn mint(&self, to: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Mint { to }).unwrap()
+    async fn mint(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::Mint { pool_id, to }).unwrap()
     }
 
     // Return pair token amount
-    async fn burn(&self, to: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Burn { to }).unwrap()
+    async fn burn(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::Burn { pool_id, to }).unwrap()
     }
 
     async fn swap(
         &self,
+        pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
     ) -> Vec<u8> {
         bcs::to_bytes(&PoolOperation::Swap {
+            pool_id,
             amount_0_out,
             amount_1_out,
             to,

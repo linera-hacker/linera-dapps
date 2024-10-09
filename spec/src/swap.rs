@@ -21,6 +21,28 @@ pub enum PoolMessage {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     },
+    SetFeeTo {
+        pool_id: u64,
+        account: ChainAccountOwner,
+    },
+    SetFeeToSetter {
+        pool_id: u64,
+        account: ChainAccountOwner,
+    },
+    Mint {
+        pool_id: u64,
+        to: ChainAccountOwner,
+    },
+    Burn {
+        pool_id: u64,
+        to: ChainAccountOwner,
+    },
+    Swap {
+        pool_id: u64,
+        amount_0_out: Amount,
+        amount_1_out: Amount,
+        to: ChainAccountOwner,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
@@ -40,18 +62,23 @@ pub enum PoolOperation {
         amount_1_virtual: Amount,
     },
     SetFeeTo {
+        pool_id: u64,
         account: ChainAccountOwner,
     },
     SetFeeToSetter {
+        pool_id: u64,
         account: ChainAccountOwner,
     },
     Mint {
+        pool_id: u64,
         to: ChainAccountOwner,
     },
     Burn {
+        pool_id: u64,
         to: ChainAccountOwner,
     },
     Swap {
+        pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
@@ -73,7 +100,6 @@ pub struct Pool {
 pub enum PoolResponse {
     #[default]
     Ok,
-    Pool(Pool),
 }
 
 pub trait PoolQueryRoot {
@@ -106,12 +132,14 @@ pub trait PoolMutationRoot {
     fn set_fee_to(
         &self,
         ctx: &Context<'_>,
+        pool_id: u64,
         account: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn set_fee_to_setter(
         &self,
         ctx: &Context<'_>,
+        pool_id: u64,
         account: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
@@ -119,6 +147,7 @@ pub trait PoolMutationRoot {
     fn mint(
         &self,
         ctx: &Context<'_>,
+        pool_id: u64,
         to: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
@@ -126,12 +155,14 @@ pub trait PoolMutationRoot {
     fn burn(
         &self,
         ctx: &Context<'_>,
+        pool_id: u64,
         to: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn swap(
         &self,
         ctx: &Context<'_>,
+        pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
