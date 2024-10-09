@@ -16,14 +16,17 @@ pub enum ERC20Operation {
 }
 
 pub trait ERC20QueryRoot {
-    async fn total_supply(&self, ctx: &Context<'_>) -> Result<Amount, Error>;
+    fn total_supply(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {
-    async fn transfer(
+    fn transfer(
         &self,
         ctx: &Context<'_>,
         to: ChainAccountOwner,
         amount: Amount,
-    ) -> Result<Vec<u8>, Error>;
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }

@@ -10,8 +10,8 @@ use linera_sdk::{
     Service, ServiceRuntime,
 };
 use spec::{
-    erc20::{ERC20MutationRoot, ERC20QueryRoot},
     account::ChainAccountOwner,
+    erc20::{ERC20MutationRoot, ERC20QueryRoot},
 };
 use std::sync::{Arc, Mutex};
 

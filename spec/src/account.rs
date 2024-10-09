@@ -1,7 +1,5 @@
 use async_graphql::scalar;
-use linera_sdk::{
-    base::{AccountOwner, ChainId},
-};
+use linera_sdk::base::{AccountOwner, ChainId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]

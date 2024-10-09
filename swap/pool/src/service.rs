@@ -10,8 +10,8 @@ use linera_sdk::{
     Service, ServiceRuntime,
 };
 use spec::{
-    swap::{PoolMutationRoot, PoolQueryRoot},
     account::ChainAccountOwner,
+    swap::{PoolMutationRoot, PoolQueryRoot},
 };
 use std::sync::{Arc, Mutex};
 
@@ -86,7 +86,12 @@ impl PoolMutationRoot for MutationRoot {
         Vec::new()
     }
 
-    async fn swap(&self, amount_0_out: Amount, amount_1_out: Amount, to: ChainAccountOwner) -> Vec<u8> {
+    async fn swap(
+        &self,
+        amount_0_out: Amount,
+        amount_1_out: Amount,
+        to: ChainAccountOwner,
+    ) -> Vec<u8> {
         Vec::new()
     }
 }
