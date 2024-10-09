@@ -1,4 +1,5 @@
 use linera_sdk::base::{ContractAbi, ServiceAbi};
+use async_graphql::{Request, Response};
 
 pub struct ApplicationAbi;
 
@@ -8,6 +9,6 @@ impl ContractAbi for ApplicationAbi {
 }
 
 impl ServiceAbi for ApplicationAbi {
-    type Query = ();
-    type QueryResponse = ();
+    type Query = Request;
+    type QueryResponse = Response;
 }

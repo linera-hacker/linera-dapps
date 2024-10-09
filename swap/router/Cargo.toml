@@ -1,5 +1,5 @@
 [package]
-name = "swap"
+name = "swap-router"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,11 +12,11 @@ interfaces.workspace = true
 linera-sdk = { workspace = true, features = ["test"] }
 
 [[bin]]
-name = "swap_contract"
+name = "swap_router_contract"
 path = "src/contract.rs"
 
 [[bin]]
-name = "swap_service"
+name = "swap_router_service"
 path = "src/service.rs"
 
 [profile.release]
