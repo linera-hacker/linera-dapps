@@ -11,6 +11,15 @@ pub enum PoolOperation {
     CreatePool {
         token_0: ApplicationId,
         token_1: ApplicationId,
+        // Actual deposited initial liquidity
+        // New listed token must not be 0
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        // Virtual initial liquidity
+        // Both must not be 0, new listed token virtual liquidity must be equal to initial
+        // liquidity. If both initial amounts are not 0, then both virtual must be equal to initial
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
     },
     SetFeeTo {
         account: ChainAccountOwner,
@@ -59,6 +68,10 @@ pub trait PoolMutationRoot {
         ctx: &Context<'_>,
         token_0: ApplicationId,
         token_1: ApplicationId,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn set_fee_to(

@@ -11,7 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    swap::{PoolMutationRoot, PoolQueryRoot},
+    swap::{PoolMutationRoot, PoolQueryRoot, PoolOperation},
 };
 use std::sync::{Arc, Mutex};
 
@@ -64,8 +64,24 @@ struct MutationRoot;
 #[Object]
 impl PoolMutationRoot for MutationRoot {
     // Just put all liquidity pool in one application
-    async fn create_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Vec<u8> {
-        Vec::new()
+    async fn create_pool(
+        &self,
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+    ) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::CreatePool {
+            token_0,
+            token_1,
+            amount_0_initial,
+            amount_1_initial,
+            amount_0_virtual,
+            amount_1_virtual,
+        })
+        .unwrap()
     }
 
     async fn set_fee_to(&self, account: ChainAccountOwner) -> Vec<u8> {
