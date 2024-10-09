@@ -11,7 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    swap::{PoolMutationRoot, PoolQueryRoot, PoolOperation},
+    swap::{PoolMutationRoot, PoolOperation, PoolQueryRoot},
 };
 use std::sync::{Arc, Mutex};
 
@@ -85,21 +85,21 @@ impl PoolMutationRoot for MutationRoot {
     }
 
     async fn set_fee_to(&self, account: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::SetFeeTo { account }).unwrap()
     }
 
     async fn set_fee_to_setter(&self, account: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::SetFeeToSetter { account }).unwrap()
     }
 
     // Return minted liquidity
     async fn mint(&self, to: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::Mint { to }).unwrap()
     }
 
     // Return pair token amount
     async fn burn(&self, to: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::Burn { to }).unwrap()
     }
 
     async fn swap(
@@ -108,6 +108,11 @@ impl PoolMutationRoot for MutationRoot {
         amount_1_out: Amount,
         to: ChainAccountOwner,
     ) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::Swap {
+            amount_0_out,
+            amount_1_out,
+            to,
+        })
+        .unwrap()
     }
 }
