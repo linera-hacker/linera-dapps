@@ -11,7 +11,8 @@ use linera_sdk::{
 use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
-    swap::{PoolOperation, PoolResponse},
+    base::{BaseMessage, BaseOperation},
+    swap::{PoolMessage, PoolOperation, PoolResponse},
 };
 use swap_pool::PoolError;
 
@@ -27,7 +28,7 @@ impl WithContractAbi for ApplicationContract {
 }
 
 impl Contract for ApplicationContract {
-    type Message = ();
+    type Message = PoolMessage;
     type Parameters = ();
     type InstantiationArgument = ();
 
@@ -42,6 +43,9 @@ impl Contract for ApplicationContract {
 
     async fn execute_operation(&mut self, operation: PoolOperation) -> PoolResponse {
         match operation {
+            PoolOperation::BaseOperation(base_operation) => self
+                .execute_base_operation(base_operation)
+                .expect("Failed OP: base operation"),
             PoolOperation::CreatePool {
                 token_0,
                 token_1,
@@ -85,6 +89,20 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
+    fn execute_base_operation(&mut self, operation: BaseOperation) -> Result<PoolResponse, PoolError> {
+        match operation {
+            BaseOperation::SubscribeCreatorChain => self.on_op_subscribe_creator_chain(),
+        }
+    }
+
+    fn on_op_subscribe_creator_chain(&mut self) -> Result<PoolResponse, PoolError> {
+        self.runtime
+            .prepare_message(PoolMessage::BaseMessage(BaseMessage::SubscribeCreatorChain))
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
+        Ok(PoolResponse::Ok)
+    }
+
     fn on_op_create_pool(
         &self,
         token_0: ApplicationId,

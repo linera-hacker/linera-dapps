@@ -1,5 +1,8 @@
-use crate::account::ChainAccountOwner;
-use crate::erc20::ERC20;
+use crate::{
+    account::ChainAccountOwner,
+    base::{BaseMessage, BaseOperation},
+    erc20::ERC20,
+};
 use async_graphql::{Context, Error, SimpleObject};
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
@@ -7,8 +10,22 @@ use linera_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Deserialize, Serialize)]
+pub enum PoolMessage {
+    BaseMessage(BaseMessage),
+    CreatePool {
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+    },
+}
+
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum PoolOperation {
+    BaseOperation(BaseOperation),
     CreatePool {
         token_0: ApplicationId,
         token_1: ApplicationId,
