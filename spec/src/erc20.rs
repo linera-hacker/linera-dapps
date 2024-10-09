@@ -14,6 +14,19 @@ pub enum ERC20Operation {
         amount: Amount,
         to: ChainAccountOwner,
     },
+    TransferFrom {
+        from: ChainAccountOwner,
+        amount: Amount,
+        to: ChainAccountOwner,
+    },
+    Approve {
+        spender: ChainAccountOwner,
+        value: Amount,
+    },
+    Allowance {
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -25,8 +38,25 @@ pub enum ERC20Response {
 
 pub trait ERC20QueryRoot {
     fn total_supply(
-        &self,
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+    fn name(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+    fn symbol(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+    fn decimals(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<u8, Error>> + Send;
+    fn balance_of(
+        &self, 
         ctx: &Context<'_>,
+        owner: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 }
 
@@ -36,6 +66,25 @@ pub trait ERC20MutationRoot {
         ctx: &Context<'_>,
         to: ChainAccountOwner,
         amount: Amount,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn transfer_from(
+        &self,
+        ctx: &Context<'_>,
+        from: ChainAccountOwner,
+        to: ChainAccountOwner,
+        amount: Amount,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn approve(
+        &self,
+        ctx: &Context<'_>,
+        spender: ChainAccountOwner,
+        value: Amount,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn allowance(
+        &self,
+        ctx: &Context<'_>,
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 

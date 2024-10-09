@@ -8,6 +8,8 @@ async-graphql.workspace = true
 linera-sdk.workspace = true
 spec.workspace = true
 thiserror.workspace = true
+serde.workspace = true
+bcs.workspace = true
 
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }
