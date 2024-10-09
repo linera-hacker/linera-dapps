@@ -98,7 +98,11 @@ impl Application {
         account: ChainAccountOwner,
         setter: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let mut pool = self.indexed_pools.get(&pool_id).await?.expect("Invalid pool");
+        let mut pool = self
+            .indexed_pools
+            .get(&pool_id)
+            .await?
+            .expect("Invalid pool");
         if pool.fee_to_setter != setter {
             return Err(PoolError::PermissionDenied);
         }
@@ -113,7 +117,11 @@ impl Application {
         account: ChainAccountOwner,
         setter: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let mut pool = self.indexed_pools.get(&pool_id).await?.expect("Invalid pool");
+        let mut pool = self
+            .indexed_pools
+            .get(&pool_id)
+            .await?
+            .expect("Invalid pool");
         if pool.fee_to_setter != setter {
             return Err(PoolError::PermissionDenied);
         }
@@ -127,7 +135,11 @@ impl Application {
         pool_id: u64,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let mut pool = self.indexed_pools.get(&pool_id).await?.expect("Invalid pool");
+        let mut pool = self
+            .indexed_pools
+            .get(&pool_id)
+            .await?
+            .expect("Invalid pool");
         Ok(())
     }
 

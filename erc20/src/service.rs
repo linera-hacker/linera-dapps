@@ -2,7 +2,7 @@
 
 mod state;
 
-use self::state::{Application, AllowanceKey};
+use self::state::{AllowanceKey, Application};
 use async_graphql::{Context, EmptySubscription, Object, Schema};
 use linera_sdk::{
     base::{Account, Amount, WithServiceAbi},
@@ -13,7 +13,10 @@ use spec::{
     account::ChainAccountOwner,
     erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
 };
-use std::{fmt::format, sync::{Arc, Mutex}};
+use std::{
+    fmt::format,
+    sync::{Arc, Mutex},
+};
 
 pub struct ApplicationService {
     state: Arc<Application>,
@@ -41,7 +44,14 @@ impl Service for ApplicationService {
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
         let runtime = self.runtime.clone();
-        let schema = Schema::build(QueryRoot {state: self.state.clone()}, MutationRoot{}, EmptySubscription).finish();
+        let schema = Schema::build(
+            QueryRoot {
+                state: self.state.clone(),
+            },
+            MutationRoot {},
+            EmptySubscription,
+        )
+        .finish();
         schema.execute(query).await
     }
 }
@@ -85,26 +95,18 @@ impl ERC20MutationRoot for MutationRoot {
         })
         .unwrap()
     }
-    async fn transfer_from(&self, from: ChainAccountOwner, to: ChainAccountOwner, amount: Amount) -> Vec<u8> {
-        bcs::to_bytes(&ERC20Operation::TransferFrom {
-            from,
-            to,
-            amount,
-        })
-        .unwrap()
+    async fn transfer_from(
+        &self,
+        from: ChainAccountOwner,
+        to: ChainAccountOwner,
+        amount: Amount,
+    ) -> Vec<u8> {
+        bcs::to_bytes(&ERC20Operation::TransferFrom { from, to, amount }).unwrap()
     }
     async fn approve(&self, spender: ChainAccountOwner, value: Amount) -> Vec<u8> {
-        bcs::to_bytes(&ERC20Operation::Approve {
-            spender,
-            value,
-        })
-        .unwrap()
+        bcs::to_bytes(&ERC20Operation::Approve { spender, value }).unwrap()
     }
     async fn allowance(&self, owner: ChainAccountOwner, spender: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&ERC20Operation::Allowance {
-            owner,
-            spender,
-        })
-        .unwrap()
+        bcs::to_bytes(&ERC20Operation::Allowance { owner, spender }).unwrap()
     }
 }

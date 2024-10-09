@@ -26,7 +26,7 @@ pub enum ERC20Operation {
     Allowance {
         owner: ChainAccountOwner,
         spender: ChainAccountOwner,
-    }
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -38,23 +38,23 @@ pub enum ERC20Response {
 
 pub trait ERC20QueryRoot {
     fn total_supply(
-        &self, 
-        ctx: &Context<'_>
+        &self,
+        ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
     fn name(
-        &self, 
-        ctx: &Context<'_>
+        &self,
+        ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
     fn symbol(
-        &self, 
-        ctx: &Context<'_>
+        &self,
+        ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
     fn decimals(
-        &self, 
-        ctx: &Context<'_>
+        &self,
+        ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<u8, Error>> + Send;
     fn balance_of(
-        &self, 
+        &self,
         ctx: &Context<'_>,
         owner: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;

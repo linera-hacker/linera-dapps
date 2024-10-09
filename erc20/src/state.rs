@@ -1,9 +1,11 @@
-use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use linera_sdk::base::Amount;
+use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use serde::{Deserialize, Serialize};
 use spec::account::ChainAccountOwner;
 
-#[derive(Serialize, Deserialize, Debug, Clone, async_graphql::SimpleObject, async_graphql::InputObject)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, async_graphql::SimpleObject, async_graphql::InputObject,
+)]
 pub struct AllowanceKey {
     pub owner: ChainAccountOwner,
     pub spender: ChainAccountOwner,
