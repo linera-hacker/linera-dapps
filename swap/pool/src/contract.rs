@@ -3,7 +3,7 @@
 mod state;
 
 use linera_sdk::{
-    base::{Amount, ApplicationId, WithContractAbi},
+    base::{Amount, ApplicationId, ChannelName, WithContractAbi},
     views::{RootView, View, ViewStorageContext},
     Contract, ContractRuntime,
 };
@@ -11,7 +11,7 @@ use linera_sdk::{
 use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
-    base::{BaseMessage, BaseOperation},
+    base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     swap::{PoolMessage, PoolOperation, PoolResponse},
 };
 use swap_pool::PoolError;
@@ -81,7 +81,30 @@ impl Contract for ApplicationContract {
         }
     }
 
-    async fn execute_message(&mut self, _message: Self::Message) {}
+    async fn execute_message(&mut self, message: PoolMessage) {
+        match message {
+            PoolMessage::BaseMessage(base_message) => self
+                .execute_base_message(base_message)
+                .expect("Failed MSG: base message"),
+            PoolMessage::CreatePool {
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+            } => self
+                .on_msg_create_pool(
+                    token_0,
+                    token_1,
+                    amount_0_initial,
+                    amount_1_initial,
+                    amount_0_virtual,
+                    amount_1_virtual,
+                )
+                .expect("Failed MSG: create pool"),
+        }
+    }
 
     async fn store(mut self) {
         self.state.save().await.expect("Failed to save state");
@@ -89,7 +112,10 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
-    fn execute_base_operation(&mut self, operation: BaseOperation) -> Result<PoolResponse, PoolError> {
+    fn execute_base_operation(
+        &mut self,
+        operation: BaseOperation,
+    ) -> Result<PoolResponse, PoolError> {
         match operation {
             BaseOperation::SubscribeCreatorChain => self.on_op_subscribe_creator_chain(),
         }
@@ -141,5 +167,36 @@ impl ApplicationContract {
         to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
         Ok(PoolResponse::Ok)
+    }
+
+    fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
+        match message {
+            BaseMessage::SubscribeCreatorChain => self.on_msg_subscribe_creator_chain(),
+        }
+    }
+
+    fn on_msg_subscribe_creator_chain(&mut self) -> Result<(), PoolError> {
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+        if message_id.chain_id == self.runtime.application_creator_chain_id() {
+            return Ok(());
+        }
+
+        self.runtime.subscribe(
+            message_id.chain_id,
+            ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()),
+        );
+        Ok(())
+    }
+
+    fn on_msg_create_pool(
+        &mut self,
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+    ) -> Result<(), PoolError> {
+        Ok(())
     }
 }
