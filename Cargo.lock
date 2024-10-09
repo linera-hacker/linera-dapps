@@ -545,9 +545,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.5.19"
+version = "4.5.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7be5744db7978a28d9df86a214130d106a89ce49644cbc4e3f0c22c3fba30615"
+checksum = "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -555,9 +555,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.5.19"
+version = "4.5.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5fbc17d3ef8278f55b282b2a2e75ae6f6c7d4bb70ed3d0382375104bfafdb4b"
+checksum = "19bc80abd44e4bed93ca373a0704ccbd1b710dc5749406201bb018272808dc54"
 dependencies = [
  "anstream",
  "anstyle",
@@ -2089,7 +2089,7 @@ dependencies = [
 [[package]]
 name = "linera-base"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2126,7 +2126,7 @@ dependencies = [
 [[package]]
 name = "linera-chain"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "async-graphql",
  "async-trait",
@@ -2148,7 +2148,7 @@ dependencies = [
 [[package]]
 name = "linera-core"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2185,7 +2185,7 @@ dependencies = [
 [[package]]
 name = "linera-execution"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2222,7 +2222,7 @@ dependencies = [
 [[package]]
 name = "linera-sdk"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2252,7 +2252,7 @@ dependencies = [
 [[package]]
 name = "linera-sdk-derive"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "convert_case 0.6.0",
  "proc-macro2",
@@ -2262,7 +2262,7 @@ dependencies = [
 [[package]]
 name = "linera-storage"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "async-trait",
  "bcs",
@@ -2281,7 +2281,7 @@ dependencies = [
 [[package]]
 name = "linera-storage-service"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -2305,7 +2305,7 @@ dependencies = [
 [[package]]
 name = "linera-version"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2326,7 +2326,7 @@ dependencies = [
 [[package]]
 name = "linera-views"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2358,7 +2358,7 @@ dependencies = [
 [[package]]
 name = "linera-views-derive"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "cfg_aliases",
  "proc-macro2",
@@ -2495,7 +2495,7 @@ dependencies = [
 [[package]]
 name = "linera-witty"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "anyhow",
  "cfg_aliases",
@@ -2511,7 +2511,7 @@ dependencies = [
 [[package]]
 name = "linera-witty-macros"
 version = "0.12.1"
-source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#12c4df2d6f0481544ce0efea53df7c363316b456"
+source = "git+https://github.com/respeer-ai/linera-protocol.git?branch=respeer-maas-v0.12.1#31be657d5abbb52807ed9fcb446366ac51855c29"
 dependencies = [
  "cfg_aliases",
  "heck 0.4.1",
@@ -2706,6 +2706,25 @@ checksum = "77a8165726e8236064dbb45459242600304b42a5ea24ee2948e18e023bf7ba84"
 dependencies = [
  "overload",
  "winapi",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.4.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
+dependencies = [
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-integer"
+version = "0.1.46"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7969661fd2958a5cb096e56c8e1ad0444ac2bbcd0061bd28660485a44879858f"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -3899,8 +3918,12 @@ name = "swap-pool"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
+ "bcs",
  "linera-sdk",
+ "num-bigint",
+ "num-traits",
  "spec",
+ "thiserror",
 ]
 
 [[package]]

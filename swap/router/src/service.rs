@@ -10,8 +10,8 @@ use linera_sdk::{
     Service, ServiceRuntime,
 };
 use spec::{
-    swap::{RouterMutationRoot, RouterQueryRoot},
     account::ChainAccountOwner,
+    swap::{RouterMutationRoot, RouterQueryRoot},
 };
 use std::sync::{Arc, Mutex};
 

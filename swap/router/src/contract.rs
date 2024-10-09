@@ -35,7 +35,9 @@ impl Contract for ApplicationContract {
 
     async fn instantiate(&mut self, _argument: Self::InstantiationArgument) {}
 
-    async fn execute_operation(&mut self, _operation: Self::Operation) -> Self::Response {}
+    async fn execute_operation(&mut self, _operation: Self::Operation) -> Self::Response {
+        Self::Response::Ok
+    }
 
     async fn execute_message(&mut self, _message: Self::Message) {}
 

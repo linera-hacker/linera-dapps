@@ -10,8 +10,8 @@ use linera_sdk::{
     Service, ServiceRuntime,
 };
 use spec::{
-    swap::{PoolMutationRoot, PoolQueryRoot},
     account::ChainAccountOwner,
+    swap::{Pool, PoolMutationRoot, PoolOperation, PoolQueryRoot},
 };
 use std::sync::{Arc, Mutex};
 
@@ -50,7 +50,7 @@ struct QueryRoot;
 
 #[Object]
 impl PoolQueryRoot for QueryRoot {
-    async fn get_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Option<u64> {
+    async fn get_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Option<Pool> {
         None
     }
 
@@ -64,29 +64,55 @@ struct MutationRoot;
 #[Object]
 impl PoolMutationRoot for MutationRoot {
     // Just put all liquidity pool in one application
-    async fn create_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Vec<u8> {
-        Vec::new()
+    async fn create_pool(
+        &self,
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+    ) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::CreatePool {
+            token_0,
+            token_1,
+            amount_0_initial,
+            amount_1_initial,
+            amount_0_virtual,
+            amount_1_virtual,
+        })
+        .unwrap()
     }
 
     async fn set_fee_to(&self, account: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::SetFeeTo { account }).unwrap()
     }
 
     async fn set_fee_to_setter(&self, account: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::SetFeeToSetter { account }).unwrap()
     }
 
     // Return minted liquidity
     async fn mint(&self, to: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::Mint { to }).unwrap()
     }
 
     // Return pair token amount
     async fn burn(&self, to: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&PoolOperation::Burn { to }).unwrap()
     }
 
-    async fn swap(&self, amount_0_out: Amount, amount_1_out: Amount, to: ChainAccountOwner) -> Vec<u8> {
-        Vec::new()
+    async fn swap(
+        &self,
+        amount_0_out: Amount,
+        amount_1_out: Amount,
+        to: ChainAccountOwner,
+    ) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::Swap {
+            amount_0_out,
+            amount_1_out,
+            to,
+        })
+        .unwrap()
     }
 }

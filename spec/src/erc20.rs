@@ -1,10 +1,11 @@
 use crate::account::ChainAccountOwner;
-use async_graphql::{Context, Error};
+use async_graphql::{scalar, Context, Error};
 use linera_sdk::{
-    base::{Account, AccountOwner, Amount, ChainId},
+    base::{AccountOwner, Amount},
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum ERC20Operation {
@@ -15,42 +16,83 @@ pub enum ERC20Operation {
     },
 }
 
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub enum ERC20Response {
+    #[default]
+    Ok,
+    Balance(Amount),
+}
+
 pub trait ERC20QueryRoot {
-    async fn total_supply(&self, ctx: &Context<'_>) -> Result<Amount, Error>;
-    async fn name(&self, ctx: &Context<'_>) -> Result<String, Error>;
-    async fn symbol(&self, ctx: &Context<'_>) -> Result<String, Error>;
-    async fn decimals(&self, ctx: &Context<'_>) -> Result<u8, Error>;
-    async fn balance_of(
+    fn total_supply(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+    fn name(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+    fn symbol(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+    fn decimals(
+        &self, 
+        ctx: &Context<'_>
+    ) -> impl std::future::Future<Output = Result<u8, Error>> + Send;
+    fn balance_of(
         &self, 
         ctx: &Context<'_>,
         owner: ChainAccountOwner,
-    ) -> Result<Amount, Error>;
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {
-    async fn transfer(
+    fn transfer(
         &self,
         ctx: &Context<'_>,
         to: ChainAccountOwner,
         amount: Amount,
-    ) -> Result<Vec<u8>, Error>;
-    async fn transfer_from(
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn transfer_from(
         &self,
         ctx: &Context<'_>,
         from: ChainAccountOwner,
         to: ChainAccountOwner,
         amount: Amount,
-    ) -> Result<Vec<u8>, Error>;
-    async fn approve(
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn approve(
         &self,
         ctx: &Context<'_>,
         spender: ChainAccountOwner,
         value: Amount,
-    ) -> Result<Vec<u8>, Error>;
-    async fn allowance(
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    fn allowance(
         &self,
         ctx: &Context<'_>,
         owner: ChainAccountOwner,
         spender: ChainAccountOwner,
-    ) -> Result<Vec<u8>, Error>;
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+pub struct ERC20 {
+    pub total_supply: Amount,
+    pub balances: HashMap<ChainAccountOwner, Amount>,
+}
+
+scalar!(ERC20);
+
+impl ERC20 {
+    pub fn _mint(&mut self, to: ChainAccountOwner, amount: Amount) {
+        // TODO: process overflow
+        self.total_supply.saturating_add_assign(amount);
+        self.balances.insert(
+            to.clone(),
+            self.balances
+                .get(&to)
+                .unwrap_or(&Amount::ZERO)
+                .saturating_add(amount),
+        );
+    }
 }
