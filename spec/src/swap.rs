@@ -93,6 +93,8 @@ pub struct Pool {
     pub virtual_initial_liquidity: bool,
     pub amount_0_initial: Amount,
     pub amount_1_initial: Amount,
+    pub reserve_0: Amount,
+    pub reserve_1: Amount,
     pub pool_fee_rate: Amount,
     pub protocol_fee_rate: Amount,
     pub erc20: ERC20,

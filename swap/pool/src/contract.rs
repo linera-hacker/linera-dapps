@@ -213,6 +213,10 @@ impl ApplicationContract {
         pool_id: u64,
         to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
+        // To here, router should already transfer tokens
+        // TODO: only router application on its creator chain can call
+        // TODO: get current balance
+        // TODO: calculate increased shares
         self.runtime
             .prepare_message(PoolMessage::Mint { pool_id, to })
             .with_authentication()
@@ -225,6 +229,8 @@ impl ApplicationContract {
         pool_id: u64,
         to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
+        // To here, shares should already be returned
+        // TODO: only router application on its creator chain can call
         self.runtime
             .prepare_message(PoolMessage::Burn { pool_id, to })
             .with_authentication()

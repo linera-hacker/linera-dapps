@@ -56,6 +56,8 @@ impl Application {
                 && amount_1_initial == amount_1_virtual,
             amount_0_initial,
             amount_1_initial,
+            reserve_0: amount_0_initial,
+            reserve_1: amount_1_initial,
             pool_fee_rate: Amount::from_str("0.3")?,
             protocol_fee_rate: Amount::from_str("0.05")?,
             erc20: ERC20::default(),
@@ -125,6 +127,7 @@ impl Application {
         pool_id: u64,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
+        let mut pool = self.indexed_pools.get(&pool_id).await?.expect("Invalid pool");
         Ok(())
     }
 
