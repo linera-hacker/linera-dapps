@@ -53,7 +53,7 @@ impl RouterQueryRoot for QueryRoot {
     async fn calculate_swap_amount(
         &self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_1: Amount,
     ) -> Amount {
         Amount::ZERO
@@ -68,7 +68,7 @@ impl RouterMutationRoot for MutationRoot {
     async fn add_liquidity(
         &self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_desired: Amount,
         amount_1_desired: Amount,
         amount_0_min: Amount,
@@ -83,7 +83,7 @@ impl RouterMutationRoot for MutationRoot {
     async fn remove_liquidity(
         &self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,

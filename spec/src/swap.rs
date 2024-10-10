@@ -3,11 +3,11 @@ use crate::{
     base::{BaseMessage, BaseOperation},
     erc20::ERC20,
 };
-use async_graphql::{Context, Error, SimpleObject, Request, Response};
+use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
+    abi::{ContractAbi, ServiceAbi},
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
-    abi::{ContractAbi, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 
@@ -16,7 +16,8 @@ pub enum PoolMessage {
     BaseMessage(BaseMessage),
     CreatePool {
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        // None means add pair to native token
+        token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
@@ -51,7 +52,8 @@ pub enum PoolOperation {
     BaseOperation(BaseOperation),
     CreatePool {
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        // None means add pair to native token
+        token_1: Option<ApplicationId>,
         // Actual deposited initial liquidity
         // New listed token must not be 0
         amount_0_initial: Amount,
@@ -90,7 +92,8 @@ pub enum PoolOperation {
 pub struct Pool {
     pub id: u64,
     pub token_0: ApplicationId,
-    pub token_1: ApplicationId,
+    // None means add pair to native token
+    pub token_1: Option<ApplicationId>,
     pub virtual_initial_liquidity: bool,
     pub amount_0_initial: Amount,
     pub amount_1_initial: Amount,
@@ -114,7 +117,7 @@ pub trait PoolQueryRoot {
         &self,
         ctx: &Context<'_>,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
     ) -> impl std::future::Future<Output = Result<Option<Pool>, Error>> + Send;
 
     fn get_fee_to(
@@ -129,7 +132,7 @@ pub trait PoolMutationRoot {
         &self,
         ctx: &Context<'_>,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
@@ -180,12 +183,12 @@ pub trait PoolMutationRoot {
 pub enum RouterOperation {
     CalculateSwapAmount {
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_1: Amount,
     },
     AddLiquidity {
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_desired: Amount,
         amount_1_desired: Amount,
         amount_0_min: Amount,
@@ -195,7 +198,7 @@ pub enum RouterOperation {
     },
     RemoveLiquidity {
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
@@ -229,7 +232,7 @@ pub trait RouterQueryRoot {
         &self,
         ctx: &Context<'_>,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_1: Amount,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 }
@@ -240,7 +243,7 @@ pub trait RouterMutationRoot {
         &self,
         ctx: &Context<'_>,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_desired: Amount,
         amount_1_desired: Amount,
         amount_0_min: Amount,
@@ -254,7 +257,7 @@ pub trait RouterMutationRoot {
         &self,
         ctx: &Context<'_>,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,

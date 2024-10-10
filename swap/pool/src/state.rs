@@ -12,17 +12,47 @@ use swap_pool::PoolError;
 #[derive(RootView, async_graphql::SimpleObject)]
 #[view(context = "ViewStorageContext")]
 pub struct Application {
-    pub pools: MapView<ApplicationId, HashMap<ApplicationId, Pool>>,
+    pub erc20_erc20_pools: MapView<ApplicationId, HashMap<ApplicationId, Pool>>,
+    pub erc20_native_pools: MapView<ApplicationId, Pool>,
     pub pool_id: RegisterView<u64>,
-    pub indexed_pools: MapView<u64, Pool>,
+    pub pool_erc20_erc20s: MapView<u64, Vec<ApplicationId>>,
+    pub pool_erc20_natives: MapView<u64, ApplicationId>,
 }
 
 #[allow(dead_code)]
 impl Application {
+    async fn insert_pool(&mut self, pool: Pool) -> Result<(), PoolError> {
+        match pool.token_1 {
+            Some(_token_1) => {
+                let mut token_pools = self
+                    .erc20_erc20_pools
+                    .get(&pool.token_0)
+                    .await?
+                    .unwrap_or(HashMap::new());
+                if token_pools.get(&_token_1).is_some() {
+                    return Err(PoolError::AlreadyExists);
+                }
+                token_pools.insert(_token_1, pool.clone());
+                self.erc20_erc20_pools.insert(&pool.token_0, token_pools)?;
+                self.pool_erc20_erc20s
+                    .insert(&pool.id, [pool.token_0, _token_1].to_vec())?;
+            }
+            None => {
+                if self.erc20_native_pools.get(&pool.token_0).await?.is_some() {
+                    return Err(PoolError::AlreadyExists);
+                }
+                self.erc20_native_pools
+                    .insert(&pool.token_0, pool.clone())?;
+                self.pool_erc20_natives.insert(&pool.id, pool.token_0)?;
+            }
+        }
+        Ok(())
+    }
+
     pub(crate) async fn create_pool(
         &mut self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
@@ -80,16 +110,23 @@ impl Application {
         }
 
         self.pool_id.set(pool_id + 1);
-        let mut token_pools = self.pools.get(&token_0).await?.unwrap_or(HashMap::new());
-        match token_pools.get(&token_1) {
-            Some(_) => return Err(PoolError::AlreadyExists),
-            _ => {}
-        }
-        token_pools.insert(token_1, pool.clone());
-        self.pools.insert(&token_0, token_pools)?;
-        self.indexed_pools.insert(&pool_id, pool)?;
+        self.insert_pool(pool).await
+    }
 
-        Ok(())
+    async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
+        match self.pool_erc20_erc20s.get(&pool_id).await? {
+            Some(tokens) => Ok(self
+                .erc20_erc20_pools
+                .get(&tokens[0])
+                .await?
+                .unwrap_or(HashMap::new())
+                .get(&tokens[1])
+                .cloned()),
+            None => match self.pool_erc20_natives.get(&pool_id).await? {
+                Some(token) => Ok(self.erc20_native_pools.get(&token).await?),
+                None => Ok(None),
+            },
+        }
     }
 
     pub(crate) async fn set_fee_to(
@@ -98,11 +135,7 @@ impl Application {
         account: ChainAccountOwner,
         setter: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let mut pool = self
-            .indexed_pools
-            .get(&pool_id)
-            .await?
-            .expect("Invalid pool");
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
         if pool.fee_to_setter != setter {
             return Err(PoolError::PermissionDenied);
         }
@@ -117,11 +150,7 @@ impl Application {
         account: ChainAccountOwner,
         setter: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let mut pool = self
-            .indexed_pools
-            .get(&pool_id)
-            .await?
-            .expect("Invalid pool");
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
         if pool.fee_to_setter != setter {
             return Err(PoolError::PermissionDenied);
         }
@@ -135,11 +164,7 @@ impl Application {
         pool_id: u64,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let mut pool = self
-            .indexed_pools
-            .get(&pool_id)
-            .await?
-            .expect("Invalid pool");
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
         Ok(())
     }
 

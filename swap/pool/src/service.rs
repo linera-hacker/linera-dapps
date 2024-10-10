@@ -50,7 +50,11 @@ struct QueryRoot;
 
 #[Object]
 impl PoolQueryRoot for QueryRoot {
-    async fn get_pool(&self, token_0: ApplicationId, token_1: ApplicationId) -> Option<Pool> {
+    async fn get_pool(
+        &self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    ) -> Option<Pool> {
         None
     }
 
@@ -67,7 +71,7 @@ impl PoolMutationRoot for MutationRoot {
     async fn create_pool(
         &self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
         amount_1_initial: Amount,
         amount_0_virtual: Amount,

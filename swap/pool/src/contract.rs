@@ -3,7 +3,9 @@
 mod state;
 
 use linera_sdk::{
-    base::{AccountOwner, Amount, ApplicationId, ChannelName, Destination, WithContractAbi},
+    base::{
+        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, WithContractAbi,
+    },
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -12,7 +14,7 @@ use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Operation, ERC20ApplicationAbi},
+    erc20::{ERC20ApplicationAbi, ERC20Operation},
     swap::{PoolMessage, PoolOperation, PoolResponse},
 };
 use swap_pool::PoolError;
@@ -166,7 +168,7 @@ impl ApplicationContract {
     fn on_op_create_pool(
         &mut self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
@@ -311,7 +313,8 @@ impl ApplicationContract {
         };
 
         let call = ERC20Operation::TransferFrom { from, amount, to };
-        self.runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
+        self.runtime
+            .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
     }
 
     fn message_owner(&mut self) -> ChainAccountOwner {
@@ -324,10 +327,30 @@ impl ApplicationContract {
         }
     }
 
+    fn transfer_native(&mut self, amount: Amount) {
+        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
+            return;
+        }
+
+        let to = Account {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: None,
+            // TODO: we should transfer to application for liquidity
+            /*
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+            */
+        };
+
+        let owner = self.runtime.authenticated_signer();
+        self.runtime.transfer(owner, to, amount);
+    }
+
     async fn on_msg_create_pool(
         &mut self,
         token_0: ApplicationId,
-        token_1: ApplicationId,
+        token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
@@ -339,7 +362,10 @@ impl ApplicationContract {
             self.transfer_erc20(token_0, amount_0_initial);
         }
         if amount_1_initial > Amount::ZERO {
-            self.transfer_erc20(token_1, amount_1_initial);
+            match token_1 {
+                Some(_token_1) => self.transfer_erc20(_token_1, amount_1_initial),
+                None => self.transfer_native(amount_1_initial),
+            }
         }
 
         self.state
