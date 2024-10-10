@@ -61,6 +61,7 @@ impl Contract for ApplicationContract {
             ERC20Operation::Approve { spender, value } => self
                 .on_op_approve(spender, value)
                 .expect("Failed OP: approve"),
+            ERC20Operation::BalanceOf { owner } => todo!()
         }
     }
 
