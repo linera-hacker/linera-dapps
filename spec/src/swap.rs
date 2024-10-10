@@ -3,10 +3,11 @@ use crate::{
     base::{BaseMessage, BaseOperation},
     erc20::ERC20,
 };
-use async_graphql::{Context, Error, SimpleObject};
+use async_graphql::{Context, Error, SimpleObject, Request, Response};
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
+    abi::{ContractAbi, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 
@@ -208,6 +209,18 @@ pub enum RouterResponse {
     #[default]
     Ok,
     Liquidity((Amount, Amount, Amount)),
+}
+
+pub struct RouterApplicationAbi;
+
+impl ContractAbi for RouterApplicationAbi {
+    type Operation = RouterOperation;
+    type Response = RouterResponse;
+}
+
+impl ServiceAbi for RouterApplicationAbi {
+    type Query = Request;
+    type QueryResponse = Response;
 }
 
 pub trait RouterQueryRoot {

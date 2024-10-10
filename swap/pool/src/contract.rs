@@ -12,7 +12,7 @@ use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::ERC20Operation,
+    erc20::{ERC20Operation, ERC20ApplicationAbi},
     swap::{PoolMessage, PoolOperation, PoolResponse},
 };
 use swap_pool::PoolError;
@@ -311,7 +311,7 @@ impl ApplicationContract {
         };
 
         let call = ERC20Operation::TransferFrom { from, amount, to };
-        self.runtime.call_application(true, token.with_abi(), &call);
+        self.runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
     }
 
     fn message_owner(&mut self) -> ChainAccountOwner {
