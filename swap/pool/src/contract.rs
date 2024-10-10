@@ -85,6 +85,7 @@ impl Contract for ApplicationContract {
                 .expect("Failed OP: mint"),
             PoolOperation::Burn { pool_id, liquidity } => self
                 .on_op_burn(pool_id, liquidity)
+                .await
                 .expect("Failed OP: burn"),
             PoolOperation::Swap {
                 pool_id,
@@ -300,7 +301,37 @@ impl ApplicationContract {
         Ok(PoolResponse::Ok)
     }
 
-    fn on_op_burn(
+    async fn calculate_amounts(
+        &mut self,
+        pool_id: u64,
+        liquidity: Amount,
+    ) -> Result<(Amount, Amount), PoolError> {
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: here we should get balance of this application instance
+            _ => todo!(),
+        };
+
+        // TODO: mint fee
+
+        let amount_0: Amount = liquidity
+            .saturating_mul(balance_0.into())
+            .saturating_div(pool.erc20.total_supply)
+            .into();
+        let amount_1: Amount = liquidity
+            .saturating_mul(balance_1.into())
+            .saturating_div(pool.erc20.total_supply)
+            .into();
+        if amount_0 == Amount::ZERO || amount_1 == Amount::ZERO {
+            panic!("Invalid liquidity");
+        }
+
+        Ok((amount_0, amount_1))
+    }
+
+    async fn on_op_burn(
         &mut self,
         pool_id: u64,
         liquidity: Amount,
@@ -315,13 +346,14 @@ impl ApplicationContract {
             return Err(PoolError::PermissionDenied);
         }
 
-        // TODO: calculate return amount
+        let amounts = self.calculate_amounts(pool_id, liquidity).await?;
 
         self.runtime
             .prepare_message(PoolMessage::Burn { pool_id, liquidity })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(PoolResponse::Ok)
+
+        Ok(PoolResponse::Amounts(amounts))
     }
 
     fn on_op_swap(

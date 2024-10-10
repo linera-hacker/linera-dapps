@@ -122,6 +122,7 @@ pub enum PoolResponse {
     #[default]
     Ok,
     Liquidity(Amount),
+    Amounts((Amount, Amount)),
 }
 
 pub trait PoolQueryRoot {
