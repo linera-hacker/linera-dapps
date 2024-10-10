@@ -182,13 +182,16 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn swap(
+    pub(crate) async fn update(
         &mut self,
         pool_id: u64,
-        amount_0_out: Amount,
-        amount_1_out: Amount,
-        to: ChainAccountOwner,
+        balance_0: Amount,
+        balance_1: Amount,
     ) -> Result<(), PoolError> {
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+        pool.reserve_0 = balance_0;
+        pool.reserve_1 = balance_1;
+        // TODO: update price
         Ok(())
     }
 }
