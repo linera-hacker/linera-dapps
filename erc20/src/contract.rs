@@ -13,7 +13,7 @@ use erc20::ERC20Error;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Message, ERC20Operation, ERC20Response},
+    erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument},
 };
 
 pub struct ApplicationContract {
@@ -30,7 +30,7 @@ impl WithContractAbi for ApplicationContract {
 impl Contract for ApplicationContract {
     type Message = ERC20Message;
     type Parameters = ();
-    type InstantiationArgument = ();
+    type InstantiationArgument = InstantiationArgument;
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
         let state = Application::load(runtime.root_view_storage_context())
@@ -39,7 +39,13 @@ impl Contract for ApplicationContract {
         ApplicationContract { state, runtime }
     }
 
-    async fn instantiate(&mut self, _argument: Self::InstantiationArgument) {}
+    async fn instantiate(&mut self, argument: InstantiationArgument) {
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+        if message_id.chain_id != self.runtime.application_creator_chain_id() {
+            return;
+        }
+        self.state.instantiate(argument).await;
+    }
 
     async fn execute_operation(&mut self, operation: ERC20Operation) -> ERC20Response {
         match operation {

@@ -9,6 +9,15 @@ use linera_sdk::{
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct InstantiationArgument {
+    pub initial_supply: Amount,
+    pub owner: ChainAccountOwner,
+    pub name: String,
+    pub symbol: String,
+    pub decimals: u8,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum ERC20Message {
     BaseMessage(BaseMessage),
