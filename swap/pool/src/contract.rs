@@ -591,6 +591,8 @@ impl ApplicationContract {
         let liquidity = self.calculate_liquidity(pool, amount_0, amount_1);
         self.state.mint(pool_id, liquidity, to.clone()).await?;
 
+        // TODO: calculate fee
+
         self.publish_message(PoolMessage::Mint {
             pool_id,
             amount_0,
@@ -619,6 +621,8 @@ impl ApplicationContract {
             _ => todo!(),
         }
 
+        // TODO: mint fee
+
         self.publish_message(PoolMessage::Burn { pool_id, liquidity });
         Ok(())
     }
@@ -630,10 +634,6 @@ impl ApplicationContract {
         amount_1_out: Amount,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        self.state
-            .swap(pool_id, amount_0_out, amount_1_out, to.clone())
-            .await?;
-
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
         if amount_0_out > Amount::ZERO {
             self.transfer_erc20_to(pool.token_0, amount_0_out);
@@ -671,8 +671,7 @@ impl ApplicationContract {
         {
             return Err(PoolError::BrokenK);
         }
-
-        // TODO: update pool
+        self.state.update(pool_id, balance_0, balance_1).await?;
 
         self.publish_message(PoolMessage::Swap {
             pool_id,
