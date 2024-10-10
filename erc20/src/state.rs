@@ -1,6 +1,6 @@
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
-use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, View, ViewStorageContext};
+use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use serde::{Deserialize, Serialize};
 use spec::{account::ChainAccountOwner, erc20::InstantiationArgument};
 
@@ -33,12 +33,11 @@ pub struct Application {
 
 #[allow(dead_code)]
 impl Application {
-    pub(crate) async fn instantiate(
-        &mut self, 
-        argument: InstantiationArgument,
-    ) {
+    pub(crate) async fn instantiate(&mut self, argument: InstantiationArgument) {
         self.total_supply.set(argument.initial_supply);
-        let _ = self.balances.insert(&argument.owner, argument.initial_supply);
+        let _ = self
+            .balances
+            .insert(&argument.owner, argument.initial_supply);
         self.name.set(argument.name);
         self.symbol.set(argument.symbol);
         self.decimals.set(argument.decimals);

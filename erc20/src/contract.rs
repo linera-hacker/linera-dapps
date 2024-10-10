@@ -61,7 +61,10 @@ impl Contract for ApplicationContract {
             ERC20Operation::Approve { spender, value } => self
                 .on_op_approve(spender, value)
                 .expect("Failed OP: approve"),
-            ERC20Operation::BalanceOf { owner } => todo!()
+            ERC20Operation::BalanceOf { owner } => self
+                .on_op_balance_of(owner)
+                .await
+                .expect("Failed OP: balance of"),
         }
     }
 
@@ -145,6 +148,15 @@ impl ApplicationContract {
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
+    }
+
+    async fn on_op_balance_of(
+        &self,
+        owner: ChainAccountOwner,
+    ) -> Result<ERC20Response, ERC20Error> {
+        Ok(ERC20Response::Balance(
+            self.state.balances.get(&owner).await?.unwrap_or(Amount::ZERO)
+        ))
     }
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), ERC20Error> {

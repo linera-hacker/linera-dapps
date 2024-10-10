@@ -54,7 +54,7 @@ pub enum ERC20Operation {
     },
     BalanceOf {
         owner: ChainAccountOwner,
-    }
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
