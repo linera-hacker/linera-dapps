@@ -46,7 +46,7 @@ pub enum PoolMessage {
     },
     Burn {
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     },
     Swap {
         pool_id: u64,
@@ -89,7 +89,7 @@ pub enum PoolOperation {
     },
     Burn {
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     },
     Swap {
         pool_id: u64,
@@ -170,6 +170,8 @@ pub trait PoolMutationRoot {
         &self,
         ctx: &Context<'_>,
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
@@ -178,7 +180,7 @@ pub trait PoolMutationRoot {
         &self,
         ctx: &Context<'_>,
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn swap(

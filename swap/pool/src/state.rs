@@ -174,7 +174,8 @@ impl Application {
     pub(crate) async fn burn(
         &mut self,
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
+        from: ChainAccountOwner,
     ) -> Result<(), PoolError> {
         Ok(())
     }

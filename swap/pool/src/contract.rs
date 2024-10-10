@@ -74,12 +74,18 @@ impl Contract for ApplicationContract {
             PoolOperation::SetFeeToSetter { pool_id, account } => self
                 .on_op_set_fee_to_setter(pool_id, account)
                 .expect("Failed OP: set fee to setter"),
-            PoolOperation::Mint { pool_id, amount_0, amount_1, to } => {
-                self.on_op_mint(pool_id, amount_0, amount_1, to).await.expect("Failed OP: mint")
-            }
-            PoolOperation::Burn { pool_id, to } => {
-                self.on_op_burn(pool_id, to).expect("Failed OP: burn")
-            }
+            PoolOperation::Mint {
+                pool_id,
+                amount_0,
+                amount_1,
+                to,
+            } => self
+                .on_op_mint(pool_id, amount_0, amount_1, to)
+                .await
+                .expect("Failed OP: mint"),
+            PoolOperation::Burn { pool_id, liquidity } => self
+                .on_op_burn(pool_id, liquidity)
+                .expect("Failed OP: burn"),
             PoolOperation::Swap {
                 pool_id,
                 amount_0_out,
@@ -131,8 +137,8 @@ impl Contract for ApplicationContract {
                 .on_msg_mint(pool_id, amount_0, amount_1, to)
                 .await
                 .expect("Failed MSG: mint"),
-            PoolMessage::Burn { pool_id, to } => self
-                .on_msg_burn(pool_id, to)
+            PoolMessage::Burn { pool_id, liquidity } => self
+                .on_msg_burn(pool_id, liquidity)
                 .await
                 .expect("Failed MSG: burn"),
             PoolMessage::Swap {
@@ -253,7 +259,8 @@ impl ApplicationContract {
                     amount_1
                         .saturating_mul(total_supply.into())
                         .saturating_div(pool.reserve_1.into()),
-                ).into()
+                )
+                .into()
         }
     }
 
@@ -296,12 +303,22 @@ impl ApplicationContract {
     fn on_op_burn(
         &mut self,
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     ) -> Result<PoolResponse, PoolError> {
         // To here, shares should already be returned
-        // TODO: only router application on its creator chain can call
+        // Only router application on its creator chain can call
+        let caller = self
+            .runtime
+            .authenticated_caller_id()
+            .expect("Invalid caller");
+        if self.router_application_id().forget_abi() != caller {
+            return Err(PoolError::PermissionDenied);
+        }
+
+        // TODO: calculate return amount
+
         self.runtime
-            .prepare_message(PoolMessage::Burn { pool_id, to })
+            .prepare_message(PoolMessage::Burn { pool_id, liquidity })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
@@ -522,9 +539,18 @@ impl ApplicationContract {
         Ok(())
     }
 
-    async fn on_msg_burn(&mut self, pool_id: u64, to: ChainAccountOwner) -> Result<(), PoolError> {
-        self.state.burn(pool_id, to.clone()).await?;
-        self.publish_message(PoolMessage::Burn { pool_id, to });
+    async fn on_msg_burn(&mut self, pool_id: u64, liquidity: Amount) -> Result<(), PoolError> {
+        let myself = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+        };
+
+        self.state.burn(pool_id, liquidity, myself).await?;
+
+        // TODO: transfer token back to from
+        self.publish_message(PoolMessage::Burn { pool_id, liquidity });
         Ok(())
     }
 

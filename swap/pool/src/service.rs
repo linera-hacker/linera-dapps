@@ -97,13 +97,19 @@ impl PoolMutationRoot for MutationRoot {
     }
 
     // Return minted liquidity
-    async fn mint(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
-        panic!("Not supported");
+    async fn mint(
+        &self,
+        _pool_id: u64,
+        _amount_0: Amount,
+        _amount_1: Amount,
+        _to: ChainAccountOwner,
+    ) -> Vec<u8> {
+        panic!("Permission denied");
     }
 
     // Return pair token amount
-    async fn burn(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Burn { pool_id, to }).unwrap()
+    async fn burn(&self, _pool_id: u64, _liquidity: Amount) -> Vec<u8> {
+        panic!("Permission denied");
     }
 
     async fn swap(
