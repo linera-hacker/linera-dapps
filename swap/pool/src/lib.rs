@@ -41,4 +41,13 @@ pub enum PoolError {
 
     #[error("Insufficient funds")]
     InsufficientFunds,
+
+    #[error("Invalid amount")]
+    InvalidAmount,
+
+    #[error("Insufficient liquidity")]
+    InsufficientLiquidity,
+
+    #[error("Broken K")]
+    BrokenK,
 }

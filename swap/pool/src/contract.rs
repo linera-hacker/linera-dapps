@@ -363,6 +363,10 @@ impl ApplicationContract {
         amount_1_out: Amount,
         to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
+        if amount_0_out <= Amount::ZERO || amount_1_out <= Amount::ZERO {
+            return Err(PoolError::InvalidAmount);
+        }
+
         self.runtime
             .prepare_message(PoolMessage::Swap {
                 pool_id,
@@ -629,6 +633,47 @@ impl ApplicationContract {
         self.state
             .swap(pool_id, amount_0_out, amount_1_out, to.clone())
             .await?;
+
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+        if amount_0_out > Amount::ZERO {
+            self.transfer_erc20_to(pool.token_0, amount_0_out);
+        }
+        if amount_1_out > Amount::ZERO {
+            match pool.token_1 {
+                Some(token_1) => self.transfer_erc20_to(token_1, amount_1_out),
+                // TODO: transfer native token
+                _ => todo!(),
+            }
+        }
+
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: transfer native token
+            _ => todo!(),
+        };
+
+        let amount_0_in =
+            balance_0.saturating_sub(pool.reserve_0.saturating_mul(amount_0_out.into()));
+        let amount_1_in =
+            balance_1.saturating_sub(pool.reserve_1.saturating_mul(amount_1_out.into()));
+        if amount_0_in > Amount::ZERO || amount_1_in > Amount::ZERO {
+            return Err(PoolError::InsufficientLiquidity);
+        }
+
+        // TODO: rate should be percent
+        let balance_0_adjusted =
+            balance_0.saturating_sub(amount_0_in.saturating_mul(pool.pool_fee_rate.into()));
+        let balance_1_adjusted =
+            balance_1.saturating_sub(amount_1_in.saturating_mul(pool.pool_fee_rate.into()));
+        if balance_0_adjusted.saturating_mul(balance_1_adjusted.into())
+            >= pool.reserve_0.saturating_mul(pool.reserve_1.into())
+        {
+            return Err(PoolError::BrokenK);
+        }
+
+        // TODO: update pool
+
         self.publish_message(PoolMessage::Swap {
             pool_id,
             amount_0_out,
