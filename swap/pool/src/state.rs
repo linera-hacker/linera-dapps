@@ -177,6 +177,8 @@ impl Application {
         liquidity: Amount,
         from: ChainAccountOwner,
     ) -> Result<(), PoolError> {
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+        pool.erc20._burn(from, liquidity);
         Ok(())
     }
 

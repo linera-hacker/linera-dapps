@@ -298,7 +298,7 @@ impl ApplicationContract {
             })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(PoolResponse::Ok)
+        Ok(PoolResponse::Liquidity(liquidity))
     }
 
     async fn calculate_amounts(
@@ -405,7 +405,7 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
-    fn transfer_erc20(&mut self, token: ApplicationId, amount: Amount) {
+    fn transfer_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
@@ -426,6 +426,31 @@ impl ApplicationContract {
         };
 
         let call = ERC20Operation::TransferFrom { from, amount, to };
+        self.runtime
+            .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
+    }
+
+    fn transfer_erc20_to(&mut self, token: ApplicationId, amount: Amount) {
+        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
+            return;
+        }
+
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+
+        let from = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+        };
+        let to = ChainAccountOwner {
+            chain_id: message_id.chain_id,
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        };
+
+        let call = ERC20Operation::Transfer { amount, to };
         self.runtime
             .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
     }
@@ -472,11 +497,11 @@ impl ApplicationContract {
         let creator = self.message_owner();
 
         if amount_0_initial > Amount::ZERO {
-            self.transfer_erc20(token_0, amount_0_initial);
+            self.transfer_erc20_from(token_0, amount_0_initial);
         }
         if amount_1_initial > Amount::ZERO {
             match token_1 {
-                Some(_token_1) => self.transfer_erc20(_token_1, amount_1_initial),
+                Some(_token_1) => self.transfer_erc20_from(_token_1, amount_1_initial),
                 None => self.transfer_native(amount_1_initial),
             }
         }
@@ -581,7 +606,15 @@ impl ApplicationContract {
 
         self.state.burn(pool_id, liquidity, myself).await?;
 
-        // TODO: transfer token back to from
+        let (amount_0, amount_1) = self.calculate_amounts(pool_id, liquidity).await?;
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+        self.transfer_erc20_to(pool.token_0, amount_0);
+        match pool.token_1 {
+            Some(token_1) => self.transfer_erc20_to(token_1, amount_1),
+            // TODO: transfer native token
+            _ => todo!(),
+        }
+
         self.publish_message(PoolMessage::Burn { pool_id, liquidity });
         Ok(())
     }

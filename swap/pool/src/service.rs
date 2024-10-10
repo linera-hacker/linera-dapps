@@ -13,11 +13,10 @@ use spec::{
     account::ChainAccountOwner,
     swap::{Pool, PoolMutationRoot, PoolOperation, PoolQueryRoot},
 };
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 pub struct ApplicationService {
     state: Arc<Application>,
-    runtime: Arc<Mutex<ServiceRuntime<Self>>>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -35,12 +34,10 @@ impl Service for ApplicationService {
             .expect("Failed to load state");
         ApplicationService {
             state: Arc::new(state),
-            runtime: Arc::new(Mutex::new(runtime)),
         }
     }
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
-        let runtime = self.runtime.clone();
         let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
         schema.execute(query).await
     }
