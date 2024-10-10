@@ -11,6 +11,13 @@ use linera_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
+pub struct RouterApplicationAbi;
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct PoolParameters {
+    pub router_application_id: ApplicationId<RouterApplicationAbi>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum PoolMessage {
     BaseMessage(BaseMessage),
@@ -33,11 +40,13 @@ pub enum PoolMessage {
     },
     Mint {
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     },
     Burn {
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     },
     Swap {
         pool_id: u64,
@@ -74,11 +83,13 @@ pub enum PoolOperation {
     },
     Mint {
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     },
     Burn {
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     },
     Swap {
         pool_id: u64,
@@ -110,6 +121,8 @@ pub struct Pool {
 pub enum PoolResponse {
     #[default]
     Ok,
+    Liquidity(Amount),
+    Amounts((Amount, Amount)),
 }
 
 pub trait PoolQueryRoot {
@@ -158,6 +171,8 @@ pub trait PoolMutationRoot {
         &self,
         ctx: &Context<'_>,
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
@@ -166,7 +181,7 @@ pub trait PoolMutationRoot {
         &self,
         ctx: &Context<'_>,
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn swap(
@@ -213,8 +228,6 @@ pub enum RouterResponse {
     Ok,
     Liquidity((Amount, Amount, Amount)),
 }
-
-pub struct RouterApplicationAbi;
 
 impl ContractAbi for RouterApplicationAbi {
     type Operation = RouterOperation;

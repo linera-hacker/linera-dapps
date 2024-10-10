@@ -113,7 +113,7 @@ impl Application {
         self.insert_pool(pool).await
     }
 
-    async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
+    pub(crate) async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
         match self.pool_erc20_erc20s.get(&pool_id).await? {
             Some(tokens) => Ok(self
                 .erc20_erc20_pools
@@ -162,17 +162,23 @@ impl Application {
     pub(crate) async fn mint(
         &mut self,
         pool_id: u64,
+        liquidity: Amount,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+        pool.erc20._mint(to, liquidity);
+        // TODO: test if we need to insert again
         Ok(())
     }
 
     pub(crate) async fn burn(
         &mut self,
         pool_id: u64,
-        to: ChainAccountOwner,
+        liquidity: Amount,
+        from: ChainAccountOwner,
     ) -> Result<(), PoolError> {
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+        pool.erc20._burn(from, liquidity);
         Ok(())
     }
 

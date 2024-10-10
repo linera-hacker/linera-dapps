@@ -35,4 +35,19 @@ pub enum PoolError {
 
     #[error("Permission denied")]
     PermissionDenied,
+
+    #[error("Not supported")]
+    NotSupported,
+
+    #[error("Insufficient funds")]
+    InsufficientFunds,
+
+    #[error("Invalid amount")]
+    InvalidAmount,
+
+    #[error("Insufficient liquidity")]
+    InsufficientLiquidity,
+
+    #[error("Broken K")]
+    BrokenK,
 }

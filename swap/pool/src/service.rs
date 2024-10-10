@@ -13,11 +13,10 @@ use spec::{
     account::ChainAccountOwner,
     swap::{Pool, PoolMutationRoot, PoolOperation, PoolQueryRoot},
 };
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 pub struct ApplicationService {
     state: Arc<Application>,
-    runtime: Arc<Mutex<ServiceRuntime<Self>>>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -35,12 +34,10 @@ impl Service for ApplicationService {
             .expect("Failed to load state");
         ApplicationService {
             state: Arc::new(state),
-            runtime: Arc::new(Mutex::new(runtime)),
         }
     }
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
-        let runtime = self.runtime.clone();
         let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
         schema.execute(query).await
     }
@@ -97,13 +94,19 @@ impl PoolMutationRoot for MutationRoot {
     }
 
     // Return minted liquidity
-    async fn mint(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Mint { pool_id, to }).unwrap()
+    async fn mint(
+        &self,
+        _pool_id: u64,
+        _amount_0: Amount,
+        _amount_1: Amount,
+        _to: ChainAccountOwner,
+    ) -> Vec<u8> {
+        panic!("Permission denied");
     }
 
     // Return pair token amount
-    async fn burn(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Burn { pool_id, to }).unwrap()
+    async fn burn(&self, _pool_id: u64, _liquidity: Amount) -> Vec<u8> {
+        panic!("Permission denied");
     }
 
     async fn swap(

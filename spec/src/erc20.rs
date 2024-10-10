@@ -156,4 +156,16 @@ impl ERC20 {
                 .saturating_add(amount),
         );
     }
+
+    // Liquidity to be burn should be returned to application already
+    pub fn _burn(&mut self, from: ChainAccountOwner, liquidity: Amount) {
+        self.total_supply = self.total_supply.saturating_sub(liquidity);
+        self.balances.insert(
+            from.clone(),
+            self.balances
+                .get(&from)
+                .unwrap_or(&Amount::ZERO)
+                .saturating_sub(liquidity),
+        );
+    }
 }
