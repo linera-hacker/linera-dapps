@@ -63,13 +63,13 @@ impl ERC20QueryRoot for QueryRoot {
         *self.state.total_supply.get()
     }
     async fn name(&self) -> String {
-        "Token".to_string()
+        self.state.name.get().clone()
     }
     async fn symbol(&self) -> String {
-        "TK".to_string()
+        self.state.symbol.get().clone()
     }
     async fn decimals(&self) -> u8 {
-        18
+        self.state.decimals.get().clone()
     }
     async fn balance_of(&self, owner: ChainAccountOwner) -> Amount {
         match self.state.balances.get(&owner).await {

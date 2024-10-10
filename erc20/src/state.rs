@@ -1,8 +1,8 @@
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
-use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
+use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, View, ViewStorageContext};
 use serde::{Deserialize, Serialize};
-use spec::account::ChainAccountOwner;
+use spec::{account::ChainAccountOwner, erc20::InstantiationArgument};
 
 #[derive(
     Serialize, Deserialize, Debug, Clone, async_graphql::SimpleObject, async_graphql::InputObject,
@@ -26,10 +26,24 @@ pub struct Application {
     pub total_supply: RegisterView<Amount>,
     pub balances: MapView<ChainAccountOwner, Amount>,
     pub allowances: MapView<AllowanceKey, Amount>,
+    pub name: RegisterView<String>,
+    pub symbol: RegisterView<String>,
+    pub decimals: RegisterView<u8>,
 }
 
 #[allow(dead_code)]
 impl Application {
+    pub(crate) async fn instantiate(
+        &mut self, 
+        argument: InstantiationArgument,
+    ) {
+        self.total_supply.set(argument.initial_supply);
+        let _ = self.balances.insert(&argument.owner, argument.initial_supply);
+        self.name.set(argument.name);
+        self.symbol.set(argument.symbol);
+        self.decimals.set(argument.decimals);
+    }
+
     pub(crate) async fn transfer(
         &mut self,
         sender: ChainAccountOwner,
