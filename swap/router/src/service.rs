@@ -50,8 +50,13 @@ struct QueryRoot;
 
 #[Object]
 impl RouterQueryRoot for QueryRoot {
-    async fn example_func(&self) -> u64 {
-        0
+    async fn calculate_swap_amount(
+        &self,
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_1: Amount,
+    ) -> Amount {
+        Amount::ZERO
     }
 }
 

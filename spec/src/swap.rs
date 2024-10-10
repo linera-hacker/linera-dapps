@@ -177,6 +177,11 @@ pub trait PoolMutationRoot {
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum RouterOperation {
+    CalculateSwapAmount {
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_1: Amount,
+    },
     AddLiquidity {
         token_0: ApplicationId,
         token_1: ApplicationId,
@@ -206,10 +211,14 @@ pub enum RouterResponse {
 }
 
 pub trait RouterQueryRoot {
-    fn example_func(
+    // Return swap amount
+    fn calculate_swap_amount(
         &self,
         ctx: &Context<'_>,
-    ) -> impl std::future::Future<Output = Result<u64, Error>> + Send;
+        token_0: ApplicationId,
+        token_1: ApplicationId,
+        amount_1: Amount,
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 }
 
 pub trait RouterMutationRoot {
