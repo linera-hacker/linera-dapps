@@ -11,6 +11,13 @@ use linera_sdk::{
 };
 use serde::{Deserialize, Serialize};
 
+pub struct RouterApplicationAbi;
+
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct PoolParameters {
+    pub router_application_id: ApplicationId<RouterApplicationAbi>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum PoolMessage {
     BaseMessage(BaseMessage),
@@ -213,8 +220,6 @@ pub enum RouterResponse {
     Ok,
     Liquidity((Amount, Amount, Amount)),
 }
-
-pub struct RouterApplicationAbi;
 
 impl ContractAbi for RouterApplicationAbi {
     type Operation = RouterOperation;

@@ -14,8 +14,8 @@ use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20ApplicationAbi, ERC20Operation},
-    swap::{PoolMessage, PoolOperation, PoolResponse},
+    erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
+    swap::{PoolMessage, PoolOperation, PoolParameters, PoolResponse, RouterApplicationAbi},
 };
 use swap_pool::PoolError;
 
@@ -32,7 +32,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = PoolMessage;
-    type Parameters = ();
+    type Parameters = PoolParameters;
     type InstantiationArgument = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
@@ -75,7 +75,7 @@ impl Contract for ApplicationContract {
                 .on_op_set_fee_to_setter(pool_id, account)
                 .expect("Failed OP: set fee to setter"),
             PoolOperation::Mint { pool_id, to } => {
-                self.on_op_mint(pool_id, to).expect("Failed OP: mint")
+                self.on_op_mint(pool_id, to).await.expect("Failed OP: mint")
             }
             PoolOperation::Burn { pool_id, to } => {
                 self.on_op_burn(pool_id, to).expect("Failed OP: burn")
@@ -148,6 +148,10 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
+    fn router_application_id(&mut self) -> ApplicationId<RouterApplicationAbi> {
+        self.runtime.application_parameters().router_application_id
+    }
+
     fn execute_base_operation(
         &mut self,
         operation: BaseOperation,
@@ -213,15 +217,50 @@ impl ApplicationContract {
         Ok(PoolResponse::Ok)
     }
 
-    fn on_op_mint(
+    fn balance_of_erc20(&mut self, token: ApplicationId) -> Amount {
+        let owner = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+        };
+
+        let call = ERC20Operation::BalanceOf { owner };
+        let ERC20Response::Balance(balance) =
+            self.runtime
+                .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call)
+        else {
+            todo!()
+        };
+        balance
+    }
+
+    async fn on_op_mint(
         &mut self,
         pool_id: u64,
         to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
+        // Only router application on its creator chain can call
+        let caller = self
+            .runtime
+            .authenticated_caller_id()
+            .expect("Invalid caller");
+        if self.router_application_id().forget_abi() != caller {
+            return Err(PoolError::PermissionDenied);
+        }
         // To here, router should already transfer tokens
-        // TODO: only router application on its creator chain can call
-        // TODO: get current balance
-        // TODO: calculate increased shares
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: here we should get balance of this application instance
+            _ => return Err(PoolError::NotSupported),
+            /*
+                self
+                .runtime
+                .chain_balance(self.runtime.application_creator_chain_id()),
+            */
+        };
         self.runtime
             .prepare_message(PoolMessage::Mint { pool_id, to })
             .with_authentication()

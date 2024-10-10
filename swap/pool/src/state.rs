@@ -113,7 +113,7 @@ impl Application {
         self.insert_pool(pool).await
     }
 
-    async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
+    pub(crate) async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
         match self.pool_erc20_erc20s.get(&pool_id).await? {
             Some(tokens) => Ok(self
                 .erc20_erc20_pools

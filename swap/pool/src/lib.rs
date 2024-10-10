@@ -35,4 +35,7 @@ pub enum PoolError {
 
     #[error("Permission denied")]
     PermissionDenied,
+
+    #[error("Not supported")]
+    NotSupported,
 }
