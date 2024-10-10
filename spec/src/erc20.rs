@@ -52,6 +52,9 @@ pub enum ERC20Operation {
         spender: ChainAccountOwner,
         value: Amount,
     },
+    BalanceOf {
+        owner: ChainAccountOwner,
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -78,23 +81,28 @@ pub trait ERC20QueryRoot {
         &self,
         ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+
     fn name(
         &self,
         ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+
     fn symbol(
         &self,
         ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<String, Error>> + Send;
+
     fn decimals(
         &self,
         ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<u8, Error>> + Send;
+
     fn balance_of(
         &self,
         ctx: &Context<'_>,
         owner: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+
     fn allowance(
         &self,
         ctx: &Context<'_>,
@@ -110,6 +118,7 @@ pub trait ERC20MutationRoot {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
     fn transfer_from(
         &self,
         ctx: &Context<'_>,
@@ -117,6 +126,7 @@ pub trait ERC20MutationRoot {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
     fn approve(
         &self,
         ctx: &Context<'_>,
@@ -135,7 +145,6 @@ scalar!(ERC20);
 
 impl ERC20 {
     pub fn _mint(&mut self, to: ChainAccountOwner, amount: Amount) {
-        // TODO: process overflow
         self.total_supply.saturating_add_assign(amount);
         self.balances.insert(
             to.clone(),
