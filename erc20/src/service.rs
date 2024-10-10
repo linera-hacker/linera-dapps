@@ -78,10 +78,7 @@ impl ERC20QueryRoot for QueryRoot {
             Err(_) => Amount::ZERO,
         }
     }
-    async fn allowance(&self, 
-        owner: ChainAccountOwner,
-        spender: ChainAccountOwner,
-    ) -> Amount {
+    async fn allowance(&self, owner: ChainAccountOwner, spender: ChainAccountOwner) -> Amount {
         let allowance_key = AllowanceKey::new(owner, spender);
         match self.state.allowances.get(&allowance_key).await {
             Ok(Some(balance)) => balance,
@@ -96,11 +93,7 @@ struct MutationRoot {}
 #[Object]
 impl ERC20MutationRoot for MutationRoot {
     async fn transfer(&self, to: ChainAccountOwner, amount: Amount) -> Vec<u8> {
-        bcs::to_bytes(&ERC20Operation::Transfer {
-            to,
-            amount,
-        })
-        .unwrap()
+        bcs::to_bytes(&ERC20Operation::Transfer { to, amount }).unwrap()
     }
     async fn transfer_from(
         &self,

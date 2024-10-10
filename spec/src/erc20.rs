@@ -1,9 +1,9 @@
 use crate::account::ChainAccountOwner;
 use crate::base::{BaseMessage, BaseOperation};
-use async_graphql::{scalar, Context, Error};
+use async_graphql::{scalar, Context, Error, Request, Response};
 use linera_sdk::{
-    base::Amount,
-    graphql::GraphQLMutationRoot,
+    base::Amount, graphql::GraphQLMutationRoot,
+    abi::{ContractAbi, ServiceAbi},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -49,6 +49,18 @@ pub enum ERC20Response {
     #[default]
     Ok,
     Balance(Amount),
+}
+
+pub struct ERC20ApplicationAbi;
+
+impl ContractAbi for ERC20ApplicationAbi {
+    type Operation = ERC20Operation;
+    type Response = ERC20Response;
+}
+
+impl ServiceAbi for ERC20ApplicationAbi {
+    type Query = Request;
+    type QueryResponse = Response;
 }
 
 pub trait ERC20QueryRoot {

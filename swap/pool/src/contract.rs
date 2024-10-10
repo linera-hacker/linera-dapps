@@ -12,6 +12,7 @@ use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
+    erc20::ERC20Operation,
     swap::{PoolMessage, PoolOperation, PoolResponse},
 };
 use swap_pool::PoolError;
@@ -39,7 +40,9 @@ impl Contract for ApplicationContract {
         ApplicationContract { state, runtime }
     }
 
-    async fn instantiate(&mut self, _argument: Self::InstantiationArgument) {}
+    async fn instantiate(&mut self, _argument: Self::InstantiationArgument) {
+        self.runtime.application_parameters();
+    }
 
     async fn execute_operation(&mut self, operation: PoolOperation) -> PoolResponse {
         match operation {
@@ -287,6 +290,30 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
+    fn transfer_erc20(&mut self, token: ApplicationId, amount: Amount) {
+        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
+            return;
+        }
+
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+
+        let from = ChainAccountOwner {
+            chain_id: message_id.chain_id,
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        };
+        let to = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+        };
+
+        let call = ERC20Operation::TransferFrom { from, amount, to };
+        self.runtime.call_application(true, token.with_abi(), &call);
+    }
+
     fn message_owner(&mut self) -> ChainAccountOwner {
         let message_id = self.runtime.message_id().expect("Invalid message id");
         ChainAccountOwner {
@@ -308,7 +335,12 @@ impl ApplicationContract {
     ) -> Result<(), PoolError> {
         let creator = self.message_owner();
 
-        // TODO: transfer both token from creators' account
+        if amount_0_initial > Amount::ZERO {
+            self.transfer_erc20(token_0, amount_0_initial);
+        }
+        if amount_1_initial > Amount::ZERO {
+            self.transfer_erc20(token_1, amount_1_initial);
+        }
 
         self.state
             .create_pool(

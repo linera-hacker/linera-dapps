@@ -9,12 +9,12 @@ use linera_sdk::{
 };
 
 use self::state::Application;
-use spec::{
-    account::ChainAccountOwner, 
-    base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Message, ERC20Operation, ERC20Response}
-};
 use erc20::ERC20Error;
+use spec::{
+    account::ChainAccountOwner,
+    base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
+    erc20::{ERC20Message, ERC20Operation, ERC20Response},
+};
 
 pub struct ApplicationContract {
     state: Application,
@@ -44,36 +44,16 @@ impl Contract for ApplicationContract {
     async fn execute_operation(&mut self, operation: ERC20Operation) -> ERC20Response {
         match operation {
             ERC20Operation::BaseOperation(base_operation) => self
-            .execute_base_operation(base_operation)
-            .expect("Failed OP: base operation"),
-            ERC20Operation::Transfer { 
-                to, 
-                amount, 
-            } => self
-                .on_op_transfer(
-                    to,
-                    amount, 
-                )
+                .execute_base_operation(base_operation)
+                .expect("Failed OP: base operation"),
+            ERC20Operation::Transfer { to, amount } => self
+                .on_op_transfer(to, amount)
                 .expect("Failed OP: transfer"),
-            ERC20Operation::TransferFrom { 
-                from, 
-                amount, 
-                to, 
-            } => self
-                .on_op_transfer_from(
-                    from,
-                    amount,
-                    to,
-                )
+            ERC20Operation::TransferFrom { from, amount, to } => self
+                .on_op_transfer_from(from, amount, to)
                 .expect("Failed OP: transfer from"),
-            ERC20Operation::Approve { 
-                spender, 
-                value, 
-            } => self
-                .on_op_approve(
-                    spender,
-                    value
-                )
+            ERC20Operation::Approve { spender, value } => self
+                .on_op_approve(spender, value)
                 .expect("Failed OP: approve"),
         }
     }
@@ -84,7 +64,7 @@ impl Contract for ApplicationContract {
                 .execute_base_message(base_message)
                 .expect("Failed MSG: base message"),
             ERC20Message::Transfer { to, amount } => self
-                .on_msg_transfer(to, amount )
+                .on_msg_transfer(to, amount)
                 .await
                 .expect("Failed MSG: transfer"),
             ERC20Message::TransferFrom { from, amount, to } => self
@@ -115,7 +95,9 @@ impl ApplicationContract {
 
     fn on_op_subscribe_creator_chain(&mut self) -> Result<ERC20Response, ERC20Error> {
         self.runtime
-            .prepare_message(ERC20Message::BaseMessage(BaseMessage::SubscribeCreatorChain))
+            .prepare_message(ERC20Message::BaseMessage(
+                BaseMessage::SubscribeCreatorChain,
+            ))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
@@ -127,12 +109,12 @@ impl ApplicationContract {
         amount: Amount,
     ) -> Result<ERC20Response, ERC20Error> {
         self.runtime
-        .prepare_message(ERC20Message::Transfer { to, amount })
-        .with_authentication()
-        .send_to(self.runtime.application_creator_chain_id());
+            .prepare_message(ERC20Message::Transfer { to, amount })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
     }
-    
+
     fn on_op_transfer_from(
         &mut self,
         from: ChainAccountOwner,
@@ -140,9 +122,9 @@ impl ApplicationContract {
         to: ChainAccountOwner,
     ) -> Result<ERC20Response, ERC20Error> {
         self.runtime
-        .prepare_message(ERC20Message::TransferFrom { from, amount, to })
-        .with_authentication()
-        .send_to(self.runtime.application_creator_chain_id());
+            .prepare_message(ERC20Message::TransferFrom { from, amount, to })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
     }
 
@@ -152,9 +134,9 @@ impl ApplicationContract {
         value: Amount,
     ) -> Result<ERC20Response, ERC20Error> {
         self.runtime
-        .prepare_message(ERC20Message::Approve { spender, value })
-        .with_authentication()
-        .send_to(self.runtime.application_creator_chain_id());
+            .prepare_message(ERC20Message::Approve { spender, value })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
     }
 
@@ -194,17 +176,10 @@ impl ApplicationContract {
         amount: Amount,
     ) -> Result<(), ERC20Error> {
         let sender = self.message_owner();
-        
-        self.state.transfer(
-            sender, 
-            amount, 
-            to.clone(),
-        ).await?;
 
-        self.publish_message(ERC20Message::Transfer {
-            to,
-            amount, 
-        });
+        self.state.transfer(sender, amount, to.clone()).await?;
+
+        self.publish_message(ERC20Message::Transfer { to, amount });
         Ok(())
     }
 
@@ -215,19 +190,12 @@ impl ApplicationContract {
         to: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let caller = self.message_owner();
-        
-        self.state.transfer_from(
-            from.clone(), 
-            amount, 
-            to.clone(), 
-            caller,
-        ).await?;
 
-        self.publish_message(ERC20Message::TransferFrom { 
-            from, 
-            amount, 
-            to,
-        });
+        self.state
+            .transfer_from(from.clone(), amount, to.clone(), caller)
+            .await?;
+
+        self.publish_message(ERC20Message::TransferFrom { from, amount, to });
         Ok(())
     }
 
@@ -237,17 +205,10 @@ impl ApplicationContract {
         value: Amount,
     ) -> Result<(), ERC20Error> {
         let owner = self.message_owner();
-        
-        self.state.approve(
-            spender.clone(), 
-            value, 
-            owner
-        ).await?;
 
-        self.publish_message(ERC20Message::Approve { 
-            spender, 
-            value,
-        });
+        self.state.approve(spender.clone(), value, owner).await?;
+
+        self.publish_message(ERC20Message::Approve { spender, value });
         Ok(())
     }
 

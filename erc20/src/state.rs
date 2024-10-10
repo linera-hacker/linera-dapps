@@ -43,7 +43,7 @@ impl Application {
         };
 
         if sender_balance < amount {
-            return Err(ERC20Error::InvalidInitialAmount)
+            return Err(ERC20Error::InvalidInitialAmount);
         }
 
         let new_sender_balance = sender_balance - amount;
@@ -73,7 +73,7 @@ impl Application {
         };
 
         if allowance < amount {
-            return Err(ERC20Error::InvalidInitialAmount)
+            return Err(ERC20Error::InvalidInitialAmount);
         }
 
         let from_balance = match self.balances.get(&from).await {
@@ -83,7 +83,7 @@ impl Application {
         };
 
         if from_balance < amount {
-            return Err(ERC20Error::InvalidInitialAmount)
+            return Err(ERC20Error::InvalidInitialAmount);
         }
 
         let new_from_balance = from_balance - amount;
@@ -97,7 +97,7 @@ impl Application {
         let _ = self.balances.insert(&from, new_from_balance);
         let _ = self.balances.insert(&to, to_balance);
         let _ = self.allowances.insert(&allowance_key, new_allowance);
-        
+
         Ok(())
     }
 
@@ -109,7 +109,7 @@ impl Application {
     ) -> Result<(), ERC20Error> {
         let allowance_key = AllowanceKey::new(owner, spender.clone());
         let _ = self.allowances.insert(&allowance_key, value);
-        
+
         Ok(())
     }
 }
