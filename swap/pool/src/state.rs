@@ -162,9 +162,12 @@ impl Application {
     pub(crate) async fn mint(
         &mut self,
         pool_id: u64,
+        liquidity: Amount,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+        pool.erc20._mint(to, liquidity);
+        // TODO: test if we need to insert again
         Ok(())
     }
 

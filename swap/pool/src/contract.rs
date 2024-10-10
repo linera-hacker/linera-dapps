@@ -13,9 +13,9 @@ use linera_sdk::{
 use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
-    base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
+    base::{self, BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
-    swap::{PoolMessage, PoolOperation, PoolParameters, PoolResponse, RouterApplicationAbi},
+    swap::{Pool, PoolMessage, PoolOperation, PoolParameters, PoolResponse, RouterApplicationAbi},
 };
 use swap_pool::PoolError;
 
@@ -74,8 +74,8 @@ impl Contract for ApplicationContract {
             PoolOperation::SetFeeToSetter { pool_id, account } => self
                 .on_op_set_fee_to_setter(pool_id, account)
                 .expect("Failed OP: set fee to setter"),
-            PoolOperation::Mint { pool_id, to } => {
-                self.on_op_mint(pool_id, to).await.expect("Failed OP: mint")
+            PoolOperation::Mint { pool_id, amount_0, amount_1, to } => {
+                self.on_op_mint(pool_id, amount_0, amount_1, to).await.expect("Failed OP: mint")
             }
             PoolOperation::Burn { pool_id, to } => {
                 self.on_op_burn(pool_id, to).expect("Failed OP: burn")
@@ -122,8 +122,13 @@ impl Contract for ApplicationContract {
                 .on_msg_set_fee_to_setter(pool_id, account)
                 .await
                 .expect("Failed MSG: set fee to setter"),
-            PoolMessage::Mint { pool_id, to } => self
-                .on_msg_mint(pool_id, to)
+            PoolMessage::Mint {
+                pool_id,
+                amount_0,
+                amount_1,
+                to,
+            } => self
+                .on_msg_mint(pool_id, amount_0, amount_1, to)
                 .await
                 .expect("Failed MSG: mint"),
             PoolMessage::Burn { pool_id, to } => self
@@ -235,9 +240,28 @@ impl ApplicationContract {
         balance
     }
 
+    fn calculate_liquidity(&self, pool: Pool, amount_0: Amount, amount_1: Amount) -> Amount {
+        let total_supply = pool.erc20.total_supply;
+
+        if pool.erc20.total_supply == Amount::ZERO {
+            base::sqrt(amount_0.saturating_mul(amount_1.into()))
+        } else {
+            amount_0
+                .saturating_mul(total_supply.into())
+                .saturating_div(pool.reserve_0.into())
+                .min(
+                    amount_1
+                        .saturating_mul(total_supply.into())
+                        .saturating_div(pool.reserve_1.into()),
+                ).into()
+        }
+    }
+
     async fn on_op_mint(
         &mut self,
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
         // Only router application on its creator chain can call
@@ -248,21 +272,22 @@ impl ApplicationContract {
         if self.router_application_id().forget_abi() != caller {
             return Err(PoolError::PermissionDenied);
         }
+
         // To here, router should already transfer tokens
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
-        let balance_0 = self.balance_of_erc20(pool.token_0);
-        let balance_1 = match pool.token_1 {
-            Some(token_1) => self.balance_of_erc20(token_1),
-            // TODO: here we should get balance of this application instance
-            _ => return Err(PoolError::NotSupported),
-            /*
-                self
-                .runtime
-                .chain_balance(self.runtime.application_creator_chain_id()),
-            */
-        };
+        if pool.token_1.is_none() {
+            return Err(PoolError::NotSupported);
+        }
+        // Liquidity calculated here may be not accurate, it may changed when process message
+        let liquidity = self.calculate_liquidity(pool, amount_0, amount_1);
+
         self.runtime
-            .prepare_message(PoolMessage::Mint { pool_id, to })
+            .prepare_message(PoolMessage::Mint {
+                pool_id,
+                amount_0,
+                amount_1,
+                to,
+            })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
@@ -457,9 +482,43 @@ impl ApplicationContract {
         Ok(())
     }
 
-    async fn on_msg_mint(&mut self, pool_id: u64, to: ChainAccountOwner) -> Result<(), PoolError> {
-        self.state.mint(pool_id, to.clone()).await?;
-        self.publish_message(PoolMessage::Mint { pool_id, to });
+    async fn on_msg_mint(
+        &mut self,
+        pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
+        to: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: here we should get balance of this application instance
+            _ => return Err(PoolError::NotSupported),
+            /*
+                self
+                .runtime
+                .chain_balance(self.runtime.application_creator_chain_id()),
+            */
+        };
+
+        if balance_0.saturating_sub(pool.reserve_0) < amount_0 {
+            return Err(PoolError::InsufficientFunds);
+        }
+        if balance_1.saturating_sub(pool.reserve_1) < amount_1 {
+            return Err(PoolError::InsufficientFunds);
+        }
+
+        let liquidity = self.calculate_liquidity(pool, amount_0, amount_1);
+        self.state.mint(pool_id, liquidity, to.clone()).await?;
+
+        self.publish_message(PoolMessage::Mint {
+            pool_id,
+            amount_0,
+            amount_1,
+            to,
+        });
         Ok(())
     }
 

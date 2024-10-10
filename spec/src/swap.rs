@@ -40,6 +40,8 @@ pub enum PoolMessage {
     },
     Mint {
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     },
     Burn {
@@ -81,6 +83,8 @@ pub enum PoolOperation {
     },
     Mint {
         pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
         to: ChainAccountOwner,
     },
     Burn {
@@ -117,6 +121,7 @@ pub struct Pool {
 pub enum PoolResponse {
     #[default]
     Ok,
+    Liquidity(Amount),
 }
 
 pub trait PoolQueryRoot {

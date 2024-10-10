@@ -38,4 +38,7 @@ pub enum PoolError {
 
     #[error("Not supported")]
     NotSupported,
+
+    #[error("Insufficient funds")]
+    InsufficientFunds,
 }

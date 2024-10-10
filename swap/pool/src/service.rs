@@ -98,7 +98,7 @@ impl PoolMutationRoot for MutationRoot {
 
     // Return minted liquidity
     async fn mint(&self, pool_id: u64, to: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Mint { pool_id, to }).unwrap()
+        panic!("Not supported");
     }
 
     // Return pair token amount
