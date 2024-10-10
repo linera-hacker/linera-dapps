@@ -1,3 +1,5 @@
+use std::ops::Mul;
+
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
@@ -29,6 +31,8 @@ pub struct Application {
     pub name: RegisterView<String>,
     pub symbol: RegisterView<String>,
     pub decimals: RegisterView<u8>,
+    pub initial_currency: RegisterView<Amount>,
+    pub initial_currency_fixed: RegisterView<bool>,
 }
 
 #[allow(dead_code)]
@@ -41,6 +45,8 @@ impl Application {
         self.name.set(argument.name);
         self.symbol.set(argument.symbol);
         self.decimals.set(argument.decimals);
+        self.initial_currency_fixed.set(argument.initial_currency_fixed.unwrap_or(false));
+        self.initial_currency.set(argument.initial_currency.unwrap_or(Amount::ONE));
     }
 
     pub(crate) async fn transfer(
@@ -124,5 +130,36 @@ impl Application {
         let _ = self.allowances.insert(&allowance_key, value);
 
         Ok(())
+    }
+
+    async fn checked_mul(a: Amount, b: Amount) -> Amount {
+        let a_value: u128 = a.into();
+        let b_value: u128 = b.into();
+        let result = a_value * b_value;
+
+        Amount::from(result)
+    }
+
+    pub(crate) async fn deposit_native_and_exchange(
+        &mut self,
+        caller: ChainAccountOwner,
+        exchange_amount: Amount,
+    ) -> bool {
+        // transfer
+        let exchange_currency = self.initial_currency.get();
+        if !self.initial_currency_fixed.get() {
+            // TODO GET RATE BY DEX
+        }
+        let erc20_amount = Self::checked_mul(*exchange_currency, exchange_amount).await;
+
+        let user_balance = match self.balances.get(&caller).await {
+            Ok(Some(balance)) => balance,
+            Ok(None) => Amount::ZERO,
+            Err(_) => Amount::ZERO,
+        };
+
+        let _ = self.balances.insert(&caller, user_balance + erc20_amount);
+
+        true
     }
 }

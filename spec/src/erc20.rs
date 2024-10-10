@@ -16,6 +16,8 @@ pub struct InstantiationArgument {
     pub name: String,
     pub symbol: String,
     pub decimals: u8,
+    pub initial_currency: Option<Amount>,
+    pub initial_currency_fixed: Option<bool>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
