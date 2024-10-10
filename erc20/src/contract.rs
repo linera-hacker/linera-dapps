@@ -8,7 +8,7 @@ use linera_sdk::{
     Contract, ContractRuntime,
 };
 
-use self::state::{Application, AllowanceKey};
+use self::state::Application;
 use spec::{
     account::ChainAccountOwner, 
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
@@ -47,14 +47,12 @@ impl Contract for ApplicationContract {
             .execute_base_operation(base_operation)
             .expect("Failed OP: base operation"),
             ERC20Operation::Transfer { 
-                from, 
-                amount, 
                 to, 
+                amount, 
             } => self
                 .on_op_transfer(
-                    from, 
-                    amount, 
                     to,
+                    amount, 
                 )
                 .expect("Failed OP: transfer"),
             ERC20Operation::TransferFrom { 
@@ -85,8 +83,8 @@ impl Contract for ApplicationContract {
             ERC20Message::BaseMessage(base_message) => self
                 .execute_base_message(base_message)
                 .expect("Failed MSG: base message"),
-            ERC20Message::Transfer {from, amount, to} => self
-                .on_msg_transfer(from, amount, to)
+            ERC20Message::Transfer { to, amount } => self
+                .on_msg_transfer(to, amount )
                 .await
                 .expect("Failed MSG: transfer"),
             ERC20Message::TransferFrom { from, amount, to } => self
@@ -125,12 +123,11 @@ impl ApplicationContract {
 
     fn on_op_transfer(
         &mut self,
-        from: Option<AccountOwner>,
-        amount: Amount,
         to: ChainAccountOwner,
+        amount: Amount,
     ) -> Result<ERC20Response, ERC20Error> {
         self.runtime
-        .prepare_message(ERC20Message::Transfer { from, amount, to })
+        .prepare_message(ERC20Message::Transfer { to, amount })
         .with_authentication()
         .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
@@ -193,9 +190,8 @@ impl ApplicationContract {
 
     async fn on_msg_transfer(
         &mut self,
-        from: Option<AccountOwner>,
-        amount: Amount,
         to: ChainAccountOwner,
+        amount: Amount,
     ) -> Result<(), ERC20Error> {
         let sender = self.message_owner();
         
@@ -205,10 +201,9 @@ impl ApplicationContract {
             to.clone(),
         ).await?;
 
-        self.publish_message(ERC20Message::Transfer { 
-            from, 
-            amount, 
+        self.publish_message(ERC20Message::Transfer {
             to,
+            amount, 
         });
         Ok(())
     }

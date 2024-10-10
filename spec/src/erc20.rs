@@ -2,7 +2,7 @@ use crate::account::ChainAccountOwner;
 use crate::base::{BaseMessage, BaseOperation};
 use async_graphql::{scalar, Context, Error};
 use linera_sdk::{
-    base::{AccountOwner, Amount},
+    base::Amount,
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
@@ -12,9 +12,8 @@ use std::collections::HashMap;
 pub enum ERC20Message {
     BaseMessage(BaseMessage),
     Transfer {
-        from: Option<AccountOwner>,
-        amount: Amount,
         to: ChainAccountOwner,
+        amount: Amount,
     },
     TransferFrom {
         from: ChainAccountOwner,
@@ -31,9 +30,8 @@ pub enum ERC20Message {
 pub enum ERC20Operation {
     BaseOperation(BaseOperation),
     Transfer {
-        from: Option<AccountOwner>,
-        amount: Amount,
         to: ChainAccountOwner,
+        amount: Amount,
     },
     TransferFrom {
         from: ChainAccountOwner,

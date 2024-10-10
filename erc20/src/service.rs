@@ -97,7 +97,6 @@ struct MutationRoot {}
 impl ERC20MutationRoot for MutationRoot {
     async fn transfer(&self, to: ChainAccountOwner, amount: Amount) -> Vec<u8> {
         bcs::to_bytes(&ERC20Operation::Transfer {
-            from: None,
             to,
             amount,
         })
