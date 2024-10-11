@@ -83,7 +83,9 @@ impl Application {
 
         let _ = self.balances.insert(&sender, new_sender_balance);
         let _ = self.balances.insert(&to, new_receiver_balance);
-        let _ = self.balances.insert(&created_owner, fee);
+        if fee > Amount::ZERO {
+            let _ = self.balances.insert(&created_owner, fee);
+        }
         Ok(())
     }
 
@@ -132,7 +134,9 @@ impl Application {
         let _ = self.balances.insert(&from, new_from_balance);
         let _ = self.balances.insert(&to, new_to_balance);
         let _ = self.allowances.insert(&allowance_key, new_allowance);
-        let _ = self.balances.insert(&created_owner, fee);
+        if fee > Amount::ZERO {
+            let _ = self.balances.insert(&created_owner, fee);
+        }
 
         Ok(())
     }
