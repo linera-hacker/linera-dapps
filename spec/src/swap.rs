@@ -147,15 +147,16 @@ impl Pool {
         if total_supply == Amount::ZERO {
             base::sqrt(amount_0.saturating_mul(amount_1.into()))
         } else {
-            amount_0
-                .saturating_mul(total_supply.into())
-                .saturating_div(self.reserve_0.into())
-                .min(
-                    amount_1
-                        .saturating_mul(total_supply.into())
-                        .saturating_div(self.reserve_1.into()),
-                )
-                .into()
+            Amount::from_attos(
+                amount_0
+                    .saturating_mul(total_supply.into())
+                    .saturating_div(self.reserve_0.into())
+                    .min(
+                        amount_1
+                            .saturating_mul(total_supply.into())
+                            .saturating_div(self.reserve_1.into()),
+                    ),
+            )
         }
     }
 
@@ -165,14 +166,16 @@ impl Pool {
         balance_0: Amount,
         balance_1: Amount,
     ) -> (Amount, Amount) {
-        let amount_0: Amount = liquidity
-            .saturating_mul(balance_0.into())
-            .saturating_div(self.erc20.total_supply)
-            .into();
-        let amount_1: Amount = liquidity
-            .saturating_mul(balance_1.into())
-            .saturating_div(self.erc20.total_supply)
-            .into();
+        let amount_0: Amount = Amount::from_attos(
+            liquidity
+                .saturating_mul(balance_0.into())
+                .saturating_div(self.erc20.total_supply),
+        );
+        let amount_1: Amount = Amount::from_attos(
+            liquidity
+                .saturating_mul(balance_1.into())
+                .saturating_div(self.erc20.total_supply),
+        );
         if amount_0 == Amount::ZERO || amount_1 == Amount::ZERO {
             panic!("Invalid liquidity");
         }

@@ -222,7 +222,9 @@ impl ApplicationContract {
             owner: None,
         };
 
-        self.state.transfer(sender, amount, to.clone(), created_owner).await?;
+        self.state
+            .transfer(sender, amount, to.clone(), created_owner)
+            .await?;
 
         self.publish_message(ERC20Message::Transfer { to, amount });
         Ok(())

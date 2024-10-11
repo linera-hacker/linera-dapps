@@ -48,7 +48,8 @@ impl Application {
             .set(argument.initial_currency_fixed.unwrap_or(false));
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
-        self.basis_point_rate.set(argument.basis_point_rate.unwrap_or(Amount::ZERO));
+        self.basis_point_rate
+            .set(argument.basis_point_rate.unwrap_or(Amount::ZERO));
     }
 
     pub(crate) async fn transfer(
