@@ -1,19 +1,8 @@
-use async_graphql::{Request, Response};
-use linera_sdk::base::{ContractAbi, ParseAmountError, ServiceAbi};
-use spec::swap::{PoolOperation, PoolResponse};
+use linera_sdk::base::ParseAmountError;
+use spec::swap::PoolApplicationAbi;
 use thiserror::Error;
 
-pub struct ApplicationAbi;
-
-impl ContractAbi for ApplicationAbi {
-    type Operation = PoolOperation;
-    type Response = PoolResponse;
-}
-
-impl ServiceAbi for ApplicationAbi {
-    type Query = Request;
-    type QueryResponse = Response;
-}
+pub type ApplicationAbi = PoolApplicationAbi;
 
 #[derive(Debug, Error)]
 #[allow(dead_code)]

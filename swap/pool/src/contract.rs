@@ -95,6 +95,10 @@ impl Contract for ApplicationContract {
             } => self
                 .on_op_swap(pool_id, amount_0_out, amount_1_out, to)
                 .expect("Failed OP: swap"),
+            PoolOperation::GetPool { token_0, token_1 } => self
+                .on_op_get_pool(token_0, token_1)
+                .await
+                .expect("Failed OP: get pool"),
         }
     }
 
@@ -247,24 +251,6 @@ impl ApplicationContract {
         balance
     }
 
-    fn calculate_liquidity(&self, pool: Pool, amount_0: Amount, amount_1: Amount) -> Amount {
-        let total_supply = pool.erc20.total_supply;
-
-        if pool.erc20.total_supply == Amount::ZERO {
-            base::sqrt(amount_0.saturating_mul(amount_1.into()))
-        } else {
-            amount_0
-                .saturating_mul(total_supply.into())
-                .saturating_div(pool.reserve_0.into())
-                .min(
-                    amount_1
-                        .saturating_mul(total_supply.into())
-                        .saturating_div(pool.reserve_1.into()),
-                )
-                .into()
-        }
-    }
-
     async fn on_op_mint(
         &mut self,
         pool_id: u64,
@@ -287,7 +273,7 @@ impl ApplicationContract {
             return Err(PoolError::NotSupported);
         }
         // Liquidity calculated here may be not accurate, it may changed when process message
-        let liquidity = self.calculate_liquidity(pool, amount_0, amount_1);
+        let liquidity = pool.calculate_liquidity(amount_0, amount_1);
 
         self.runtime
             .prepare_message(PoolMessage::Mint {
@@ -377,6 +363,18 @@ impl ApplicationContract {
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
+    }
+
+    async fn on_op_get_pool(
+        &self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    ) -> Result<PoolResponse, PoolError> {
+        let pool = self
+            .state
+            .get_pool_with_token_pair(token_0, token_1)
+            .await?;
+        Ok(PoolResponse::Pool(pool))
     }
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
@@ -584,7 +582,7 @@ impl ApplicationContract {
         }
 
         self.state.mint_fee(pool_id).await?;
-        let liquidity = self.calculate_liquidity(pool, amount_0, amount_1);
+        let liquidity = pool.calculate_liquidity(amount_0, amount_1);
         self.state.mint(pool_id, liquidity, to.clone()).await?;
         self.state
             .update(pool_id, balance_0, balance_1, self.runtime.system_time())

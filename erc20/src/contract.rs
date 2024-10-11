@@ -164,7 +164,11 @@ impl ApplicationContract {
         owner: ChainAccountOwner,
     ) -> Result<ERC20Response, ERC20Error> {
         Ok(ERC20Response::Balance(
-            self.state.balances.get(&owner).await?.unwrap_or(Amount::ZERO)
+            self.state
+                .balances
+                .get(&owner)
+                .await?
+                .unwrap_or(Amount::ZERO),
         ))
     }
 

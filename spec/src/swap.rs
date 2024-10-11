@@ -1,6 +1,6 @@
 use crate::{
     account::ChainAccountOwner,
-    base::{BaseMessage, BaseOperation},
+    base::{self, BaseMessage, BaseOperation},
     erc20::ERC20,
 };
 use async_graphql::{Context, Error, Request, Response, SimpleObject};
@@ -12,6 +12,17 @@ use linera_sdk::{
 use serde::{Deserialize, Serialize};
 
 pub struct RouterApplicationAbi;
+pub struct PoolApplicationAbi;
+
+impl ContractAbi for PoolApplicationAbi {
+    type Operation = PoolOperation;
+    type Response = PoolResponse;
+}
+
+impl ServiceAbi for PoolApplicationAbi {
+    type Query = Request;
+    type QueryResponse = Response;
+}
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PoolParameters {
@@ -97,6 +108,12 @@ pub enum PoolOperation {
         amount_1_out: Amount,
         to: ChainAccountOwner,
     },
+
+    // Helper operation
+    GetPool {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    },
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
@@ -121,12 +138,33 @@ pub struct Pool {
     pub block_timestamp: Timestamp,
 }
 
+impl Pool {
+    pub fn calculate_liquidity(&self, amount_0: Amount, amount_1: Amount) -> Amount {
+        let total_supply = self.erc20.total_supply;
+
+        if total_supply == Amount::ZERO {
+            base::sqrt(amount_0.saturating_mul(amount_1.into()))
+        } else {
+            amount_0
+                .saturating_mul(total_supply.into())
+                .saturating_div(self.reserve_0.into())
+                .min(
+                    amount_1
+                        .saturating_mul(total_supply.into())
+                        .saturating_div(self.reserve_1.into()),
+                )
+                .into()
+        }
+    }
+}
+
 #[derive(Debug, Deserialize, Serialize, Default)]
 pub enum PoolResponse {
     #[default]
     Ok,
     Liquidity(Amount),
     Amounts((Amount, Amount)),
+    Pool(Option<Pool>),
 }
 
 pub trait PoolQueryRoot {
@@ -198,6 +236,11 @@ pub trait PoolMutationRoot {
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct RouterParameters {
+    pub pool_application_id: ApplicationId<PoolApplicationAbi>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum RouterMessage {
     BaseMessage(BaseMessage),
@@ -208,6 +251,7 @@ pub enum RouterMessage {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
+        created_pool: bool,
         to: ChainAccountOwner,
         deadline: Timestamp,
     },
@@ -256,6 +300,7 @@ pub enum RouterResponse {
     #[default]
     Ok,
     Liquidity((Amount, Amount, Amount)),
+    Amount(Amount),
 }
 
 impl ContractAbi for RouterApplicationAbi {

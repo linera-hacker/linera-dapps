@@ -134,6 +134,26 @@ impl Application {
         }
     }
 
+    pub(crate) async fn get_pool_with_token_pair(
+        &self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    ) -> Result<Option<Pool>, PoolError> {
+        match token_1 {
+            Some(_token_1) => match self
+                .erc20_erc20_pools
+                .get(&token_0)
+                .await?
+                .unwrap_or(HashMap::new())
+                .get(&_token_1)
+            {
+                Some(pool) => Ok(Some(pool.clone())),
+                _ => Ok(None),
+            },
+            _ => Ok(self.erc20_native_pools.get(&token_0).await?),
+        }
+    }
+
     pub(crate) async fn set_fee_to(
         &mut self,
         pool_id: u64,
