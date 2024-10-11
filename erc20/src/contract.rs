@@ -3,7 +3,7 @@
 mod state;
 
 use linera_sdk::{
-    base::{AccountOwner, Amount, ChannelName, Destination, WithContractAbi},
+    base::{Account, AccountOwner, Amount, ChannelName, Destination, WithContractAbi},
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -13,7 +13,7 @@ use erc20::ERC20Error;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument},
+    erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument}, swap::PoolOperation,
 };
 
 pub struct ApplicationContract {
@@ -256,6 +256,14 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<(), ERC20Error> {
+        let created_owner = Account {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: None,
+        };
+
+        let to_owner = self.runtime.authenticated_signer();
+        self.runtime.transfer(to_owner, created_owner, amount);
+
         self.state.deposit_native_and_exchange(to.clone(), amount).await;
 
         self.publish_message(ERC20Message::Mint { to, amount });

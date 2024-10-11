@@ -145,10 +145,9 @@ impl Application {
         caller: ChainAccountOwner,
         exchange_amount: Amount,
     ) {
-        // transfer
         let exchange_currency = self.initial_currency.get();
         if !self.initial_currency_fixed.get() {
-            // TODO GET RATE BY DEX
+            // TODO GET RATE FROM DEX
         }
         let erc20_amount = Self::checked_mul(*exchange_currency, exchange_amount).await;
 
