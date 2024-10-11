@@ -13,7 +13,8 @@ use erc20::ERC20Error;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument}, swap::PoolOperation,
+    erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument},
+    swap::{RouterOperation, RouterResponse, RouterApplicationAbi},
 };
 
 pub struct ApplicationContract {
@@ -256,6 +257,15 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<(), ERC20Error> {
+        let token_0  = self.runtime.application_id().forget_abi();
+        let token_1 = Some(self.runtime.application_id().forget_abi());
+        let call = RouterOperation::CalculateSwapAmount { token_0, token_1, amount_1: amount };
+        let RouterResponse::Liquidity(liquidity) =
+        self.runtime
+            .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
+        else {
+            todo!()
+        };
         let created_owner = Account {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: None,
