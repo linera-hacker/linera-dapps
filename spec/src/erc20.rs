@@ -18,7 +18,7 @@ pub struct InstantiationArgument {
     pub decimals: u8,
     pub initial_currency: Option<Amount>,
     pub initial_currency_fixed: Option<bool>,
-    pub basis_point_rate: Option<u8>,
+    pub basis_point_rate: Option<Amount>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
