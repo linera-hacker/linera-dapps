@@ -1,5 +1,3 @@
-use std::ops::{Div, Mul};
-
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
@@ -33,7 +31,7 @@ pub struct Application {
     pub decimals: RegisterView<u8>,
     pub initial_currency: RegisterView<Amount>,
     pub initial_currency_fixed: RegisterView<bool>,
-    pub basis_point_rate: RegisterView<u8>,
+    pub basis_point_rate: RegisterView<Amount>,
 }
 
 #[allow(dead_code)]
@@ -50,7 +48,7 @@ impl Application {
             .set(argument.initial_currency_fixed.unwrap_or(false));
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
-        self.basis_point_rate.set(argument.basis_point_rate.unwrap_or(0));
+        self.basis_point_rate.set(argument.basis_point_rate.unwrap_or(Amount::ZERO));
     }
 
     pub(crate) async fn transfer(
@@ -76,8 +74,8 @@ impl Application {
             Ok(None) => Amount::ZERO,
             Err(_) => Amount::ZERO,
         };
-        let fee_rate = *self.basis_point_rate.get() as u128;
-        let fee = amount.mul(fee_rate.div(10000));
+        let fee_rate = *self.basis_point_rate.get();
+        let fee = amount.saturating_mul(fee_rate.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
         let new_receiver_balance = receiver_balance + send_amount;
 
@@ -126,8 +124,8 @@ impl Application {
             Ok(None) => amount,
             Err(_) => amount,
         };
-        let fee_rate = *self.basis_point_rate.get() as u128;
-        let fee = amount.mul(fee_rate.div(10000));
+        let fee_rate = *self.basis_point_rate.get();
+        let fee = amount.saturating_mul(fee_rate.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
         let new_to_balance = to_balance + send_amount;
 
