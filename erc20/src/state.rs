@@ -1,4 +1,4 @@
-use std::ops::Mul;
+use std::ops::{Div, Mul};
 
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
@@ -33,6 +33,7 @@ pub struct Application {
     pub decimals: RegisterView<u8>,
     pub initial_currency: RegisterView<Amount>,
     pub initial_currency_fixed: RegisterView<bool>,
+    pub basis_point_rate: RegisterView<u8>,
 }
 
 #[allow(dead_code)]
@@ -49,6 +50,7 @@ impl Application {
             .set(argument.initial_currency_fixed.unwrap_or(false));
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
+        self.basis_point_rate.set(argument.basis_point_rate.unwrap_or(0));
     }
 
     pub(crate) async fn transfer(
@@ -56,6 +58,7 @@ impl Application {
         sender: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
+        created_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let sender_balance = match self.balances.get(&sender).await {
             Ok(Some(balance)) => balance,
@@ -73,9 +76,14 @@ impl Application {
             Ok(None) => Amount::ZERO,
             Err(_) => Amount::ZERO,
         };
+        let fee_rate = *self.basis_point_rate.get() as u128;
+        let fee = amount.mul(fee_rate.div(10000));
+        let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
+        let new_receiver_balance = receiver_balance + send_amount;
 
         let _ = self.balances.insert(&sender, new_sender_balance);
-        let _ = self.balances.insert(&to, receiver_balance);
+        let _ = self.balances.insert(&to, new_receiver_balance);
+        let _ = self.balances.insert(&created_owner, fee);
         Ok(())
     }
 
@@ -85,6 +93,7 @@ impl Application {
         amount: Amount,
         to: ChainAccountOwner,
         caller: ChainAccountOwner,
+        created_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let allowance_key = AllowanceKey::new(from.clone(), caller);
         let allowance = match self.allowances.get(&allowance_key).await {
@@ -109,15 +118,21 @@ impl Application {
 
         let new_from_balance = from_balance - amount;
         let new_allowance = allowance - amount;
+
         let to_balance = match self.balances.get(&to).await {
-            Ok(Some(balance)) => balance + amount,
+            Ok(Some(balance)) => balance,
             Ok(None) => amount,
             Err(_) => amount,
         };
+        let fee_rate = *self.basis_point_rate.get() as u128;
+        let fee = amount.mul(fee_rate.div(10000));
+        let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
+        let new_to_balance = to_balance + send_amount;
 
         let _ = self.balances.insert(&from, new_from_balance);
-        let _ = self.balances.insert(&to, to_balance);
+        let _ = self.balances.insert(&to, new_to_balance);
         let _ = self.allowances.insert(&allowance_key, new_allowance);
+        let _ = self.balances.insert(&created_owner, fee);
 
         Ok(())
     }
