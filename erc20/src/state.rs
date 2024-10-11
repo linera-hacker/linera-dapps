@@ -144,7 +144,7 @@ impl Application {
         &mut self,
         caller: ChainAccountOwner,
         exchange_amount: Amount,
-    ) -> bool {
+    ) {
         // transfer
         let exchange_currency = self.initial_currency.get();
         if !self.initial_currency_fixed.get() {
@@ -159,7 +159,5 @@ impl Application {
         };
 
         let _ = self.balances.insert(&caller, user_balance + erc20_amount);
-
-        true
     }
 }

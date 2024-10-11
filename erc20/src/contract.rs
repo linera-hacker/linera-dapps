@@ -65,6 +65,10 @@ impl Contract for ApplicationContract {
                 .on_op_balance_of(owner)
                 .await
                 .expect("Failed OP: balance of"),
+            ERC20Operation::Mint { amount } => self
+                .on_op_mint(amount)
+                .await
+                .expect("Failed OP: mint"),
         }
     }
 
@@ -83,6 +87,10 @@ impl Contract for ApplicationContract {
                 .expect("Failed MSG: transfer from"),
             ERC20Message::Approve { spender, value } => self
                 .on_msg_approve(spender, value)
+                .await
+                .expect("Failed MSG: approve"),
+            ERC20Message::Mint { to, amount } => self
+                .on_msg_mint(to, amount)
                 .await
                 .expect("Failed MSG: approve"),
         }
@@ -159,6 +167,18 @@ impl ApplicationContract {
         ))
     }
 
+    async fn on_op_mint(
+        &mut self,
+        amount: Amount,
+    ) -> Result<ERC20Response, ERC20Error> {
+        let to = self.message_owner();
+        self.runtime
+            .prepare_message(ERC20Message::Mint { to, amount })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
+        Ok(ERC20Response::Ok)
+    }
+
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), ERC20Error> {
         match message {
             BaseMessage::SubscribeCreatorChain => self.on_msg_subscribe_creator_chain(),
@@ -228,6 +248,17 @@ impl ApplicationContract {
         self.state.approve(spender.clone(), value, owner).await?;
 
         self.publish_message(ERC20Message::Approve { spender, value });
+        Ok(())
+    }
+
+    async fn on_msg_mint(
+        &mut self,
+        to: ChainAccountOwner,
+        amount: Amount,
+    ) -> Result<(), ERC20Error> {
+        self.state.deposit_native_and_exchange(to.clone(), amount).await;
+
+        self.publish_message(ERC20Message::Mint { to, amount });
         Ok(())
     }
 
