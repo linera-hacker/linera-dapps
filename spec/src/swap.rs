@@ -150,9 +150,9 @@ impl Pool {
                 .saturating_div(self.reserve_0.into())
                 .min(
                     amount_1
-                    .saturating_mul(total_supply.into())
-                    .saturating_div(self.reserve_1.into()),
-                    )
+                        .saturating_mul(total_supply.into())
+                        .saturating_div(self.reserve_1.into()),
+                )
                 .into()
         }
     }

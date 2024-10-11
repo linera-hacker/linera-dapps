@@ -4,15 +4,21 @@ mod state;
 
 use self::state::Application;
 use linera_sdk::{
-    base::{Amount, ApplicationId, ChannelName, Destination, Timestamp, WithContractAbi, Account, AccountOwner},
+    base::{
+        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Timestamp,
+        WithContractAbi,
+    },
     views::{RootView, View, ViewStorageContext},
     Contract, ContractRuntime,
 };
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    swap::{Pool, PoolApplicationAbi, RouterMessage, RouterOperation, RouterResponse, PoolOperation, PoolResponse, RouterParameters},
-    erc20::{ERC20Operation, ERC20ApplicationAbi},
+    erc20::{ERC20ApplicationAbi, ERC20Operation},
+    swap::{
+        Pool, PoolApplicationAbi, PoolOperation, PoolResponse, RouterMessage, RouterOperation,
+        RouterParameters, RouterResponse,
+    },
 };
 use swap_router::RouterError;
 
@@ -240,9 +246,11 @@ impl ApplicationContract {
         if pool.reserve_0 <= Amount::ZERO || pool.reserve_1 <= Amount::ZERO {
             return Err(RouterError::InvalidAmount);
         }
-        Ok(Amount::from_attos(amount_0
-            .saturating_mul(pool.reserve_1.into())
-            .saturating_div(pool.reserve_0.into())))
+        Ok(Amount::from_attos(
+            amount_0
+                .saturating_mul(pool.reserve_1.into())
+                .saturating_div(pool.reserve_0.into()),
+        ))
     }
 
     fn calculate_amounts(
