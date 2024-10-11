@@ -1,5 +1,3 @@
-use std::ops::Mul;
-
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};

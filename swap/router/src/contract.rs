@@ -101,6 +101,25 @@ impl Contract for ApplicationContract {
             } => self
                 .on_op_calculate_swap_amount(token_0, token_1, amount_1)
                 .expect("Failed OP: calculate swap amount"),
+            RouterOperation::Swap {
+                token_0,
+                token_1,
+                amount_0_in,
+                amount_1_in,
+                amount_0_out_min,
+                amount_1_out_min,
+                to,
+            } => self
+                .on_op_swap(
+                    token_0,
+                    token_1,
+                    amount_0_in,
+                    amount_1_in,
+                    amount_0_out_min,
+                    amount_1_out_min,
+                    to,
+                )
+                .expect("Failed OP: swap"),
         }
     }
 
@@ -153,6 +172,26 @@ impl Contract for ApplicationContract {
                 )
                 .await
                 .expect("Failed MSG: remove liquidity"),
+            RouterMessage::Swap {
+                token_0,
+                token_1,
+                amount_0_in,
+                amount_1_in,
+                amount_0_out_min,
+                amount_1_out_min,
+                to,
+            } => self
+                .on_msg_swap(
+                    token_0,
+                    token_1,
+                    amount_0_in,
+                    amount_1_in,
+                    amount_0_out_min,
+                    amount_1_out_min,
+                    to,
+                )
+                .await
+                .expect("Failed MSG: swap"),
         }
     }
 
@@ -197,15 +236,32 @@ impl ApplicationContract {
         pool
     }
 
+    fn get_pool_exchangable(
+        &mut self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    ) -> Option<(Pool, bool)> {
+        if let Some(pool) = self.get_pool(token_0, token_1) {
+            return Some((pool, false));
+        }
+        if token_1.is_none() {
+            return None;
+        }
+        if let Some(pool) = self.get_pool(token_1.unwrap(), Some(token_0)) {
+            return Some((pool, true));
+        }
+        None
+    }
+
     fn get_or_create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_0_desired: Amount,
         amount_1_desired: Amount,
-    ) -> Result<(Pool, bool), RouterError> {
-        if let Some(pool) = self.get_pool(token_0, token_1) {
-            return Ok((pool, false));
+    ) -> Result<(Pool, bool, bool), RouterError> {
+        if let Some((pool, exchanged)) = self.get_pool_exchangable(token_0, token_1) {
+            return Ok((pool, false, exchanged));
         }
 
         let call = PoolOperation::CreatePool {
@@ -221,7 +277,7 @@ impl ApplicationContract {
             .call_application(true, pool_application_id, &call);
 
         if let Some(pool) = self.get_pool(token_0, token_1) {
-            return Ok((pool, false));
+            return Ok((pool, false, false));
         }
         Err(RouterError::CreatePoolError)
     }
@@ -303,9 +359,33 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<RouterResponse, RouterError> {
-        let (pool, created) = self
+        let (pool, created, exchanged) = self
             .get_or_create_pool(token_0, token_1, amount_0_desired, amount_1_desired)
             .expect("Invalid pool");
+
+        let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
+        let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let amount_0_desired = if exchanged {
+            amount_1_desired
+        } else {
+            amount_0_desired
+        };
+        let amount_1_desired = if exchanged {
+            amount_0_desired
+        } else {
+            amount_1_desired
+        };
+        let amount_0_min = if exchanged {
+            amount_1_min
+        } else {
+            amount_0_min
+        };
+        let amount_1_min = if exchanged {
+            amount_0_min
+        } else {
+            amount_1_min
+        };
+
         let (amount_0, amount_1) = if created {
             (amount_0_desired, amount_1_desired)
         } else {
@@ -369,7 +449,22 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<RouterResponse, RouterError> {
-        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+        let (pool, exchanged) = self
+            .get_pool_exchangable(token_0, token_1)
+            .expect("Invalid pool");
+
+        let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
+        let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let amount_0_min = if exchanged {
+            amount_1_min
+        } else {
+            amount_0_min
+        };
+        let amount_1_min = if exchanged {
+            amount_0_min
+        } else {
+            amount_1_min
+        };
 
         let balance_0 = self.balance_of_erc20(pool.token_0);
         let balance_1 = match pool.token_1 {
@@ -403,26 +498,76 @@ impl ApplicationContract {
         token_1: Option<ApplicationId>,
         amount_1: Amount,
     ) -> Result<RouterResponse, RouterError> {
-        let mut exchanged = false;
-        let mut pool = self.get_pool(token_0, token_1);
-        if pool.is_none() {
-            if token_1.is_none() {
-                return Err(RouterError::InvalidPool);
-            }
-            pool = self.get_pool(token_1.unwrap(), Some(token_0));
-            exchanged = true;
-        }
+        let (pool, exchanged) = self
+            .get_pool_exchangable(token_0, token_1)
+            .expect("Invalid pool");
 
-        let Some(pool) = pool else {
-            return Err(RouterError::InvalidPool);
-        };
         let amount = if exchanged {
-            self.calculate_swap_amount_0(pool, amount_1)?
-        } else {
             self.calculate_swap_amount_1(pool, amount_1)?
+        } else {
+            self.calculate_swap_amount_0(pool, amount_1)?
         };
 
         Ok(RouterResponse::Amount(amount))
+    }
+
+    fn on_op_swap(
+        &mut self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
+    ) -> Result<RouterResponse, RouterError> {
+        let (pool, exchanged) = self
+            .get_pool_exchangable(token_0, token_1)
+            .expect("Invalid pool");
+
+        let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
+        let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let amount_0_in = if exchanged { amount_1_in } else { amount_0_in };
+        let amount_1_in = if exchanged { amount_0_in } else { amount_1_in };
+        let amount_0_out_min = if exchanged {
+            amount_1_out_min
+        } else {
+            amount_0_out_min
+        };
+        let amount_1_out_min = if exchanged {
+            amount_0_out_min
+        } else {
+            amount_1_out_min
+        };
+
+        if let Some(_amount_0_out_min) = amount_0_out_min {
+            if let Some(_amount_1_in) = amount_1_in {
+                if self.calculate_swap_amount_0(pool.clone(), _amount_1_in)? < _amount_0_out_min {
+                    return Err(RouterError::InvalidAmount);
+                }
+            }
+        }
+        if let Some(_amount_1_out_min) = amount_1_out_min {
+            if let Some(_amount_0_in) = amount_0_in {
+                if self.calculate_swap_amount_1(pool, _amount_0_in)? < _amount_1_out_min {
+                    return Err(RouterError::InvalidAmount);
+                }
+            }
+        }
+
+        self.runtime
+            .prepare_message(RouterMessage::Swap {
+                token_0,
+                token_1,
+                amount_0_in,
+                amount_1_in,
+                amount_0_out_min,
+                amount_1_out_min,
+                to,
+            })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
+        Ok(RouterResponse::Ok)
     }
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), RouterError> {
@@ -480,7 +625,7 @@ impl ApplicationContract {
             .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
     }
 
-    fn transfer_native(&mut self, amount: Amount) {
+    fn transfer_native_from(&mut self, amount: Amount) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
@@ -531,7 +676,7 @@ impl ApplicationContract {
         if amount_1 > Amount::ZERO {
             match token_1 {
                 Some(_token_1) => self.transfer_erc20_from(_token_1, amount_1),
-                None => self.transfer_native(amount_1),
+                None => self.transfer_native_from(amount_1),
             }
         }
 
@@ -600,6 +745,91 @@ impl ApplicationContract {
             to,
             deadline,
         });
+        Ok(())
+    }
+
+    fn swap(
+        &mut self,
+        pool: Pool,
+        amount_0_out: Amount,
+        amount_1_out: Amount,
+        to: ChainAccountOwner,
+    ) {
+        let call = PoolOperation::Swap {
+            pool_id: pool.id,
+            amount_0_out,
+            amount_1_out,
+            to,
+        };
+        let pool_application_id = self.pool_application_id();
+        let PoolResponse::AmountPair(_) =
+            self.runtime
+                .call_application(true, pool_application_id, &call)
+        else {
+            todo!();
+        };
+    }
+
+    async fn on_msg_swap(
+        &mut self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
+    ) -> Result<(), RouterError> {
+        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+
+        let mut amount_0_out = Amount::ZERO;
+        let mut amount_1_out = Amount::ZERO;
+
+        if let Some(_amount_0_out_min) = amount_0_out_min {
+            if let Some(_amount_1_in) = amount_1_in {
+                amount_0_out = self.calculate_swap_amount_0(pool.clone(), _amount_1_in)?;
+                if amount_0_out < _amount_0_out_min {
+                    return Err(RouterError::InvalidAmount);
+                }
+                if amount_0_out == Amount::ZERO {
+                    return Err(RouterError::InvalidAmount);
+                }
+            }
+        }
+        if let Some(_amount_1_out_min) = amount_1_out_min {
+            if let Some(_amount_0_in) = amount_0_in {
+                amount_1_out = self.calculate_swap_amount_1(pool.clone(), _amount_0_in)?;
+                if amount_1_out < _amount_1_out_min {
+                    return Err(RouterError::InvalidAmount);
+                }
+                if amount_1_out == Amount::ZERO {
+                    return Err(RouterError::InvalidAmount);
+                }
+            }
+        }
+
+        if amount_0_out > Amount::ZERO {
+            self.transfer_erc20_from(token_0, amount_0_in.unwrap());
+        }
+        if amount_1_out > Amount::ZERO {
+            match token_1 {
+                Some(_token_1) => self.transfer_erc20_from(_token_1, amount_0_in.unwrap()),
+                None => self.transfer_native_from(amount_0_in.unwrap()),
+            }
+        }
+
+        self.swap(pool, amount_0_out, amount_1_out, to);
+
+        self.publish_message(RouterMessage::Swap {
+            token_0,
+            token_1,
+            amount_0_in,
+            amount_1_in,
+            amount_0_out_min,
+            amount_1_out_min,
+            to,
+        });
+
         Ok(())
     }
 }

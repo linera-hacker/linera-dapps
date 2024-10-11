@@ -286,6 +286,15 @@ pub enum RouterMessage {
         to: ChainAccountOwner,
         deadline: Timestamp,
     },
+    Swap {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
@@ -314,6 +323,15 @@ pub enum RouterOperation {
         amount_1_min: Amount,
         to: ChainAccountOwner,
         deadline: Timestamp,
+    },
+    Swap {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
     },
 }
 
@@ -373,5 +391,17 @@ pub trait RouterMutationRoot {
         amount_1_min: Amount,
         to: ChainAccountOwner,
         deadline: Timestamp,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn swap(
+        &self,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }

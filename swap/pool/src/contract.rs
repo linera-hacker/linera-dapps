@@ -13,9 +13,9 @@ use linera_sdk::{
 use self::state::Application;
 use spec::{
     account::ChainAccountOwner,
-    base::{self, BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
+    base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
-    swap::{Pool, PoolMessage, PoolOperation, PoolParameters, PoolResponse, RouterApplicationAbi},
+    swap::{PoolMessage, PoolOperation, PoolParameters, PoolResponse, RouterApplicationAbi},
 };
 use swap_pool::PoolError;
 
@@ -83,8 +83,12 @@ impl Contract for ApplicationContract {
                 .on_op_mint(pool_id, amount_0, amount_1, to)
                 .await
                 .expect("Failed OP: mint"),
-            PoolOperation::Burn { pool_id, liquidity } => self
-                .on_op_burn(pool_id, liquidity)
+            PoolOperation::Burn {
+                pool_id,
+                liquidity,
+                to,
+            } => self
+                .on_op_burn(pool_id, liquidity, to)
                 .await
                 .expect("Failed OP: burn"),
             PoolOperation::Swap {
@@ -142,8 +146,12 @@ impl Contract for ApplicationContract {
                 .on_msg_mint(pool_id, amount_0, amount_1, to)
                 .await
                 .expect("Failed MSG: mint"),
-            PoolMessage::Burn { pool_id, liquidity } => self
-                .on_msg_burn(pool_id, liquidity)
+            PoolMessage::Burn {
+                pool_id,
+                liquidity,
+                to,
+            } => self
+                .on_msg_burn(pool_id, liquidity, to)
                 .await
                 .expect("Failed MSG: burn"),
             PoolMessage::Swap {
@@ -306,6 +314,7 @@ impl ApplicationContract {
         &mut self,
         pool_id: u64,
         liquidity: Amount,
+        to: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
         // To here, shares should already be returned
         // Only router application on its creator chain can call
@@ -320,7 +329,11 @@ impl ApplicationContract {
         let amounts = self.calculate_amount_pair(pool_id, liquidity).await?;
 
         self.runtime
-            .prepare_message(PoolMessage::Burn { pool_id, liquidity })
+            .prepare_message(PoolMessage::Burn {
+                pool_id,
+                liquidity,
+                to,
+            })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
 
@@ -457,11 +470,11 @@ impl ApplicationContract {
         self.runtime.transfer(owner, to, amount);
     }
 
-    fn transfer_native_to(&mut self, amount: Amount, to: ChainAccountOwner) {
+    fn transfer_native_to(&mut self, _amount: Amount, _to: ChainAccountOwner) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
-        self.runtime.transfer(None, to, amount);
+        panic!("Not supported");
     }
 
     async fn on_msg_create_pool(
@@ -580,7 +593,12 @@ impl ApplicationContract {
         Ok(())
     }
 
-    async fn on_msg_burn(&mut self, pool_id: u64, liquidity: Amount) -> Result<(), PoolError> {
+    async fn on_msg_burn(
+        &mut self,
+        pool_id: u64,
+        liquidity: Amount,
+        to: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
         let myself = ChainAccountOwner {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: Some(AccountOwner::Application(
@@ -600,9 +618,11 @@ impl ApplicationContract {
             _ => todo!(),
         }
 
-        // TODO: mint fee
-
-        self.publish_message(PoolMessage::Burn { pool_id, liquidity });
+        self.publish_message(PoolMessage::Burn {
+            pool_id,
+            liquidity,
+            to,
+        });
         Ok(())
     }
 

@@ -108,4 +108,26 @@ impl RouterMutationRoot for MutationRoot {
         })
         .unwrap()
     }
+
+    async fn swap(
+        &self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
+    ) -> Vec<u8> {
+        bcs::to_bytes(&RouterOperation::Swap {
+            token_0,
+            token_1,
+            amount_0_in,
+            amount_1_in,
+            amount_0_out_min,
+            amount_1_out_min,
+            to,
+        })
+        .unwrap()
+    }
 }
