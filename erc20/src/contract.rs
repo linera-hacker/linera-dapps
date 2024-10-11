@@ -217,7 +217,12 @@ impl ApplicationContract {
     ) -> Result<(), ERC20Error> {
         let sender = self.message_owner();
 
-        self.state.transfer(sender, amount, to.clone()).await?;
+        let created_owner = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: None,
+        };
+
+        self.state.transfer(sender, amount, to.clone(), created_owner).await?;
 
         self.publish_message(ERC20Message::Transfer { to, amount });
         Ok(())
@@ -231,8 +236,13 @@ impl ApplicationContract {
     ) -> Result<(), ERC20Error> {
         let caller = self.message_owner();
 
+        let created_owner = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: None,
+        };
+
         self.state
-            .transfer_from(from.clone(), amount, to.clone(), caller)
+            .transfer_from(from.clone(), amount, to.clone(), caller, created_owner)
             .await?;
 
         self.publish_message(ERC20Message::TransferFrom { from, amount, to });
