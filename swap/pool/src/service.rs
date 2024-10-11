@@ -3,7 +3,7 @@
 mod state;
 
 use self::state::Application;
-use async_graphql::{EmptySubscription, Object, Schema};
+use async_graphql::{Context, EmptySubscription, Object, Schema};
 use linera_sdk::{
     base::{Amount, ApplicationId, WithServiceAbi},
     views::View,
@@ -15,8 +15,12 @@ use spec::{
 };
 use std::sync::Arc;
 
-pub struct ApplicationService {
+struct PoolContext {
     state: Arc<Application>,
+}
+
+pub struct ApplicationService {
+    pool_context: Arc<PoolContext>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -33,12 +37,16 @@ impl Service for ApplicationService {
             .await
             .expect("Failed to load state");
         ApplicationService {
-            state: Arc::new(state),
+            pool_context: Arc::new(PoolContext {
+                state: Arc::new(state),
+            }),
         }
     }
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
-        let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
+        let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
+            .data(self.pool_context.clone())
+            .finish();
         schema.execute(query).await
     }
 }
@@ -47,16 +55,20 @@ struct QueryRoot;
 
 #[Object]
 impl PoolQueryRoot for QueryRoot {
-    async fn get_pool(
-        &self,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-    ) -> Option<Pool> {
-        None
+    async fn get_pool(&self, ctx: &Context<'_>, pool_id: u64) -> Option<Pool> {
+        let pool_context = ctx.data::<Arc<PoolContext>>().unwrap();
+        match pool_context.state.get_pool(pool_id).await {
+            Ok(pool) => pool,
+            _ => None,
+        }
     }
 
-    async fn get_fee_to(&self) -> Option<ChainAccountOwner> {
-        None
+    async fn get_fee_to(&self, ctx: &Context<'_>, pool_id: u64) -> Option<ChainAccountOwner> {
+        let pool_context = ctx.data::<Arc<PoolContext>>().unwrap();
+        match pool_context.state.get_pool(pool_id).await {
+            Ok(pool) => Some(pool.unwrap().fee_to),
+            _ => None,
+        }
     }
 }
 
@@ -101,12 +113,12 @@ impl PoolMutationRoot for MutationRoot {
         _amount_1: Amount,
         _to: ChainAccountOwner,
     ) -> Vec<u8> {
-        panic!("Permission denied");
+        Vec::new()
     }
 
     // Return pair token amount
     async fn burn(&self, _pool_id: u64, _liquidity: Amount) -> Vec<u8> {
-        panic!("Permission denied");
+        Vec::new()
     }
 
     async fn swap(

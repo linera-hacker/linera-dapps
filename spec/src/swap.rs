@@ -115,6 +115,10 @@ pub struct Pool {
     pub erc20: ERC20,
     pub fee_to: ChainAccountOwner,
     pub fee_to_setter: ChainAccountOwner,
+    pub price_0_cumulative: Amount,
+    pub price_1_cumulative: Amount,
+    pub k_last: Amount,
+    pub block_timestamp: Timestamp,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -129,13 +133,13 @@ pub trait PoolQueryRoot {
     fn get_pool(
         &self,
         ctx: &Context<'_>,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
+        pool_id: u64,
     ) -> impl std::future::Future<Output = Result<Option<Pool>, Error>> + Send;
 
     fn get_fee_to(
         &self,
         ctx: &Context<'_>,
+        pool_id: u64,
     ) -> impl std::future::Future<Output = Result<Option<ChainAccountOwner>, Error>> + Send;
 }
 

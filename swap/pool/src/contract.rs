@@ -441,12 +441,6 @@ impl ApplicationContract {
 
         let message_id = self.runtime.message_id().expect("Invalid message id");
 
-        let from = ChainAccountOwner {
-            chain_id: self.runtime.application_creator_chain_id(),
-            owner: Some(AccountOwner::Application(
-                self.runtime.application_id().forget_abi(),
-            )),
-        };
         let to = ChainAccountOwner {
             chain_id: message_id.chain_id,
             owner: Some(AccountOwner::User(
@@ -519,6 +513,7 @@ impl ApplicationContract {
                 amount_0_virtual,
                 amount_1_virtual,
                 creator,
+                self.runtime.system_time(),
             )
             .await?;
 
@@ -588,10 +583,12 @@ impl ApplicationContract {
             return Err(PoolError::InsufficientFunds);
         }
 
+        self.state.mint_fee(pool_id).await?;
         let liquidity = self.calculate_liquidity(pool, amount_0, amount_1);
         self.state.mint(pool_id, liquidity, to.clone()).await?;
-
-        // TODO: calculate fee
+        self.state
+            .update(pool_id, balance_0, balance_1, self.runtime.system_time())
+            .await?;
 
         self.publish_message(PoolMessage::Mint {
             pool_id,
@@ -612,6 +609,7 @@ impl ApplicationContract {
 
         self.state.burn(pool_id, liquidity, myself).await?;
 
+        self.state.mint_fee(pool_id).await?;
         let (amount_0, amount_1) = self.calculate_amounts(pool_id, liquidity).await?;
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
         self.transfer_erc20_to(pool.token_0, amount_0);
@@ -671,7 +669,9 @@ impl ApplicationContract {
         {
             return Err(PoolError::BrokenK);
         }
-        self.state.update(pool_id, balance_0, balance_1).await?;
+        self.state
+            .update(pool_id, balance_0, balance_1, self.runtime.system_time())
+            .await?;
 
         self.publish_message(PoolMessage::Swap {
             pool_id,

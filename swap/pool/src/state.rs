@@ -1,11 +1,11 @@
 use linera_sdk::{
-    base::{Amount, ApplicationId},
+    base::{Amount, ApplicationId, Timestamp},
     views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
 use num_bigint::BigUint;
 use num_traits::cast::ToPrimitive;
 use num_traits::FromPrimitive;
-use spec::{account::ChainAccountOwner, erc20::ERC20, swap::Pool};
+use spec::{account::ChainAccountOwner, base, erc20::ERC20, swap::Pool};
 use std::{collections::HashMap, str::FromStr};
 use swap_pool::PoolError;
 
@@ -58,6 +58,7 @@ impl Application {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
         creator: ChainAccountOwner,
+        block_timestamp: Timestamp,
     ) -> Result<(), PoolError> {
         if amount_0_initial != Amount::ZERO && amount_0_initial != amount_0_virtual {
             return Err(PoolError::InvalidInitialAmount);
@@ -93,6 +94,10 @@ impl Application {
             erc20: ERC20::default(),
             fee_to: creator.clone(),
             fee_to_setter: creator.clone(),
+            price_0_cumulative: Amount::ZERO,
+            price_1_cumulative: Amount::ZERO,
+            k_last: Amount::ZERO,
+            block_timestamp: block_timestamp,
         };
 
         if !pool.virtual_initial_liquidity {
@@ -187,11 +192,55 @@ impl Application {
         pool_id: u64,
         balance_0: Amount,
         balance_1: Amount,
+        block_timestamp: Timestamp,
     ) -> Result<(), PoolError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+
+        let time_elapsed = u128::from(
+            block_timestamp
+                .delta_since(pool.block_timestamp)
+                .as_micros(),
+        );
+        if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
+            pool.price_0_cumulative = pool
+                .reserve_1
+                .saturating_div(pool.reserve_0)
+                .saturating_mul(time_elapsed)
+                .into();
+            pool.price_1_cumulative = pool
+                .reserve_0
+                .saturating_div(pool.reserve_1)
+                .saturating_mul(time_elapsed)
+                .into();
+        }
+
         pool.reserve_0 = balance_0;
         pool.reserve_1 = balance_1;
-        // TODO: update price
+        pool.block_timestamp = block_timestamp;
+        pool.k_last = pool.reserve_0.saturating_mul(pool.reserve_1.into());
+
+        Ok(())
+    }
+
+    pub(crate) async fn mint_fee(&mut self, pool_id: u64) -> Result<(), PoolError> {
+        let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
+
+        if pool.k_last != Amount::ZERO {
+            let root_k = base::sqrt(pool.reserve_0.saturating_mul(pool.reserve_1.into()));
+            let root_k_last = base::sqrt(pool.k_last);
+            if root_k > root_k_last {
+                let numerator = pool
+                    .erc20
+                    .total_supply
+                    .saturating_mul(root_k.saturating_sub(root_k_last.into()).into());
+                let denominator = root_k.saturating_mul(5).saturating_add(root_k_last.into());
+                let liquidity = Amount::from_attos(numerator.saturating_div(denominator));
+                if liquidity > Amount::ZERO {
+                    pool.erc20._mint(pool.fee_to, liquidity);
+                }
+            }
+        }
+
         Ok(())
     }
 }
