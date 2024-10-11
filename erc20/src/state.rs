@@ -68,7 +68,7 @@ impl Application {
             return Err(ERC20Error::InvalidInitialAmount);
         }
 
-        let new_sender_balance = sender_balance - amount;
+        let new_sender_balance = sender_balance.saturating_sub(amount);
         let receiver_balance = match self.balances.get(&to).await {
             Ok(Some(balance)) => balance,
             Ok(None) => Amount::ZERO,
@@ -77,7 +77,7 @@ impl Application {
         let fee_rate = *self.basis_point_rate.get();
         let fee = amount.saturating_mul(fee_rate.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
-        let new_receiver_balance = receiver_balance + send_amount;
+        let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
         let _ = self.balances.insert(&sender, new_sender_balance);
         let _ = self.balances.insert(&to, new_receiver_balance);
@@ -116,8 +116,8 @@ impl Application {
             return Err(ERC20Error::InvalidInitialAmount);
         }
 
-        let new_from_balance = from_balance - amount;
-        let new_allowance = allowance - amount;
+        let new_from_balance = from_balance.saturating_sub(amount);
+        let new_allowance = allowance.saturating_sub(amount);
 
         let to_balance = match self.balances.get(&to).await {
             Ok(Some(balance)) => balance,
@@ -127,7 +127,7 @@ impl Application {
         let fee_rate = *self.basis_point_rate.get();
         let fee = amount.saturating_mul(fee_rate.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
-        let new_to_balance = to_balance + send_amount;
+        let new_to_balance = to_balance.saturating_add(send_amount);
 
         let _ = self.balances.insert(&from, new_from_balance);
         let _ = self.balances.insert(&to, new_to_balance);
@@ -151,14 +151,6 @@ impl Application {
         Ok(())
     }
 
-    async fn checked_mul(a: Amount, b: Amount) -> Amount {
-        let a_value: u128 = a.into();
-        let b_value: u128 = b.into();
-        let result = a_value * b_value;
-
-        Amount::from(result)
-    }
-
     pub(crate) async fn deposit_native_and_exchange(
         &mut self,
         caller: ChainAccountOwner,
@@ -169,7 +161,7 @@ impl Application {
         if !self.initial_currency_fixed.get() {
             exchange_currency = &currency
         }
-        let erc20_amount = Self::checked_mul(*exchange_currency, exchange_amount).await;
+        let erc20_amount = exchange_currency.saturating_mul(exchange_amount.into());
 
         let user_balance = match self.balances.get(&caller).await {
             Ok(Some(balance)) => balance,
@@ -177,6 +169,7 @@ impl Application {
             Err(_) => Amount::ZERO,
         };
 
-        let _ = self.balances.insert(&caller, user_balance + erc20_amount);
+        let new_user_balance = user_balance.saturating_add(erc20_amount);
+        let _ = self.balances.insert(&caller, new_user_balance);
     }
 }
