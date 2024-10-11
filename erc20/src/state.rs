@@ -144,10 +144,11 @@ impl Application {
         &mut self,
         caller: ChainAccountOwner,
         exchange_amount: Amount,
+        currency: Amount,
     ) {
-        let exchange_currency = self.initial_currency.get();
+        let mut exchange_currency = self.initial_currency.get();
         if !self.initial_currency_fixed.get() {
-            // TODO GET RATE FROM DEX
+            exchange_currency = &currency
         }
         let erc20_amount = Self::checked_mul(*exchange_currency, exchange_amount).await;
 
