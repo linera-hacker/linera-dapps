@@ -222,16 +222,14 @@ impl Application {
                 .as_micros(),
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
-            pool.price_0_cumulative = pool
+            pool.price_0_cumulative = Amount::from_attos(pool
                 .reserve_1
                 .saturating_div(pool.reserve_0)
-                .saturating_mul(time_elapsed)
-                .into();
-            pool.price_1_cumulative = pool
+                .saturating_mul(time_elapsed));
+            pool.price_1_cumulative = Amount::from_attos(pool
                 .reserve_0
                 .saturating_div(pool.reserve_1)
-                .saturating_mul(time_elapsed)
-                .into();
+                .saturating_mul(time_elapsed));
         }
 
         pool.reserve_0 = balance_0;
