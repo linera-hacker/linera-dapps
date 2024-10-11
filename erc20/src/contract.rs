@@ -262,9 +262,9 @@ impl ApplicationContract {
         amount: Amount,
     ) -> Result<(), ERC20Error> {
         let token_0  = self.runtime.application_id().forget_abi();
-        let token_1 = Some(self.runtime.application_id().forget_abi());
+        let token_1 = None;
         let call = RouterOperation::CalculateSwapAmount { token_0, token_1, amount_1: amount };
-        let RouterResponse::Liquidity(liquidity) =
+        let RouterResponse::Amount(currency) =
         self.runtime
             .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
         else {
@@ -278,7 +278,7 @@ impl ApplicationContract {
         let to_owner = self.runtime.authenticated_signer();
         self.runtime.transfer(to_owner, created_owner, amount);
 
-        self.state.deposit_native_and_exchange(to.clone(), amount).await;
+        self.state.deposit_native_and_exchange(to.clone(), amount, currency).await;
 
         self.publish_message(ERC20Message::Mint { to, amount });
         Ok(())
