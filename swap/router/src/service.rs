@@ -11,7 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    swap::{RouterMutationRoot, RouterQueryRoot, RouterOperation},
+    swap::{RouterMutationRoot, RouterOperation, RouterQueryRoot},
 };
 use std::sync::{Arc, Mutex};
 
