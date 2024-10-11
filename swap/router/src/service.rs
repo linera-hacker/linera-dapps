@@ -6,18 +6,17 @@ use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp, WithServiceAbi},
-    views::{View, ViewStorageContext},
+    views::View,
     Service, ServiceRuntime,
 };
 use spec::{
     account::ChainAccountOwner,
     swap::{RouterMutationRoot, RouterOperation, RouterQueryRoot},
 };
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 pub struct ApplicationService {
-    state: Arc<Application>,
-    runtime: Arc<Mutex<ServiceRuntime<Self>>>,
+    _state: Arc<Application>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -34,13 +33,11 @@ impl Service for ApplicationService {
             .await
             .expect("Failed to load state");
         ApplicationService {
-            state: Arc::new(state),
-            runtime: Arc::new(Mutex::new(runtime)),
+            _state: Arc::new(state),
         }
     }
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
-        let runtime = self.runtime.clone();
         let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription).finish();
         schema.execute(query).await
     }
@@ -52,9 +49,9 @@ struct QueryRoot;
 impl RouterQueryRoot for QueryRoot {
     async fn calculate_swap_amount(
         &self,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_1: Amount,
+        _token_0: ApplicationId,
+        _token_1: Option<ApplicationId>,
+        _amount_1: Amount,
     ) -> Amount {
         Amount::ZERO
     }

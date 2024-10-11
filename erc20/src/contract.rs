@@ -14,7 +14,7 @@ use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument},
-    swap::{RouterOperation, RouterResponse, RouterApplicationAbi},
+    swap::{RouterApplicationAbi, RouterOperation, RouterResponse},
 };
 
 pub struct ApplicationContract {
@@ -66,10 +66,9 @@ impl Contract for ApplicationContract {
                 .on_op_balance_of(owner)
                 .await
                 .expect("Failed OP: balance of"),
-            ERC20Operation::Mint { amount } => self
-                .on_op_mint(amount)
-                .await
-                .expect("Failed OP: mint"),
+            ERC20Operation::Mint { amount } => {
+                self.on_op_mint(amount).await.expect("Failed OP: mint")
+            }
         }
     }
 
@@ -172,10 +171,7 @@ impl ApplicationContract {
         ))
     }
 
-    async fn on_op_mint(
-        &mut self,
-        amount: Amount,
-    ) -> Result<ERC20Response, ERC20Error> {
+    async fn on_op_mint(&mut self, amount: Amount) -> Result<ERC20Response, ERC20Error> {
         let to = self.message_owner();
         self.runtime
             .prepare_message(ERC20Message::Mint { to, amount })
@@ -261,12 +257,16 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<(), ERC20Error> {
-        let token_0  = self.runtime.application_id().forget_abi();
+        let token_0 = self.runtime.application_id().forget_abi();
         let token_1 = None;
-        let call = RouterOperation::CalculateSwapAmount { token_0, token_1, amount_1: amount };
+        let call = RouterOperation::CalculateSwapAmount {
+            token_0,
+            token_1,
+            amount_1: amount,
+        };
         let RouterResponse::Amount(currency) =
-        self.runtime
-            .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
+            self.runtime
+                .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
         else {
             todo!()
         };
@@ -278,7 +278,9 @@ impl ApplicationContract {
         let to_owner = self.runtime.authenticated_signer();
         self.runtime.transfer(to_owner, created_owner, amount);
 
-        self.state.deposit_native_and_exchange(to.clone(), amount, currency).await;
+        self.state
+            .deposit_native_and_exchange(to.clone(), amount, currency)
+            .await;
 
         self.publish_message(ERC20Message::Mint { to, amount });
         Ok(())

@@ -45,8 +45,10 @@ impl Application {
         self.name.set(argument.name);
         self.symbol.set(argument.symbol);
         self.decimals.set(argument.decimals);
-        self.initial_currency_fixed.set(argument.initial_currency_fixed.unwrap_or(false));
-        self.initial_currency.set(argument.initial_currency.unwrap_or(Amount::ONE));
+        self.initial_currency_fixed
+            .set(argument.initial_currency_fixed.unwrap_or(false));
+        self.initial_currency
+            .set(argument.initial_currency.unwrap_or(Amount::ONE));
     }
 
     pub(crate) async fn transfer(

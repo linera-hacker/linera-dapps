@@ -8,7 +8,7 @@ use linera_sdk::{
         Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Timestamp,
         WithContractAbi,
     },
-    views::{RootView, View, ViewStorageContext},
+    views::{RootView, View},
     Contract, ContractRuntime,
 };
 use spec::{
@@ -242,7 +242,7 @@ impl ApplicationContract {
         };
     }
 
-    fn calculate_swap_amount(&self, pool: Pool, amount_0: Amount) -> Result<Amount, RouterError> {
+    fn calculate_swap_amount_1(&self, pool: Pool, amount_0: Amount) -> Result<Amount, RouterError> {
         if pool.reserve_0 <= Amount::ZERO || pool.reserve_1 <= Amount::ZERO {
             return Err(RouterError::InvalidAmount);
         }
@@ -250,6 +250,17 @@ impl ApplicationContract {
             amount_0
                 .saturating_mul(pool.reserve_1.into())
                 .saturating_div(pool.reserve_0.into()),
+        ))
+    }
+
+    fn calculate_swap_amount_0(&self, pool: Pool, amount_1: Amount) -> Result<Amount, RouterError> {
+        if pool.reserve_0 <= Amount::ZERO || pool.reserve_1 <= Amount::ZERO {
+            return Err(RouterError::InvalidAmount);
+        }
+        Ok(Amount::from_attos(
+            amount_1
+                .saturating_mul(pool.reserve_0.into())
+                .saturating_div(pool.reserve_1.into()),
         ))
     }
 
@@ -264,14 +275,14 @@ impl ApplicationContract {
         if pool.reserve_0 == Amount::ZERO && pool.reserve_1 == Amount::ZERO {
             return Ok((amount_0_desired, amount_1_desired));
         }
-        let amount_1_optimal = self.calculate_swap_amount(pool.clone(), amount_0_desired)?;
+        let amount_1_optimal = self.calculate_swap_amount_1(pool.clone(), amount_0_desired)?;
         if amount_1_optimal <= amount_1_desired {
             if amount_1_optimal < amount_1_min {
                 return Err(RouterError::InvalidAmount);
             }
             return Ok((amount_0_desired, amount_1_optimal));
         }
-        let amount_0_optimal = self.calculate_swap_amount(pool, amount_1_desired)?;
+        let amount_0_optimal = self.calculate_swap_amount_1(pool, amount_1_desired)?;
         if amount_0_optimal > amount_0_desired {
             return Err(RouterError::InvalidAmount);
         }
@@ -292,7 +303,7 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<RouterResponse, RouterError> {
-        let (mut pool, created) = self
+        let (pool, created) = self
             .get_or_create_pool(token_0, token_1, amount_0_desired, amount_1_desired)
             .expect("Invalid pool");
         let (amount_0, amount_1) = if created {
@@ -387,12 +398,31 @@ impl ApplicationContract {
     }
 
     fn on_op_calculate_swap_amount(
-        &self,
+        &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_1: Amount,
     ) -> Result<RouterResponse, RouterError> {
-        Ok(RouterResponse::Ok)
+        let mut exchanged = false;
+        let mut pool = self.get_pool(token_0, token_1);
+        if pool.is_none() {
+            if token_1.is_none() {
+                return Err(RouterError::InvalidPool);
+            }
+            pool = self.get_pool(token_1.unwrap(), Some(token_0));
+            exchanged = true;
+        }
+
+        let Some(pool) = pool else {
+            return Err(RouterError::InvalidPool);
+        };
+        let amount = if exchanged {
+            self.calculate_swap_amount_0(pool, amount_1)?
+        } else {
+            self.calculate_swap_amount_1(pool, amount_1)?
+        };
+
+        Ok(RouterResponse::Amount(amount))
     }
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), RouterError> {

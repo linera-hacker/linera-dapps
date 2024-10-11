@@ -1,5 +1,3 @@
-use async_graphql::{Request, Response};
-use linera_sdk::base::{ContractAbi, ServiceAbi};
 use spec::swap::RouterApplicationAbi;
 use thiserror::Error;
 
@@ -13,4 +11,7 @@ pub enum RouterError {
 
     #[error("Create pool error")]
     CreatePoolError,
+
+    #[error("Invalid pool")]
+    InvalidPool,
 }

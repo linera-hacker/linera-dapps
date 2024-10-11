@@ -163,7 +163,7 @@ impl Pool {
         &self,
         liquidity: Amount,
         balance_0: Amount,
-        balance_1: Amount
+        balance_1: Amount,
     ) -> (Amount, Amount) {
         let amount_0: Amount = liquidity
             .saturating_mul(balance_0.into())
