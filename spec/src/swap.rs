@@ -198,8 +198,33 @@ pub trait PoolMutationRoot {
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub enum RouterMessage {
+    BaseMessage(BaseMessage),
+    AddLiquidity {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_desired: Amount,
+        amount_1_desired: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: ChainAccountOwner,
+        deadline: Timestamp,
+    },
+    RemoveLiquidity {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        liquidity: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: ChainAccountOwner,
+        deadline: Timestamp,
+    },
+}
+
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum RouterOperation {
+    BaseOperation(BaseOperation),
     CalculateSwapAmount {
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
