@@ -14,7 +14,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20ApplicationAbi, ERC20Operation},
+    erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
     swap::{
         Pool, PoolApplicationAbi, PoolOperation, PoolResponse, RouterMessage, RouterOperation,
         RouterParameters, RouterResponse,
@@ -253,7 +253,7 @@ impl ApplicationContract {
         ))
     }
 
-    fn calculate_amounts(
+    fn calculate_amount_pair(
         &self,
         pool: Pool,
         amount_0_desired: Amount,
@@ -298,7 +298,7 @@ impl ApplicationContract {
         let (amount_0, amount_1) = if created {
             (amount_0_desired, amount_1_desired)
         } else {
-            self.calculate_amounts(
+            self.calculate_amount_pair(
                 pool.clone(),
                 amount_0_desired,
                 amount_1_desired,
@@ -330,6 +330,24 @@ impl ApplicationContract {
         Ok(RouterResponse::Liquidity((amount_0, amount_1, liquidity)))
     }
 
+    fn balance_of_erc20(&mut self, token: ApplicationId) -> Amount {
+        let owner = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+        };
+
+        let call = ERC20Operation::BalanceOf { owner };
+        let ERC20Response::Balance(balance) =
+            self.runtime
+                .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call)
+        else {
+            todo!();
+        };
+        balance
+    }
+
     fn on_op_remove_liquidity(
         &mut self,
         token_0: ApplicationId,
@@ -340,6 +358,19 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<RouterResponse, RouterError> {
+        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: here we should get balance of this application instance
+            _ => todo!(),
+        };
+        let (amount_0, amount_1) = pool.calculate_amount_pair(liquidity, balance_0, balance_1);
+        if amount_0 < amount_0_min || amount_1 < amount_1_min {
+            return Err(RouterError::InvalidAmount);
+        }
+
         self.runtime
             .prepare_message(RouterMessage::RemoveLiquidity {
                 token_0,
@@ -352,7 +383,7 @@ impl ApplicationContract {
             })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(RouterResponse::Ok)
+        Ok(RouterResponse::AmountPair((amount_0, amount_1)))
     }
 
     fn on_op_calculate_swap_amount(
@@ -455,7 +486,7 @@ impl ApplicationContract {
         let (amount_0, amount_1) = if created_pool {
             (amount_0_desired, amount_1_desired)
         } else {
-            self.calculate_amounts(
+            self.calculate_amount_pair(
                 pool.clone(),
                 amount_0_desired,
                 amount_1_desired,
@@ -490,6 +521,21 @@ impl ApplicationContract {
         Ok(())
     }
 
+    fn burn(&mut self, pool: Pool, liquidity: Amount, to: ChainAccountOwner) {
+        let call = PoolOperation::Burn {
+            pool_id: pool.id,
+            liquidity,
+            to,
+        };
+        let pool_application_id = self.pool_application_id();
+        let PoolResponse::AmountPair(_) =
+            self.runtime
+                .call_application(true, pool_application_id, &call)
+        else {
+            todo!();
+        };
+    }
+
     async fn on_msg_remove_liquidity(
         &mut self,
         token_0: ApplicationId,
@@ -500,6 +546,30 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<(), RouterError> {
+        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: here we should get balance of this application instance
+            _ => todo!(),
+        };
+        let (amount_0, amount_1) = pool.calculate_amount_pair(liquidity, balance_0, balance_1);
+        if amount_0 < amount_0_min || amount_1 < amount_1_min {
+            return Err(RouterError::InvalidAmount);
+        }
+
+        self.burn(pool, liquidity, to);
+
+        self.publish_message(RouterMessage::RemoveLiquidity {
+            token_0,
+            token_1,
+            liquidity,
+            amount_0_min,
+            amount_1_min,
+            to,
+            deadline,
+        });
         Ok(())
     }
 }

@@ -287,7 +287,7 @@ impl ApplicationContract {
         Ok(PoolResponse::Liquidity(liquidity))
     }
 
-    async fn calculate_amounts(
+    async fn calculate_amount_pair(
         &mut self,
         pool_id: u64,
         liquidity: Amount,
@@ -299,22 +299,7 @@ impl ApplicationContract {
             // TODO: here we should get balance of this application instance
             _ => todo!(),
         };
-
-        // TODO: mint fee
-
-        let amount_0: Amount = liquidity
-            .saturating_mul(balance_0.into())
-            .saturating_div(pool.erc20.total_supply)
-            .into();
-        let amount_1: Amount = liquidity
-            .saturating_mul(balance_1.into())
-            .saturating_div(pool.erc20.total_supply)
-            .into();
-        if amount_0 == Amount::ZERO || amount_1 == Amount::ZERO {
-            panic!("Invalid liquidity");
-        }
-
-        Ok((amount_0, amount_1))
+        Ok(pool.calculate_amount_pair(liquidity, balance_0, balance_1))
     }
 
     async fn on_op_burn(
@@ -332,14 +317,14 @@ impl ApplicationContract {
             return Err(PoolError::PermissionDenied);
         }
 
-        let amounts = self.calculate_amounts(pool_id, liquidity).await?;
+        let amounts = self.calculate_amount_pair(pool_id, liquidity).await?;
 
         self.runtime
             .prepare_message(PoolMessage::Burn { pool_id, liquidity })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
 
-        Ok(PoolResponse::Amounts(amounts))
+        Ok(PoolResponse::AmountPair(amounts))
     }
 
     fn on_op_swap(
@@ -608,7 +593,7 @@ impl ApplicationContract {
         self.state.burn(pool_id, liquidity, myself).await?;
 
         self.state.mint_fee(pool_id).await?;
-        let (amount_0, amount_1) = self.calculate_amounts(pool_id, liquidity).await?;
+        let (amount_0, amount_1) = self.calculate_amount_pair(pool_id, liquidity).await?;
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
         self.transfer_erc20_to(pool.token_0, amount_0);
         match pool.token_1 {

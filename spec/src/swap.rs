@@ -58,6 +58,7 @@ pub enum PoolMessage {
     Burn {
         pool_id: u64,
         liquidity: Amount,
+        to: ChainAccountOwner,
     },
     Swap {
         pool_id: u64,
@@ -101,6 +102,7 @@ pub enum PoolOperation {
     Burn {
         pool_id: u64,
         liquidity: Amount,
+        to: ChainAccountOwner,
     },
     Swap {
         pool_id: u64,
@@ -156,6 +158,26 @@ impl Pool {
                 .into()
         }
     }
+
+    pub fn calculate_amount_pair(
+        &self,
+        liquidity: Amount,
+        balance_0: Amount,
+        balance_1: Amount
+    ) -> (Amount, Amount) {
+        let amount_0: Amount = liquidity
+            .saturating_mul(balance_0.into())
+            .saturating_div(self.erc20.total_supply)
+            .into();
+        let amount_1: Amount = liquidity
+            .saturating_mul(balance_1.into())
+            .saturating_div(self.erc20.total_supply)
+            .into();
+        if amount_0 == Amount::ZERO || amount_1 == Amount::ZERO {
+            panic!("Invalid liquidity");
+        }
+        (amount_0, amount_1)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -163,7 +185,7 @@ pub enum PoolResponse {
     #[default]
     Ok,
     Liquidity(Amount),
-    Amounts((Amount, Amount)),
+    AmountPair((Amount, Amount)),
     Pool(Option<Pool>),
 }
 
@@ -301,6 +323,7 @@ pub enum RouterResponse {
     Ok,
     Liquidity((Amount, Amount, Amount)),
     Amount(Amount),
+    AmountPair((Amount, Amount)),
 }
 
 impl ContractAbi for RouterApplicationAbi {
