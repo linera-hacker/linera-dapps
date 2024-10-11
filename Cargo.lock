@@ -3934,8 +3934,10 @@ name = "swap-router"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
+ "bcs",
  "linera-sdk",
  "spec",
+ "thiserror",
 ]
 
 [[package]]

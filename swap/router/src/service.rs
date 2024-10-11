@@ -11,7 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    swap::{RouterMutationRoot, RouterQueryRoot},
+    swap::{RouterMutationRoot, RouterQueryRoot, RouterOperation},
 };
 use std::sync::{Arc, Mutex};
 
@@ -76,7 +76,17 @@ impl RouterMutationRoot for MutationRoot {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&RouterOperation::AddLiquidity {
+            token_0,
+            token_1,
+            amount_0_desired,
+            amount_1_desired,
+            amount_0_min,
+            amount_1_min,
+            to,
+            deadline,
+        })
+        .unwrap()
     }
 
     // Return pair token amount
@@ -90,6 +100,15 @@ impl RouterMutationRoot for MutationRoot {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Vec<u8> {
-        Vec::new()
+        bcs::to_bytes(&RouterOperation::RemoveLiquidity {
+            token_0,
+            token_1,
+            liquidity,
+            amount_0_min,
+            amount_1_min,
+            to,
+            deadline,
+        })
+        .unwrap()
     }
 }
