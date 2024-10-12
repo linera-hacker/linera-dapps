@@ -77,7 +77,6 @@ timeout 10s linera -w 12 service --port 30092 --external-signing false
 print $'\U01F4AB' $YELLOW " Deploying Swap Pool application ..."
 swap_pool_bid=`linera --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_pool_{contract,service}.wasm`
 swap_pool_appid=`linera --with-wallet 12 create-application $swap_pool_bid \
-    --required-application-ids $erc20_1_appid --required-application-ids $erc20_2_appid \
     `
 print $'\U01f499' $LIGHTGREEN " Swap Pool application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_pool_bid$NC"
@@ -96,7 +95,6 @@ print $'\U01F4AB' $YELLOW " Deploying Swap Router application ..."
 swap_router_bid=`linera --with-wallet 13 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_router_{contract,service}.wasm`
 swap_router_appid=`linera --with-wallet 13 create-application $swap_router_bid \
     --json-parameters "{\"pool_application_id\":\"$swap_pool_appid\"}" \
-    --required-application-ids $erc20_1_appid --required-application-ids $erc20_2_appid \
     `
 print $'\U01f499' $LIGHTGREEN " Swap Router application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_router_bid$NC"
