@@ -41,11 +41,13 @@ impl Contract for ApplicationContract {
     }
 
     async fn instantiate(&mut self, argument: InstantiationArgument) {
-        let message_id = self.runtime.message_id().expect("Invalid message id");
-        if message_id.chain_id != self.runtime.application_creator_chain_id() {
-            return;
-        }
-        self.state.instantiate(argument).await;
+        let owner = ChainAccountOwner {
+            chain_id: self.runtime.chain_id(),
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        };
+        self.state.instantiate(argument, owner).await;
     }
 
     async fn execute_operation(&mut self, operation: ERC20Operation) -> ERC20Response {
@@ -217,13 +219,8 @@ impl ApplicationContract {
     ) -> Result<(), ERC20Error> {
         let sender = self.message_owner();
 
-        let created_owner = ChainAccountOwner {
-            chain_id: self.runtime.application_creator_chain_id(),
-            owner: None,
-        };
-
         self.state
-            .transfer(sender, amount, to.clone(), created_owner)
+            .transfer(sender, amount, to.clone())
             .await?;
 
         self.publish_message(ERC20Message::Transfer { to, amount });
@@ -238,13 +235,8 @@ impl ApplicationContract {
     ) -> Result<(), ERC20Error> {
         let caller = self.message_owner();
 
-        let created_owner = ChainAccountOwner {
-            chain_id: self.runtime.application_creator_chain_id(),
-            owner: None,
-        };
-
         self.state
-            .transfer_from(from.clone(), amount, to.clone(), caller, created_owner)
+            .transfer_from(from.clone(), amount, to.clone(), caller)
             .await?;
 
         self.publish_message(ERC20Message::TransferFrom { from, amount, to });
