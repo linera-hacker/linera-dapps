@@ -316,7 +316,7 @@ pub enum RouterOperation {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     },
     RemoveLiquidity {
@@ -325,7 +325,7 @@ pub enum RouterOperation {
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     },
     Swap {
@@ -335,7 +335,7 @@ pub enum RouterOperation {
         amount_1_in: Option<Amount>,
         amount_0_out_min: Option<Amount>,
         amount_1_out_min: Option<Amount>,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
     },
 }
 
@@ -380,7 +380,7 @@ pub trait RouterMutationRoot {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
@@ -393,7 +393,7 @@ pub trait RouterMutationRoot {
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
@@ -406,6 +406,6 @@ pub trait RouterMutationRoot {
         amount_1_in: Option<Amount>,
         amount_0_out_min: Option<Amount>,
         amount_1_out_min: Option<Amount>,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }

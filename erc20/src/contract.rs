@@ -219,9 +219,7 @@ impl ApplicationContract {
     ) -> Result<(), ERC20Error> {
         let sender = self.message_owner();
 
-        self.state
-            .transfer(sender, amount, to.clone())
-            .await?;
+        self.state.transfer(sender, amount, to.clone()).await?;
 
         self.publish_message(ERC20Message::Transfer { to, amount });
         Ok(())
