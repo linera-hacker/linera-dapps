@@ -57,12 +57,18 @@ print $'\U01f499' $LIGHTGREEN " WLINERA application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_2_appid$NC"
 
+linera --with-wallet 12 request-application $erc20_1_appid
+linera --with-wallet 12 request-application $erc20_2_appid
+
 print $'\U01F4AB' $YELLOW " Deploying Swap Pool application ..."
 swap_pool_bid=`linera --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_pool_{contract,service}.wasm`
 swap_pool_appid=`linera --with-wallet 12 create-application $swap_pool_bid`
 print $'\U01f499' $LIGHTGREEN " Swap Pool application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_pool_bid$NC"
 echo -e "    Application ID: $BLUE$swap_pool_appid$NC"
+
+linera --with-wallet 13 request-application $erc20_1_appid
+linera --with-wallet 13 request-application $erc20_2_appid
 
 print $'\U01F4AB' $YELLOW " Deploying Swap Router application ..."
 swap_router_bid=`linera --with-wallet 13 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_router_{contract,service}.wasm`
