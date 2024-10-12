@@ -28,7 +28,7 @@ function run_service () {
   local_port=`expr 30080 + $1`
   pub_port=`expr 40100 + $1`
 
-  linera -w $1 service --port $local_port --external-signing true --listener-skip-process-inbox
+  linera -w $1 service --port $local_port --external-signing false
   if [ ! $? -eq 0 ]; then
     echo "Run with official release"
     linera -w $1 service --port $local_port
