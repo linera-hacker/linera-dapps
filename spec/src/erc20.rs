@@ -153,6 +153,11 @@ pub trait ERC20MutationRoot {
         spender: ChainAccountOwner,
         value: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn subscribe_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, Default)]
