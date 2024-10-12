@@ -90,7 +90,13 @@ impl Application {
         let _ = self.balances.insert(&to, new_receiver_balance);
         let created_owner = self.created_owner.get().expect("Invalid created owner");
         if fee > Amount::ZERO {
-            let _ = self.balances.insert(&created_owner, fee);
+            let created_owner_balance = match self.balances.get(&created_owner).await {
+                Ok(Some(balance)) => balance,
+                Ok(None) => Amount::ZERO,
+                Err(_) => Amount::ZERO,
+            };
+            let new_created_owner_balance = created_owner_balance.saturating_add(fee);
+            let _ = self.balances.insert(&created_owner, new_created_owner_balance);
         }
         Ok(())
     }
@@ -141,7 +147,13 @@ impl Application {
         let _ = self.allowances.insert(&allowance_key, new_allowance);
         let created_owner = self.created_owner.get().expect("Invalid created owner");
         if fee > Amount::ZERO {
-            let _ = self.balances.insert(&created_owner, fee);
+            let created_owner_balance = match self.balances.get(&created_owner).await {
+                Ok(Some(balance)) => balance,
+                Ok(None) => Amount::ZERO,
+                Err(_) => Amount::ZERO,
+            };
+            let new_created_owner_balance = created_owner_balance.saturating_add(fee);
+            let _ = self.balances.insert(&created_owner, new_created_owner_balance);
         }
 
         Ok(())
