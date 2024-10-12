@@ -125,10 +125,10 @@ impl PoolMutationRoot for MutationRoot {
 
     async fn swap(
         &self,
-        pool_id: u64,
-        amount_0_out: Amount,
-        amount_1_out: Amount,
-        to: ChainAccountOwner,
+        _pool_id: u64,
+        _amount_0_out: Amount,
+        _amount_1_out: Amount,
+        _to: ChainAccountOwner,
     ) -> Vec<u8> {
         // Invoked by router
         Vec::new()
