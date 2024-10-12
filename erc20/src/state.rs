@@ -33,7 +33,7 @@ pub struct Application {
     pub decimals: RegisterView<u8>,
     pub initial_currency: RegisterView<Amount>,
     pub fixed_currency: RegisterView<bool>,
-    pub fee_rate: RegisterView<Amount>,
+    pub fee_percent: RegisterView<Amount>,
     pub created_owner: RegisterView<Option<ChainAccountOwner>>,
 }
 
@@ -54,7 +54,7 @@ impl Application {
             .set(argument.fixed_currency.unwrap_or(false));
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
-        self.fee_rate.set(argument.fee_rate.unwrap_or(Amount::ZERO));
+        self.fee_percent.set(argument.fee_percent.unwrap_or(Amount::ZERO));
     }
 
     pub(crate) async fn transfer(
@@ -79,8 +79,8 @@ impl Application {
             Ok(None) => Amount::ZERO,
             Err(_) => Amount::ZERO,
         };
-        let fee_rate = *self.fee_rate.get();
-        let fee = amount.saturating_mul(fee_rate.into());
+        let fee_percent = *self.fee_percent.get();
+        let fee = amount.saturating_mul(fee_percent.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
@@ -129,8 +129,8 @@ impl Application {
             Ok(None) => amount,
             Err(_) => amount,
         };
-        let fee_rate = *self.fee_rate.get();
-        let fee = amount.saturating_mul(fee_rate.into());
+        let fee_percent = *self.fee_percent.get();
+        let fee = amount.saturating_mul(fee_percent.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
         let new_to_balance = to_balance.saturating_add(send_amount);
 
