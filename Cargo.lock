@@ -3923,6 +3923,7 @@ dependencies = [
  "async-graphql",
  "bcs",
  "linera-sdk",
+ "log",
  "num-bigint",
  "num-traits",
  "spec",

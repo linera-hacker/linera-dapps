@@ -290,7 +290,10 @@ impl ApplicationContract {
             .runtime
             .authenticated_caller_id()
             .expect("Invalid caller");
-        if self.state.get_router_application_id() != caller {
+        let Some(router_application_id) = self.state.get_router_application_id() else {
+            return Err(PoolError::PermissionDenied);
+        };
+        if router_application_id != caller {
             return Err(PoolError::PermissionDenied);
         }
 
@@ -341,7 +344,10 @@ impl ApplicationContract {
             .runtime
             .authenticated_caller_id()
             .expect("Invalid caller");
-        if self.state.get_router_application_id() != caller {
+        let Some(router_application_id) = self.state.get_router_application_id() else {
+            return Err(PoolError::PermissionDenied);
+        };
+        if router_application_id != caller {
             return Err(PoolError::PermissionDenied);
         }
 
