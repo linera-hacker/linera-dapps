@@ -12,6 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
+    base::BaseOperation,
 };
 use std::sync::Arc;
 
@@ -109,5 +110,12 @@ impl ERC20MutationRoot for MutationRoot {
 
     async fn approve(&self, spender: ChainAccountOwner, value: Amount) -> Vec<u8> {
         bcs::to_bytes(&ERC20Operation::Approve { spender, value }).unwrap()
+    }
+
+    async fn subscribe_creator_chain(&self) -> Vec<u8> {
+        bcs::to_bytes(&ERC20Operation::BaseOperation(
+            BaseOperation::SubscribeCreatorChain,
+        ))
+        .unwrap()
     }
 }
