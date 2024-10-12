@@ -70,6 +70,32 @@ impl PoolQueryRoot for QueryRoot {
             _ => None,
         }
     }
+
+    async fn get_pools(&self, ctx: &Context<'_>) -> Vec<Pool> {
+        let pool_context = ctx.data::<Arc<PoolContext>>().unwrap();
+        let mut pools = Vec::<Pool>::new();
+        pool_context
+            .state
+            .erc20_erc20_pools
+            .for_each_index_value(|_index, values| {
+                for value in values.values() {
+                    pools.push(value.clone());
+                }
+                Ok(())
+            })
+            .await
+            .expect("Fail get erc20 pools");
+        pool_context
+            .state
+            .erc20_native_pools
+            .for_each_index_value(|_index, value| {
+                pools.push(value);
+                Ok(())
+            })
+            .await
+            .expect("Fail get native pools");
+        pools
+    }
 }
 
 struct MutationRoot;
@@ -95,6 +121,14 @@ impl PoolMutationRoot for MutationRoot {
             amount_1_virtual,
         })
         .unwrap()
+    }
+
+    async fn get_pool_with_token_pair(
+        &self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    ) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::GetPoolWithTokenPair { token_0, token_1 }).unwrap()
     }
 
     async fn set_fee_to(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
@@ -132,5 +166,9 @@ impl PoolMutationRoot for MutationRoot {
     ) -> Vec<u8> {
         // Invoked by router
         Vec::new()
+    }
+
+    async fn set_router_application_id(&self, application_id: ApplicationId) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::SetRouterApplicationId { application_id }).unwrap()
     }
 }

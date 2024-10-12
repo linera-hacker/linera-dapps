@@ -67,6 +67,7 @@ impl Contract for ApplicationContract {
                     amount_0_virtual,
                     amount_1_virtual,
                 )
+                .await
                 .expect("Failed OP: create pool"),
             PoolOperation::SetFeeTo { pool_id, account } => self
                 .on_op_set_fee_to(pool_id, account)
@@ -99,8 +100,8 @@ impl Contract for ApplicationContract {
             } => self
                 .on_op_swap(pool_id, amount_0_out, amount_1_out, to)
                 .expect("Failed OP: swap"),
-            PoolOperation::GetPool { token_0, token_1 } => self
-                .on_op_get_pool(token_0, token_1)
+            PoolOperation::GetPoolWithTokenPair { token_0, token_1 } => self
+                .on_op_get_pool_with_token_pair(token_0, token_1)
                 .await
                 .expect("Failed OP: get pool"),
             PoolOperation::SetRouterApplicationId { application_id } => self
@@ -196,7 +197,7 @@ impl ApplicationContract {
         Ok(PoolResponse::Ok)
     }
 
-    fn on_op_create_pool(
+    async fn on_op_create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -205,6 +206,21 @@ impl ApplicationContract {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Result<PoolResponse, PoolError> {
+        let creator = self.runtime_owner();
+
+        self.state
+            .create_pool(
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+                creator,
+                self.runtime.system_time(),
+            )
+            .await?;
+
         self.runtime
             .prepare_message(PoolMessage::CreatePool {
                 token_0,
@@ -366,7 +382,7 @@ impl ApplicationContract {
         Ok(PoolResponse::Ok)
     }
 
-    async fn on_op_get_pool(
+    async fn on_op_get_pool_with_token_pair(
         &self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -461,6 +477,15 @@ impl ApplicationContract {
         let message_id = self.runtime.message_id().expect("Invalid message id");
         ChainAccountOwner {
             chain_id: message_id.chain_id,
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        }
+    }
+
+    fn runtime_owner(&mut self) -> ChainAccountOwner {
+        ChainAccountOwner {
+            chain_id: self.runtime.chain_id(),
             owner: Some(AccountOwner::User(
                 self.runtime.authenticated_signer().expect("Invalid owner"),
             )),

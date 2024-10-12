@@ -16,6 +16,7 @@ serde = { version = "1.0.197", features = ["derive"] }
 bcs = "0.1.6"
 num-bigint = "0.4.3"
 num-traits = "0.2.18"
+log = "0.4.21"
 
 spec = { path = "./spec" }
 

@@ -73,10 +73,11 @@ impl Contract for ApplicationContract {
                 .expect("Failed OP: balance of"),
             ERC20Operation::Mint { amount } => {
                 self.on_op_mint(amount).await.expect("Failed OP: mint")
-            },
-            ERC20Operation::ChangeCreatedOwner { new_owner } => {
-                self.on_op_change_created_owner(new_owner).await.expect("Failed OP: cahnge created owner")
             }
+            ERC20Operation::ChangeCreatedOwner { new_owner } => self
+                .on_op_change_created_owner(new_owner)
+                .await
+                .expect("Failed OP: cahnge created owner"),
         }
     }
 
@@ -188,9 +189,9 @@ impl ApplicationContract {
         new_owner: ChainAccountOwner,
     ) -> Result<ERC20Response, ERC20Error> {
         self.runtime
-        .prepare_message(ERC20Message::ChangeCreatedOwner { new_owner })
-        .with_authentication()
-        .send_to(self.runtime.application_creator_chain_id());
+            .prepare_message(ERC20Message::ChangeCreatedOwner { new_owner })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
     }
 
@@ -302,16 +303,16 @@ impl ApplicationContract {
                 token_1,
                 amount_1: amount,
             };
-            let RouterResponse::Amount(currency) =
-                self.runtime
-                    .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
-            
-            else {
+            let RouterResponse::Amount(currency) = self.runtime.call_application(
+                true,
+                token_0.with_abi::<RouterApplicationAbi>(),
+                &call,
+            ) else {
                 todo!()
             };
             cur_currency = currency;
         }
-       
+
         let created_owner = Account {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: None,

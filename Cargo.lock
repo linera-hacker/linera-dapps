@@ -3936,6 +3936,7 @@ dependencies = [
  "async-graphql",
  "bcs",
  "linera-sdk",
+ "log",
  "spec",
  "thiserror",
 ]
