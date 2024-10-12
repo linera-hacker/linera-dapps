@@ -110,7 +110,7 @@ pub enum PoolOperation {
     },
 
     // Helper operation
-    GetPool {
+    GetPoolWithTokenPair {
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
     },
@@ -205,6 +205,11 @@ pub trait PoolQueryRoot {
         ctx: &Context<'_>,
         pool_id: u64,
     ) -> impl std::future::Future<Output = Result<Option<ChainAccountOwner>, Error>> + Send;
+
+    fn get_pools(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Vec<Pool>, Error>> + Send;
 }
 
 pub trait PoolMutationRoot {
@@ -218,6 +223,13 @@ pub trait PoolMutationRoot {
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn get_pool_with_token_pair(
+        &self,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     fn set_fee_to(
@@ -259,6 +271,12 @@ pub trait PoolMutationRoot {
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn set_router_application_id(
+        &self,
+        ctx: &Context<'_>,
+        application_id: ApplicationId,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 

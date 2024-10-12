@@ -55,8 +55,6 @@ print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
 
-timeout 10s linera -w 10 service --port 30090 --external-signing false
-
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
@@ -70,10 +68,6 @@ echo -e "    Application ID: $BLUE$erc20_2_appid$NC"
 linera --with-wallet 12 request-application $erc20_1_appid
 linera --with-wallet 12 request-application $erc20_2_appid
 
-timeout 10s linera -w 10 service --port 30090 --external-signing false
-timeout 10s linera -w 11 service --port 30091 --external-signing false
-timeout 10s linera -w 12 service --port 30092 --external-signing false
-
 print $'\U01F4AB' $YELLOW " Deploying Swap Pool application ..."
 swap_pool_bid=`linera --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_pool_{contract,service}.wasm`
 swap_pool_appid=`linera --with-wallet 12 create-application $swap_pool_bid \
@@ -86,11 +80,6 @@ linera --with-wallet 13 request-application $erc20_1_appid
 linera --with-wallet 13 request-application $erc20_2_appid
 linera --with-wallet 13 request-application $swap_pool_appid
 
-timeout 10s linera -w 10 service --port 30090 --external-signing false
-timeout 10s linera -w 11 service --port 30091 --external-signing false
-timeout 10s linera -w 12 service --port 30092 --external-signing false
-timeout 10s linera -w 13 service --port 30093 --external-signing false
-
 print $'\U01F4AB' $YELLOW " Deploying Swap Router application ..."
 swap_router_bid=`linera --with-wallet 13 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_router_{contract,service}.wasm`
 swap_router_appid=`linera --with-wallet 13 create-application $swap_router_bid \
@@ -99,6 +88,25 @@ swap_router_appid=`linera --with-wallet 13 create-application $swap_router_bid \
 print $'\U01f499' $LIGHTGREEN " Swap Router application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_router_bid$NC"
 echo -e "    Application ID: $BLUE$swap_router_appid$NC"
+
+HTTP_HOST="http://210.209.69.38:23103"
+
+chain=`linera --with-wallet 10 wallet show | grep "Public Key" | awk '{print $2}'`
+print $'\U01F4AB' $YELLOW " ERC20"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
+
+chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}'`
+print $'\U01F4AB' $YELLOW " WTLINERA"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+
+chain=`linera --with-wallet 12 wallet show | grep "Public Key" | awk '{print $2}'`
+print $'\U01F4AB' $YELLOW " Swap Pool"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
+
+chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
+print $'\U01F4AB' $YELLOW " Swap Router"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
+
 
 run_service 10 &
 run_service 11 &

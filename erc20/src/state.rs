@@ -1,8 +1,6 @@
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
-use linera_sdk::views::{
-    linera_views, MapView, RegisterView, RootView, ViewStorageContext,
-};
+use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use serde::{Deserialize, Serialize};
 use spec::{account::ChainAccountOwner, erc20::InstantiationArgument};
 
@@ -56,7 +54,8 @@ impl Application {
             .set(argument.fixed_currency.unwrap_or(false));
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
-        self.fee_percent.set(argument.fee_percent.unwrap_or(Amount::ZERO));
+        self.fee_percent
+            .set(argument.fee_percent.unwrap_or(Amount::ZERO));
         self.minted_supply.set(Amount::ZERO);
     }
 

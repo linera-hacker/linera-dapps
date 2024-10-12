@@ -225,8 +225,12 @@ impl ApplicationContract {
     }
 
     fn get_pool(&mut self, token_0: ApplicationId, token_1: Option<ApplicationId>) -> Option<Pool> {
-        let call = PoolOperation::GetPool { token_0, token_1 };
+        let call = PoolOperation::GetPoolWithTokenPair { token_0, token_1 };
         let pool_application_id = self.pool_application_id();
+        let resp = self
+            .runtime
+            .call_application(true, pool_application_id, &call);
+        log::info!("GetPoolWithTokenPair {:?}", resp);
         let PoolResponse::Pool(pool) =
             self.runtime
                 .call_application(true, pool_application_id, &call)
