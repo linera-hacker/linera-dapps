@@ -45,14 +45,18 @@ create_wallet 13
 
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid --json-argument '{"initial_supply":"20000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001", "fixed_currency":false, "fee_percent": "0.1"}'`
+erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
+    --json-argument '{"initial_supply":"20000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent": "0.1"}' \
+    --json-parameters '{"initial_balances": {}}'`
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
 
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid --json-argument '{"initial_supply":"20000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1", "fixed_currency":true, "fee_percent": "0.1"}'`
+erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
+    --json-argument '{"initial_supply":"20000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent": "0.1"}' \
+    --json-parameters '{"initial_balances": {}}'`
 print $'\U01f499' $LIGHTGREEN " WLINERA application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_2_appid$NC"
