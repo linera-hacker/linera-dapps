@@ -1,6 +1,7 @@
 #!/bin/bash
 
 kill -9 `ps | grep linera | awk '{print $1}'`
+kill -9 `ps | grep socat | awk '{print $1}'`
 
 unset RUSTFLAGS
 cargo build --release --target wasm32-unknown-unknown
@@ -127,6 +128,7 @@ print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_ro
 ##   2 set router application id to pool
 ####
 wallet_13_swap_pool_service="http://172.21.132.203:30093/chains/$chain/applications/$swap_pool_appid"
+wallet_13_swap_router_service="$HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 run_service 10 &
 run_service 11 &
@@ -143,6 +145,7 @@ curl H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { se
 echo
 
 print $'\U01F4AB' $YELLOW " Add liquidity with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_13_swap_router_service"
 echo -e "mutation {\n\
   addLiquidity (\n\
     token0: \"$erc20_1_appid\",\n\
