@@ -15,7 +15,7 @@ use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
-    swap::{PoolMessage, PoolOperation, PoolParameters, PoolResponse, RouterApplicationAbi},
+    swap::{PoolMessage, PoolOperation, PoolResponse},
 };
 use swap_pool::PoolError;
 
@@ -32,7 +32,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = PoolMessage;
-    type Parameters = PoolParameters;
+    type Parameters = ();
     type InstantiationArgument = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
@@ -103,6 +103,9 @@ impl Contract for ApplicationContract {
                 .on_op_get_pool(token_0, token_1)
                 .await
                 .expect("Failed OP: get pool"),
+            PoolOperation::SetRouterApplicationId { application_id } => self
+                .on_op_set_router_application_id(application_id)
+                .expect("Failed OP: set router application id"),
         }
     }
 
@@ -163,6 +166,10 @@ impl Contract for ApplicationContract {
                 .on_msg_swap(pool_id, amount_0_out, amount_1_out, to)
                 .await
                 .expect("Failed MSG: swap"),
+            PoolMessage::SetRouterApplicationId { application_id } => self
+                .on_msg_set_router_application_id(application_id)
+                .await
+                .expect("Failed MSG: set router application id"),
         }
     }
 
@@ -172,10 +179,6 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
-    fn router_application_id(&mut self) -> ApplicationId<RouterApplicationAbi> {
-        self.runtime.application_parameters().router_application_id
-    }
-
     fn execute_base_operation(
         &mut self,
         operation: BaseOperation,
@@ -271,7 +274,7 @@ impl ApplicationContract {
             .runtime
             .authenticated_caller_id()
             .expect("Invalid caller");
-        if self.router_application_id().forget_abi() != caller {
+        if self.state.get_router_application_id() != caller {
             return Err(PoolError::PermissionDenied);
         }
 
@@ -322,7 +325,7 @@ impl ApplicationContract {
             .runtime
             .authenticated_caller_id()
             .expect("Invalid caller");
-        if self.router_application_id().forget_abi() != caller {
+        if self.state.get_router_application_id() != caller {
             return Err(PoolError::PermissionDenied);
         }
 
@@ -373,6 +376,20 @@ impl ApplicationContract {
             .get_pool_with_token_pair(token_0, token_1)
             .await?;
         Ok(PoolResponse::Pool(pool))
+    }
+
+    fn on_op_set_router_application_id(
+        &mut self,
+        application_id: ApplicationId,
+    ) -> Result<PoolResponse, PoolError> {
+        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
+            return Err(PoolError::PermissionDenied);
+        }
+        self.runtime
+            .prepare_message(PoolMessage::SetRouterApplicationId { application_id })
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
+        Ok(PoolResponse::Ok)
     }
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
@@ -680,6 +697,15 @@ impl ApplicationContract {
             amount_1_out,
             to,
         });
+        Ok(())
+    }
+
+    async fn on_msg_set_router_application_id(
+        &mut self,
+        application_id: ApplicationId,
+    ) -> Result<(), PoolError> {
+        self.state.set_router_application_id(application_id).await;
+        self.publish_message(PoolMessage::SetRouterApplicationId { application_id });
         Ok(())
     }
 }

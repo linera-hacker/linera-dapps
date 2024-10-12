@@ -113,11 +113,13 @@ impl PoolMutationRoot for MutationRoot {
         _amount_1: Amount,
         _to: ChainAccountOwner,
     ) -> Vec<u8> {
+        // Invoked by router
         Vec::new()
     }
 
     // Return pair token amount
     async fn burn(&self, _pool_id: u64, _liquidity: Amount) -> Vec<u8> {
+        // Invoked by router
         Vec::new()
     }
 
@@ -128,12 +130,7 @@ impl PoolMutationRoot for MutationRoot {
         amount_1_out: Amount,
         to: ChainAccountOwner,
     ) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::Swap {
-            pool_id,
-            amount_0_out,
-            amount_1_out,
-            to,
-        })
-        .unwrap()
+        // Invoked by router
+        Vec::new()
     }
 }

@@ -24,11 +24,6 @@ impl ServiceAbi for PoolApplicationAbi {
     type QueryResponse = Response;
 }
 
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct PoolParameters {
-    pub router_application_id: ApplicationId<RouterApplicationAbi>,
-}
-
 #[derive(Debug, Deserialize, Serialize)]
 pub enum PoolMessage {
     BaseMessage(BaseMessage),
@@ -65,6 +60,9 @@ pub enum PoolMessage {
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
+    },
+    SetRouterApplicationId {
+        application_id: ApplicationId,
     },
 }
 
@@ -115,6 +113,9 @@ pub enum PoolOperation {
     GetPool {
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
+    },
+    SetRouterApplicationId {
+        application_id: ApplicationId,
     },
 }
 

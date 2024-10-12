@@ -17,10 +17,21 @@ pub struct Application {
     pub pool_id: RegisterView<u64>,
     pub pool_erc20_erc20s: MapView<u64, Vec<ApplicationId>>,
     pub pool_erc20_natives: MapView<u64, ApplicationId>,
+    pub router_application_id: RegisterView<Option<ApplicationId>>,
 }
 
 #[allow(dead_code)]
 impl Application {
+    pub(crate) async fn set_router_application_id(&mut self, application_id: ApplicationId) {
+        self.router_application_id.set(Some(application_id));
+    }
+
+    pub(crate) fn get_router_application_id(&self) -> ApplicationId {
+        self.router_application_id
+            .get()
+            .expect("Invalid router application id")
+    }
+
     async fn insert_pool(&mut self, pool: Pool) -> Result<(), PoolError> {
         match pool.token_1 {
             Some(_token_1) => {
@@ -222,14 +233,16 @@ impl Application {
                 .as_micros(),
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
-            pool.price_0_cumulative = Amount::from_attos(pool
-                .reserve_1
-                .saturating_div(pool.reserve_0)
-                .saturating_mul(time_elapsed));
-            pool.price_1_cumulative = Amount::from_attos(pool
-                .reserve_0
-                .saturating_div(pool.reserve_1)
-                .saturating_mul(time_elapsed));
+            pool.price_0_cumulative = Amount::from_attos(
+                pool.reserve_1
+                    .saturating_div(pool.reserve_0)
+                    .saturating_mul(time_elapsed),
+            );
+            pool.price_1_cumulative = Amount::from_attos(
+                pool.reserve_0
+                    .saturating_div(pool.reserve_1)
+                    .saturating_mul(time_elapsed),
+            );
         }
 
         pool.reserve_0 = balance_0;
