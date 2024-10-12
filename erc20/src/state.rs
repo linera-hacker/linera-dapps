@@ -84,7 +84,7 @@ impl Application {
         };
         let fee_percent = *self.fee_percent.get();
         let fee = amount.saturating_mul(fee_percent.into());
-        let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
+        let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
         let _ = self.balances.insert(&sender, new_sender_balance);
@@ -134,7 +134,7 @@ impl Application {
         };
         let fee_percent = *self.fee_percent.get();
         let fee = amount.saturating_mul(fee_percent.into());
-        let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
+        let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
         let _ = self.balances.insert(&from, new_from_balance);
