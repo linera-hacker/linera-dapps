@@ -1,6 +1,6 @@
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
-use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
+use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, SetView, ViewStorageContext};
 use serde::{Deserialize, Serialize};
 use spec::{account::ChainAccountOwner, erc20::InstantiationArgument};
 
@@ -30,26 +30,27 @@ pub struct Application {
     pub symbol: RegisterView<String>,
     pub decimals: RegisterView<u8>,
     pub initial_currency: RegisterView<Amount>,
-    pub initial_currency_fixed: RegisterView<bool>,
-    pub basis_point_rate: RegisterView<Amount>,
+    pub fixed_currency: RegisterView<bool>,
+    pub fee_rate: RegisterView<Amount>,
+    pub created_owner: RegisterView<Option<ChainAccountOwner>>,
 }
 
 #[allow(dead_code)]
 impl Application {
-    pub(crate) async fn instantiate(&mut self, argument: InstantiationArgument) {
+    pub(crate) async fn instantiate(&mut self, argument: InstantiationArgument, owner: ChainAccountOwner) {
+        self.created_owner.set(Some(owner));
         self.total_supply.set(argument.initial_supply);
         let _ = self
             .balances
-            .insert(&argument.owner, argument.initial_supply);
+            .insert(&owner, argument.initial_supply);
         self.name.set(argument.name);
         self.symbol.set(argument.symbol);
         self.decimals.set(argument.decimals);
-        self.initial_currency_fixed
-            .set(argument.initial_currency_fixed.unwrap_or(false));
+        self.fixed_currency
+            .set(argument.fixed_currency.unwrap_or(false));
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
-        self.basis_point_rate
-            .set(argument.basis_point_rate.unwrap_or(Amount::ZERO));
+        self.fee_rate.set(argument.fee_rate.unwrap_or(Amount::ZERO));
     }
 
     pub(crate) async fn transfer(
@@ -57,7 +58,6 @@ impl Application {
         sender: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
-        created_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let sender_balance = match self.balances.get(&sender).await {
             Ok(Some(balance)) => balance,
@@ -75,13 +75,14 @@ impl Application {
             Ok(None) => Amount::ZERO,
             Err(_) => Amount::ZERO,
         };
-        let fee_rate = *self.basis_point_rate.get();
+        let fee_rate = *self.fee_rate.get();
         let fee = amount.saturating_mul(fee_rate.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
         let _ = self.balances.insert(&sender, new_sender_balance);
         let _ = self.balances.insert(&to, new_receiver_balance);
+        let created_owner = self.created_owner.get().expect("Invalid created owner");
         if fee > Amount::ZERO {
             let _ = self.balances.insert(&created_owner, fee);
         }
@@ -94,7 +95,6 @@ impl Application {
         amount: Amount,
         to: ChainAccountOwner,
         caller: ChainAccountOwner,
-        created_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let allowance_key = AllowanceKey::new(from.clone(), caller);
         let allowance = match self.allowances.get(&allowance_key).await {
@@ -125,7 +125,7 @@ impl Application {
             Ok(None) => amount,
             Err(_) => amount,
         };
-        let fee_rate = *self.basis_point_rate.get();
+        let fee_rate = *self.fee_rate.get();
         let fee = amount.saturating_mul(fee_rate.into());
         let send_amount = amount.try_sub(fee).expect("Invalid sub send amount");
         let new_to_balance = to_balance.saturating_add(send_amount);
@@ -133,6 +133,7 @@ impl Application {
         let _ = self.balances.insert(&from, new_from_balance);
         let _ = self.balances.insert(&to, new_to_balance);
         let _ = self.allowances.insert(&allowance_key, new_allowance);
+        let created_owner = self.created_owner.get().expect("Invalid created owner");
         if fee > Amount::ZERO {
             let _ = self.balances.insert(&created_owner, fee);
         }
@@ -159,7 +160,7 @@ impl Application {
         currency: Amount,
     ) {
         let mut exchange_currency = self.initial_currency.get();
-        if !self.initial_currency_fixed.get() {
+        if !self.fixed_currency.get() {
             exchange_currency = &currency
         }
         let erc20_amount = exchange_currency.saturating_mul(exchange_amount.into());

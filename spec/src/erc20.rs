@@ -12,13 +12,12 @@ use std::collections::HashMap;
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct InstantiationArgument {
     pub initial_supply: Amount,
-    pub owner: ChainAccountOwner,
     pub name: String,
     pub symbol: String,
     pub decimals: u8,
     pub initial_currency: Option<Amount>,
-    pub initial_currency_fixed: Option<bool>,
-    pub basis_point_rate: Option<Amount>,
+    pub fixed_currency: Option<bool>,
+    pub fee_rate: Option<Amount>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
