@@ -1,5 +1,8 @@
 #!/bin/bash
 
+unset RUSTFLAGS
+cargo build --release --target wasm32-unknown-unknown
+
 WALLET_BASE=/tmp/linera/dapps
 mkdir -p $WALLET_BASE
 rm $WALLET_BASE/* -rf
@@ -36,6 +39,8 @@ function run_service () {
 }
 
 create_wallet 10
+create_wallet 11
+create_wallet 12
 
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
@@ -43,6 +48,23 @@ print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_appid$NC"
 
+print $'\U01F4AB' $YELLOW " Deploying Swap Pool application ..."
+swap_pool_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_pool_{contract,service}.wasm`
+swap_pool_appid=`linera --with-wallet 11 create-application $swap_pool_bid`
+print $'\U01f499' $LIGHTGREEN " Swap Pool application deployed"
+echo -e "    Bytecode ID:    $BLUE$swap_pool_bid$NC"
+echo -e "    Application ID: $BLUE$swap_pool_appid$NC"
+
+print $'\U01F4AB' $YELLOW " Deploying Swap Router application ..."
+swap_router_bid=`linera --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_router_{contract,service}.wasm`
+swap_router_appid=`linera --with-wallet 12 create-application $swap_router_bid \
+    --json-parameters "{\"pool_application_id\":\"$swap_pool_appid\"}"`
+print $'\U01f499' $LIGHTGREEN " Swap Router application deployed"
+echo -e "    Bytecode ID:    $BLUE$swap_router_bid$NC"
+echo -e "    Application ID: $BLUE$swap_router_appid$NC"
+
 run_service 10 &
+run_service 11 &
+run_service 12 &
 
 sleep 1000000
