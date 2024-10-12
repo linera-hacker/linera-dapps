@@ -227,10 +227,6 @@ impl ApplicationContract {
     fn get_pool(&mut self, token_0: ApplicationId, token_1: Option<ApplicationId>) -> Option<Pool> {
         let call = PoolOperation::GetPoolWithTokenPair { token_0, token_1 };
         let pool_application_id = self.pool_application_id();
-        let resp = self
-            .runtime
-            .call_application(true, pool_application_id, &call);
-        log::info!("GetPoolWithTokenPair {:?}", resp);
         let PoolResponse::Pool(pool) =
             self.runtime
                 .call_application(true, pool_application_id, &call)
@@ -308,8 +304,8 @@ impl ApplicationContract {
         }
         Ok(Amount::from_attos(
             amount_0
-                .saturating_mul(pool.reserve_1.into())
-                .saturating_div(pool.reserve_0.into()),
+                .saturating_div(pool.reserve_0.into())
+                .saturating_mul(pool.reserve_1.into()),
         ))
     }
 
@@ -319,8 +315,8 @@ impl ApplicationContract {
         }
         Ok(Amount::from_attos(
             amount_1
-                .saturating_mul(pool.reserve_0.into())
-                .saturating_div(pool.reserve_1.into()),
+                .saturating_div(pool.reserve_1.into())
+                .saturating_mul(pool.reserve_0.into()),
         ))
     }
 
@@ -336,13 +332,15 @@ impl ApplicationContract {
             return Ok((amount_0_desired, amount_1_desired));
         }
         let amount_1_optimal = self.calculate_swap_amount_1(pool.clone(), amount_0_desired)?;
+        let reserve_0: u128 = pool.reserve_0.into();
+        let reserve_1: u128 = pool.reserve_1.into();
         if amount_1_optimal <= amount_1_desired {
             if amount_1_optimal < amount_1_min {
                 return Err(RouterError::InvalidAmount);
             }
             return Ok((amount_0_desired, amount_1_optimal));
         }
-        let amount_0_optimal = self.calculate_swap_amount_1(pool, amount_1_desired)?;
+        let amount_0_optimal = self.calculate_swap_amount_0(pool, amount_1_desired)?;
         if amount_0_optimal > amount_0_desired {
             return Err(RouterError::InvalidAmount);
         }
