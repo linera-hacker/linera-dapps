@@ -85,6 +85,7 @@ echo -e "    Application ID: $BLUE$swap_pool_appid$NC"
 
 linera --with-wallet 13 request-application $erc20_1_appid
 linera --with-wallet 13 request-application $erc20_2_appid
+linera --with-wallet 13 request-application $swap_pool_appid
 
 timeout 10s linera -w 10 service --port 30090 --external-signing false
 timeout 10s linera -w 11 service --port 30091 --external-signing false
