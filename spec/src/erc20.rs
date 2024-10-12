@@ -9,6 +9,12 @@ use linera_sdk::{
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ERC20Parameters {
+    pub airdrop_amount: Amount,
+    pub airdrop_owners: Vec<ChainAccountOwner>,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct InstantiationArgument {
     pub initial_supply: Amount,
