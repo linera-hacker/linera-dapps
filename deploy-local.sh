@@ -90,21 +90,33 @@ echo -e "    Bytecode ID:    $BLUE$swap_router_bid$NC"
 echo -e "    Application ID: $BLUE$swap_router_appid$NC"
 
 HTTP_HOST="http://210.209.69.38:23103"
-
 chain=`linera --with-wallet 10 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " ERC20"
+print $'\U01F4AB' $YELLOW " ERC20 Wallet 10"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " WTLINERA"
+print $'\U01F4AB' $YELLOW " WTLINERA Wallet 11"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 chain=`linera --with-wallet 12 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " Swap Pool"
+print $'\U01F4AB' $YELLOW " Swap Pool Wallet 12"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
+HTTP_HOST="http://210.209.69.38:23105"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " Swap Router"
+print $'\U01F4AB' $YELLOW " Swap Router Wallet 13"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 

@@ -11,6 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
+    base::BaseOperation,
     swap::{Pool, PoolMutationRoot, PoolOperation, PoolQueryRoot},
 };
 use std::sync::Arc;
@@ -170,5 +171,12 @@ impl PoolMutationRoot for MutationRoot {
 
     async fn set_router_application_id(&self, application_id: ApplicationId) -> Vec<u8> {
         bcs::to_bytes(&PoolOperation::SetRouterApplicationId { application_id }).unwrap()
+    }
+
+    async fn subscribe_creator_chain(&self) -> Vec<u8> {
+        bcs::to_bytes(&PoolOperation::BaseOperation(
+            BaseOperation::SubscribeCreatorChain,
+        ))
+        .unwrap()
     }
 }

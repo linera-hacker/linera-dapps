@@ -26,10 +26,8 @@ impl Application {
         self.router_application_id.set(Some(application_id));
     }
 
-    pub(crate) fn get_router_application_id(&self) -> ApplicationId {
-        self.router_application_id
-            .get()
-            .expect("Invalid router application id")
+    pub(crate) fn get_router_application_id(&self) -> Option<ApplicationId> {
+        *self.router_application_id.get()
     }
 
     async fn insert_pool(&mut self, pool: Pool) -> Result<(), PoolError> {

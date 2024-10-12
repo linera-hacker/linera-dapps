@@ -278,6 +278,12 @@ pub trait PoolMutationRoot {
         ctx: &Context<'_>,
         application_id: ApplicationId,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    // TODO: how to inherit trait from base
+    fn subscribe_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
