@@ -178,4 +178,49 @@ impl Application {
         let new_user_balance = user_balance.saturating_add(erc20_amount);
         let _ = self.balances.insert(&caller, new_user_balance);
     }
+
+    pub(crate) async fn airdrop(
+        &mut self,
+        airdrop_amount: Amount,
+        airdrop_owners: Vec<ChainAccountOwner>,
+    ) -> Result<(), ERC20Error> {
+        let created_owner = self.created_owner.get().expect("Invalid created owner");
+        for owner in airdrop_owners {
+            let allowance_key = AllowanceKey::new(created_owner.clone(), owner);
+            let allowance = match self.allowances.get(&allowance_key).await {
+                Ok(Some(balance)) => balance,
+                Ok(None) => Amount::ZERO,
+                Err(_) => Amount::ZERO,
+            };
+
+            if allowance < airdrop_amount {
+                return Err(ERC20Error::InvalidInitialAmount);
+            }
+
+            let from_balance = match self.balances.get(&created_owner).await {
+                Ok(Some(balance)) => balance,
+                Ok(None) => Amount::ZERO,
+                Err(_) => Amount::ZERO,
+            };
+    
+            if from_balance < airdrop_amount {
+                return Err(ERC20Error::InvalidInitialAmount);
+            }
+    
+            let to_balance = match self.balances.get(&owner).await {
+                Ok(Some(balance)) => balance,
+                Ok(None) => airdrop_amount,
+                Err(_) => airdrop_amount,
+            };
+
+            let new_from_balance = from_balance.saturating_sub(airdrop_amount);
+            let new_to_balance = to_balance.saturating_add(airdrop_amount);
+            let new_allowance = allowance.saturating_sub(airdrop_amount);
+            
+            let _ = self.balances.insert(&created_owner, new_from_balance);
+            let _ = self.balances.insert(&owner, new_to_balance);
+            let _ = self.allowances.insert(&allowance_key, new_allowance);
+        }
+        Ok(())
+    }
 }

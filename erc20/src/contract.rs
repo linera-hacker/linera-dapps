@@ -13,7 +13,7 @@ use erc20::ERC20Error;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Message, ERC20Operation, ERC20Response, InstantiationArgument},
+    erc20::{ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument},
     swap::{RouterApplicationAbi, RouterOperation, RouterResponse},
 };
 
@@ -30,7 +30,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = ERC20Message;
-    type Parameters = ();
+    type Parameters = ERC20Parameters;
     type InstantiationArgument = InstantiationArgument;
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
@@ -47,7 +47,11 @@ impl Contract for ApplicationContract {
                 self.runtime.authenticated_signer().expect("Invalid owner"),
             )),
         };
+        let airdrop_owners = self.runtime.application_parameters().airdrop_owners;
+        let airdrop_amount = self.runtime.application_parameters().airdrop_amount;
         self.state.instantiate(argument, owner).await;
+
+        let _ = self.state.airdrop(airdrop_amount, airdrop_owners).await;
     }
 
     async fn execute_operation(&mut self, operation: ERC20Operation) -> ERC20Response {
