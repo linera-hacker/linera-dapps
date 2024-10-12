@@ -153,16 +153,16 @@ curl H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { se
 echo
 
 print $'\U01F4AB' $YELLOW " Add liquidity with..."
-echo "mutation {\
-  addLiquidity (\
-    token0: \"$erc20_1_appid\", \
-    token1: \"$erc20_2_appid\", \
-    amount0Desired: \"2000\", \
-    amount1Desired: \"2000\", \
-    amount0Min: \"2000\", \
-    amount1Min: \"2000\", \
-    deadline: 0, \
-  )\
+echo -e "mutation {\n\
+  addLiquidity (\n\
+    token0: \"$erc20_1_appid\",\n\
+    token1: \"$erc20_2_appid\",\n\
+    amount0Desired: \"2000\",\n\
+    amount1Desired: \"2000\",\n\
+    amount0Min: \"2000\",\n\
+    amount1Min: \"2000\",\n\
+    deadline: 0,\n\
+  )\n\
 }"
 
 sleep 1000000
