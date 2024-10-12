@@ -546,12 +546,6 @@ impl ApplicationContract {
             }
         }
 
-        log::info!(
-            "Create pool message chain {} runtime chain {}",
-            self.runtime.message_id().unwrap().chain_id,
-            self.runtime.chain_id()
-        );
-
         if self.runtime.message_id().unwrap().chain_id != self.runtime.chain_id() {
             self.state
                 .create_pool(

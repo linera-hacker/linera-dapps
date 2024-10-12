@@ -111,6 +111,8 @@ print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
+wallet_12_swap_pool_service="http://172.21.132.203:30092/chains/$chain/applications/$swap_pool_appid"
+
 HTTP_HOST="http://210.209.69.38:23105"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
 print $'\U01F4AB' $YELLOW " Swap Router Wallet 13"
@@ -119,10 +121,38 @@ print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
+####
+## We should
+##   1 subscribe to pool creator chain
+##   2 set router application id to pool
+####
+wallet_13_swap_pool_service="http://172.21.132.203:30093/chains/$chain/applications/$swap_pool_appid"
 
 run_service 10 &
 run_service 11 &
 run_service 12 &
 run_service 13 &
+
+sleep 5
+
+print $'\U01F4AB' $YELLOW " Subscribe pool creator chain..."
+curl H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_swap_pool_service
+echo
+print $'\U01F4AB' $YELLOW " Set router application id to pool..."
+curl H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { setRouterApplicationId(applicationId:\\\"$swap_router_appid\\\")}\"}" $wallet_12_swap_pool_service
+echo
+
+print $'\U01F4AB' $YELLOW " Add liquidity with..."
+echo "mutation {\
+  addLiquidity (\
+    token0: \"$erc20_1_appid\", \
+    token1: \"$erc20_2_appid\", \
+    amount0Desired: \"2000\", \
+    amount1Desired: \"2000\", \
+    amount0Min: \"2000\", \
+    amount1Min: \"2000\", \
+    deadline: 0, \
+  )\
+}"
 
 sleep 1000000

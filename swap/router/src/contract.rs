@@ -332,8 +332,6 @@ impl ApplicationContract {
             return Ok((amount_0_desired, amount_1_desired));
         }
         let amount_1_optimal = self.calculate_swap_amount_1(pool.clone(), amount_0_desired)?;
-        let reserve_0: u128 = pool.reserve_0.into();
-        let reserve_1: u128 = pool.reserve_1.into();
         if amount_1_optimal <= amount_1_desired {
             if amount_1_optimal < amount_1_min {
                 return Err(RouterError::InvalidAmount);
