@@ -356,7 +356,7 @@ impl ApplicationContract {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> Result<RouterResponse, RouterError> {
         let (pool, created, exchanged) = self
@@ -396,6 +396,16 @@ impl ApplicationContract {
                 amount_0_min,
                 amount_1_min,
             )?
+        };
+
+        let to = match to {
+            Some(_to) => _to,
+            None => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::User(
+                    self.runtime.authenticated_signer().expect("Invalid owner"),
+                )),
+            },
         };
 
         // Fake add reserves to calculate liquidity, it'll be persisted later
@@ -446,7 +456,7 @@ impl ApplicationContract {
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> Result<RouterResponse, RouterError> {
         let (pool, exchanged) = self
@@ -476,6 +486,16 @@ impl ApplicationContract {
         if amount_0 < amount_0_min || amount_1 < amount_1_min {
             return Err(RouterError::InvalidAmount);
         }
+
+        let to = match to {
+            Some(_to) => _to,
+            None => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::User(
+                    self.runtime.authenticated_signer().expect("Invalid owner"),
+                )),
+            },
+        };
 
         self.runtime
             .prepare_message(RouterMessage::RemoveLiquidity {
@@ -519,7 +539,7 @@ impl ApplicationContract {
         amount_1_in: Option<Amount>,
         amount_0_out_min: Option<Amount>,
         amount_1_out_min: Option<Amount>,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
     ) -> Result<RouterResponse, RouterError> {
         let (pool, exchanged) = self
             .get_pool_exchangable(token_0, token_1)
@@ -554,6 +574,16 @@ impl ApplicationContract {
                 }
             }
         }
+
+        let to = match to {
+            Some(_to) => _to,
+            None => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::User(
+                    self.runtime.authenticated_signer().expect("Invalid owner"),
+                )),
+            },
+        };
 
         self.runtime
             .prepare_message(RouterMessage::Swap {

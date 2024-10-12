@@ -70,7 +70,7 @@ impl RouterMutationRoot for MutationRoot {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> Vec<u8> {
         bcs::to_bytes(&RouterOperation::AddLiquidity {
@@ -94,7 +94,7 @@ impl RouterMutationRoot for MutationRoot {
         liquidity: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> Vec<u8> {
         bcs::to_bytes(&RouterOperation::RemoveLiquidity {
@@ -117,7 +117,7 @@ impl RouterMutationRoot for MutationRoot {
         amount_1_in: Option<Amount>,
         amount_0_out_min: Option<Amount>,
         amount_1_out_min: Option<Amount>,
-        to: ChainAccountOwner,
+        to: Option<ChainAccountOwner>,
     ) -> Vec<u8> {
         bcs::to_bytes(&RouterOperation::Swap {
             token_0,
