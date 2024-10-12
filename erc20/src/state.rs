@@ -138,7 +138,7 @@ impl Application {
             Err(_) => amount,
         };
         let fee_percent = *self.fee_percent.get();
-        let fee = amount.saturating_mul(fee_percent.into());
+        let fee = Amount::from_attos(amount.saturating_mul(fee_percent.into()).saturating_div(Amount::ONE));
         let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
