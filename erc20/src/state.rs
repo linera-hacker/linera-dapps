@@ -223,4 +223,35 @@ impl Application {
         }
         Ok(())
     }
+
+    pub(crate) async fn change_created_owner(
+        &mut self,
+        owner: ChainAccountOwner,
+        new_owner: ChainAccountOwner,
+    ) -> Result<(), ERC20Error> {
+        let old_owner = self.created_owner.get().expect("Invalid created owner");
+        if old_owner != owner {
+            return Err(ERC20Error::PermissionDenied);
+        }
+
+        let from_balance = match self.balances.get(&owner).await {
+            Ok(Some(balance)) => balance,
+            Ok(None) => Amount::ZERO,
+            Err(_) => Amount::ZERO,
+        };
+
+        let to_balance = match self.balances.get(&new_owner).await {
+            Ok(Some(balance)) => balance,
+            Ok(None) => Amount::ZERO,
+            Err(_) => Amount::ZERO,
+        };
+
+        let new_to_balance = to_balance.saturating_add(from_balance);
+        let _ = self.balances.insert(&owner, Amount::ZERO);
+        let _ = self.balances.insert(&owner, new_to_balance);
+
+        self.created_owner.set(Some(new_owner));
+
+        Ok(())
+    }
 }

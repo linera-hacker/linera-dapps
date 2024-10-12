@@ -46,6 +46,9 @@ pub enum ERC20Message {
         to: ChainAccountOwner,
         amount: Amount,
     },
+    ChangeCreatedOwner {
+        new_owner: ChainAccountOwner,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
@@ -69,6 +72,9 @@ pub enum ERC20Operation {
     },
     Mint {
         amount: Amount,
+    },
+    ChangeCreatedOwner {
+        new_owner: ChainAccountOwner,
     },
 }
 

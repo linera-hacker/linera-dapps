@@ -74,6 +74,9 @@ impl Contract for ApplicationContract {
                 .expect("Failed OP: balance of"),
             ERC20Operation::Mint { amount } => {
                 self.on_op_mint(amount).await.expect("Failed OP: mint")
+            },
+            ERC20Operation::ChangeCreatedOwner { new_owner } => {
+                self.on_op_change_created_owner(new_owner).await.expect("Failed OP: cahnge created owner")
             }
         }
     }
@@ -97,6 +100,10 @@ impl Contract for ApplicationContract {
                 .expect("Failed MSG: approve"),
             ERC20Message::Mint { to, amount } => self
                 .on_msg_mint(to, amount)
+                .await
+                .expect("Failed MSG: approve"),
+            ERC20Message::ChangeCreatedOwner { new_owner } => self
+                .on_msg_change_created_owner(new_owner)
                 .await
                 .expect("Failed MSG: approve"),
         }
@@ -177,6 +184,17 @@ impl ApplicationContract {
         ))
     }
 
+    async fn on_op_change_created_owner(
+        &mut self,
+        new_owner: ChainAccountOwner,
+    ) -> Result<ERC20Response, ERC20Error> {
+        self.runtime
+        .prepare_message(ERC20Message::ChangeCreatedOwner { new_owner })
+        .with_authentication()
+        .send_to(self.runtime.application_creator_chain_id());
+        Ok(ERC20Response::Ok)
+    }
+
     async fn on_op_mint(&mut self, amount: Amount) -> Result<ERC20Response, ERC20Error> {
         let to = self.message_owner();
         self.runtime
@@ -255,6 +273,18 @@ impl ApplicationContract {
         self.state.approve(spender.clone(), value, owner).await?;
 
         self.publish_message(ERC20Message::Approve { spender, value });
+        Ok(())
+    }
+
+    async fn on_msg_change_created_owner(
+        &mut self,
+        new_owner: ChainAccountOwner,
+    ) -> Result<(), ERC20Error> {
+        let owner = self.message_owner();
+
+        self.state.change_created_owner(owner, new_owner).await?;
+
+        self.publish_message(ERC20Message::ChangeCreatedOwner { new_owner });
         Ok(())
     }
 
