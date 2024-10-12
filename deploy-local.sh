@@ -140,16 +140,16 @@ run_service 13 &
 sleep 5
 
 print $'\U01F4AB' $YELLOW " Subscribe erc20 1 creator chain..."
-curl H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_10_erc20_1_service
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_10_erc20_1_service
 echo
 print $'\U01F4AB' $YELLOW " Subscribe erc20 2 creator chain..."
-curl H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_11_erc20_2_service
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_11_erc20_2_service
 echo
 print $'\U01F4AB' $YELLOW " Subscribe pool creator chain..."
-curl H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_swap_pool_service
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_swap_pool_service
 echo
 print $'\U01F4AB' $YELLOW " Set router application id to pool..."
-curl H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { setRouterApplicationId(applicationId:\\\"$swap_router_appid\\\")}\"}" $wallet_12_swap_pool_service
+curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { setRouterApplicationId(applicationId:\\\"$swap_router_appid\\\")}\"}" $wallet_12_swap_pool_service
 echo
 
 print $'\U01F4AB' $YELLOW " Add liquidity with..."
