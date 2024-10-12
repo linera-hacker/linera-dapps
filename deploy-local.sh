@@ -44,6 +44,7 @@ create_wallet 12
 
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
+erc20_appid=`linera --with-wallet 10 create-application $erc20_bid --json-argument '{"initial_supply":"20","name":"TestToken","symbol":"TKA","decimals":18,"initial_currency":"1", "fixed_currency":true, "fee_rate": "1"}'`
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_appid$NC"
