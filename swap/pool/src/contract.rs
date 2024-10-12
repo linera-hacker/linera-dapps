@@ -546,18 +546,26 @@ impl ApplicationContract {
             }
         }
 
-        self.state
-            .create_pool(
-                token_0,
-                token_1,
-                amount_0_initial,
-                amount_1_initial,
-                amount_0_virtual,
-                amount_1_virtual,
-                creator,
-                self.runtime.system_time(),
-            )
-            .await?;
+        log::info!(
+            "Create pool message chain {} runtime chain {}",
+            self.runtime.message_id().unwrap().chain_id,
+            self.runtime.chain_id()
+        );
+
+        if self.runtime.message_id().unwrap().chain_id != self.runtime.chain_id() {
+            self.state
+                .create_pool(
+                    token_0,
+                    token_1,
+                    amount_0_initial,
+                    amount_1_initial,
+                    amount_0_virtual,
+                    amount_1_virtual,
+                    creator,
+                    self.runtime.system_time(),
+                )
+                .await?;
+        }
 
         self.publish_message(PoolMessage::CreatePool {
             token_0,

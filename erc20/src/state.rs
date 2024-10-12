@@ -82,7 +82,11 @@ impl Application {
             Err(_) => Amount::ZERO,
         };
         let fee_percent = *self.fee_percent.get();
-        let fee = Amount::from_attos(amount.saturating_mul(fee_percent.into()).saturating_div(Amount::ONE));
+        let fee = Amount::from_attos(
+            amount
+                .saturating_mul(fee_percent.into())
+                .saturating_div(Amount::ONE),
+        );
         let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
@@ -96,7 +100,9 @@ impl Application {
                 Err(_) => Amount::ZERO,
             };
             let new_created_owner_balance = created_owner_balance.saturating_add(fee);
-            let _ = self.balances.insert(&created_owner, new_created_owner_balance);
+            let _ = self
+                .balances
+                .insert(&created_owner, new_created_owner_balance);
         }
         Ok(())
     }
@@ -153,7 +159,9 @@ impl Application {
                 Err(_) => Amount::ZERO,
             };
             let new_created_owner_balance = created_owner_balance.saturating_add(fee);
-            let _ = self.balances.insert(&created_owner, new_created_owner_balance);
+            let _ = self
+                .balances
+                .insert(&created_owner, new_created_owner_balance);
         }
 
         Ok(())
@@ -181,7 +189,11 @@ impl Application {
         if !self.fixed_currency.get() {
             exchange_currency = &currency
         }
-        let erc20_amount = Amount::from_attos(exchange_currency.saturating_mul(exchange_amount.into()).saturating_div(Amount::ONE));
+        let erc20_amount = Amount::from_attos(
+            exchange_currency
+                .saturating_mul(exchange_amount.into())
+                .saturating_div(Amount::ONE),
+        );
 
         let user_balance = match self.balances.get(&caller).await {
             Ok(Some(balance)) => balance,
