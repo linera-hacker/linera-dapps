@@ -6,6 +6,8 @@ use linera_sdk::views::{
 use serde::{Deserialize, Serialize};
 use spec::{account::ChainAccountOwner, erc20::InstantiationArgument};
 
+use std::collections::HashMap;
+
 #[derive(
     Serialize, Deserialize, Debug, Clone, async_graphql::SimpleObject, async_graphql::InputObject,
 )]
@@ -35,6 +37,7 @@ pub struct Application {
     pub fixed_currency: RegisterView<bool>,
     pub fee_percent: RegisterView<Amount>,
     pub created_owner: RegisterView<Option<ChainAccountOwner>>,
+    pub minted_supply: RegisterView<Amount>,
 }
 
 #[allow(dead_code)]
@@ -46,7 +49,6 @@ impl Application {
     ) {
         self.created_owner.set(Some(owner));
         self.total_supply.set(argument.initial_supply);
-        let _ = self.balances.insert(&owner, argument.initial_supply);
         self.name.set(argument.name);
         self.symbol.set(argument.symbol);
         self.decimals.set(argument.decimals);
@@ -55,6 +57,7 @@ impl Application {
         self.initial_currency
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
         self.fee_percent.set(argument.fee_percent.unwrap_or(Amount::ZERO));
+        self.minted_supply.set(Amount::ZERO);
     }
 
     pub(crate) async fn transfer(
@@ -175,52 +178,30 @@ impl Application {
             Err(_) => Amount::ZERO,
         };
 
+        let minted_supply = self.minted_supply.get();
+        let new_minted_supply = minted_supply.saturating_add(erc20_amount);
+        self.minted_supply.set(new_minted_supply);
+
         let new_user_balance = user_balance.saturating_add(erc20_amount);
         let _ = self.balances.insert(&caller, new_user_balance);
     }
 
     pub(crate) async fn airdrop(
         &mut self,
-        airdrop_amount: Amount,
-        airdrop_owners: Vec<ChainAccountOwner>,
+        initial_balances: HashMap<ChainAccountOwner, Amount>,
     ) -> Result<(), ERC20Error> {
-        let created_owner = self.created_owner.get().expect("Invalid created owner");
-        for owner in airdrop_owners {
-            let allowance_key = AllowanceKey::new(created_owner.clone(), owner);
-            let allowance = match self.allowances.get(&allowance_key).await {
-                Ok(Some(balance)) => balance,
-                Ok(None) => Amount::ZERO,
-                Err(_) => Amount::ZERO,
-            };
-
-            if allowance < airdrop_amount {
+        let total_supply = self.total_supply.get();
+        let mut airdrop_amount = Amount::ZERO;
+        for (owner, amount) in initial_balances.into_iter() {
+            airdrop_amount = airdrop_amount.saturating_add(amount);
+            if *total_supply < airdrop_amount {
                 return Err(ERC20Error::InvalidInitialAmount);
             }
-
-            let from_balance = match self.balances.get(&created_owner).await {
-                Ok(Some(balance)) => balance,
-                Ok(None) => Amount::ZERO,
-                Err(_) => Amount::ZERO,
-            };
-    
-            if from_balance < airdrop_amount {
-                return Err(ERC20Error::InvalidInitialAmount);
-            }
-    
-            let to_balance = match self.balances.get(&owner).await {
-                Ok(Some(balance)) => balance,
-                Ok(None) => airdrop_amount,
-                Err(_) => airdrop_amount,
-            };
-
-            let new_from_balance = from_balance.saturating_sub(airdrop_amount);
-            let new_to_balance = to_balance.saturating_add(airdrop_amount);
-            let new_allowance = allowance.saturating_sub(airdrop_amount);
-            
-            let _ = self.balances.insert(&created_owner, new_from_balance);
-            let _ = self.balances.insert(&owner, new_to_balance);
-            let _ = self.allowances.insert(&allowance_key, new_allowance);
+            let _ = self.balances.insert(&owner, amount);
         }
+        let created_owner = self.created_owner.get().expect("Invalid created owner");
+        let balance = total_supply.saturating_sub(airdrop_amount);
+        let _ = self.balances.insert(&created_owner, balance);
         Ok(())
     }
 

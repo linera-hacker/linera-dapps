@@ -11,8 +11,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ERC20Parameters {
-    pub airdrop_amount: Amount,
-    pub airdrop_owners: Vec<ChainAccountOwner>,
+    pub initial_balances: HashMap<ChainAccountOwner, Amount>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]

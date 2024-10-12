@@ -47,11 +47,10 @@ impl Contract for ApplicationContract {
                 self.runtime.authenticated_signer().expect("Invalid owner"),
             )),
         };
-        let airdrop_owners = self.runtime.application_parameters().airdrop_owners;
-        let airdrop_amount = self.runtime.application_parameters().airdrop_amount;
         self.state.instantiate(argument, owner).await;
 
-        let _ = self.state.airdrop(airdrop_amount, airdrop_owners).await;
+        let initial_balances = self.runtime.application_parameters().initial_balances;
+        let _ = self.state.airdrop(initial_balances).await;
     }
 
     async fn execute_operation(&mut self, operation: ERC20Operation) -> ERC20Response {
@@ -293,19 +292,26 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<(), ERC20Error> {
-        let token_0 = self.runtime.application_id().forget_abi();
-        let token_1 = None;
-        let call = RouterOperation::CalculateSwapAmount {
-            token_0,
-            token_1,
-            amount_1: amount,
-        };
-        let RouterResponse::Amount(currency) =
-            self.runtime
-                .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
-        else {
-            todo!()
-        };
+        let mut cur_currency = *self.state.initial_currency.get();
+        let fixed_currency = self.state.fixed_currency.get();
+        if !*fixed_currency {
+            let token_0 = self.runtime.application_id().forget_abi();
+            let token_1 = None;
+            let call = RouterOperation::CalculateSwapAmount {
+                token_0,
+                token_1,
+                amount_1: amount,
+            };
+            let RouterResponse::Amount(currency) =
+                self.runtime
+                    .call_application(true, token_0.with_abi::<RouterApplicationAbi>(), &call)
+            
+            else {
+                todo!()
+            };
+            cur_currency = currency;
+        }
+       
         let created_owner = Account {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: None,
@@ -315,7 +321,7 @@ impl ApplicationContract {
         self.runtime.transfer(to_owner, created_owner, amount);
 
         self.state
-            .deposit_native_and_exchange(to.clone(), amount, currency)
+            .deposit_native_and_exchange(to.clone(), amount, cur_currency)
             .await;
 
         self.publish_message(ERC20Message::Mint { to, amount });
