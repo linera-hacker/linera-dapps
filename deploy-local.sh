@@ -1,7 +1,13 @@
 #!/bin/bash
 
-kill -9 `ps | grep linera | awk '{print $1}'`
-kill -9 `ps | grep socat | awk '{print $1}'`
+function cleanup() {
+  kill -15 `ps | grep linera-proxy | awk '{print $1}'` > /dev/null 2>&1
+  kill -15 `ps | grep linera-server | awk '{print $1}'` > /dev/null 2>&1
+  kill -15 `ps | grep linera | awk '{print $1}'` > /dev/null 2>&1
+  kill -9 `ps | grep socat | awk '{print $1}'` > /dev/null 2>&1
+}
+
+cleanup
 
 unset RUSTFLAGS
 cargo build --release --target wasm32-unknown-unknown
@@ -176,4 +182,9 @@ echo -e "mutation {\n\
   )\n\
 }"
 
-sleep 1000000
+trap cleanup INT
+read -p "  Press any key to exit"
+print $'\U01f499' $LIGHTGREEN " Exit ..."
+
+cleanup
+
