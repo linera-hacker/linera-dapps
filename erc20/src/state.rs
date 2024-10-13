@@ -223,8 +223,14 @@ impl Application {
             let _ = self.balances.insert(&owner, amount);
         }
         let created_owner = self.created_owner.get().expect("Invalid created owner");
+        let created_owner_balance = match self.balances.get(&created_owner).await {
+            Ok(Some(balance)) => balance,
+            Ok(None) => Amount::ZERO,
+            Err(_) => Amount::ZERO,
+        };
         let balance = total_supply.saturating_sub(airdrop_amount);
-        let _ = self.balances.insert(&created_owner, balance);
+        let new_created_owner_balance = created_owner_balance.saturating_add(balance);
+        let _ = self.balances.insert(&created_owner, new_created_owner_balance);
         Ok(())
     }
 
