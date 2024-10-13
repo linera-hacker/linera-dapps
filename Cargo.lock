@@ -1326,6 +1326,7 @@ dependencies = [
  "bcs",
  "linera-sdk",
  "serde",
+ "serde_json",
  "spec",
  "thiserror",
 ]

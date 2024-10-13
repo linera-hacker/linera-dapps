@@ -211,11 +211,12 @@ impl Application {
 
     pub(crate) async fn airdrop(
         &mut self,
-        initial_balances: HashMap<ChainAccountOwner, Amount>,
+        initial_balances: HashMap<String, Amount>,
     ) -> Result<(), ERC20Error> {
         let total_supply = self.total_supply.get();
         let mut airdrop_amount = Amount::ZERO;
-        for (owner, amount) in initial_balances.into_iter() {
+        for (owner_str, amount) in initial_balances.into_iter() {
+            let owner: ChainAccountOwner = serde_json::from_str(&owner_str).unwrap();
             airdrop_amount = airdrop_amount.saturating_add(amount);
             if *total_supply < airdrop_amount {
                 return Err(ERC20Error::InvalidInitialAmount);

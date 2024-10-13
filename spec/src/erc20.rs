@@ -11,7 +11,7 @@ use std::collections::HashMap;
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ERC20Parameters {
-    pub initial_balances: HashMap<ChainAccountOwner, Amount>,
+    pub initial_balances: HashMap<String, Amount>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
