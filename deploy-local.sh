@@ -28,7 +28,7 @@ LIGHTGREEN='\033[1;32m'
 NC='\033[0m'
 
 PROJECT_ROOT=$HOME/linera-project
-mkdir -l $PROJECT_ROOT
+mkdir -p $PROJECT_ROOT
 
 function print() {
   echo -e $1$2$3$NC
