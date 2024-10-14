@@ -25,6 +25,9 @@ YELLOW='\033[1;33m'
 LIGHTGREEN='\033[1;32m'
 NC='\033[0m'
 
+PROJECT_ROOT=$HOME/linera-project
+mkdir -l $PROJECT_ROOT
+
 function print() {
   echo -e $1$2$3$NC
 }
@@ -49,7 +52,7 @@ function run_service () {
   local_port=`expr 30080 + $1`
   pub_port=`expr 40100 + $1`
 
-  __run_service $1 $local_port &
+  __run_service $1 $local_port > $PROJECT_ROOT/service_$local_port.log 2>&1 &
 
   sleep 10
   socat TCP4-LISTEN:$pub_port TCP4:localhost:$local_port
@@ -121,7 +124,7 @@ print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
-wallet_11_erc20_2_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_12ppid"
+wallet_11_erc20_2_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_2_appid"
 
 chain=`linera --with-wallet 12 wallet show | grep "Public Key" | awk '{print $2}'`
 print $'\U01F4AB' $YELLOW " Swap Pool Wallet 12"
