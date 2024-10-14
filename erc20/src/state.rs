@@ -144,7 +144,11 @@ impl Application {
             Err(_) => amount,
         };
         let fee_percent = *self.fee_percent.get();
-        let fee = Amount::from_attos(amount.saturating_mul(fee_percent.into()).saturating_div(Amount::ONE));
+        let fee = Amount::from_attos(
+            amount
+                .saturating_mul(fee_percent.into())
+                .saturating_div(Amount::ONE),
+        );
         let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
@@ -231,7 +235,9 @@ impl Application {
         };
         let balance = total_supply.saturating_sub(airdrop_amount);
         let new_created_owner_balance = created_owner_balance.saturating_add(balance);
-        let _ = self.balances.insert(&created_owner, new_created_owner_balance);
+        let _ = self
+            .balances
+            .insert(&created_owner, new_created_owner_balance);
         Ok(())
     }
 
