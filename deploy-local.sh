@@ -9,6 +9,8 @@ function cleanup() {
 
 cleanup
 
+export TMPDIR=
+
 unset RUSTFLAGS
 cargo build --release --target wasm32-unknown-unknown
 
@@ -27,7 +29,6 @@ NC='\033[0m'
 
 PROJECT_ROOT=$HOME/linera-project
 mkdir -l $PROJECT_ROOT
-export TMPDIR=
 
 function print() {
   echo -e $1$2$3$NC
@@ -55,7 +56,7 @@ function run_service () {
 
   __run_service $1 $local_port > $PROJECT_ROOT/service_$local_port.log 2>&1 &
 
-  sleep 10
+  sleep 3
   socat TCP4-LISTEN:$pub_port TCP4:localhost:$local_port
 }
 
@@ -108,41 +109,33 @@ print $'\U01f499' $LIGHTGREEN " Swap Router application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_router_bid$NC"
 echo -e "    Application ID: $BLUE$swap_router_appid$NC"
 
+function print_apps() {
+  print $'\U01F4AB' $YELLOW " $1"
+  echo -e "    ERC20:        $BLUE$2/chains/$3/applications/$erc20_1_appid$NC"
+  echo -e "    WLINERA:      $BLUE$2/chains/$3/applications/$erc20_2_appid$NC"
+  echo -e "    Swap Pool:    $BLUE$2/chains/$3/applications/$swap_pool_appid$NC"
+  echo -e "    Swap Router:  $BLUE$2/chains/$3/applications/$swap_router_appid$NC"
+}
+
 HTTP_HOST="http://$WALLET_10_PUBLIC_IPORT"
 chain=`linera --with-wallet 10 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " ERC20 Wallet 10"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
+print_apps "Wallet 10" $HTTP_HOST $chain
 
 wallet_10_erc20_1_service="http://$LOCAL_IP:30090/chains/$chain/applications/$erc20_1_appid"
 
 chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " WTLINERA Wallet 11"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
+print_apps "Wallet 11" $HTTP_HOST $chain
 
 wallet_11_erc20_2_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_2_appid"
 
 chain=`linera --with-wallet 12 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " Swap Pool Wallet 12"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
+print_apps "Wallet 12" $HTTP_HOST $chain
 
 wallet_12_swap_pool_service="http://$LOCAL_IP:30092/chains/$chain/applications/$swap_pool_appid"
 
 HTTP_HOST="http://$WALLET_14_PUBLIC_IPORT"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
-print $'\U01F4AB' $YELLOW " Swap Router Wallet 13"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
-print $'\U01F4AB' $LIGHTGREEN "   $HTTP_HOST/chains/$chain/applications/$swap_router_appid"
+print_apps "Wallet 13" $HTTP_HOST $chain
 
 ####
 ## We should
