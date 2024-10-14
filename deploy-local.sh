@@ -4,7 +4,7 @@ function cleanup() {
   kill -15 `ps | grep linera-proxy | awk '{print $1}'` > /dev/null 2>&1
   kill -15 `ps | grep linera-server | awk '{print $1}'` > /dev/null 2>&1
   kill -15 `ps | grep linera | awk '{print $1}'` > /dev/null 2>&1
-  kill -9 `ps | grep socat | awk '{print $1}'` > /dev/null 2>&1
+  kill -15 `ps | grep socat | awk '{print $1}'` > /dev/null 2>&1
 }
 
 cleanup
@@ -20,9 +20,9 @@ WALLET_BASE=/tmp/linera/dapps
 mkdir -p $WALLET_BASE
 rm $WALLET_BASE/* -rf
 
-WALLET_10_PUBLIC_IPORT='210.209.69.38:23103'
-WALLET_14_PUBLIC_IPORT='210.209.69.38:23105'
-LOCAL_IP='172.21.132.203'
+WALLET_10_PUBLIC_IPORT='172.16.31.73:30092'
+WALLET_14_PUBLIC_IPORT='172.16.31.73:30093'
+LOCAL_IP='172.16.31.73'
 
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
