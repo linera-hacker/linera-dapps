@@ -27,6 +27,7 @@ NC='\033[0m'
 
 PROJECT_ROOT=$HOME/linera-project
 mkdir -l $PROJECT_ROOT
+export TMPDIR=
 
 function print() {
   echo -e $1$2$3$NC
