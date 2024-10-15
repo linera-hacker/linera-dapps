@@ -30,35 +30,51 @@ impl Application {
         *self.router_application_id.get()
     }
 
-    async fn insert_pool(&mut self, pool: Pool) -> Result<(), PoolError> {
-        match pool.token_1 {
-            Some(_token_1) => {
-                let mut token_pools = self
-                    .erc20_erc20_pools
-                    .get(&pool.token_0)
-                    .await?
-                    .unwrap_or(HashMap::new());
-                if token_pools.get(&_token_1).is_some() {
-                    return Err(PoolError::AlreadyExists);
-                }
-                token_pools.insert(_token_1, pool.clone());
-                self.erc20_erc20_pools.insert(&pool.token_0, token_pools)?;
-                self.pool_erc20_erc20s
-                    .insert(&pool.id, [pool.token_0, _token_1].to_vec())?;
+    async fn _insert_erc20_erc20(&mut self, pool: Pool, required: bool) -> Result<Pool, PoolError> {
+        let token_1 = pool.token_1.unwrap();
+        let mut token_pools = self
+            .erc20_erc20_pools
+            .get(&pool.token_0)
+            .await?
+            .unwrap_or(HashMap::new());
+        if let Some(_pool) = token_pools.get(&token_1) {
+            if required {
+                return Err(PoolError::AlreadyExists);
             }
-            None => {
-                if self.erc20_native_pools.get(&pool.token_0).await?.is_some() {
-                    return Err(PoolError::AlreadyExists);
-                }
-                self.erc20_native_pools
-                    .insert(&pool.token_0, pool.clone())?;
-                self.pool_erc20_natives.insert(&pool.id, pool.token_0)?;
-            }
+            return Ok(_pool.clone());
         }
-        Ok(())
+        token_pools.insert(token_1, pool.clone());
+        self.erc20_erc20_pools.insert(&pool.token_0, token_pools)?;
+        self.pool_erc20_erc20s
+            .insert(&pool.id, [pool.token_0, token_1].to_vec())?;
+        Ok(pool)
     }
 
-    pub(crate) async fn create_pool(
+    async fn _insert_erc20_native(
+        &mut self,
+        pool: Pool,
+        required: bool,
+    ) -> Result<Pool, PoolError> {
+        if let Some(_pool) = self.erc20_native_pools.get(&pool.token_0).await? {
+            if required {
+                return Err(PoolError::AlreadyExists);
+            }
+            return Ok(_pool);
+        }
+        self.erc20_native_pools
+            .insert(&pool.token_0, pool.clone())?;
+        self.pool_erc20_natives.insert(&pool.id, pool.token_0)?;
+        Ok(pool)
+    }
+
+    async fn insert_pool(&mut self, pool: Pool, required: bool) -> Result<Pool, PoolError> {
+        match pool.token_1 {
+            Some(_) => self._insert_erc20_erc20(pool, required).await,
+            None => self._insert_erc20_native(pool, required).await,
+        }
+    }
+
+    pub(crate) async fn _create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -68,7 +84,8 @@ impl Application {
         amount_1_virtual: Amount,
         creator: ChainAccountOwner,
         block_timestamp: Timestamp,
-    ) -> Result<(), PoolError> {
+        required: bool,
+    ) -> Result<Pool, PoolError> {
         if amount_0_initial != Amount::ZERO && amount_0_initial != amount_0_virtual {
             return Err(PoolError::InvalidInitialAmount);
         }
@@ -124,7 +141,57 @@ impl Application {
         }
 
         self.pool_id.set(pool_id + 1);
-        self.insert_pool(pool).await
+        self.insert_pool(pool, required).await
+    }
+
+    pub(crate) async fn create_pool(
+        &mut self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+        creator: ChainAccountOwner,
+        block_timestamp: Timestamp,
+    ) -> Result<Pool, PoolError> {
+        self._create_pool(
+            token_0,
+            token_1,
+            amount_0_initial,
+            amount_1_initial,
+            amount_0_virtual,
+            amount_1_virtual,
+            creator,
+            block_timestamp,
+            false,
+        )
+        .await
+    }
+
+    pub(crate) async fn require_create_pool(
+        &mut self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+        creator: ChainAccountOwner,
+        block_timestamp: Timestamp,
+    ) -> Result<Pool, PoolError> {
+        self._create_pool(
+            token_0,
+            token_1,
+            amount_0_initial,
+            amount_1_initial,
+            amount_0_virtual,
+            amount_1_virtual,
+            creator,
+            block_timestamp,
+            true,
+        )
+        .await
     }
 
     pub(crate) async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
