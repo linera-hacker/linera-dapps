@@ -272,7 +272,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn to_sunscriber_sync_state(&self) -> Result<SubscriberSyncState, ERC20Error> {
+    pub(crate) async fn to_subscriber_sync_state(&self) -> Result<SubscriberSyncState, ERC20Error> {
         let mut state = SubscriberSyncState {
             total_supply: *self.total_supply.get(),
             balances: HashMap::new(),
@@ -284,6 +284,7 @@ impl Application {
             fixed_currency: *self.fixed_currency.get(),
             fee_percent: *self.fee_percent.get(),
             owner: self.owner.get().clone(),
+            owner_balance: *self.owner_balance.get(),
         };
         self.balances
             .for_each_index_value(|index, value| {
@@ -318,6 +319,7 @@ impl Application {
         self.fixed_currency.set(state.fixed_currency);
         self.fee_percent.set(state.fee_percent);
         self.owner.set(state.owner);
+        self.owner_balance.set(state.owner_balance);
         Ok(())
     }
 }

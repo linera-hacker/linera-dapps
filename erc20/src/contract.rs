@@ -90,6 +90,7 @@ impl Contract for ApplicationContract {
         match message {
             ERC20Message::BaseMessage(base_message) => self
                 .execute_base_message(base_message)
+                .await
                 .expect("Failed MSG: base message"),
             ERC20Message::Transfer { origin, to, amount } => self
                 .on_msg_transfer(origin, to, amount)
@@ -268,15 +269,18 @@ impl ApplicationContract {
         Ok(ERC20Response::Ok)
     }
 
-    fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), ERC20Error> {
+    async fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), ERC20Error> {
         match message {
-            BaseMessage::SubscribeCreatorChain { origin: _ } => {
-                self.on_msg_subscribe_creator_chain()
+            BaseMessage::SubscribeCreatorChain { origin } => {
+                self.on_msg_subscribe_creator_chain(origin).await
             }
         }
     }
 
-    fn on_msg_subscribe_creator_chain(&mut self) -> Result<(), ERC20Error> {
+    async fn on_msg_subscribe_creator_chain(
+        &mut self,
+        origin: ChainAccountOwner,
+    ) -> Result<(), ERC20Error> {
         let message_id = self.runtime.message_id().expect("Invalid message id");
         if message_id.chain_id == self.runtime.application_creator_chain_id() {
             return Ok(());
@@ -286,6 +290,13 @@ impl ApplicationContract {
             message_id.chain_id,
             ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()),
         );
+
+        let state = self.state.to_subscriber_sync_state().await?;
+        self.runtime
+            .prepare_message(ERC20Message::SubscriberSync { origin, state })
+            .with_authentication()
+            .send_to(message_id.chain_id);
+
         Ok(())
     }
 
@@ -343,9 +354,7 @@ impl ApplicationContract {
         spender: ChainAccountOwner,
         value: Amount,
     ) -> Result<(), ERC20Error> {
-        let owner = self.message_owner();
-
-        self.state.approve(spender.clone(), value, owner).await?;
+        self.state.approve(spender.clone(), value, origin).await?;
 
         self.publish_message(ERC20Message::Approve {
             origin,

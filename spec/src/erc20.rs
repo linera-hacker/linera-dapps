@@ -51,6 +51,7 @@ pub struct SubscriberSyncState {
     pub fixed_currency: bool,
     pub fee_percent: Amount,
     pub owner: Option<ChainAccountOwner>,
+    pub owner_balance: Amount,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
