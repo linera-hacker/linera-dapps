@@ -1,8 +1,10 @@
-use erc20::AllowanceKey;
 use erc20::ERC20Error;
 use linera_sdk::base::Amount;
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
-use spec::{account::ChainAccountOwner, erc20::InstantiationArgument};
+use spec::{
+    account::ChainAccountOwner,
+    erc20::{AllowanceKey, InstantiationArgument, SubscriberSyncState},
+};
 
 use std::collections::HashMap;
 
@@ -19,8 +21,8 @@ pub struct Application {
     pub initial_currency: RegisterView<Amount>,
     pub fixed_currency: RegisterView<bool>,
     pub fee_percent: RegisterView<Amount>,
-    pub created_owner: RegisterView<Option<ChainAccountOwner>>,
-    pub minted_supply: RegisterView<Amount>,
+    pub owner: RegisterView<Option<ChainAccountOwner>>,
+    pub owner_balance: RegisterView<Amount>,
 }
 
 #[allow(dead_code)]
@@ -30,7 +32,7 @@ impl Application {
         argument: InstantiationArgument,
         owner: ChainAccountOwner,
     ) {
-        self.created_owner.set(Some(owner));
+        self.owner.set(Some(owner));
         self.total_supply.set(argument.initial_supply);
         self.name.set(argument.name);
         self.symbol.set(argument.symbol);
@@ -41,7 +43,7 @@ impl Application {
             .set(argument.initial_currency.unwrap_or(Amount::ONE));
         self.fee_percent
             .set(argument.fee_percent.unwrap_or(Amount::ZERO));
-        self.minted_supply.set(Amount::ZERO);
+        self.owner_balance.set(argument.initial_supply);
     }
 
     pub(crate) async fn transfer(
@@ -82,19 +84,14 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
-        let _ = self.balances.insert(&sender, new_sender_balance);
-        let _ = self.balances.insert(&to, new_receiver_balance);
-        let created_owner = self.created_owner.get().expect("Invalid created owner");
-        if fee > Amount::ZERO {
-            let created_owner_balance = match self.balances.get(&created_owner).await {
-                Ok(Some(balance)) => balance,
-                Ok(None) => Amount::ZERO,
-                Err(_) => Amount::ZERO,
-            };
-            let new_created_owner_balance = created_owner_balance.saturating_add(fee);
-            let _ = self
-                .balances
-                .insert(&created_owner, new_created_owner_balance);
+        self.balances.insert(&sender, new_sender_balance)?;
+        self.balances.insert(&to, new_receiver_balance)?;
+        if let Some(_) = self.owner.get() {
+            if fee > Amount::ZERO {
+                let owner_balance = self.owner_balance.get();
+                let new_owner_balance = owner_balance.saturating_add(fee);
+                self.owner_balance.set(new_owner_balance);
+            }
         }
         Ok(())
     }
@@ -144,20 +141,15 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
-        let _ = self.balances.insert(&from, new_from_balance);
-        let _ = self.balances.insert(&to, new_to_balance);
-        let _ = self.allowances.insert(&allowance_key, new_allowance);
-        let created_owner = self.created_owner.get().expect("Invalid created owner");
-        if fee > Amount::ZERO {
-            let created_owner_balance = match self.balances.get(&created_owner).await {
-                Ok(Some(balance)) => balance,
-                Ok(None) => Amount::ZERO,
-                Err(_) => Amount::ZERO,
-            };
-            let new_created_owner_balance = created_owner_balance.saturating_add(fee);
-            let _ = self
-                .balances
-                .insert(&created_owner, new_created_owner_balance);
+        self.balances.insert(&from, new_from_balance)?;
+        self.balances.insert(&to, new_to_balance)?;
+        self.allowances.insert(&allowance_key, new_allowance)?;
+        if let Some(_) = self.owner.get() {
+            if fee > Amount::ZERO {
+                let owner_balance = self.owner_balance.get();
+                let new_owner_balance = owner_balance.saturating_add(fee);
+                self.owner_balance.set(new_owner_balance);
+            }
         }
 
         Ok(())
@@ -170,9 +162,7 @@ impl Application {
         owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let allowance_key = AllowanceKey::new(owner, spender.clone());
-        let _ = self.allowances.insert(&allowance_key, value);
-
-        Ok(())
+        Ok(self.allowances.insert(&allowance_key, value)?)
     }
 
     pub(crate) async fn deposit_native_and_exchange(
@@ -180,7 +170,7 @@ impl Application {
         caller: ChainAccountOwner,
         exchange_amount: Amount,
         currency: Amount,
-    ) {
+    ) -> Result<(), ERC20Error> {
         let mut exchange_currency = self.initial_currency.get();
         if !self.fixed_currency.get() {
             exchange_currency = &currency
@@ -196,13 +186,16 @@ impl Application {
             Ok(None) => Amount::ZERO,
             Err(_) => Amount::ZERO,
         };
-
-        let minted_supply = self.minted_supply.get();
-        let new_minted_supply = minted_supply.saturating_add(erc20_amount);
-        self.minted_supply.set(new_minted_supply);
+        let owner_balance = *self.owner_balance.get();
+        if owner_balance < erc20_amount {
+            return Err(ERC20Error::InsufficientFunds);
+        }
 
         let new_user_balance = user_balance.saturating_add(erc20_amount);
-        let _ = self.balances.insert(&caller, new_user_balance);
+        let new_owner_balance = owner_balance.saturating_sub(erc20_amount);
+
+        self.owner_balance.set(new_owner_balance);
+        Ok(self.balances.insert(&caller, new_user_balance)?)
     }
 
     pub(crate) async fn airdrop(
@@ -217,29 +210,25 @@ impl Application {
             if *total_supply < airdrop_amount {
                 return Err(ERC20Error::InsufficientFunds);
             }
-            let _ = self.balances.insert(&owner, amount);
+            self.balances.insert(&owner, amount)?;
         }
-        let created_owner = self.created_owner.get().expect("Invalid created owner");
-        let created_owner_balance = match self.balances.get(&created_owner).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
+        let owner_balance = self.owner_balance.get();
         let balance = total_supply.saturating_sub(airdrop_amount);
-        let new_created_owner_balance = created_owner_balance.saturating_add(balance);
-        let _ = self
-            .balances
-            .insert(&created_owner, new_created_owner_balance);
+        let new_owner_balance = owner_balance.saturating_add(balance);
+        self.owner_balance.set(new_owner_balance);
         Ok(())
     }
 
-    pub(crate) async fn change_created_owner(
+    pub(crate) async fn transfer_ownership(
         &mut self,
         owner: ChainAccountOwner,
         new_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
-        let old_owner = self.created_owner.get().expect("Invalid created owner");
-        if old_owner != owner {
+        if let Some(old_owner) = self.owner.get() {
+            if *old_owner != owner {
+                return Err(ERC20Error::PermissionDenied);
+            }
+        } else {
             return Err(ERC20Error::PermissionDenied);
         }
 
@@ -256,11 +245,60 @@ impl Application {
         };
 
         let new_to_balance = to_balance.saturating_add(from_balance);
-        let _ = self.balances.insert(&owner, Amount::ZERO);
-        let _ = self.balances.insert(&owner, new_to_balance);
+        self.balances.insert(&owner, Amount::ZERO)?;
+        self.balances.insert(&owner, new_to_balance)?;
 
-        self.created_owner.set(Some(new_owner));
+        self.owner.set(Some(new_owner));
 
+        Ok(())
+    }
+
+    pub(crate) async fn to_sunscriber_sync_state(&self) -> Result<SubscriberSyncState, ERC20Error> {
+        let mut state = SubscriberSyncState {
+            total_supply: *self.total_supply.get(),
+            balances: HashMap::new(),
+            allowances: HashMap::new(),
+            name: self.name.get().clone(),
+            symbol: self.symbol.get().clone(),
+            decimals: *self.decimals.get(),
+            initial_currency: *self.initial_currency.get(),
+            fixed_currency: *self.fixed_currency.get(),
+            fee_percent: *self.fee_percent.get(),
+            owner: self.owner.get().clone(),
+        };
+        self.balances
+            .for_each_index_value(|index, value| {
+                state.balances.insert(index, value);
+                Ok(())
+            })
+            .await?;
+        self.allowances
+            .for_each_index_value(|index, value| {
+                state.allowances.insert(index, value);
+                Ok(())
+            })
+            .await?;
+        Ok(state)
+    }
+
+    pub(crate) async fn from_subscriber_sync_state(
+        &mut self,
+        state: SubscriberSyncState,
+    ) -> Result<(), ERC20Error> {
+        self.total_supply.set(state.total_supply);
+        for (key, value) in &state.balances {
+            self.balances.insert(key, *value)?;
+        }
+        for (key, value) in &state.allowances {
+            self.allowances.insert(key, *value)?;
+        }
+        self.name.set(state.name);
+        self.symbol.set(state.symbol);
+        self.decimals.set(state.decimals);
+        self.initial_currency.set(state.initial_currency);
+        self.fixed_currency.set(state.fixed_currency);
+        self.fee_percent.set(state.fee_percent);
+        self.owner.set(state.owner);
         Ok(())
     }
 }

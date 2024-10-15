@@ -25,6 +25,34 @@ pub struct InstantiationArgument {
     pub fee_percent: Option<Amount>,
 }
 
+#[derive(Copy, Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Hash)]
+pub struct AllowanceKey {
+    pub owner: ChainAccountOwner,
+    pub spender: ChainAccountOwner,
+}
+
+scalar!(AllowanceKey);
+
+impl AllowanceKey {
+    pub fn new(owner: ChainAccountOwner, spender: ChainAccountOwner) -> Self {
+        Self { owner, spender }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SubscriberSyncState {
+    pub total_supply: Amount,
+    pub balances: HashMap<ChainAccountOwner, Amount>,
+    pub allowances: HashMap<AllowanceKey, Amount>,
+    pub name: String,
+    pub symbol: String,
+    pub decimals: u8,
+    pub initial_currency: Amount,
+    pub fixed_currency: bool,
+    pub fee_percent: Amount,
+    pub owner: Option<ChainAccountOwner>,
+}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum ERC20Message {
     BaseMessage(BaseMessage),
@@ -50,9 +78,13 @@ pub enum ERC20Message {
         to: ChainAccountOwner,
         amount: Amount,
     },
-    ChangeCreatedOwner {
+    TransferOwnership {
         origin: ChainAccountOwner,
         new_owner: ChainAccountOwner,
+    },
+    SubscriberSync {
+        origin: ChainAccountOwner,
+        state: SubscriberSyncState,
     },
 }
 
@@ -78,7 +110,7 @@ pub enum ERC20Operation {
     Mint {
         amount: Amount,
     },
-    ChangeCreatedOwner {
+    TransferOwnership {
         new_owner: ChainAccountOwner,
     },
 }

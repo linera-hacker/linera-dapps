@@ -13,7 +13,10 @@ use erc20::ERC20Error;
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument},
+    erc20::{
+        ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument,
+        SubscriberSyncState,
+    },
     swap::{RouterApplicationAbi, RouterOperation, RouterResponse},
 };
 
@@ -76,10 +79,10 @@ impl Contract for ApplicationContract {
             ERC20Operation::Mint { amount } => {
                 self.on_op_mint(amount).await.expect("Failed OP: mint")
             }
-            ERC20Operation::ChangeCreatedOwner { new_owner } => self
-                .on_op_change_created_owner(new_owner)
+            ERC20Operation::TransferOwnership { new_owner } => self
+                .on_op_transfer_ownership(new_owner)
                 .await
-                .expect("Failed OP: cahnge created owner"),
+                .expect("Failed OP: transfer ownership"),
         }
     }
 
@@ -113,11 +116,15 @@ impl Contract for ApplicationContract {
             ERC20Message::Mint { origin, to, amount } => self
                 .on_msg_mint(origin, to, amount)
                 .await
-                .expect("Failed MSG: approve"),
-            ERC20Message::ChangeCreatedOwner { origin, new_owner } => self
-                .on_msg_change_created_owner(origin, new_owner)
+                .expect("Failed MSG: mint"),
+            ERC20Message::TransferOwnership { origin, new_owner } => self
+                .on_msg_transfer_ownership(origin, new_owner)
                 .await
-                .expect("Failed MSG: approve"),
+                .expect("Failed MSG: transfer ownership"),
+            ERC20Message::SubscriberSync { origin: _, state } => self
+                .on_msg_subscriber_sync_state(state)
+                .await
+                .expect("Failed MSG: subscriber sync state"),
         }
     }
 
@@ -245,13 +252,13 @@ impl ApplicationContract {
         ))
     }
 
-    async fn on_op_change_created_owner(
+    async fn on_op_transfer_ownership(
         &mut self,
         new_owner: ChainAccountOwner,
     ) -> Result<ERC20Response, ERC20Error> {
         let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(ERC20Message::ChangeCreatedOwner { origin, new_owner })
+            .prepare_message(ERC20Message::TransferOwnership { origin, new_owner })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
@@ -354,16 +361,16 @@ impl ApplicationContract {
         Ok(())
     }
 
-    async fn on_msg_change_created_owner(
+    async fn on_msg_transfer_ownership(
         &mut self,
         origin: ChainAccountOwner,
         new_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
         let owner = self.message_owner();
 
-        self.state.change_created_owner(owner, new_owner).await?;
+        self.state.transfer_ownership(owner, new_owner).await?;
 
-        self.publish_message(ERC20Message::ChangeCreatedOwner { origin, new_owner });
+        self.publish_message(ERC20Message::TransferOwnership { origin, new_owner });
         Ok(())
     }
 
@@ -403,9 +410,16 @@ impl ApplicationContract {
 
         self.state
             .deposit_native_and_exchange(to.clone(), amount, cur_currency)
-            .await;
+            .await?;
 
         self.publish_message(ERC20Message::Mint { origin, to, amount });
         Ok(())
+    }
+
+    async fn on_msg_subscriber_sync_state(
+        &mut self,
+        state: SubscriberSyncState,
+    ) -> Result<(), ERC20Error> {
+        self.state.from_subscriber_sync_state(state).await
     }
 }

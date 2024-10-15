@@ -4,7 +4,6 @@ mod state;
 
 use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
-use erc20::AllowanceKey;
 use linera_sdk::{
     base::{Amount, WithServiceAbi},
     views::View,
@@ -13,7 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
+    erc20::{AllowanceKey, ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
 };
 use std::sync::Arc;
 
