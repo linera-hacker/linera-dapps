@@ -23,14 +23,23 @@ rm $WALLET_BASE/* -rf
 unset all_proxy
 unset ALL_PROXY
 
-# WALLET_10_PUBLIC_IPORT='210.209.69.38:23103'
-# WALLET_13_PUBLIC_IPORT='210.209.69.38:23105'
-# LOCAL_IP='172.21.132.203'
-WALLET_10_PUBLIC_IPORT='172.16.31.73:40110'
-WALLET_11_PUBLIC_IPORT='172.16.31.73:40111'
-WALLET_12_PUBLIC_IPORT='172.16.31.73:40112'
-WALLET_13_PUBLIC_IPORT='172.16.31.73:40113'
-LOCAL_IP='localhost'
+WALLET_10_PUBLIC_IPORT='210.209.69.38:23099'
+WALLET_11_PUBLIC_IPORT='210.209.69.38:23101'
+WALLET_12_PUBLIC_IPORT='210.209.69.38:23103'
+WALLET_13_PUBLIC_IPORT='210.209.69.38:23105'
+LOCAL_IP='172.21.132.203'
+
+# WALLET_10_PUBLIC_IPORT='172.16.31.73:40110'
+# WALLET_11_PUBLIC_IPORT='172.16.31.73:40111'
+# WALLET_12_PUBLIC_IPORT='172.16.31.73:40112'
+# WALLET_13_PUBLIC_IPORT='172.16.31.73:40113'
+# LOCAL_IP='localhost'
+
+# WALLET_10_PUBLIC_IPORT='localhost:30090'
+# WALLET_11_PUBLIC_IPORT='localhost:30091'
+# WALLET_12_PUBLIC_IPORT='localhost:30092'
+# WALLET_13_PUBLIC_IPORT='localhost:30093'
+# LOCAL_IP='localhost'
 
 BLUE='\033[1;34m'
 YELLOW='\033[1;33m'
@@ -141,6 +150,8 @@ wallet_10_swap_router_service="http://$LOCAL_IP:30090/chains/$chain/applications
 wallet_10_default_chain=$chain
 wallet_10_owner=$owner
 
+wallet_10_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
+
 HTTP_HOST="http://$WALLET_11_PUBLIC_IPORT"
 chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}'`
 owner=`linera --with-wallet 11 wallet show | grep "Owner" | awk '{print $4}'`
@@ -164,6 +175,8 @@ wallet_12_swap_pool_service="http://$LOCAL_IP:30092/chains/$chain/applications/$
 wallet_12_swap_router_service="http://$LOCAL_IP:30092/chains/$chain/applications/$swap_router_appid"
 wallet_12_default_chain=$chain
 wallet_12_owner=$owner
+
+wallet_12_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 
 HTTP_HOST="http://$WALLET_13_PUBLIC_IPORT"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
@@ -210,6 +223,21 @@ echo
 print $'\U01F4AB' $YELLOW " Authorize ERC20 to pool application..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_12_default_chain\\\", owner:\\\"Application:$swap_pool_appid\\\"},value:\\\"50000000.\\\")}\"}" $wallet_10_erc20_1_service
 echo
+
+print $'\U01F4AB' $YELLOW " Add query allowance with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_12_public_erc20_1_service"
+echo -e "query {\n\
+  allowance(\n\
+    owner: {\n\
+      chain_id:\"$wallet_10_default_chain\",\n\
+      owner:\"User:$wallet_10_owner\"\n\
+    },\n\
+    spender: {\n\
+      chain_id:\"$wallet_12_default_chain\",\n\
+      owner:\"Application:$swap_pool_appid\"\n\
+    }\n\
+  )\n\
+}"
 
 print $'\U01F4AB' $YELLOW " Add liquidity with..."
 print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_router_service"
