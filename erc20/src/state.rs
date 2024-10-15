@@ -3,7 +3,7 @@ use linera_sdk::base::Amount;
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use spec::{
     account::ChainAccountOwner,
-    erc20::{AllowanceKey, InstantiationArgument, SubscriberSyncState},
+    erc20::{InstantiationArgument, SubscriberSyncState},
 };
 
 use std::collections::HashMap;
@@ -14,7 +14,8 @@ pub struct Application {
     // Add fields here.
     pub total_supply: RegisterView<Amount>,
     pub balances: MapView<ChainAccountOwner, Amount>,
-    pub allowances: MapView<AllowanceKey, Amount>,
+    pub allowances: MapView<ChainAccountOwner, HashMap<ChainAccountOwner, Amount>>,
+    pub locked_allowances: MapView<ChainAccountOwner, Amount>,
     pub name: RegisterView<String>,
     pub symbol: RegisterView<String>,
     pub decimals: RegisterView<u8>,
@@ -68,14 +69,15 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
-        self.updatebalance_of(sender, new_sender_balance).await?;
-        self.updatebalance_of(to, new_receiver_balance).await?;
+        self.update_owner_balance(sender, new_sender_balance)
+            .await?;
+        self.update_owner_balance(to, new_receiver_balance).await?;
 
         if let Some(owner) = self.owner.get() {
             if fee > Amount::ZERO {
                 let owner_balance = self.owner_balance.get();
                 let newbalance_of = owner_balance.saturating_add(fee);
-                self.updatebalance_of(*owner, newbalance_of).await?;
+                self.update_owner_balance(*owner, newbalance_of).await?;
             }
         }
         Ok(())
@@ -94,7 +96,7 @@ impl Application {
         }
     }
 
-    async fn updatebalance_of(
+    async fn update_owner_balance(
         &mut self,
         owner: ChainAccountOwner,
         amount: Amount,
@@ -113,10 +115,12 @@ impl Application {
         owner: ChainAccountOwner,
         spender: ChainAccountOwner,
     ) -> Result<Amount, ERC20Error> {
-        let allowance_key = AllowanceKey::new(owner, spender);
-        match self.allowances.get(&allowance_key).await? {
-            Some(balance) => Ok(balance),
-            None => Ok(Amount::ZERO),
+        match self.allowances.get(&owner).await? {
+            Some(allowances) => match allowances.get(&spender) {
+                Some(allowance) => Ok(*allowance),
+                _ => Ok(Amount::ZERO),
+            },
+            _ => Ok(Amount::ZERO),
         }
     }
 
@@ -126,8 +130,28 @@ impl Application {
         spender: ChainAccountOwner,
         amount: Amount,
     ) -> Result<(), ERC20Error> {
-        let allowance_key = AllowanceKey::new(owner, spender);
-        Ok(self.allowances.insert(&allowance_key, amount)?)
+        let mut allowances = match self.allowances.get(&owner).await? {
+            Some(allowances) => allowances,
+            None => HashMap::new(),
+        };
+        let allowance = match allowances.get(&spender) {
+            Some(_allowance) => *_allowance,
+            None => Amount::ZERO,
+        };
+
+        let allowance_decrease = allowance.saturating_sub(amount);
+        let locked_allowance = match self.locked_allowances.get(&owner).await? {
+            Some(allowance) => allowance,
+            None => Amount::ZERO,
+        };
+        let locked_allowance = locked_allowance.saturating_sub(allowance_decrease);
+        if locked_allowance < Amount::ZERO {
+            return Err(ERC20Error::InsufficientFunds);
+        }
+
+        self.locked_allowances.insert(&owner, locked_allowance)?;
+        allowances.insert(spender, amount);
+        Ok(self.allowances.insert(&owner, allowances)?)
     }
 
     pub(crate) async fn transfer_from(
@@ -162,8 +186,8 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
-        self.updatebalance_of(from, new_from_balance).await?;
-        self.updatebalance_of(to, new_to_balance).await?;
+        self.update_owner_balance(from, new_from_balance).await?;
+        self.update_owner_balance(to, new_to_balance).await?;
         self.update_owner_allowance(from, caller, new_allowance)
             .await?;
 
@@ -171,7 +195,7 @@ impl Application {
             if fee > Amount::ZERO {
                 let owner_balance = self.owner_balance.get();
                 let newbalance_of = owner_balance.saturating_add(fee);
-                self.updatebalance_of(*owner, newbalance_of).await?;
+                self.update_owner_balance(*owner, newbalance_of).await?;
             }
         }
 
@@ -184,8 +208,22 @@ impl Application {
         value: Amount,
         owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
-        let allowance_key = AllowanceKey::new(owner, spender.clone());
-        Ok(self.allowances.insert(&allowance_key, value)?)
+        let balance = self.balance_of(owner).await?;
+        let locked_allowance = match self.locked_allowances.get(&owner).await? {
+            Some(allowance) => allowance,
+            None => Amount::ZERO,
+        };
+        log::info!(
+            "{}, {}, {}, {}",
+            balance.saturating_sub(locked_allowance),
+            balance,
+            locked_allowance,
+            value
+        );
+        if balance.saturating_sub(locked_allowance) < value {
+            return Err(ERC20Error::InsufficientFunds);
+        }
+        self.update_owner_allowance(owner, spender, value).await
     }
 
     pub(crate) async fn deposit_native_and_exchange(
@@ -221,20 +259,18 @@ impl Application {
         &mut self,
         initial_balances: HashMap<String, Amount>,
     ) -> Result<(), ERC20Error> {
-        let total_supply = self.total_supply.get();
+        let owner_balance = self.owner_balance.get();
         let mut airdrop_amount = Amount::ZERO;
         for (owner_str, amount) in initial_balances.into_iter() {
             let owner: ChainAccountOwner = serde_json::from_str(&owner_str).unwrap();
             airdrop_amount = airdrop_amount.saturating_add(amount);
-            if *total_supply < airdrop_amount {
+            if *owner_balance < airdrop_amount {
                 return Err(ERC20Error::InsufficientFunds);
             }
             self.balances.insert(&owner, amount)?;
         }
-        let owner_balance = self.owner_balance.get();
-        let balance = total_supply.saturating_sub(airdrop_amount);
-        let newbalance_of = owner_balance.saturating_add(balance);
-        self.owner_balance.set(newbalance_of);
+        let balance = owner_balance.saturating_sub(airdrop_amount);
+        self.owner_balance.set(balance);
         Ok(())
     }
 
@@ -277,6 +313,7 @@ impl Application {
             total_supply: *self.total_supply.get(),
             balances: HashMap::new(),
             allowances: HashMap::new(),
+            locked_allowances: HashMap::new(),
             name: self.name.get().clone(),
             symbol: self.symbol.get().clone(),
             decimals: *self.decimals.get(),
@@ -293,8 +330,18 @@ impl Application {
             })
             .await?;
         self.allowances
+            .for_each_index_value(|index, allowances| {
+                let mut _allowances = HashMap::new();
+                for (key, value) in &allowances {
+                    _allowances.insert(*key, *value);
+                }
+                state.allowances.insert(index, _allowances);
+                Ok(())
+            })
+            .await?;
+        self.locked_allowances
             .for_each_index_value(|index, value| {
-                state.allowances.insert(index, value);
+                state.locked_allowances.insert(index, value);
                 Ok(())
             })
             .await?;
@@ -309,8 +356,15 @@ impl Application {
         for (key, value) in &state.balances {
             self.balances.insert(key, *value)?;
         }
-        for (key, value) in &state.allowances {
-            self.allowances.insert(key, *value)?;
+        for (owner, allowances) in &state.allowances {
+            let mut _allowances = HashMap::new();
+            for (key, value) in allowances {
+                _allowances.insert(*key, *value);
+            }
+            self.allowances.insert(owner, _allowances)?;
+        }
+        for (key, value) in &state.locked_allowances {
+            self.locked_allowances.insert(key, *value)?;
         }
         self.name.set(state.name);
         self.symbol.set(state.symbol);

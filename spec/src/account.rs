@@ -19,3 +19,9 @@ impl Hash for ChainAccountOwner {
         }
     }
 }
+
+impl std::fmt::Display for ChainAccountOwner {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "ChainAccountOwner:{}:{:?}", self.chain_id, self.owner)
+    }
+}

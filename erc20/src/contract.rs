@@ -71,6 +71,7 @@ impl Contract for ApplicationContract {
                 .expect("Failed OP: transfer from"),
             ERC20Operation::Approve { spender, value } => self
                 .on_op_approve(spender, value)
+                .await
                 .expect("Failed OP: approve"),
             ERC20Operation::BalanceOf { owner } => self
                 .on_op_balance_of(owner)
@@ -223,12 +224,13 @@ impl ApplicationContract {
         Ok(ERC20Response::Ok)
     }
 
-    fn on_op_approve(
+    async fn on_op_approve(
         &mut self,
         spender: ChainAccountOwner,
         value: Amount,
     ) -> Result<ERC20Response, ERC20Error> {
         let origin = self.runtime_owner();
+        self.state.approve(spender.clone(), value, origin).await?;
         self.runtime
             .prepare_message(ERC20Message::Approve {
                 origin,
@@ -354,7 +356,9 @@ impl ApplicationContract {
         spender: ChainAccountOwner,
         value: Amount,
     ) -> Result<(), ERC20Error> {
-        self.state.approve(spender.clone(), value, origin).await?;
+        if origin.chain_id != self.runtime.chain_id() {
+            self.state.approve(spender.clone(), value, origin).await?;
+        }
 
         self.publish_message(ERC20Message::Approve {
             origin,

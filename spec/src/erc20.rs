@@ -25,25 +25,12 @@ pub struct InstantiationArgument {
     pub fee_percent: Option<Amount>,
 }
 
-#[derive(Copy, Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Hash)]
-pub struct AllowanceKey {
-    pub owner: ChainAccountOwner,
-    pub spender: ChainAccountOwner,
-}
-
-scalar!(AllowanceKey);
-
-impl AllowanceKey {
-    pub fn new(owner: ChainAccountOwner, spender: ChainAccountOwner) -> Self {
-        Self { owner, spender }
-    }
-}
-
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubscriberSyncState {
     pub total_supply: Amount,
     pub balances: HashMap<ChainAccountOwner, Amount>,
-    pub allowances: HashMap<AllowanceKey, Amount>,
+    pub allowances: HashMap<ChainAccountOwner, HashMap<ChainAccountOwner, Amount>>,
+    pub locked_allowances: HashMap<ChainAccountOwner, Amount>,
     pub name: String,
     pub symbol: String,
     pub decimals: u8,
