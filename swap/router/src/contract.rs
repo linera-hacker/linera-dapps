@@ -664,7 +664,7 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
-    fn transfer_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
+    fn receive_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
@@ -689,7 +689,7 @@ impl ApplicationContract {
             .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
     }
 
-    fn transfer_native_from(&mut self, amount: Amount) {
+    fn receive_native_from(&mut self, amount: Amount) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
@@ -736,12 +736,12 @@ impl ApplicationContract {
         };
 
         if amount_0 > Amount::ZERO {
-            self.transfer_erc20_from(token_0, amount_0);
+            self.receive_erc20_from(token_0, amount_0);
         }
         if amount_1 > Amount::ZERO {
             match token_1 {
-                Some(_token_1) => self.transfer_erc20_from(_token_1, amount_1),
-                None => self.transfer_native_from(amount_1),
+                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1),
+                None => self.receive_native_from(amount_1),
             }
         }
 
@@ -878,12 +878,12 @@ impl ApplicationContract {
         }
 
         if amount_0_out > Amount::ZERO {
-            self.transfer_erc20_from(token_0, amount_0_in.unwrap());
+            self.receive_erc20_from(token_0, amount_0_in.unwrap());
         }
         if amount_1_out > Amount::ZERO {
             match token_1 {
-                Some(_token_1) => self.transfer_erc20_from(_token_1, amount_0_in.unwrap()),
-                None => self.transfer_native_from(amount_0_in.unwrap()),
+                Some(_token_1) => self.receive_erc20_from(_token_1, amount_0_in.unwrap()),
+                None => self.receive_native_from(amount_0_in.unwrap()),
             }
         }
 

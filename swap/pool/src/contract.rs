@@ -486,7 +486,7 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
-    fn transfer_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
+    fn receive_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
@@ -540,7 +540,7 @@ impl ApplicationContract {
         }
     }
 
-    fn transfer_native_from(&mut self, amount: Amount) {
+    fn receive_native_from(&mut self, amount: Amount) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
@@ -580,12 +580,12 @@ impl ApplicationContract {
         let creator = self.message_owner();
 
         if amount_0_initial > Amount::ZERO {
-            self.transfer_erc20_from(token_0, amount_0_initial);
+            self.receive_erc20_from(token_0, amount_0_initial);
         }
         if amount_1_initial > Amount::ZERO {
             match token_1 {
-                Some(_token_1) => self.transfer_erc20_from(_token_1, amount_1_initial),
-                None => self.transfer_native_from(amount_1_initial),
+                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1_initial),
+                None => self.receive_native_from(amount_1_initial),
             }
         }
 
