@@ -12,7 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    erc20::{AllowanceKey, ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
+    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
 };
 use std::sync::Arc;
 
@@ -74,20 +74,14 @@ impl ERC20QueryRoot for QueryRoot {
     }
 
     async fn balance_of(&self, owner: ChainAccountOwner) -> Amount {
-        match self.state.balances.get(&owner).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        }
+        self.state.balance_of(owner).await.unwrap_or(Amount::ZERO)
     }
 
     async fn allowance(&self, owner: ChainAccountOwner, spender: ChainAccountOwner) -> Amount {
-        let allowance_key = AllowanceKey::new(owner, spender);
-        match self.state.allowances.get(&allowance_key).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        }
+        self.state
+            .owner_allowance(owner, spender)
+            .await
+            .unwrap_or(Amount::ZERO)
     }
 }
 

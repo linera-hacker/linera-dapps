@@ -243,13 +243,7 @@ impl ApplicationContract {
         &self,
         owner: ChainAccountOwner,
     ) -> Result<ERC20Response, ERC20Error> {
-        Ok(ERC20Response::Balance(
-            self.state
-                .balances
-                .get(&owner)
-                .await?
-                .unwrap_or(Amount::ZERO),
-        ))
+        Ok(ERC20Response::Balance(self.state.balance_of(owner).await?))
     }
 
     async fn on_op_transfer_ownership(
