@@ -38,6 +38,7 @@ pub enum ERC20Message {
         from: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
+        allowance_owner: ChainAccountOwner,
     },
     Approve {
         origin: ChainAccountOwner,

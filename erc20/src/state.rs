@@ -71,6 +71,8 @@ impl Application {
             Err(_) => Amount::ZERO,
         };
 
+        log::info!("Sender {:?} balance {} amount {}", sender, sender_balance, amount);
+
         if sender_balance < amount {
             return Err(ERC20Error::InvalidInitialAmount);
         }

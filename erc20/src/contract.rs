@@ -60,9 +60,11 @@ impl Contract for ApplicationContract {
                 .expect("Failed OP: base operation"),
             ERC20Operation::Transfer { to, amount } => self
                 .on_op_transfer(to, amount)
+                .await
                 .expect("Failed OP: transfer"),
             ERC20Operation::TransferFrom { from, amount, to } => self
                 .on_op_transfer_from(from, amount, to)
+                .await
                 .expect("Failed OP: transfer from"),
             ERC20Operation::Approve { spender, value } => self
                 .on_op_approve(spender, value)
@@ -95,8 +97,9 @@ impl Contract for ApplicationContract {
                 from,
                 amount,
                 to,
+                allowance_owner,
             } => self
-                .on_msg_transfer_from(origin, from, amount, to)
+                .on_msg_transfer_from(origin, from, amount, to, allowance_owner)
                 .await
                 .expect("Failed MSG: transfer from"),
             ERC20Message::Approve {
@@ -163,12 +166,14 @@ impl ApplicationContract {
         Ok(ERC20Response::Ok)
     }
 
-    fn on_op_transfer(
+    async fn on_op_transfer(
         &mut self,
         to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<ERC20Response, ERC20Error> {
         let origin = self.runtime_owner();
+        self.state.transfer(origin, amount, to.clone()).await?;
+
         self.runtime
             .prepare_message(ERC20Message::Transfer { origin, to, amount })
             .with_authentication()
@@ -176,12 +181,26 @@ impl ApplicationContract {
         Ok(ERC20Response::Ok)
     }
 
-    fn on_op_transfer_from(
+    async fn on_op_transfer_from(
         &mut self,
         from: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
     ) -> Result<ERC20Response, ERC20Error> {
+        // If it's called from application, caller will be application creation chain
+        // If it's called from owner, we don't know which chain will be the caller, so currently we
+        // don't support
+        let Some(allowance_owner_application) = self.runtime.authenticated_caller_id() else {
+            return Err(ERC20Error::NotSupported);
+        };
+        let allowance_owner = ChainAccountOwner {
+            chain_id: allowance_owner_application.creation.chain_id,
+            owner: Some(AccountOwner::Application(allowance_owner_application)),
+        };
+        self.state
+            .transfer_from(from.clone(), amount, to.clone(), allowance_owner)
+            .await?;
+
         let origin = self.runtime_owner();
         self.runtime
             .prepare_message(ERC20Message::TransferFrom {
@@ -189,6 +208,7 @@ impl ApplicationContract {
                 from,
                 amount,
                 to,
+                allowance_owner,
             })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
@@ -285,10 +305,9 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         amount: Amount,
     ) -> Result<(), ERC20Error> {
-        let sender = self.message_owner();
-
-        self.state.transfer(sender, amount, to.clone()).await?;
-
+        if origin.chain_id != self.runtime.chain_id() {
+            self.state.transfer(origin, amount, to.clone()).await?;
+        }
         self.publish_message(ERC20Message::Transfer { origin, to, amount });
         Ok(())
     }
@@ -299,18 +318,20 @@ impl ApplicationContract {
         from: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
+        allowance_owner: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
-        let caller = self.message_owner();
-
-        self.state
-            .transfer_from(from.clone(), amount, to.clone(), caller)
-            .await?;
+        if origin.chain_id != self.runtime.chain_id() {
+            self.state
+                .transfer_from(from.clone(), amount, to.clone(), allowance_owner)
+                .await?;
+        }
 
         self.publish_message(ERC20Message::TransferFrom {
             origin,
             from,
             amount,
             to,
+            allowance_owner,
         });
         Ok(())
     }

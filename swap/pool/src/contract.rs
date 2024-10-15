@@ -227,6 +227,19 @@ impl ApplicationContract {
     ) -> Result<PoolResponse, PoolError> {
         let creator = self.runtime_owner();
 
+        log::info!("Create pool {}:{}", amount_0_initial, amount_1_initial);
+
+        if amount_0_initial > Amount::ZERO {
+            self.receive_erc20_from(token_0, amount_0_initial);
+        }
+        if amount_1_initial > Amount::ZERO {
+            match token_1 {
+                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1_initial),
+                None => self.receive_native_from(amount_1_initial),
+            }
+        }
+
+
         self.state
             .create_pool(
                 token_0,
@@ -486,15 +499,10 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
+    // This should be run in operation
     fn receive_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
-        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
-            return;
-        }
-
-        let message_id = self.runtime.message_id().expect("Invalid message id");
-
         let from = ChainAccountOwner {
-            chain_id: message_id.chain_id,
+            chain_id: self.runtime.chain_id(),
             owner: Some(AccountOwner::User(
                 self.runtime.authenticated_signer().expect("Invalid owner"),
             )),
@@ -511,11 +519,8 @@ impl ApplicationContract {
             .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
     }
 
+    // This should be run in operation
     fn transfer_erc20_to(&mut self, token: ApplicationId, amount: Amount, to: ChainAccountOwner) {
-        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
-            return;
-        }
-
         let call = ERC20Operation::Transfer { amount, to };
         self.runtime
             .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
@@ -540,11 +545,8 @@ impl ApplicationContract {
         }
     }
 
+    // This should be run in operation, but transfer to creator chain
     fn receive_native_from(&mut self, amount: Amount) {
-        if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
-            return;
-        }
-
         let to = Account {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: None,
@@ -578,16 +580,6 @@ impl ApplicationContract {
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
         let creator = self.message_owner();
-
-        if amount_0_initial > Amount::ZERO {
-            self.receive_erc20_from(token_0, amount_0_initial);
-        }
-        if amount_1_initial > Amount::ZERO {
-            match token_1 {
-                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1_initial),
-                None => self.receive_native_from(amount_1_initial),
-            }
-        }
 
         if origin.chain_id != self.runtime.chain_id() {
             self.state

@@ -21,4 +21,7 @@ pub enum ERC20Error {
 
     #[error("Permission denied")]
     PermissionDenied,
+
+    #[error("Not supported")]
+    NotSupported,
 }
