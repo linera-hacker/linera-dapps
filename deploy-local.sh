@@ -9,9 +9,11 @@ function cleanup() {
 
 cleanup
 
-export TMPDIR=
-
 unset RUSTFLAGS
+unset TMPDIR
+unset ALL_PROXY
+unset all_proxy
+
 cargo build --release --target wasm32-unknown-unknown
 
 WALLET_BASE=/tmp/linera/dapps
