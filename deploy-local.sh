@@ -24,10 +24,12 @@ unset all_proxy
 unset ALL_PROXY
 
 # WALLET_10_PUBLIC_IPORT='210.209.69.38:23103'
-# WALLET_14_PUBLIC_IPORT='210.209.69.38:23105'
+# WALLET_13_PUBLIC_IPORT='210.209.69.38:23105'
 # LOCAL_IP='172.21.132.203'
-WALLET_10_PUBLIC_IPORT='172.16.31.73:40112'
-WALLET_14_PUBLIC_IPORT='172.16.31.73:40113'
+WALLET_10_PUBLIC_IPORT='172.16.31.73:40110'
+WALLET_11_PUBLIC_IPORT='172.16.31.73:40111'
+WALLET_12_PUBLIC_IPORT='172.16.31.73:40112'
+WALLET_13_PUBLIC_IPORT='172.16.31.73:40113'
 LOCAL_IP='localhost'
 
 BLUE='\033[1;34m'
@@ -119,6 +121,8 @@ echo -e "    Application ID: $BLUE$swap_router_appid$NC"
 
 function print_apps() {
   print $'\U01F4AB' $YELLOW " $1"
+  echo -e "  Default Chain:  $LIGHTGREEN$3$NC"
+  echo -e "  Owner:          $LIGHTGREEN$4$NC"
   echo -e "    ERC20:        $BLUE$2/chains/$3/applications/$erc20_1_appid$NC"
   echo -e "    WLINERA:      $BLUE$2/chains/$3/applications/$erc20_2_appid$NC"
   echo -e "    Swap Pool:    $BLUE$2/chains/$3/applications/$swap_pool_appid$NC"
@@ -127,31 +131,60 @@ function print_apps() {
 
 HTTP_HOST="http://$WALLET_10_PUBLIC_IPORT"
 chain=`linera --with-wallet 10 wallet show | grep "Public Key" | awk '{print $2}'`
-print_apps "Wallet 10" $HTTP_HOST $chain
+owner=`linera --with-wallet 10 wallet show | grep "Owner" | awk '{print $4}'`
+print_apps "Wallet 10" $HTTP_HOST $chain $owner
 
 wallet_10_erc20_1_service="http://$LOCAL_IP:30090/chains/$chain/applications/$erc20_1_appid"
+wallet_10_erc20_2_service="http://$LOCAL_IP:30090/chains/$chain/applications/$erc20_2_appid"
+wallet_10_swap_pool_service="http://$LOCAL_IP:30090/chains/$chain/applications/$swap_pool_appid"
+wallet_10_swap_router_service="http://$LOCAL_IP:30090/chains/$chain/applications/$swap_router_appid"
+wallet_10_default_chain=$chain
+wallet_10_owner=$owner
 
+HTTP_HOST="http://$WALLET_11_PUBLIC_IPORT"
 chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}'`
-print_apps "Wallet 11" $HTTP_HOST $chain
+owner=`linera --with-wallet 11 wallet show | grep "Owner" | awk '{print $4}'`
+print_apps "Wallet 11" $HTTP_HOST $chain $owner
 
+wallet_11_erc20_1_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_1_appid"
 wallet_11_erc20_2_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_2_appid"
+wallet_11_swap_pool_service="http://$LOCAL_IP:30091/chains/$chain/applications/$swap_pool_appid"
+wallet_11_swap_router_service="http://$LOCAL_IP:30091/chains/$chain/applications/$swap_router_appid"
+wallet_11_default_chain=$chain
+wallet_11_owner=$owner
 
+HTTP_HOST="http://$WALLET_12_PUBLIC_IPORT"
 chain=`linera --with-wallet 12 wallet show | grep "Public Key" | awk '{print $2}'`
-print_apps "Wallet 12" $HTTP_HOST $chain
+owner=`linera --with-wallet 12 wallet show | grep "Owner" | awk '{print $4}'`
+print_apps "Wallet 12" $HTTP_HOST $chain $owner
 
+wallet_12_erc20_1_service="http://$LOCAL_IP:30092/chains/$chain/applications/$erc20_1_appid"
+wallet_12_erc20_2_service="http://$LOCAL_IP:30092/chains/$chain/applications/$erc20_2_appid"
 wallet_12_swap_pool_service="http://$LOCAL_IP:30092/chains/$chain/applications/$swap_pool_appid"
+wallet_12_swap_router_service="http://$LOCAL_IP:30092/chains/$chain/applications/$swap_router_appid"
+wallet_12_default_chain=$chain
+wallet_12_owner=$owner
 
-HTTP_HOST="http://$WALLET_14_PUBLIC_IPORT"
+HTTP_HOST="http://$WALLET_13_PUBLIC_IPORT"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
-print_apps "Wallet 13" $HTTP_HOST $chain
+owner=`linera --with-wallet 13 wallet show | grep "Owner" | awk '{print $4}'`
+print_apps "Wallet 13" $HTTP_HOST $chain $owner
+
+wallet_13_erc20_1_service="http://$LOCAL_IP:30093/chains/$chain/applications/$erc20_1_appid"
+wallet_13_erc20_2_service="http://$LOCAL_IP:30093/chains/$chain/applications/$erc20_2_appid"
+wallet_13_swap_pool_service="http://$LOCAL_IP:30093/chains/$chain/applications/$swap_pool_appid"
+wallet_13_swap_router_service="http://$LOCAL_IP:30093/chains/$chain/applications/$swap_router_appid"
+wallet_13_default_chain=$chain
+wallet_13_owner=$owner
+
+wallet_13_public_swap_router_service="$HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 ####
 ## We should
 ##   1 subscribe to pool creator chain
 ##   2 set router application id to pool
+##   3 authorize balance for the pool
 ####
-wallet_13_swap_pool_service="http://$LOCAL_IP:30093/chains/$chain/applications/$swap_pool_appid"
-wallet_13_swap_router_service="$HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 run_service 10 &
 run_service 11 &
@@ -160,11 +193,13 @@ run_service 13 &
 
 sleep 5
 
-print $'\U01F4AB' $YELLOW " Subscribe erc20 1 creator chain..."
-curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_10_erc20_1_service
+print $'\U01F4AB' $YELLOW " Subscribe ERC20 creator chain..."
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_1_service
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_erc20_1_service
 echo
-print $'\U01F4AB' $YELLOW " Subscribe erc20 2 creator chain..."
-curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_11_erc20_2_service
+print $'\U01F4AB' $YELLOW " Subscribe WLINERA creator chain..."
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_2_service
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_erc20_2_service
 echo
 print $'\U01F4AB' $YELLOW " Subscribe pool creator chain..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_swap_pool_service
@@ -172,9 +207,12 @@ echo
 print $'\U01F4AB' $YELLOW " Set router application id to pool..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { setRouterApplicationId(applicationId:\\\"$swap_router_appid\\\")}\"}" $wallet_12_swap_pool_service
 echo
+print $'\U01F4AB' $YELLOW " Authorize ERC20 to pool application..."
+curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_12_default_chain\\\", owner:\\\"Application:$swap_pool_appid\\\"},value:\\\"50000000.\\\")}\"}" $wallet_10_erc20_1_service
+echo
 
 print $'\U01F4AB' $YELLOW " Add liquidity with..."
-print $'\U01F4AB' $LIGHTGREEN " $wallet_13_swap_router_service"
+print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_router_service"
 echo -e "mutation {\n\
   addLiquidity (\n\
     token0: \"$erc20_1_appid\",\n\
