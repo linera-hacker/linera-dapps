@@ -52,29 +52,13 @@ impl Application {
         amount: Amount,
         to: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
-        let sender_balance = match self.balances.get(&sender).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
-        log::info!(
-            "Sender {:?} balance {} amount {}",
-            sender,
-            sender_balance,
-            amount
-        );
-
+        let sender_balance = self._owner_balance(sender).await?;
         if sender_balance < amount {
             return Err(ERC20Error::InsufficientFunds);
         }
 
         let new_sender_balance = sender_balance.saturating_sub(amount);
-        let receiver_balance = match self.balances.get(&to).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
+        let receiver_balance = self._owner_balance(to).await?;
         let fee_percent = *self.fee_percent.get();
         let fee = Amount::from_attos(
             amount
@@ -84,16 +68,67 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
 
-        self.balances.insert(&sender, new_sender_balance)?;
-        self.balances.insert(&to, new_receiver_balance)?;
-        if let Some(_) = self.owner.get() {
+        self.update_owner_balance(sender, new_sender_balance)
+            .await?;
+        self.update_owner_balance(to, new_receiver_balance).await?;
+
+        if let Some(owner) = self.owner.get() {
             if fee > Amount::ZERO {
                 let owner_balance = self.owner_balance.get();
                 let new_owner_balance = owner_balance.saturating_add(fee);
-                self.owner_balance.set(new_owner_balance);
+                self.update_owner_balance(*owner, new_owner_balance).await?;
             }
         }
         Ok(())
+    }
+
+    async fn _owner_balance(&self, owner: ChainAccountOwner) -> Result<Amount, ERC20Error> {
+        if let Some(application_creator) = self.owner.get() {
+            if *application_creator == owner {
+                return Ok(*self.owner_balance.get());
+            }
+        }
+
+        match self.balances.get(&owner).await? {
+            Some(balance) => Ok(balance),
+            None => Ok(Amount::ZERO),
+        }
+    }
+
+    async fn update_owner_balance(
+        &mut self,
+        owner: ChainAccountOwner,
+        amount: Amount,
+    ) -> Result<(), ERC20Error> {
+        if let Some(application_creator) = self.owner.get() {
+            if *application_creator == owner {
+                self.owner_balance.set(amount);
+                return Ok(());
+            }
+        }
+        Ok(self.balances.insert(&owner, amount)?)
+    }
+
+    async fn owner_allowance(
+        &self,
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
+    ) -> Result<Amount, ERC20Error> {
+        let allowance_key = AllowanceKey::new(owner, spender);
+        match self.allowances.get(&allowance_key).await? {
+            Some(balance) => Ok(balance),
+            None => Ok(Amount::ZERO),
+        }
+    }
+
+    async fn update_owner_allowance(
+        &mut self,
+        owner: ChainAccountOwner,
+        spender: ChainAccountOwner,
+        amount: Amount,
+    ) -> Result<(), ERC20Error> {
+        let allowance_key = AllowanceKey::new(owner, spender);
+        Ok(self.allowances.insert(&allowance_key, amount)?)
     }
 
     pub(crate) async fn transfer_from(
@@ -103,23 +138,12 @@ impl Application {
         to: ChainAccountOwner,
         caller: ChainAccountOwner,
     ) -> Result<(), ERC20Error> {
-        let allowance_key = AllowanceKey::new(from.clone(), caller);
-        let allowance = match self.allowances.get(&allowance_key).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
+        let allowance = self.owner_allowance(from.clone(), caller).await?;
         if allowance < amount {
             return Err(ERC20Error::InsufficientFunds);
         }
 
-        let from_balance = match self.balances.get(&from).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
-
+        let from_balance = self._owner_balance(from).await?;
         if from_balance < amount {
             return Err(ERC20Error::InsufficientFunds);
         }
@@ -127,11 +151,9 @@ impl Application {
         let new_from_balance = from_balance.saturating_sub(amount);
         let new_allowance = allowance.saturating_sub(amount);
 
-        let to_balance = match self.balances.get(&to).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => amount,
-            Err(_) => amount,
-        };
+        let to_balance = self._owner_balance(to).await?;
+
+        // TODO: if owner is not set, fee should be 0
         let fee_percent = *self.fee_percent.get();
         let fee = Amount::from_attos(
             amount
@@ -141,14 +163,16 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
-        self.balances.insert(&from, new_from_balance)?;
-        self.balances.insert(&to, new_to_balance)?;
-        self.allowances.insert(&allowance_key, new_allowance)?;
-        if let Some(_) = self.owner.get() {
+        self.update_owner_balance(from, new_from_balance).await?;
+        self.update_owner_balance(to, new_to_balance).await?;
+        self.update_owner_allowance(from, caller, new_allowance)
+            .await?;
+
+        if let Some(owner) = self.owner.get() {
             if fee > Amount::ZERO {
                 let owner_balance = self.owner_balance.get();
                 let new_owner_balance = owner_balance.saturating_add(fee);
-                self.owner_balance.set(new_owner_balance);
+                self.update_owner_balance(*owner, new_owner_balance).await?;
             }
         }
 
@@ -181,11 +205,7 @@ impl Application {
                 .saturating_div(Amount::ONE),
         );
 
-        let user_balance = match self.balances.get(&caller).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        };
+        let user_balance = self._owner_balance(caller).await?;
         let owner_balance = *self.owner_balance.get();
         if owner_balance < erc20_amount {
             return Err(ERC20Error::InsufficientFunds);
