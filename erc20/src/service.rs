@@ -2,8 +2,9 @@
 
 mod state;
 
-use self::state::{AllowanceKey, Application};
+use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
+use erc20::AllowanceKey;
 use linera_sdk::{
     base::{Amount, WithServiceAbi},
     views::View,
