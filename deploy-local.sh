@@ -366,8 +366,6 @@ echo -e "query {\n\
 }"
 
 print $'\U01F4AB' $YELLOW " Add liquidity with..."
-print $'\U01F4AB' $LIGHTGREEN " $wallet_10_public_swap_router_service"
-print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_router_service"
 print $'\U01F4AB' $LIGHTGREEN " $wallet_14_public_swap_router_service"
 echo -e "mutation {\n\
   addLiquidity (\n\
