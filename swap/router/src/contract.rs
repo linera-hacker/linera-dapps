@@ -277,7 +277,7 @@ impl ApplicationContract {
             .call_application(true, pool_application_id, &call);
 
         if let Some(pool) = self.get_pool(token_0, token_1) {
-            return Ok((pool, false, false));
+            return Ok((pool, true, false));
         }
         Err(RouterError::CreatePoolError)
     }

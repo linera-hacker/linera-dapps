@@ -116,6 +116,7 @@ impl Contract for ApplicationContract {
                 .execute_base_message(base_message)
                 .expect("Failed MSG: base message"),
             PoolMessage::CreatePool {
+                origin,
                 token_0,
                 token_1,
                 amount_0_initial,
@@ -124,6 +125,7 @@ impl Contract for ApplicationContract {
                 amount_1_virtual,
             } => self
                 .on_msg_create_pool(
+                    origin,
                     token_0,
                     token_1,
                     amount_0_initial,
@@ -223,6 +225,7 @@ impl ApplicationContract {
 
         self.runtime
             .prepare_message(PoolMessage::CreatePool {
+                origin: creator,
                 token_0,
                 token_1,
                 amount_0_initial,
@@ -527,6 +530,7 @@ impl ApplicationContract {
 
     async fn on_msg_create_pool(
         &mut self,
+        origin: ChainAccountOwner,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_0_initial: Amount,
@@ -546,7 +550,7 @@ impl ApplicationContract {
             }
         }
 
-        if self.runtime.message_id().unwrap().chain_id != self.runtime.chain_id() {
+        if origin.chain_id != self.runtime.chain_id() {
             self.state
                 .create_pool(
                     token_0,
@@ -562,6 +566,7 @@ impl ApplicationContract {
         }
 
         self.publish_message(PoolMessage::CreatePool {
+            origin,
             token_0,
             token_1,
             amount_0_initial,

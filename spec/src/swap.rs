@@ -28,6 +28,7 @@ impl ServiceAbi for PoolApplicationAbi {
 pub enum PoolMessage {
     BaseMessage(BaseMessage),
     CreatePool {
+        origin: ChainAccountOwner,
         token_0: ApplicationId,
         // None means add pair to native token
         token_1: Option<ApplicationId>,
