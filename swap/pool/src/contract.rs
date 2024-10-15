@@ -135,42 +135,56 @@ impl Contract for ApplicationContract {
                 )
                 .await
                 .expect("Failed MSG: create pool"),
-            PoolMessage::SetFeeTo { pool_id, account } => self
-                .on_msg_set_fee_to(pool_id, account)
+            PoolMessage::SetFeeTo {
+                origin,
+                pool_id,
+                account,
+            } => self
+                .on_msg_set_fee_to(origin, pool_id, account)
                 .await
                 .expect("Failed MSG: set fee to"),
-            PoolMessage::SetFeeToSetter { pool_id, account } => self
-                .on_msg_set_fee_to_setter(pool_id, account)
+            PoolMessage::SetFeeToSetter {
+                origin,
+                pool_id,
+                account,
+            } => self
+                .on_msg_set_fee_to_setter(origin, pool_id, account)
                 .await
                 .expect("Failed MSG: set fee to setter"),
             PoolMessage::Mint {
+                origin,
                 pool_id,
                 amount_0,
                 amount_1,
                 to,
             } => self
-                .on_msg_mint(pool_id, amount_0, amount_1, to)
+                .on_msg_mint(origin, pool_id, amount_0, amount_1, to)
                 .await
                 .expect("Failed MSG: mint"),
             PoolMessage::Burn {
+                origin,
                 pool_id,
                 liquidity,
                 to,
             } => self
-                .on_msg_burn(pool_id, liquidity, to)
+                .on_msg_burn(origin, pool_id, liquidity, to)
                 .await
                 .expect("Failed MSG: burn"),
             PoolMessage::Swap {
+                origin,
                 pool_id,
                 amount_0_out,
                 amount_1_out,
                 to,
             } => self
-                .on_msg_swap(pool_id, amount_0_out, amount_1_out, to)
+                .on_msg_swap(origin, pool_id, amount_0_out, amount_1_out, to)
                 .await
                 .expect("Failed MSG: swap"),
-            PoolMessage::SetRouterApplicationId { application_id } => self
-                .on_msg_set_router_application_id(application_id)
+            PoolMessage::SetRouterApplicationId {
+                origin,
+                application_id,
+            } => self
+                .on_msg_set_router_application_id(origin, application_id)
                 .await
                 .expect("Failed MSG: set router application id"),
         }
@@ -192,8 +206,11 @@ impl ApplicationContract {
     }
 
     fn on_op_subscribe_creator_chain(&mut self) -> Result<PoolResponse, PoolError> {
+        let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::BaseMessage(BaseMessage::SubscribeCreatorChain))
+            .prepare_message(PoolMessage::BaseMessage(
+                BaseMessage::SubscribeCreatorChain { origin },
+            ))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
@@ -244,8 +261,13 @@ impl ApplicationContract {
         pool_id: u64,
         account: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
+        let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::SetFeeTo { pool_id, account })
+            .prepare_message(PoolMessage::SetFeeTo {
+                origin,
+                pool_id,
+                account,
+            })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
@@ -256,8 +278,13 @@ impl ApplicationContract {
         pool_id: u64,
         account: ChainAccountOwner,
     ) -> Result<PoolResponse, PoolError> {
+        let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::SetFeeToSetter { pool_id, account })
+            .prepare_message(PoolMessage::SetFeeToSetter {
+                origin,
+                pool_id,
+                account,
+            })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
@@ -308,8 +335,10 @@ impl ApplicationContract {
         // Liquidity calculated here may be not accurate, it may changed when process message
         let liquidity = pool.calculate_liquidity(amount_0, amount_1);
 
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(PoolMessage::Mint {
+                origin,
                 pool_id,
                 amount_0,
                 amount_1,
@@ -356,8 +385,10 @@ impl ApplicationContract {
 
         let amounts = self.calculate_amount_pair(pool_id, liquidity).await?;
 
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(PoolMessage::Burn {
+                origin,
                 pool_id,
                 liquidity,
                 to,
@@ -379,8 +410,10 @@ impl ApplicationContract {
             return Err(PoolError::InvalidAmount);
         }
 
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(PoolMessage::Swap {
+                origin,
                 pool_id,
                 amount_0_out,
                 amount_1_out,
@@ -410,8 +443,12 @@ impl ApplicationContract {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return Err(PoolError::PermissionDenied);
         }
+        let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::SetRouterApplicationId { application_id })
+            .prepare_message(PoolMessage::SetRouterApplicationId {
+                origin,
+                application_id,
+            })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(PoolResponse::Ok)
@@ -419,7 +456,9 @@ impl ApplicationContract {
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
         match message {
-            BaseMessage::SubscribeCreatorChain => self.on_msg_subscribe_creator_chain(),
+            BaseMessage::SubscribeCreatorChain { origin: _ } => {
+                self.on_msg_subscribe_creator_chain()
+            }
         }
     }
 
@@ -580,6 +619,7 @@ impl ApplicationContract {
 
     async fn on_msg_set_fee_to(
         &mut self,
+        origin: ChainAccountOwner,
         pool_id: u64,
         account: ChainAccountOwner,
     ) -> Result<(), PoolError> {
@@ -587,12 +627,17 @@ impl ApplicationContract {
         self.state
             .set_fee_to(pool_id, account.clone(), setter)
             .await?;
-        self.publish_message(PoolMessage::SetFeeTo { pool_id, account });
+        self.publish_message(PoolMessage::SetFeeTo {
+            origin,
+            pool_id,
+            account,
+        });
         Ok(())
     }
 
     async fn on_msg_set_fee_to_setter(
         &mut self,
+        origin: ChainAccountOwner,
         pool_id: u64,
         account: ChainAccountOwner,
     ) -> Result<(), PoolError> {
@@ -600,12 +645,17 @@ impl ApplicationContract {
         self.state
             .set_fee_to_setter(pool_id, account.clone(), setter)
             .await?;
-        self.publish_message(PoolMessage::SetFeeToSetter { pool_id, account });
+        self.publish_message(PoolMessage::SetFeeToSetter {
+            origin,
+            pool_id,
+            account,
+        });
         Ok(())
     }
 
     async fn on_msg_mint(
         &mut self,
+        origin: ChainAccountOwner,
         pool_id: u64,
         amount_0: Amount,
         amount_1: Amount,
@@ -640,6 +690,7 @@ impl ApplicationContract {
             .await?;
 
         self.publish_message(PoolMessage::Mint {
+            origin,
             pool_id,
             amount_0,
             amount_1,
@@ -650,6 +701,7 @@ impl ApplicationContract {
 
     async fn on_msg_burn(
         &mut self,
+        origin: ChainAccountOwner,
         pool_id: u64,
         liquidity: Amount,
         to: ChainAccountOwner,
@@ -674,6 +726,7 @@ impl ApplicationContract {
         }
 
         self.publish_message(PoolMessage::Burn {
+            origin,
             pool_id,
             liquidity,
             to,
@@ -683,6 +736,7 @@ impl ApplicationContract {
 
     async fn on_msg_swap(
         &mut self,
+        origin: ChainAccountOwner,
         pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
@@ -730,6 +784,7 @@ impl ApplicationContract {
             .await?;
 
         self.publish_message(PoolMessage::Swap {
+            origin,
             pool_id,
             amount_0_out,
             amount_1_out,
@@ -740,10 +795,14 @@ impl ApplicationContract {
 
     async fn on_msg_set_router_application_id(
         &mut self,
+        origin: ChainAccountOwner,
         application_id: ApplicationId,
     ) -> Result<(), PoolError> {
         self.state.set_router_application_id(application_id).await;
-        self.publish_message(PoolMessage::SetRouterApplicationId { application_id });
+        self.publish_message(PoolMessage::SetRouterApplicationId {
+            origin,
+            application_id,
+        });
         Ok(())
     }
 }

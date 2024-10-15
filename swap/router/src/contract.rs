@@ -129,6 +129,7 @@ impl Contract for ApplicationContract {
                 .execute_base_message(base_message)
                 .expect("Failed MSG: base message"),
             RouterMessage::AddLiquidity {
+                origin,
                 token_0,
                 token_1,
                 amount_0_desired,
@@ -140,6 +141,7 @@ impl Contract for ApplicationContract {
                 deadline,
             } => self
                 .on_msg_add_liquidity(
+                    origin,
                     token_0,
                     token_1,
                     amount_0_desired,
@@ -153,6 +155,7 @@ impl Contract for ApplicationContract {
                 .await
                 .expect("Failed MSG: add liquidity"),
             RouterMessage::RemoveLiquidity {
+                origin,
                 token_0,
                 token_1,
                 liquidity,
@@ -162,6 +165,7 @@ impl Contract for ApplicationContract {
                 deadline,
             } => self
                 .on_msg_remove_liquidity(
+                    origin,
                     token_0,
                     token_1,
                     liquidity,
@@ -173,6 +177,7 @@ impl Contract for ApplicationContract {
                 .await
                 .expect("Failed MSG: remove liquidity"),
             RouterMessage::Swap {
+                origin,
                 token_0,
                 token_1,
                 amount_0_in,
@@ -182,6 +187,7 @@ impl Contract for ApplicationContract {
                 to,
             } => self
                 .on_msg_swap(
+                    origin,
                     token_0,
                     token_1,
                     amount_0_in,
@@ -201,6 +207,25 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
+    fn message_owner(&mut self) -> ChainAccountOwner {
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+        ChainAccountOwner {
+            chain_id: message_id.chain_id,
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        }
+    }
+
+    fn runtime_owner(&mut self) -> ChainAccountOwner {
+        ChainAccountOwner {
+            chain_id: self.runtime.chain_id(),
+            owner: Some(AccountOwner::User(
+                self.runtime.authenticated_signer().expect("Invalid owner"),
+            )),
+        }
+    }
+
     fn execute_base_operation(
         &mut self,
         operation: BaseOperation,
@@ -211,9 +236,10 @@ impl ApplicationContract {
     }
 
     fn on_op_subscribe_creator_chain(&mut self) -> Result<RouterResponse, RouterError> {
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(RouterMessage::BaseMessage(
-                BaseMessage::SubscribeCreatorChain,
+                BaseMessage::SubscribeCreatorChain { origin },
             ))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
@@ -414,8 +440,10 @@ impl ApplicationContract {
         fake_pool.reserve_0.saturating_add_assign(amount_1);
         let liquidity = fake_pool.calculate_liquidity(amount_0, amount_1);
 
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(RouterMessage::AddLiquidity {
+                origin,
                 token_0,
                 token_1,
                 amount_0_desired,
@@ -497,8 +525,10 @@ impl ApplicationContract {
             },
         };
 
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(RouterMessage::RemoveLiquidity {
+                origin,
                 token_0,
                 token_1,
                 liquidity,
@@ -585,8 +615,10 @@ impl ApplicationContract {
             },
         };
 
+        let origin = self.runtime_owner();
         self.runtime
             .prepare_message(RouterMessage::Swap {
+                origin,
                 token_0,
                 token_1,
                 amount_0_in,
@@ -602,7 +634,9 @@ impl ApplicationContract {
 
     fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), RouterError> {
         match message {
-            BaseMessage::SubscribeCreatorChain => self.on_msg_subscribe_creator_chain(),
+            BaseMessage::SubscribeCreatorChain { origin: _ } => {
+                self.on_msg_subscribe_creator_chain()
+            }
         }
     }
 
@@ -677,6 +711,7 @@ impl ApplicationContract {
 
     async fn on_msg_add_liquidity(
         &mut self,
+        origin: ChainAccountOwner,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_0_desired: Amount,
@@ -713,6 +748,7 @@ impl ApplicationContract {
         self.mint(pool, amount_0, amount_1, to);
 
         self.publish_message(RouterMessage::AddLiquidity {
+            origin,
             token_0,
             token_1,
             amount_0_desired,
@@ -743,6 +779,7 @@ impl ApplicationContract {
 
     async fn on_msg_remove_liquidity(
         &mut self,
+        origin: ChainAccountOwner,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         liquidity: Amount,
@@ -767,6 +804,7 @@ impl ApplicationContract {
         self.burn(pool, liquidity, to);
 
         self.publish_message(RouterMessage::RemoveLiquidity {
+            origin,
             token_0,
             token_1,
             liquidity,
@@ -802,6 +840,7 @@ impl ApplicationContract {
 
     async fn on_msg_swap(
         &mut self,
+        origin: ChainAccountOwner,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_0_in: Option<Amount>,
@@ -851,6 +890,7 @@ impl ApplicationContract {
         self.swap(pool, amount_0_out, amount_1_out, to);
 
         self.publish_message(RouterMessage::Swap {
+            origin,
             token_0,
             token_1,
             amount_0_in,

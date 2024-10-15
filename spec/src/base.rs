@@ -1,3 +1,4 @@
+use crate::account::ChainAccountOwner;
 use async_graphql::{scalar, Context, Error};
 use linera_sdk::{base::Amount, graphql::GraphQLMutationRoot};
 use num_bigint::BigUint;
@@ -6,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum BaseMessage {
-    SubscribeCreatorChain,
+    SubscribeCreatorChain { origin: ChainAccountOwner },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]

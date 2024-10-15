@@ -165,7 +165,8 @@ impl Application {
             creator,
             block_timestamp,
             false,
-        ).await
+        )
+        .await
     }
 
     pub(crate) async fn require_create_pool(
@@ -189,7 +190,8 @@ impl Application {
             creator,
             block_timestamp,
             true,
-        ).await
+        )
+        .await
     }
 
     pub(crate) async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {

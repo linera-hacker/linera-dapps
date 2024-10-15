@@ -29,23 +29,28 @@ pub struct InstantiationArgument {
 pub enum ERC20Message {
     BaseMessage(BaseMessage),
     Transfer {
+        origin: ChainAccountOwner,
         to: ChainAccountOwner,
         amount: Amount,
     },
     TransferFrom {
+        origin: ChainAccountOwner,
         from: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
     },
     Approve {
+        origin: ChainAccountOwner,
         spender: ChainAccountOwner,
         value: Amount,
     },
     Mint {
+        origin: ChainAccountOwner,
         to: ChainAccountOwner,
         amount: Amount,
     },
     ChangeCreatedOwner {
+        origin: ChainAccountOwner,
         new_owner: ChainAccountOwner,
     },
 }
