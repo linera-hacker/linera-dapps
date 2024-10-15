@@ -225,6 +225,7 @@ curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { a
 echo
 
 print $'\U01F4AB' $YELLOW " Add query allowance with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_10_public_erc20_1_service"
 print $'\U01F4AB' $LIGHTGREEN " $wallet_12_public_erc20_1_service"
 echo -e "query {\n\
   allowance(\n\
