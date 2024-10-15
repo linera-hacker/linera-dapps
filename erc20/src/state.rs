@@ -74,7 +74,7 @@ impl Application {
         log::info!("Sender {:?} balance {} amount {}", sender, sender_balance, amount);
 
         if sender_balance < amount {
-            return Err(ERC20Error::InvalidInitialAmount);
+            return Err(ERC20Error::InsufficientFunds);
         }
 
         let new_sender_balance = sender_balance.saturating_sub(amount);
@@ -124,7 +124,7 @@ impl Application {
         };
 
         if allowance < amount {
-            return Err(ERC20Error::InvalidInitialAmount);
+            return Err(ERC20Error::InsufficientFunds);
         }
 
         let from_balance = match self.balances.get(&from).await {
@@ -134,7 +134,7 @@ impl Application {
         };
 
         if from_balance < amount {
-            return Err(ERC20Error::InvalidInitialAmount);
+            return Err(ERC20Error::InsufficientFunds);
         }
 
         let new_from_balance = from_balance.saturating_sub(amount);
@@ -225,7 +225,7 @@ impl Application {
             let owner: ChainAccountOwner = serde_json::from_str(&owner_str).unwrap();
             airdrop_amount = airdrop_amount.saturating_add(amount);
             if *total_supply < airdrop_amount {
-                return Err(ERC20Error::InvalidInitialAmount);
+                return Err(ERC20Error::InsufficientFunds);
             }
             let _ = self.balances.insert(&owner, amount);
         }

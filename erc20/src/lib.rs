@@ -7,8 +7,8 @@ pub type ApplicationAbi = ERC20ApplicationAbi;
 #[derive(Debug, Error)]
 #[allow(dead_code)]
 pub enum ERC20Error {
-    #[error("Invalid initial amount")]
-    InvalidInitialAmount,
+    #[error("Insufficient funds")]
+    InsufficientFunds,
 
     #[error(transparent)]
     ParseAmountError(#[from] ParseAmountError),
