@@ -227,8 +227,6 @@ impl ApplicationContract {
     ) -> Result<PoolResponse, PoolError> {
         let creator = self.runtime_owner();
 
-        log::info!("Create pool {}:{}", amount_0_initial, amount_1_initial);
-
         if amount_0_initial > Amount::ZERO {
             self.receive_erc20_from(token_0, amount_0_initial);
         }
@@ -238,7 +236,6 @@ impl ApplicationContract {
                 None => self.receive_native_from(amount_1_initial),
             }
         }
-
 
         self.state
             .create_pool(
