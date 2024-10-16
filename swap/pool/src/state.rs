@@ -215,6 +215,29 @@ impl Application {
         }
     }
 
+    pub(crate) async fn update_pool(&mut self, pool: Pool) -> Result<(), PoolError> {
+        let Some(_pool) = self
+            .get_pool_with_token_pair(pool.token_0, pool.token_1)
+            .await?
+        else {
+            return Err(PoolError::InvalidPool);
+        };
+        if _pool.id != pool.id {
+            return Err(PoolError::InvalidPool);
+        }
+
+        match pool.token_1 {
+            Some(token_1) => {
+                let mut pools = self.erc20_erc20_pools.get(&pool.token_0).await?.unwrap();
+                pools.insert(token_1, pool);
+                Ok(self.erc20_erc20_pools.insert(&token_1, pools)?)
+            }
+            _ => Ok(self
+                .erc20_native_pools
+                .insert(&pool.token_0.clone(), pool)?),
+        }
+    }
+
     pub(crate) async fn get_pool_with_token_pair(
         &self,
         token_0: ApplicationId,
@@ -246,7 +269,7 @@ impl Application {
             return Err(PoolError::PermissionDenied);
         }
         pool.fee_to = account;
-        // TODO: test if we need to insert again
+        self.update_pool(pool).await?;
         Ok(())
     }
 
@@ -261,7 +284,7 @@ impl Application {
             return Err(PoolError::PermissionDenied);
         }
         pool.fee_to_setter = account;
-        // TODO: test if we need to insert again
+        self.update_pool(pool).await?;
         Ok(())
     }
 
@@ -273,7 +296,7 @@ impl Application {
     ) -> Result<(), PoolError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
         pool.erc20._mint(to, liquidity);
-        // TODO: test if we need to insert again
+        self.update_pool(pool).await?;
         Ok(())
     }
 
