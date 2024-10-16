@@ -407,7 +407,10 @@ echo -e "query {\n\
     virtualInitialLiquidity\n\
     reserve0\n\
     reserve1\n\
-    erc20\n\
+    erc20 {
+      balances\n\
+      totalSupply\n\
+    }\n\
     feeTo\n\
     feeToSetter\n\
   }\n\
