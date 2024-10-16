@@ -5,7 +5,12 @@ use linera_sdk::{
 use num_bigint::BigUint;
 use num_traits::cast::ToPrimitive;
 use num_traits::FromPrimitive;
-use spec::{account::ChainAccountOwner, base, erc20::ERC20, swap::Pool};
+use spec::{
+    account::ChainAccountOwner,
+    base,
+    erc20::ERC20,
+    swap::{Pool, PoolSubscriberSyncState},
+};
 use std::{collections::HashMap, str::FromStr};
 use swap_pool::PoolError;
 
@@ -337,6 +342,65 @@ impl Application {
             }
         }
 
+        Ok(())
+    }
+
+    pub(crate) async fn to_subscriber_sync_state(
+        &self,
+    ) -> Result<PoolSubscriberSyncState, PoolError> {
+        let mut state = PoolSubscriberSyncState {
+            erc20_erc20_pools: HashMap::new(),
+            erc20_native_pools: HashMap::new(),
+            pool_id: *self.pool_id.get(),
+            pool_erc20_erc20s: HashMap::new(),
+            pool_erc20_natives: HashMap::new(),
+            router_application_id: self.router_application_id.get().clone(),
+        };
+        self.erc20_erc20_pools
+            .for_each_index_value(|index, pools| {
+                state.erc20_erc20_pools.insert(index, pools);
+                Ok(())
+            })
+            .await?;
+        self.erc20_native_pools
+            .for_each_index_value(|index, pool| {
+                state.erc20_native_pools.insert(index, pool);
+                Ok(())
+            })
+            .await?;
+        self.pool_erc20_erc20s
+            .for_each_index_value(|index, tokens| {
+                state.pool_erc20_erc20s.insert(index, tokens);
+                Ok(())
+            })
+            .await?;
+        self.pool_erc20_natives
+            .for_each_index_value(|index, token| {
+                state.pool_erc20_natives.insert(index, token);
+                Ok(())
+            })
+            .await?;
+        Ok(state)
+    }
+
+    pub(crate) async fn from_subscriber_sync_state(
+        &mut self,
+        state: PoolSubscriberSyncState,
+    ) -> Result<(), PoolError> {
+        self.pool_id.set(state.pool_id);
+        self.router_application_id.set(state.router_application_id);
+        for (key, pools) in &state.erc20_erc20_pools {
+            self.erc20_erc20_pools.insert(key, pools.clone())?;
+        }
+        for (key, pool) in &state.erc20_native_pools {
+            self.erc20_native_pools.insert(key, pool.clone())?;
+        }
+        for (key, tokens) in &state.pool_erc20_erc20s {
+            self.pool_erc20_erc20s.insert(key, tokens.clone())?;
+        }
+        for (key, token) in &state.pool_erc20_natives {
+            self.pool_erc20_natives.insert(key, *token)?;
+        }
         Ok(())
     }
 }

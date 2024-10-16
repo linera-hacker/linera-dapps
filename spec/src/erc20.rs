@@ -186,7 +186,7 @@ pub trait ERC20MutationRoot {
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Default)]
 pub struct ERC20 {
     pub total_supply: Amount,
     pub balances: HashMap<ChainAccountOwner, Amount>,

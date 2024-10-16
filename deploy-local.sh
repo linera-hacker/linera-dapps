@@ -198,6 +198,7 @@ wallet_12_owner=$owner
 
 wallet_12_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 wallet_12_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+wallet_12_public_swap_pool_service="$HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 wallet_12_public_swap_router_service="$HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 HTTP_HOST="http://$WALLET_13_PUBLIC_IPORT"
@@ -225,6 +226,7 @@ wallet_14_swap_pool_service="http://$LOCAL_IP:30094/chains/$chain/applications/$
 wallet_14_swap_router_service="http://$LOCAL_IP:30094/chains/$chain/applications/$swap_router_appid"
 
 wallet_14_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+wallet_14_public_swap_pool_service="$HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 wallet_14_public_swap_router_service="$HTTP_HOST/chains/$chain/applications/$swap_router_appid"
 
 ####
@@ -377,6 +379,31 @@ echo -e "mutation {\n\
     amount1Min: \"2000\",\n\
     deadline: 0,\n\
   )\n\
+}"
+
+print $'\U01F4AB' $YELLOW " Query pools with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_12_public_swap_pool_service"
+print $'\U01F4AB' $LIGHTGREEN " $wallet_14_public_swap_pool_service"
+echo -e "query {\n\
+  getPools {\n\
+    id\n\
+    token0\n\
+    token1\n\
+    poolFeeRate\n\
+    price0Cumulative\n\
+    price1Cumulative\n\
+    amount0Initial\n\
+    amount1Initial\n\
+    kLast\n\
+    blockTimestamp\n\
+    protocolFeeRate\n\
+    virtualInitialLiquidity\n\
+    reserve0\n\
+    reserve1\n\
+    erc20\n\
+    feeTo\n\
+    feeToSetter\n\
+  }\n\
 }"
 
 trap cleanup INT

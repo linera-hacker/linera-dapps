@@ -17,7 +17,7 @@ use spec::{
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
     swap::{
         Pool, PoolApplicationAbi, PoolOperation, PoolResponse, RouterMessage, RouterOperation,
-        RouterParameters, RouterResponse,
+        RouterParameters, RouterResponse, RouterSubscriberSyncState,
     },
 };
 use swap_router::RouterError;
@@ -198,6 +198,10 @@ impl Contract for ApplicationContract {
                 )
                 .await
                 .expect("Failed MSG: swap"),
+            RouterMessage::SubscriberSync { origin, state } => self
+                .on_msg_subscriber_sync(origin, state)
+                .await
+                .expect("Failed MSG: subscriber sync"),
         }
     }
 
@@ -900,6 +904,14 @@ impl ApplicationContract {
             to,
         });
 
+        Ok(())
+    }
+
+    async fn on_msg_subscriber_sync(
+        &mut self,
+        _origin: ChainAccountOwner,
+        _state: RouterSubscriberSyncState,
+    ) -> Result<(), RouterError> {
         Ok(())
     }
 }

@@ -331,11 +331,7 @@ impl Application {
             .await?;
         self.allowances
             .for_each_index_value(|index, allowances| {
-                let mut _allowances = HashMap::new();
-                for (key, value) in &allowances {
-                    _allowances.insert(*key, *value);
-                }
-                state.allowances.insert(index, _allowances);
+                state.allowances.insert(index, allowances.clone());
                 Ok(())
             })
             .await?;
@@ -357,11 +353,7 @@ impl Application {
             self.balances.insert(key, *value)?;
         }
         for (owner, allowances) in &state.allowances {
-            let mut _allowances = HashMap::new();
-            for (key, value) in allowances {
-                _allowances.insert(*key, *value);
-            }
-            self.allowances.insert(owner, _allowances)?;
+            self.allowances.insert(owner, allowances.clone())?;
         }
         for (key, value) in &state.locked_allowances {
             self.locked_allowances.insert(key, *value)?;

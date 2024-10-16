@@ -15,7 +15,7 @@ use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
-    swap::{PoolMessage, PoolOperation, PoolResponse},
+    swap::{PoolMessage, PoolOperation, PoolResponse, PoolSubscriberSyncState},
 };
 use swap_pool::PoolError;
 
@@ -114,6 +114,7 @@ impl Contract for ApplicationContract {
         match message {
             PoolMessage::BaseMessage(base_message) => self
                 .execute_base_message(base_message)
+                .await
                 .expect("Failed MSG: base message"),
             PoolMessage::CreatePool {
                 origin,
@@ -187,6 +188,10 @@ impl Contract for ApplicationContract {
                 .on_msg_set_router_application_id(origin, application_id)
                 .await
                 .expect("Failed MSG: set router application id"),
+            PoolMessage::SubscriberSync { origin, state } => self
+                .on_msg_subscriber_sync(origin, state)
+                .await
+                .expect("Failed MSG: subscriber sync"),
         }
     }
 
@@ -464,15 +469,15 @@ impl ApplicationContract {
         Ok(PoolResponse::Ok)
     }
 
-    fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
+    async fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
         match message {
             BaseMessage::SubscribeCreatorChain { origin: _ } => {
-                self.on_msg_subscribe_creator_chain()
+                self.on_msg_subscribe_creator_chain().await
             }
         }
     }
 
-    fn on_msg_subscribe_creator_chain(&mut self) -> Result<(), PoolError> {
+    async fn on_msg_subscribe_creator_chain(&mut self) -> Result<(), PoolError> {
         let message_id = self.runtime.message_id().expect("Invalid message id");
         if message_id.chain_id == self.runtime.application_creator_chain_id() {
             return Ok(());
@@ -482,6 +487,14 @@ impl ApplicationContract {
             message_id.chain_id,
             ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()),
         );
+
+        let origin = self.message_owner();
+        let state = self.state.to_subscriber_sync_state().await?;
+        self.runtime
+            .prepare_message(PoolMessage::SubscriberSync { origin, state })
+            .with_authentication()
+            .send_to(message_id.chain_id);
+
         Ok(())
     }
 
@@ -792,6 +805,16 @@ impl ApplicationContract {
             origin,
             application_id,
         });
+        Ok(())
+    }
+
+    async fn on_msg_subscriber_sync(
+        &mut self,
+        origin: ChainAccountOwner,
+        state: PoolSubscriberSyncState,
+    ) -> Result<(), PoolError> {
+        self.state.from_subscriber_sync_state(state.clone()).await?;
+        self.publish_message(PoolMessage::SubscriberSync { origin, state });
         Ok(())
     }
 }

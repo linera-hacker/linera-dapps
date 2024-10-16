@@ -10,6 +10,7 @@ use linera_sdk::{
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 pub struct RouterApplicationAbi;
 pub struct PoolApplicationAbi;
@@ -22,6 +23,38 @@ impl ContractAbi for PoolApplicationAbi {
 impl ServiceAbi for PoolApplicationAbi {
     type Query = Request;
     type QueryResponse = Response;
+}
+
+#[derive(Debug, Clone, Deserialize, Eq, PartialEq, Serialize, SimpleObject)]
+pub struct Pool {
+    pub id: u64,
+    pub token_0: ApplicationId,
+    // None means add pair to native token
+    pub token_1: Option<ApplicationId>,
+    pub virtual_initial_liquidity: bool,
+    pub amount_0_initial: Amount,
+    pub amount_1_initial: Amount,
+    pub reserve_0: Amount,
+    pub reserve_1: Amount,
+    pub pool_fee_rate: Amount,
+    pub protocol_fee_rate: Amount,
+    pub erc20: ERC20,
+    pub fee_to: ChainAccountOwner,
+    pub fee_to_setter: ChainAccountOwner,
+    pub price_0_cumulative: Amount,
+    pub price_1_cumulative: Amount,
+    pub k_last: Amount,
+    pub block_timestamp: Timestamp,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct PoolSubscriberSyncState {
+    pub erc20_erc20_pools: HashMap<ApplicationId, HashMap<ApplicationId, Pool>>,
+    pub erc20_native_pools: HashMap<ApplicationId, Pool>,
+    pub pool_id: u64,
+    pub pool_erc20_erc20s: HashMap<u64, Vec<ApplicationId>>,
+    pub pool_erc20_natives: HashMap<u64, ApplicationId>,
+    pub router_application_id: Option<ApplicationId>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -70,6 +103,10 @@ pub enum PoolMessage {
     SetRouterApplicationId {
         origin: ChainAccountOwner,
         application_id: ApplicationId,
+    },
+    SubscriberSync {
+        origin: ChainAccountOwner,
+        state: PoolSubscriberSyncState,
     },
 }
 
@@ -124,28 +161,6 @@ pub enum PoolOperation {
     SetRouterApplicationId {
         application_id: ApplicationId,
     },
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, SimpleObject)]
-pub struct Pool {
-    pub id: u64,
-    pub token_0: ApplicationId,
-    // None means add pair to native token
-    pub token_1: Option<ApplicationId>,
-    pub virtual_initial_liquidity: bool,
-    pub amount_0_initial: Amount,
-    pub amount_1_initial: Amount,
-    pub reserve_0: Amount,
-    pub reserve_1: Amount,
-    pub pool_fee_rate: Amount,
-    pub protocol_fee_rate: Amount,
-    pub erc20: ERC20,
-    pub fee_to: ChainAccountOwner,
-    pub fee_to_setter: ChainAccountOwner,
-    pub price_0_cumulative: Amount,
-    pub price_1_cumulative: Amount,
-    pub k_last: Amount,
-    pub block_timestamp: Timestamp,
 }
 
 impl Pool {
@@ -298,6 +313,9 @@ pub struct RouterParameters {
     pub pool_application_id: ApplicationId<PoolApplicationAbi>,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct RouterSubscriberSyncState {}
+
 #[derive(Debug, Deserialize, Serialize)]
 pub enum RouterMessage {
     BaseMessage(BaseMessage),
@@ -332,6 +350,10 @@ pub enum RouterMessage {
         amount_0_out_min: Option<Amount>,
         amount_1_out_min: Option<Amount>,
         to: ChainAccountOwner,
+    },
+    SubscriberSync {
+        origin: ChainAccountOwner,
+        state: RouterSubscriberSyncState,
     },
 }
 
