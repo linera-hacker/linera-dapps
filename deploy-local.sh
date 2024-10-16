@@ -92,8 +92,8 @@ create_wallet 11
 create_wallet 12
 create_wallet 13
 
-wallet_14_default_chain=`linera --with-wallet 14 wallet show | grep "Public Key" | awk '{print $2}'`
-wallet_14_owner=`linera --with-wallet 14 wallet show | grep "Owner" | awk '{print $4}'`
+wallet_13_default_chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
+wallet_13_owner=`linera --with-wallet 13 wallet show | grep "Owner" | awk '{print $4}'`
 
 ####
 ## Mint ERC20 token and WLINERA token initial liquidity to wallet 14 default chain directly
@@ -103,7 +103,7 @@ print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
     --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_14_default_chain'\",\"owner\":\"User:'$wallet_14_owner'\"}":"5000000."}}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."}}' \
     `
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
@@ -113,7 +113,7 @@ print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
     --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_14_default_chain'\",\"owner\":\"User:'$wallet_14_owner'\"}":"5000000."}}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."}}' \
     `
 print $'\U01f499' $LIGHTGREEN " WLINERA application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
@@ -124,16 +124,13 @@ linera --with-wallet 12 request-application $erc20_2_appid
 
 print $'\U01F4AB' $YELLOW " Deploying Swap Router application ..."
 swap_router_bid=`linera --with-wallet 13 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_router_{contract,service}.wasm`
-swap_router_appid=`linera --with-wallet 13 create-application $swap_router_bid \
-    --json-parameters "{\"pool_application_id\":\"$swap_pool_appid\"}" \
-    `
+swap_router_appid=`linera --with-wallet 13 create-application $swap_router_bid`
 print $'\U01f499' $LIGHTGREEN " Swap Router application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_router_bid$NC"
 echo -e "    Application ID: $BLUE$swap_router_appid$NC"
 
 linera --with-wallet 13 request-application $erc20_1_appid
 linera --with-wallet 13 request-application $erc20_2_appid
-linera --with-wallet 13 request-application $swap_pool_appid
 linera --with-wallet 13 request-application $swap_router_appid
 
 function print_apps() {
@@ -142,7 +139,6 @@ function print_apps() {
   echo -e "  Owner:          $LIGHTGREEN$4$NC"
   echo -e "    ERC20:        $BLUE$2/chains/$3/applications/$erc20_1_appid$NC"
   echo -e "    WLINERA:      $BLUE$2/chains/$3/applications/$erc20_2_appid$NC"
-  echo -e "    Swap Pool:    $BLUE$2/chains/$3/applications/$swap_pool_appid$NC"
   echo -e "    Swap Router:  $BLUE$2/chains/$3/applications/$swap_router_appid$NC"
 }
 
@@ -153,7 +149,6 @@ print_apps "Wallet 10" $HTTP_HOST $chain $owner
 
 wallet_10_erc20_1_service="http://$LOCAL_IP:30090/chains/$chain/applications/$erc20_1_appid"
 wallet_10_erc20_2_service="http://$LOCAL_IP:30090/chains/$chain/applications/$erc20_2_appid"
-wallet_10_swap_pool_service="http://$LOCAL_IP:30090/chains/$chain/applications/$swap_pool_appid"
 wallet_10_swap_router_service="http://$LOCAL_IP:30090/chains/$chain/applications/$swap_router_appid"
 wallet_10_default_chain=$chain
 wallet_10_owner=$owner
@@ -220,12 +215,10 @@ run_service 13 &
 sleep 5
 
 print $'\U01F4AB' $YELLOW " Subscribe ERC20 creator chain..."
-curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_11_erc20_1_service
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_1_service
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_erc20_1_service
 echo
 print $'\U01F4AB' $YELLOW " Subscribe WLINERA creator chain..."
-curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_11_erc20_2_service
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_2_service
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_erc20_2_service
 echo
@@ -298,7 +291,7 @@ echo -e "query {\n\
     },\n\
     spender: {\n\
       chain_id:\"$wallet_12_default_chain\",\n\
-      owner:\"Application:$swap_pool_appid\"\n\
+      owner:\"Application:$swap_router_appid\"\n\
     }\n\
   )\n\
   balanceOf(owner: {\n\
@@ -322,7 +315,7 @@ echo -e "query {\n\
     },\n\
     spender: {\n\
       chain_id:\"$wallet_12_default_chain\",\n\
-      owner:\"Application:$swap_pool_appid\"\n\
+      owner:\"Application:$swap_router_appid\"\n\
     }\n\
   )\n\
   balanceOf(owner: {\n\
@@ -350,8 +343,8 @@ echo -e "mutation {\n\
 }"
 
 print $'\U01F4AB' $YELLOW " Query pools with..."
-print $'\U01F4AB' $LIGHTGREEN " $wallet_12_public_swap_pool_service"
-print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_pool_service"
+print $'\U01F4AB' $LIGHTGREEN " $wallet_12_public_swap_router_service"
+print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_router_service"
 echo -e "query {\n\
   getPools {\n\
     id\n\
