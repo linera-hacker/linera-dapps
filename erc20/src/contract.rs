@@ -128,7 +128,7 @@ impl Contract for ApplicationContract {
                 .await
                 .expect("Failed MSG: transfer ownership"),
             ERC20Message::SubscriberSync { origin: _, state } => self
-                .on_msg_subscriber_sync_state(state)
+                .on_msg_subscriber_sync(state)
                 .await
                 .expect("Failed MSG: subscriber sync state"),
         }
@@ -434,10 +434,14 @@ impl ApplicationContract {
         Ok(())
     }
 
-    async fn on_msg_subscriber_sync_state(
+    async fn on_msg_subscriber_sync(
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), ERC20Error> {
+        if *self.state.total_supply.get() > Amount::ZERO {
+            log::warn!("Stale subscriber state on {}", self.runtime.chain_id());
+            return Ok(());
+        }
         self.state.from_subscriber_sync_state(state).await
     }
 }

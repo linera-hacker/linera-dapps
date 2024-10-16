@@ -3,27 +3,15 @@ use crate::{
     base::{self, BaseMessage, BaseOperation},
     erc20::ERC20,
 };
-use async_graphql::{Context, Error, Request, Response, SimpleObject};
+use async_graphql::{scalar, Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 pub struct RouterApplicationAbi;
-pub struct PoolApplicationAbi;
-
-impl ContractAbi for PoolApplicationAbi {
-    type Operation = PoolOperation;
-    type Response = PoolResponse;
-}
-
-impl ServiceAbi for PoolApplicationAbi {
-    type Query = Request;
-    type QueryResponse = Response;
-}
 
 #[derive(Debug, Clone, Deserialize, Eq, PartialEq, Serialize, SimpleObject)]
 pub struct Pool {
@@ -47,19 +35,8 @@ pub struct Pool {
     pub block_timestamp: Timestamp,
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct PoolSubscriberSyncState {
-    pub erc20_erc20_pools: HashMap<ApplicationId, HashMap<ApplicationId, Pool>>,
-    pub erc20_native_pools: HashMap<ApplicationId, Pool>,
-    pub pool_id: u64,
-    pub pool_erc20_erc20s: HashMap<u64, Vec<ApplicationId>>,
-    pub pool_erc20_natives: HashMap<u64, ApplicationId>,
-    pub router_application_id: Option<ApplicationId>,
-}
-
 #[derive(Debug, Deserialize, Serialize)]
 pub enum PoolMessage {
-    BaseMessage(BaseMessage),
     CreatePool {
         origin: ChainAccountOwner,
         token_0: ApplicationId,
@@ -93,26 +70,17 @@ pub enum PoolMessage {
         liquidity: Amount,
         to: ChainAccountOwner,
     },
-    Swap {
+    SwapWithPool {
         origin: ChainAccountOwner,
         pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
     },
-    SetRouterApplicationId {
-        origin: ChainAccountOwner,
-        application_id: ApplicationId,
-    },
-    SubscriberSync {
-        origin: ChainAccountOwner,
-        state: PoolSubscriberSyncState,
-    },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum PoolOperation {
-    BaseOperation(BaseOperation),
     CreatePool {
         token_0: ApplicationId,
         // None means add pair to native token
@@ -141,12 +109,19 @@ pub enum PoolOperation {
         amount_1: Amount,
         to: ChainAccountOwner,
     },
+    MintWithTokenPair {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0: Amount,
+        amount_1: Amount,
+        to: ChainAccountOwner,
+    },
     Burn {
         pool_id: u64,
         liquidity: Amount,
         to: ChainAccountOwner,
     },
-    Swap {
+    SwapWithPool {
         pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
@@ -158,10 +133,9 @@ pub enum PoolOperation {
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
     },
-    SetRouterApplicationId {
-        application_id: ApplicationId,
-    },
 }
+
+scalar!(PoolOperation);
 
 impl Pool {
     pub fn calculate_liquidity(&self, amount_0: Amount, amount_1: Amount) -> Amount {
@@ -206,16 +180,127 @@ impl Pool {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize, Default)]
+#[derive(Debug, Deserialize, Serialize)]
 pub enum PoolResponse {
-    #[default]
-    Ok,
     Liquidity(Amount),
     AmountPair((Amount, Amount)),
     Pool(Option<Pool>),
 }
 
-pub trait PoolQueryRoot {
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct RouterSubscriberSyncState {}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub enum RouterMessage {
+    BaseMessage(BaseMessage),
+    PoolMessage(PoolMessage),
+    AddLiquidity {
+        origin: ChainAccountOwner,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_desired: Amount,
+        amount_1_desired: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        created_pool: bool,
+        to: ChainAccountOwner,
+        deadline: Timestamp,
+    },
+    RemoveLiquidity {
+        origin: ChainAccountOwner,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        liquidity: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: ChainAccountOwner,
+        deadline: Timestamp,
+    },
+    Swap {
+        origin: ChainAccountOwner,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: ChainAccountOwner,
+    },
+    SubscriberSync {
+        origin: ChainAccountOwner,
+        state: RouterSubscriberSyncState,
+    },
+}
+
+#[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
+pub enum RouterOperation {
+    BaseOperation(BaseOperation),
+    PoolOperation(PoolOperation),
+    CalculateSwapAmount {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_1: Amount,
+    },
+    AddLiquidity {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_desired: Amount,
+        amount_1_desired: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: Option<ChainAccountOwner>,
+        deadline: Timestamp,
+    },
+    RemoveLiquidity {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        liquidity: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: Option<ChainAccountOwner>,
+        deadline: Timestamp,
+    },
+    Swap {
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: Option<ChainAccountOwner>,
+    },
+}
+
+#[derive(Debug, Deserialize, Serialize, Default)]
+pub enum RouterResponse {
+    #[default]
+    Ok,
+    Liquidity((Amount, Amount, Amount)),
+    Amount(Amount),
+    AmountPair((Amount, Amount)),
+    PoolResponse(PoolResponse),
+}
+
+impl ContractAbi for RouterApplicationAbi {
+    type Operation = RouterOperation;
+    type Response = RouterResponse;
+}
+
+impl ServiceAbi for RouterApplicationAbi {
+    type Query = Request;
+    type QueryResponse = Response;
+}
+
+pub trait RouterQueryRoot {
+    // Return swap amount
+    fn calculate_swap_amount(
+        &self,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_1: Amount,
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+
     fn get_pool(
         &self,
         ctx: &Context<'_>,
@@ -234,7 +319,46 @@ pub trait PoolQueryRoot {
     ) -> impl std::future::Future<Output = Result<Vec<Pool>, Error>> + Send;
 }
 
-pub trait PoolMutationRoot {
+pub trait RouterMutationRoot {
+    // Return pair token amount and liquidity
+    fn add_liquidity(
+        &self,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_desired: Amount,
+        amount_1_desired: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: Option<ChainAccountOwner>,
+        deadline: Timestamp,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    // Return pair token amount
+    fn remove_liquidity(
+        &self,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        liquidity: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+        to: Option<ChainAccountOwner>,
+        deadline: Timestamp,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn swap(
+        &self,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out_min: Option<Amount>,
+        amount_1_out_min: Option<Amount>,
+        to: Option<ChainAccountOwner>,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
     // Just put all liquidity pool in one application
     fn create_pool(
         &self,
@@ -286,183 +410,13 @@ pub trait PoolMutationRoot {
         liquidity: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
-    fn swap(
+    fn swap_with_pool(
         &self,
         ctx: &Context<'_>,
         pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    fn set_router_application_id(
-        &self,
-        ctx: &Context<'_>,
-        application_id: ApplicationId,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    // TODO: how to inherit trait from base
-    fn subscribe_creator_chain(
-        &self,
-        ctx: &Context<'_>,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-}
-
-#[derive(Debug, Deserialize, Serialize, Clone)]
-pub struct RouterParameters {
-    pub pool_application_id: ApplicationId<PoolApplicationAbi>,
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct RouterSubscriberSyncState {}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub enum RouterMessage {
-    BaseMessage(BaseMessage),
-    AddLiquidity {
-        origin: ChainAccountOwner,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0_desired: Amount,
-        amount_1_desired: Amount,
-        amount_0_min: Amount,
-        amount_1_min: Amount,
-        created_pool: bool,
-        to: ChainAccountOwner,
-        deadline: Timestamp,
-    },
-    RemoveLiquidity {
-        origin: ChainAccountOwner,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        liquidity: Amount,
-        amount_0_min: Amount,
-        amount_1_min: Amount,
-        to: ChainAccountOwner,
-        deadline: Timestamp,
-    },
-    Swap {
-        origin: ChainAccountOwner,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0_in: Option<Amount>,
-        amount_1_in: Option<Amount>,
-        amount_0_out_min: Option<Amount>,
-        amount_1_out_min: Option<Amount>,
-        to: ChainAccountOwner,
-    },
-    SubscriberSync {
-        origin: ChainAccountOwner,
-        state: RouterSubscriberSyncState,
-    },
-}
-
-#[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
-pub enum RouterOperation {
-    BaseOperation(BaseOperation),
-    CalculateSwapAmount {
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_1: Amount,
-    },
-    AddLiquidity {
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0_desired: Amount,
-        amount_1_desired: Amount,
-        amount_0_min: Amount,
-        amount_1_min: Amount,
-        to: Option<ChainAccountOwner>,
-        deadline: Timestamp,
-    },
-    RemoveLiquidity {
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        liquidity: Amount,
-        amount_0_min: Amount,
-        amount_1_min: Amount,
-        to: Option<ChainAccountOwner>,
-        deadline: Timestamp,
-    },
-    Swap {
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0_in: Option<Amount>,
-        amount_1_in: Option<Amount>,
-        amount_0_out_min: Option<Amount>,
-        amount_1_out_min: Option<Amount>,
-        to: Option<ChainAccountOwner>,
-    },
-}
-
-#[derive(Debug, Deserialize, Serialize, Default)]
-pub enum RouterResponse {
-    #[default]
-    Ok,
-    Liquidity((Amount, Amount, Amount)),
-    Amount(Amount),
-    AmountPair((Amount, Amount)),
-}
-
-impl ContractAbi for RouterApplicationAbi {
-    type Operation = RouterOperation;
-    type Response = RouterResponse;
-}
-
-impl ServiceAbi for RouterApplicationAbi {
-    type Query = Request;
-    type QueryResponse = Response;
-}
-
-pub trait RouterQueryRoot {
-    // Return swap amount
-    fn calculate_swap_amount(
-        &self,
-        ctx: &Context<'_>,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_1: Amount,
-    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
-}
-
-pub trait RouterMutationRoot {
-    // Return pair token amount and liquidity
-    fn add_liquidity(
-        &self,
-        ctx: &Context<'_>,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0_desired: Amount,
-        amount_1_desired: Amount,
-        amount_0_min: Amount,
-        amount_1_min: Amount,
-        to: Option<ChainAccountOwner>,
-        deadline: Timestamp,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    // Return pair token amount
-    fn remove_liquidity(
-        &self,
-        ctx: &Context<'_>,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        liquidity: Amount,
-        amount_0_min: Amount,
-        amount_1_min: Amount,
-        to: Option<ChainAccountOwner>,
-        deadline: Timestamp,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    fn swap(
-        &self,
-        ctx: &Context<'_>,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0_in: Option<Amount>,
-        amount_1_in: Option<Amount>,
-        amount_0_out_min: Option<Amount>,
-        amount_1_out_min: Option<Amount>,
-        to: Option<ChainAccountOwner>,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
     // TODO: how to inherit trait from base

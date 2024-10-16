@@ -2,7 +2,6 @@
 members = [
     "spec",
     "erc20",
-    "swap/pool",
     "swap/router",
 ]
 resolver = "2"
