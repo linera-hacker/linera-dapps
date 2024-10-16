@@ -6,7 +6,7 @@ use spec::{
     account::ChainAccountOwner,
     base,
     erc20::ERC20,
-    swap::{Pool, PoolSubscriberSyncState},
+    swap::{Pool, RouterSubscriberSyncState},
 };
 use std::{collections::HashMap, str::FromStr};
 use swap_router::PoolError;
@@ -19,19 +19,10 @@ pub struct Application {
     pub pool_id: RegisterView<u64>,
     pub pool_erc20_erc20s: MapView<u64, Vec<ApplicationId>>,
     pub pool_erc20_natives: MapView<u64, ApplicationId>,
-    pub router_application_id: RegisterView<Option<ApplicationId>>,
 }
 
 #[allow(dead_code)]
 impl Application {
-    pub(crate) async fn set_router_application_id(&mut self, application_id: ApplicationId) {
-        self.router_application_id.set(Some(application_id));
-    }
-
-    pub(crate) fn get_router_application_id(&self) -> Option<ApplicationId> {
-        *self.router_application_id.get()
-    }
-
     async fn _insert_erc20_erc20(&mut self, pool: Pool, required: bool) -> Result<Pool, PoolError> {
         let token_1 = pool.token_1.unwrap();
         let mut token_pools = self
@@ -357,14 +348,13 @@ impl Application {
 
     pub(crate) async fn to_subscriber_sync_state(
         &self,
-    ) -> Result<PoolSubscriberSyncState, PoolError> {
-        let mut state = PoolSubscriberSyncState {
+    ) -> Result<RouterSubscriberSyncState, PoolError> {
+        let mut state = RouterSubscriberSyncState {
             erc20_erc20_pools: HashMap::new(),
             erc20_native_pools: HashMap::new(),
             pool_id: *self.pool_id.get(),
             pool_erc20_erc20s: HashMap::new(),
             pool_erc20_natives: HashMap::new(),
-            router_application_id: self.router_application_id.get().clone(),
         };
         self.erc20_erc20_pools
             .for_each_index_value(|index, pools| {
@@ -395,10 +385,9 @@ impl Application {
 
     pub(crate) async fn from_subscriber_sync_state(
         &mut self,
-        state: PoolSubscriberSyncState,
+        state: RouterSubscriberSyncState,
     ) -> Result<(), PoolError> {
         self.pool_id.set(state.pool_id);
-        self.router_application_id.set(state.router_application_id);
         for (key, pools) in &state.erc20_erc20_pools {
             self.erc20_erc20_pools.insert(key, pools.clone())?;
         }

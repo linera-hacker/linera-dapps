@@ -16,11 +16,11 @@ use spec::{
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
     swap::{
-        Pool, PoolApplicationAbi, PoolOperation, PoolResponse, RouterMessage, RouterOperation,
-        RouterParameters, RouterResponse, RouterSubscriberSyncState,
+        Pool, PoolMessage, PoolOperation, PoolResponse, RouterMessage, RouterOperation,
+        RouterResponse, RouterSubscriberSyncState,
     },
 };
-use swap_router::RouterError;
+use swap_router::{PoolError, RouterError};
 
 pub struct ApplicationContract {
     state: Application,
@@ -35,7 +35,7 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = RouterMessage;
-    type Parameters = RouterParameters;
+    type Parameters = ();
     type InstantiationArgument = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
@@ -55,7 +55,7 @@ impl Contract for ApplicationContract {
                 .execute_base_operation(base_operation)
                 .expect("Failed OP: base operation"),
             RouterOperation::PoolOperation(pool_operation) => self
-                .execute_pool_operation(base_operation)
+                .execute_pool_operation(pool_operation)
                 .await
                 .expect("Fail OP: pool operation"),
             RouterOperation::AddLiquidity {
@@ -78,6 +78,7 @@ impl Contract for ApplicationContract {
                     to,
                     deadline,
                 )
+                .await
                 .expect("Failed OP: add liquidity"),
             RouterOperation::RemoveLiquidity {
                 token_0,
@@ -97,6 +98,7 @@ impl Contract for ApplicationContract {
                     to,
                     deadline,
                 )
+                .await
                 .expect("Failed OP: remove liquidity"),
             RouterOperation::CalculateSwapAmount {
                 token_0,
@@ -104,6 +106,7 @@ impl Contract for ApplicationContract {
                 amount_1,
             } => self
                 .on_op_calculate_swap_amount(token_0, token_1, amount_1)
+                .await
                 .expect("Failed OP: calculate swap amount"),
             RouterOperation::Swap {
                 token_0,
@@ -123,6 +126,7 @@ impl Contract for ApplicationContract {
                     amount_1_out_min,
                     to,
                 )
+                .await
                 .expect("Failed OP: swap"),
         }
     }
@@ -258,90 +262,73 @@ impl ApplicationContract {
         Ok(RouterResponse::Ok)
     }
 
-    fn pool_application_id(&mut self) -> ApplicationId<PoolApplicationAbi> {
-        self.runtime.application_parameters().pool_application_id
-    }
-
-    fn get_pool(&mut self, token_0: ApplicationId, token_1: Option<ApplicationId>) -> Option<Pool> {
-        let call = PoolOperation::GetPoolWithTokenPair { token_0, token_1 };
-        let pool_application_id = self.pool_application_id();
-        let PoolResponse::Pool(pool) =
-            self.runtime
-                .call_application(true, pool_application_id, &call)
-        else {
-            todo!();
-        };
-        pool
-    }
-
-    fn get_pool_exchangable(
+    async fn get_pool_exchangable(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
-    ) -> Option<(Pool, bool)> {
-        if let Some(pool) = self.get_pool(token_0, token_1) {
-            return Some((pool, false));
+    ) -> Result<Option<(Pool, bool)>, RouterError> {
+        if let Some(pool) = self
+            .state
+            .get_pool_with_token_pair(token_0, token_1)
+            .await?
+        {
+            return Ok(Some((pool, false)));
         }
         if token_1.is_none() {
-            return None;
+            return Ok(None);
         }
-        if let Some(pool) = self.get_pool(token_1.unwrap(), Some(token_0)) {
-            return Some((pool, true));
+        if let Some(pool) = self
+            .state
+            .get_pool_with_token_pair(token_1.unwrap(), Some(token_0))
+            .await?
+        {
+            return Ok(Some((pool, true)));
         }
-        None
+        Ok(None)
     }
 
-    fn get_or_create_pool(
+    async fn get_or_create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_0_desired: Amount,
         amount_1_desired: Amount,
     ) -> Result<(Pool, bool, bool), RouterError> {
-        if let Some((pool, exchanged)) = self.get_pool_exchangable(token_0, token_1) {
+        if let Some((pool, exchanged)) = self.get_pool_exchangable(token_0, token_1).await? {
             return Ok((pool, false, exchanged));
         }
 
-        let call = PoolOperation::CreatePool {
-            token_0,
-            token_1,
-            amount_0_initial: amount_0_desired,
-            amount_1_initial: amount_1_desired,
-            amount_0_virtual: amount_0_desired,
-            amount_1_virtual: amount_1_desired,
-        };
-        let pool_application_id = self.pool_application_id();
-        self.runtime
-            .call_application(true, pool_application_id, &call);
-
-        if let Some(pool) = self.get_pool(token_0, token_1) {
-            return Ok((pool, true, false));
-        }
-        Err(RouterError::CreatePoolError)
+        let owner = self.runtime_owner();
+        let pool = self
+            .state
+            .create_pool(
+                token_0,
+                token_1,
+                amount_0_desired,
+                amount_1_desired,
+                amount_0_desired,
+                amount_1_desired,
+                owner,
+                self.runtime.system_time(),
+            )
+            .await?;
+        return Ok((pool, true, false));
     }
 
-    fn mint(
+    async fn mint(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
         amount_0: Amount,
         amount_1: Amount,
         to: ChainAccountOwner,
-    ) {
-        let call = PoolOperation::MintWithTokenPair {
-            token_0,
-            token_1,
-            amount_0,
-            amount_1,
-            to,
-        };
-        let pool_application_id = self.pool_application_id();
-        let PoolResponse::Liquidity(_) =
-            self.runtime
-                .call_application(true, pool_application_id, &call)
-        else {
-            todo!();
-        };
+    ) -> Result<(), RouterError> {
+        let pool = self
+            .state
+            .get_pool_with_token_pair(token_0, token_1)
+            .await?
+            .expect("Invalid pool");
+        Ok(self.mint_with_pool(pool.id, amount_0, amount_1, to).await?)
     }
 
     fn calculate_swap_amount_1(&self, pool: Pool, amount_0: Amount) -> Result<Amount, RouterError> {
@@ -394,7 +381,7 @@ impl ApplicationContract {
         Ok((amount_0_optimal, amount_1_desired))
     }
 
-    fn on_op_add_liquidity(
+    async fn on_op_add_liquidity(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -407,6 +394,7 @@ impl ApplicationContract {
     ) -> Result<RouterResponse, RouterError> {
         let (pool, created, exchanged) = self
             .get_or_create_pool(token_0, token_1, amount_0_desired, amount_1_desired)
+            .await
             .expect("Invalid pool");
 
         log::info!(
@@ -507,7 +495,7 @@ impl ApplicationContract {
         balance
     }
 
-    fn on_op_remove_liquidity(
+    async fn on_op_remove_liquidity(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -519,6 +507,7 @@ impl ApplicationContract {
     ) -> Result<RouterResponse, RouterError> {
         let (pool, exchanged) = self
             .get_pool_exchangable(token_0, token_1)
+            .await?
             .expect("Invalid pool");
 
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
@@ -572,7 +561,7 @@ impl ApplicationContract {
         Ok(RouterResponse::AmountPair((amount_0, amount_1)))
     }
 
-    fn on_op_calculate_swap_amount(
+    async fn on_op_calculate_swap_amount(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -580,6 +569,7 @@ impl ApplicationContract {
     ) -> Result<RouterResponse, RouterError> {
         let (pool, exchanged) = self
             .get_pool_exchangable(token_0, token_1)
+            .await?
             .expect("Invalid pool");
 
         let amount = if exchanged {
@@ -591,7 +581,7 @@ impl ApplicationContract {
         Ok(RouterResponse::Amount(amount))
     }
 
-    fn on_op_swap(
+    async fn on_op_swap(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -603,6 +593,7 @@ impl ApplicationContract {
     ) -> Result<RouterResponse, RouterError> {
         let (pool, exchanged) = self
             .get_pool_exchangable(token_0, token_1)
+            .await?
             .expect("Invalid pool");
 
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
@@ -752,7 +743,11 @@ impl ApplicationContract {
         let (amount_0, amount_1) = if created_pool {
             (amount_0_desired, amount_1_desired)
         } else {
-            let Some(pool) = self.get_pool(token_0, token_1) else {
+            let Some(pool) = self
+                .state
+                .get_pool_with_token_pair(token_0, token_1)
+                .await?
+            else {
                 return Err(RouterError::InvalidPool);
             };
             self.calculate_amount_pair(
@@ -779,7 +774,7 @@ impl ApplicationContract {
                     }
                 }
             }
-            self.mint(token_0, token_1, amount_0, amount_1, to);
+            self.mint(token_0, token_1, amount_0, amount_1, to).await?;
         }
 
         self.publish_message(RouterMessage::AddLiquidity {
@@ -797,19 +792,13 @@ impl ApplicationContract {
         Ok(())
     }
 
-    fn burn(&mut self, pool: Pool, liquidity: Amount, to: ChainAccountOwner) {
-        let call = PoolOperation::Burn {
-            pool_id: pool.id,
-            liquidity,
-            to,
-        };
-        let pool_application_id = self.pool_application_id();
-        let PoolResponse::AmountPair(_) =
-            self.runtime
-                .call_application(true, pool_application_id, &call)
-        else {
-            todo!();
-        };
+    async fn burn(
+        &mut self,
+        pool: Pool,
+        liquidity: Amount,
+        to: ChainAccountOwner,
+    ) -> Result<(), RouterError> {
+        Ok(self.state.burn(pool.id, liquidity, to).await?)
     }
 
     async fn on_msg_remove_liquidity(
@@ -823,7 +812,11 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<(), RouterError> {
-        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+        let pool = self
+            .state
+            .get_pool_with_token_pair(token_0, token_1)
+            .await?
+            .expect("Invalid pool");
 
         let balance_0 = self.balance_of_erc20(pool.token_0);
         let balance_1 = match pool.token_1 {
@@ -836,7 +829,7 @@ impl ApplicationContract {
             return Err(RouterError::InvalidAmount);
         }
 
-        self.burn(pool, liquidity, to);
+        self.burn(pool, liquidity, to).await?;
 
         self.publish_message(RouterMessage::RemoveLiquidity {
             origin,
@@ -851,26 +844,54 @@ impl ApplicationContract {
         Ok(())
     }
 
-    fn swap(
+    async fn swap_with_pool(
         &mut self,
-        pool: Pool,
+        pool_id: u64,
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
-    ) {
-        let call = PoolOperation::Swap {
-            pool_id: pool.id,
-            amount_0_out,
-            amount_1_out,
-            to,
+    ) -> Result<(), RouterError> {
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+        if amount_0_out > Amount::ZERO {
+            self.transfer_erc20_to(pool.token_0, amount_0_out, to);
+        }
+        if amount_1_out > Amount::ZERO {
+            match pool.token_1 {
+                Some(token_1) => self.transfer_erc20_to(token_1, amount_1_out, to),
+                // TODO: transfer native token
+                _ => todo!(),
+            }
+        }
+
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: transfer native token
+            _ => todo!(),
         };
-        let pool_application_id = self.pool_application_id();
-        let PoolResponse::AmountPair(_) =
-            self.runtime
-                .call_application(true, pool_application_id, &call)
-        else {
-            todo!();
-        };
+
+        let amount_0_in =
+            balance_0.saturating_sub(pool.reserve_0.saturating_mul(amount_0_out.into()));
+        let amount_1_in =
+            balance_1.saturating_sub(pool.reserve_1.saturating_mul(amount_1_out.into()));
+        if amount_0_in <= Amount::ZERO && amount_1_in <= Amount::ZERO {
+            return Err(RouterError::PoolError(PoolError::InsufficientLiquidity));
+        }
+
+        // TODO: rate should be percent
+        let balance_0_adjusted =
+            balance_0.saturating_sub(amount_0_in.saturating_mul(pool.pool_fee_rate.into()));
+        let balance_1_adjusted =
+            balance_1.saturating_sub(amount_1_in.saturating_mul(pool.pool_fee_rate.into()));
+        if balance_0_adjusted.saturating_mul(balance_1_adjusted.into())
+            >= pool.reserve_0.saturating_mul(pool.reserve_1.into())
+        {
+            return Err(RouterError::PoolError(PoolError::BrokenK));
+        }
+        Ok(self
+            .state
+            .update(pool_id, balance_0, balance_1, self.runtime.system_time())
+            .await?)
     }
 
     async fn on_msg_swap(
@@ -884,7 +905,11 @@ impl ApplicationContract {
         amount_1_out_min: Option<Amount>,
         to: ChainAccountOwner,
     ) -> Result<(), RouterError> {
-        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+        let pool = self
+            .state
+            .get_pool_with_token_pair(token_0, token_1)
+            .await?
+            .expect("Invalid pool");
 
         let mut amount_0_out = Amount::ZERO;
         let mut amount_1_out = Amount::ZERO;
@@ -922,7 +947,8 @@ impl ApplicationContract {
             }
         }
 
-        self.swap(pool, amount_0_out, amount_1_out, to);
+        self.swap_with_pool(pool.id, amount_0_out, amount_1_out, to)
+            .await?;
 
         self.publish_message(RouterMessage::Swap {
             origin,
@@ -946,7 +972,7 @@ impl ApplicationContract {
         Ok(())
     }
 
-    fn execute_pool_operation(
+    async fn execute_pool_operation(
         &mut self,
         operation: PoolOperation,
     ) -> Result<RouterResponse, RouterError> {
@@ -996,7 +1022,7 @@ impl ApplicationContract {
         }
     }
 
-    fn execute_pool_message(&mut self, message: PoolMessage) -> Result<(), RouterError> {
+    async fn execute_pool_message(&mut self, message: PoolMessage) -> Result<(), RouterError> {
         match message {
             PoolMessage::CreatePool {
                 origin,
@@ -1047,7 +1073,7 @@ impl ApplicationContract {
                 liquidity,
                 to,
             } => self.on_msg_burn(origin, pool_id, liquidity, to).await,
-            PoolMessage::Swap {
+            PoolMessage::SwapWithPool {
                 origin,
                 pool_id,
                 amount_0_out,
@@ -1068,15 +1094,15 @@ impl ApplicationContract {
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
-    ) -> Result<PoolResponse, PoolError> {
+    ) -> Result<RouterResponse, RouterError> {
         let creator = self.runtime_owner();
 
         if amount_0_initial > Amount::ZERO {
-            self.receive_erc20_from(token_0, amount_0_initial);
+            self.receive_erc20_from(token_0, amount_0_initial, creator);
         }
         if amount_1_initial > Amount::ZERO {
             match token_1 {
-                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1_initial),
+                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1_initial, creator),
                 None => self.receive_native_from(amount_1_initial),
             }
         }
@@ -1095,12 +1121,12 @@ impl ApplicationContract {
             )
             .await?;
         if !pool.virtual_initial_liquidity {
-            self.mint(pool.id, amount_0_initial, amount_1_initial, creator)
+            self.mint_with_pool(pool.id, amount_0_initial, amount_1_initial, creator)
                 .await?;
         }
 
         self.runtime
-            .prepare_message(PoolMessage::CreatePool {
+            .prepare_message(RouterMessage::PoolMessage(PoolMessage::CreatePool {
                 origin: creator,
                 token_0,
                 token_1,
@@ -1108,45 +1134,45 @@ impl ApplicationContract {
                 amount_1_initial,
                 amount_0_virtual,
                 amount_1_virtual,
-            })
+            }))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         // We cannot get pool here so we just let creator to process it and return Ok
-        Ok(PoolResponse::Ok)
+        Ok(RouterResponse::Ok)
     }
 
     fn on_op_set_fee_to(
         &mut self,
         pool_id: u64,
         account: ChainAccountOwner,
-    ) -> Result<PoolResponse, PoolError> {
+    ) -> Result<RouterResponse, RouterError> {
         let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::SetFeeTo {
+            .prepare_message(RouterMessage::PoolMessage(PoolMessage::SetFeeTo {
                 origin,
                 pool_id,
                 account,
-            })
+            }))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(PoolResponse::Ok)
+        Ok(RouterResponse::Ok)
     }
 
     fn on_op_set_fee_to_setter(
         &mut self,
         pool_id: u64,
         account: ChainAccountOwner,
-    ) -> Result<PoolResponse, PoolError> {
+    ) -> Result<RouterResponse, RouterError> {
         let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::SetFeeToSetter {
+            .prepare_message(RouterMessage::PoolMessage(PoolMessage::SetFeeToSetter {
                 origin,
                 pool_id,
                 account,
-            })
+            }))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(PoolResponse::Ok)
+        Ok(RouterResponse::Ok)
     }
 
     async fn on_op_mint(
@@ -1155,39 +1181,29 @@ impl ApplicationContract {
         amount_0: Amount,
         amount_1: Amount,
         to: ChainAccountOwner,
-    ) -> Result<PoolResponse, PoolError> {
-        // Only router application on its creator chain can call
-        let caller = self
-            .runtime
-            .authenticated_caller_id()
-            .expect("Invalid caller");
-        let Some(router_application_id) = self.state.get_router_application_id() else {
-            return Err(PoolError::PermissionDenied);
-        };
-        if router_application_id != caller {
-            return Err(PoolError::PermissionDenied);
-        }
-
+    ) -> Result<RouterResponse, RouterError> {
         // To here, router should already transfer tokens
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
         if pool.token_1.is_none() {
-            return Err(PoolError::NotSupported);
+            return Err(RouterError::PoolError(PoolError::NotSupported));
         }
         // Liquidity calculated here may be not accurate, it may changed when process message
         let liquidity = pool.calculate_liquidity(amount_0, amount_1);
 
         let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::Mint {
+            .prepare_message(RouterMessage::PoolMessage(PoolMessage::Mint {
                 origin,
                 pool_id,
                 amount_0,
                 amount_1,
                 to,
-            })
+            }))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(PoolResponse::Liquidity(liquidity))
+        Ok(RouterResponse::PoolResponse(PoolResponse::Liquidity(
+            liquidity,
+        )))
     }
 
     async fn on_op_burn(
@@ -1195,34 +1211,25 @@ impl ApplicationContract {
         pool_id: u64,
         liquidity: Amount,
         to: ChainAccountOwner,
-    ) -> Result<PoolResponse, PoolError> {
-        // To here, shares should already be returned
-        // Only router application on its creator chain can call
-        let caller = self
-            .runtime
-            .authenticated_caller_id()
-            .expect("Invalid caller");
-        let Some(router_application_id) = self.state.get_router_application_id() else {
-            return Err(PoolError::PermissionDenied);
-        };
-        if router_application_id != caller {
-            return Err(PoolError::PermissionDenied);
-        }
-
-        let amounts = self.calculate_amount_pair(pool_id, liquidity).await?;
+    ) -> Result<RouterResponse, RouterError> {
+        let amounts = self
+            .calculate_amount_pair_with_pool(pool_id, liquidity)
+            .await?;
 
         let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::Burn {
+            .prepare_message(RouterMessage::PoolMessage(PoolMessage::Burn {
                 origin,
                 pool_id,
                 liquidity,
                 to,
-            })
+            }))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
 
-        Ok(PoolResponse::AmountPair(amounts))
+        Ok(RouterResponse::PoolResponse(PoolResponse::AmountPair(
+            amounts,
+        )))
     }
 
     fn on_op_swap_with_pool(
@@ -1231,35 +1238,35 @@ impl ApplicationContract {
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
-    ) -> Result<PoolResponse, PoolError> {
+    ) -> Result<RouterResponse, RouterError> {
         if amount_0_out <= Amount::ZERO || amount_1_out <= Amount::ZERO {
-            return Err(PoolError::InvalidAmount);
+            return Err(RouterError::PoolError(PoolError::InvalidAmount));
         }
 
         let origin = self.runtime_owner();
         self.runtime
-            .prepare_message(PoolMessage::Swap {
+            .prepare_message(RouterMessage::PoolMessage(PoolMessage::SwapWithPool {
                 origin,
                 pool_id,
                 amount_0_out,
                 amount_1_out,
                 to,
-            })
+            }))
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
-        Ok(PoolResponse::Ok)
+        Ok(RouterResponse::Ok)
     }
 
     async fn on_op_get_pool_with_token_pair(
         &self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
-    ) -> Result<PoolResponse, PoolError> {
+    ) -> Result<RouterResponse, RouterError> {
         let pool = self
             .state
             .get_pool_with_token_pair(token_0, token_1)
             .await?;
-        Ok(PoolResponse::Pool(pool))
+        Ok(RouterResponse::PoolResponse(PoolResponse::Pool(pool)))
     }
 
     async fn on_msg_create_pool(
@@ -1271,7 +1278,7 @@ impl ApplicationContract {
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
-    ) -> Result<(), PoolError> {
+    ) -> Result<(), RouterError> {
         if origin.chain_id != self.runtime.chain_id() {
             let pool = self
                 .state
@@ -1286,11 +1293,11 @@ impl ApplicationContract {
                     self.runtime.system_time(),
                 )
                 .await?;
-            self.mint(pool.id, amount_0_initial, amount_1_initial, origin)
+            self.mint_with_pool(pool.id, amount_0_initial, amount_1_initial, origin)
                 .await?;
         }
 
-        self.publish_message(PoolMessage::CreatePool {
+        self.publish_message(RouterMessage::PoolMessage(PoolMessage::CreatePool {
             origin,
             token_0,
             token_1,
@@ -1298,7 +1305,7 @@ impl ApplicationContract {
             amount_1_initial,
             amount_0_virtual,
             amount_1_virtual,
-        });
+        }));
 
         Ok(())
     }
@@ -1308,16 +1315,16 @@ impl ApplicationContract {
         origin: ChainAccountOwner,
         pool_id: u64,
         account: ChainAccountOwner,
-    ) -> Result<(), PoolError> {
+    ) -> Result<(), RouterError> {
         let setter = self.message_owner();
         self.state
             .set_fee_to(pool_id, account.clone(), setter)
             .await?;
-        self.publish_message(PoolMessage::SetFeeTo {
+        self.publish_message(RouterMessage::PoolMessage(PoolMessage::SetFeeTo {
             origin,
             pool_id,
             account,
-        });
+        }));
         Ok(())
     }
 
@@ -1326,16 +1333,16 @@ impl ApplicationContract {
         origin: ChainAccountOwner,
         pool_id: u64,
         account: ChainAccountOwner,
-    ) -> Result<(), PoolError> {
+    ) -> Result<(), RouterError> {
         let setter = self.message_owner();
         self.state
             .set_fee_to_setter(pool_id, account.clone(), setter)
             .await?;
-        self.publish_message(PoolMessage::SetFeeToSetter {
+        self.publish_message(RouterMessage::PoolMessage(PoolMessage::SetFeeToSetter {
             origin,
             pool_id,
             account,
-        });
+        }));
         Ok(())
     }
 
@@ -1345,7 +1352,7 @@ impl ApplicationContract {
         amount_0: Amount,
         amount_1: Amount,
         to: ChainAccountOwner,
-    ) -> Result<(), PoolError> {
+    ) -> Result<(), RouterError> {
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
 
         let balance_0 = pool.reserve_0.saturating_add(amount_0);
@@ -1367,17 +1374,38 @@ impl ApplicationContract {
         amount_0: Amount,
         amount_1: Amount,
         to: ChainAccountOwner,
-    ) -> Result<(), PoolError> {
-        self.mint(pool_id, amount_0, amount_1, to).await?;
+    ) -> Result<(), RouterError> {
+        self.mint_with_pool(pool_id, amount_0, amount_1, to).await?;
 
-        self.publish_message(PoolMessage::Mint {
+        self.publish_message(RouterMessage::PoolMessage(PoolMessage::Mint {
             origin,
             pool_id,
             amount_0,
             amount_1,
             to,
-        });
+        }));
         Ok(())
+    }
+
+    fn transfer_erc20_to(&mut self, token: ApplicationId, amount: Amount, to: ChainAccountOwner) {
+        let call = ERC20Operation::Transfer { amount, to };
+        self.runtime
+            .call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
+    }
+
+    async fn calculate_amount_pair_with_pool(
+        &mut self,
+        pool_id: u64,
+        liquidity: Amount,
+    ) -> Result<(Amount, Amount), PoolError> {
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+        let balance_0 = self.balance_of_erc20(pool.token_0);
+        let balance_1 = match pool.token_1 {
+            Some(token_1) => self.balance_of_erc20(token_1),
+            // TODO: here we should get balance of this application instance
+            _ => todo!(),
+        };
+        Ok(pool.calculate_amount_pair(liquidity, balance_0, balance_1))
     }
 
     async fn on_msg_burn(
@@ -1386,7 +1414,7 @@ impl ApplicationContract {
         pool_id: u64,
         liquidity: Amount,
         to: ChainAccountOwner,
-    ) -> Result<(), PoolError> {
+    ) -> Result<(), RouterError> {
         let myself = ChainAccountOwner {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: Some(AccountOwner::Application(
@@ -1397,7 +1425,9 @@ impl ApplicationContract {
         self.state.burn(pool_id, liquidity, myself).await?;
 
         self.state.mint_fee(pool_id).await?;
-        let (amount_0, amount_1) = self.calculate_amount_pair(pool_id, liquidity).await?;
+        let (amount_0, amount_1) = self
+            .calculate_amount_pair_with_pool(pool_id, liquidity)
+            .await?;
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
         self.transfer_erc20_to(pool.token_0, amount_0, to);
         match pool.token_1 {
@@ -1406,12 +1436,12 @@ impl ApplicationContract {
             _ => todo!(),
         }
 
-        self.publish_message(PoolMessage::Burn {
+        self.publish_message(RouterMessage::PoolMessage(PoolMessage::Burn {
             origin,
             pool_id,
             liquidity,
             to,
-        });
+        }));
         Ok(())
     }
 
@@ -1422,7 +1452,7 @@ impl ApplicationContract {
         amount_0_out: Amount,
         amount_1_out: Amount,
         to: ChainAccountOwner,
-    ) -> Result<(), PoolError> {
+    ) -> Result<(), RouterError> {
         let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
         if amount_0_out > Amount::ZERO {
             self.transfer_erc20_to(pool.token_0, amount_0_out, to);
@@ -1447,7 +1477,7 @@ impl ApplicationContract {
         let amount_1_in =
             balance_1.saturating_sub(pool.reserve_1.saturating_mul(amount_1_out.into()));
         if amount_0_in <= Amount::ZERO && amount_1_in <= Amount::ZERO {
-            return Err(PoolError::InsufficientLiquidity);
+            return Err(RouterError::PoolError(PoolError::InsufficientLiquidity));
         }
 
         // TODO: rate should be percent
@@ -1458,19 +1488,19 @@ impl ApplicationContract {
         if balance_0_adjusted.saturating_mul(balance_1_adjusted.into())
             >= pool.reserve_0.saturating_mul(pool.reserve_1.into())
         {
-            return Err(PoolError::BrokenK);
+            return Err(RouterError::PoolError(PoolError::BrokenK));
         }
         self.state
             .update(pool_id, balance_0, balance_1, self.runtime.system_time())
             .await?;
 
-        self.publish_message(PoolMessage::Swap {
+        self.publish_message(RouterMessage::PoolMessage(PoolMessage::SwapWithPool {
             origin,
             pool_id,
             amount_0_out,
             amount_1_out,
             to,
-        });
+        }));
         Ok(())
     }
 }
