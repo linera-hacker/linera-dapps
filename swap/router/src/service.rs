@@ -3,7 +3,7 @@
 mod state;
 
 use self::state::Application;
-use async_graphql::{EmptySubscription, Object, Schema};
+use async_graphql::{Context, EmptySubscription, Object, Schema};
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp, WithServiceAbi},
     views::View,
@@ -12,7 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    swap::{RouterMutationRoot, RouterOperation, RouterQueryRoot},
+    swap::{Pool, PoolOperation, RouterMutationRoot, RouterOperation, RouterQueryRoot},
 };
 use std::sync::Arc;
 
@@ -21,7 +21,7 @@ struct RouterContext {
 }
 
 pub struct ApplicationService {
-    context: Arc<PoolContext>,
+    context: Arc<RouterContext>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -46,7 +46,7 @@ impl Service for ApplicationService {
 
     async fn handle_query(&self, query: Self::Query) -> Self::QueryResponse {
         let schema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
-            .data(self.pool_context.clone())
+            .data(self.context.clone())
             .finish();
         schema.execute(query).await
     }
@@ -66,25 +66,25 @@ impl RouterQueryRoot for QueryRoot {
     }
 
     async fn get_pool(&self, ctx: &Context<'_>, pool_id: u64) -> Option<Pool> {
-        let pool_context = ctx.data::<Arc<PoolContext>>().unwrap();
-        match pool_context.state.get_pool(pool_id).await {
+        let context = ctx.data::<Arc<RouterContext>>().unwrap();
+        match context.state.get_pool(pool_id).await {
             Ok(pool) => pool,
             _ => None,
         }
     }
 
     async fn get_fee_to(&self, ctx: &Context<'_>, pool_id: u64) -> Option<ChainAccountOwner> {
-        let pool_context = ctx.data::<Arc<PoolContext>>().unwrap();
-        match pool_context.state.get_pool(pool_id).await {
+        let context = ctx.data::<Arc<RouterContext>>().unwrap();
+        match context.state.get_pool(pool_id).await {
             Ok(pool) => Some(pool.unwrap().fee_to),
             _ => None,
         }
     }
 
     async fn get_pools(&self, ctx: &Context<'_>) -> Vec<Pool> {
-        let pool_context = ctx.data::<Arc<PoolContext>>().unwrap();
+        let context = ctx.data::<Arc<RouterContext>>().unwrap();
         let mut pools = Vec::<Pool>::new();
-        pool_context
+        context
             .state
             .erc20_erc20_pools
             .for_each_index_value(|_index, values| {
@@ -95,7 +95,7 @@ impl RouterQueryRoot for QueryRoot {
             })
             .await
             .expect("Fail get erc20 pools");
-        pool_context
+        context
             .state
             .erc20_native_pools
             .for_each_index_value(|_index, value| {
@@ -199,14 +199,14 @@ impl RouterMutationRoot for MutationRoot {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::CreatePool {
+        bcs::to_bytes(&RouterOperation::PoolOperation(PoolOperation::CreatePool {
             token_0,
             token_1,
             amount_0_initial,
             amount_1_initial,
             amount_0_virtual,
             amount_1_virtual,
-        })
+        }))
         .unwrap()
     }
 
@@ -215,15 +215,25 @@ impl RouterMutationRoot for MutationRoot {
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
     ) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::GetPoolWithTokenPair { token_0, token_1 }).unwrap()
+        bcs::to_bytes(&RouterOperation::PoolOperation(
+            PoolOperation::GetPoolWithTokenPair { token_0, token_1 },
+        ))
+        .unwrap()
     }
 
     async fn set_fee_to(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::SetFeeTo { pool_id, account }).unwrap()
+        bcs::to_bytes(&RouterOperation::PoolOperation(PoolOperation::SetFeeTo {
+            pool_id,
+            account,
+        }))
+        .unwrap()
     }
 
     async fn set_fee_to_setter(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::SetFeeToSetter { pool_id, account }).unwrap()
+        bcs::to_bytes(&RouterOperation::PoolOperation(
+            PoolOperation::SetFeeToSetter { pool_id, account },
+        ))
+        .unwrap()
     }
 
     // Return minted liquidity
@@ -244,7 +254,7 @@ impl RouterMutationRoot for MutationRoot {
         Vec::new()
     }
 
-    async fn swap(
+    async fn swap_with_pool(
         &self,
         _pool_id: u64,
         _amount_0_out: Amount,
@@ -253,16 +263,5 @@ impl RouterMutationRoot for MutationRoot {
     ) -> Vec<u8> {
         // Invoked by router
         Vec::new()
-    }
-
-    async fn set_router_application_id(&self, application_id: ApplicationId) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::SetRouterApplicationId { application_id }).unwrap()
-    }
-
-    async fn subscribe_creator_chain(&self) -> Vec<u8> {
-        bcs::to_bytes(&PoolOperation::BaseOperation(
-            BaseOperation::SubscribeCreatorChain,
-        ))
-        .unwrap()
     }
 }

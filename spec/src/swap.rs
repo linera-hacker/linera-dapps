@@ -10,6 +10,7 @@ use linera_sdk::{
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 
 pub struct RouterApplicationAbi;
 
@@ -109,13 +110,6 @@ pub enum PoolOperation {
         amount_1: Amount,
         to: ChainAccountOwner,
     },
-    MintWithTokenPair {
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-        amount_0: Amount,
-        amount_1: Amount,
-        to: ChainAccountOwner,
-    },
     Burn {
         pool_id: u64,
         liquidity: Amount,
@@ -188,7 +182,13 @@ pub enum PoolResponse {
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
-pub struct RouterSubscriberSyncState {}
+pub struct RouterSubscriberSyncState {
+    pub erc20_erc20_pools: HashMap<ApplicationId, HashMap<ApplicationId, Pool>>,
+    pub erc20_native_pools: HashMap<ApplicationId, Pool>,
+    pub pool_id: u64,
+    pub pool_erc20_erc20s: HashMap<u64, Vec<ApplicationId>>,
+    pub pool_erc20_natives: HashMap<u64, ApplicationId>,
+}
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum RouterMessage {

@@ -47,9 +47,6 @@ pub enum RouterError {
     #[error("Invalid amount")]
     InvalidAmount,
 
-    #[error("Create pool error")]
-    CreatePoolError,
-
     #[error("Invalid pool")]
     InvalidPool,
 
