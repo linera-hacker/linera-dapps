@@ -95,6 +95,7 @@ impl PoolQueryRoot for QueryRoot {
             })
             .await
             .expect("Fail get native pools");
+        log::info!("Pools {:?}", pools);
         pools
     }
 }

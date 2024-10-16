@@ -213,13 +213,6 @@ impl Application {
             Some(allowance) => allowance,
             None => Amount::ZERO,
         };
-        log::info!(
-            "{}, {}, {}, {}",
-            balance.saturating_sub(locked_allowance),
-            balance,
-            locked_allowance,
-            value
-        );
         if balance.saturating_sub(locked_allowance) < value {
             return Err(ERC20Error::InsufficientFunds);
         }

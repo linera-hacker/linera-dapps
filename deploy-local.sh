@@ -98,7 +98,7 @@ wallet_14_owner=`linera --with-wallet 14 wallet show | grep "Owner" | awk '{prin
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
-    --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0.1"}' \
+    --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0"}' \
     --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_14_default_chain'\",\"owner\":\"User:'$wallet_14_owner'\"}":"5000000."}}' \
     `
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
@@ -108,7 +108,7 @@ echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
-    --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0.1"}' \
+    --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0"}' \
     --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_14_default_chain'\",\"owner\":\"User:'$wallet_14_owner'\"}":"5000000."}}' \
     `
 print $'\U01f499' $LIGHTGREEN " WLINERA application deployed"
@@ -225,6 +225,7 @@ wallet_14_erc20_2_service="http://$LOCAL_IP:30094/chains/$chain/applications/$er
 wallet_14_swap_pool_service="http://$LOCAL_IP:30094/chains/$chain/applications/$swap_pool_appid"
 wallet_14_swap_router_service="http://$LOCAL_IP:30094/chains/$chain/applications/$swap_router_appid"
 
+wallet_14_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 wallet_14_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
 wallet_14_public_swap_pool_service="$HTTP_HOST/chains/$chain/applications/$swap_pool_appid"
 wallet_14_public_swap_router_service="$HTTP_HOST/chains/$chain/applications/$swap_router_appid"
@@ -265,10 +266,16 @@ print $'\U01F4AB' $YELLOW " Set router application id to pool..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { setRouterApplicationId(applicationId:\\\"$swap_router_appid\\\")}\"}" $wallet_12_swap_pool_service
 echo
 print $'\U01F4AB' $YELLOW " Authorize ERC20 to pool application..."
-curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_12_default_chain\\\", owner:\\\"Application:$swap_pool_appid\\\"},value:\\\"5000000.\\\")}\"}" $wallet_14_erc20_1_service
+curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_12_default_chain\\\", owner:\\\"Application:$swap_pool_appid\\\"},value:\\\"4000000.\\\")}\"}" $wallet_14_erc20_1_service
 echo
 print $'\U01F4AB' $YELLOW " Authorize WLINERA to pool application..."
-curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_12_default_chain\\\", owner:\\\"Application:$swap_pool_appid\\\"},value:\\\"5000000.\\\")}\"}" $wallet_14_erc20_2_service
+curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_12_default_chain\\\", owner:\\\"Application:$swap_pool_appid\\\"},value:\\\"4000000.\\\")}\"}" $wallet_14_erc20_2_service
+echo
+print $'\U01F4AB' $YELLOW " Authorize ERC20 to router application..."
+curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_13_default_chain\\\", owner:\\\"Application:$swap_router_appid\\\"},value:\\\"500000.\\\")}\"}" $wallet_14_erc20_1_service
+echo
+print $'\U01F4AB' $YELLOW " Authorize WLINERA to router application..."
+curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$wallet_13_default_chain\\\", owner:\\\"Application:$swap_router_appid\\\"},value:\\\"500000.\\\")}\"}" $wallet_14_erc20_2_service
 echo
 
 print $'\U01F4AB' $YELLOW " Query ERC20 allowance with..."

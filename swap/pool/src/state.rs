@@ -2,9 +2,6 @@ use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
-use num_bigint::BigUint;
-use num_traits::cast::ToPrimitive;
-use num_traits::FromPrimitive;
 use spec::{
     account::ChainAccountOwner,
     base,
@@ -46,7 +43,6 @@ impl Application {
             if required {
                 return Err(PoolError::AlreadyExists);
             }
-            return Ok(_pool.clone());
         }
         token_pools.insert(token_1, pool.clone());
         self.erc20_erc20_pools.insert(&pool.token_0, token_pools)?;
@@ -110,16 +106,16 @@ impl Application {
             amount_1_virtual
         };
 
-        let mut pool = Pool {
+        let pool = Pool {
             id: pool_id,
             token_0,
             token_1,
-            virtual_initial_liquidity: amount_0_initial == amount_0_virtual
-                && amount_1_initial == amount_1_virtual,
+            virtual_initial_liquidity: amount_0_initial != amount_0_virtual
+                || amount_1_initial != amount_1_virtual,
             amount_0_initial,
             amount_1_initial,
-            reserve_0: amount_0_initial,
-            reserve_1: amount_1_initial,
+            reserve_0: Amount::ZERO,
+            reserve_1: Amount::ZERO,
             pool_fee_rate: Amount::from_str("0.3")?,
             protocol_fee_rate: Amount::from_str("0.05")?,
             erc20: ERC20::default(),
@@ -130,20 +126,6 @@ impl Application {
             k_last: Amount::ZERO,
             block_timestamp: block_timestamp,
         };
-
-        if !pool.virtual_initial_liquidity {
-            let amount_0_bigint =
-                BigUint::from_u128(u128::from(amount_0_initial)).expect("Couldn't convert amount");
-            let amount_1_bigint =
-                BigUint::from_u128(u128::from(amount_1_initial)).expect("Couldn't convert amount");
-            let amount_mul_bigint = amount_0_bigint * amount_1_bigint;
-            let liquidity = Amount::from_attos(
-                BigUint::sqrt(&amount_mul_bigint)
-                    .to_u128()
-                    .expect("Couldn't convert BigUint to u128"),
-            );
-            pool.erc20._mint(creator, liquidity);
-        }
 
         self.pool_id.set(pool_id + 1);
         self.insert_pool(pool, required).await
@@ -229,8 +211,9 @@ impl Application {
         match pool.token_1 {
             Some(token_1) => {
                 let mut pools = self.erc20_erc20_pools.get(&pool.token_0).await?.unwrap();
-                pools.insert(token_1, pool);
-                Ok(self.erc20_erc20_pools.insert(&token_1, pools)?)
+                pools.insert(token_1, pool.clone());
+                log::info!("Update pool {:?}", pool);
+                Ok(self.erc20_erc20_pools.insert(&pool.token_0, pools)?)
             }
             _ => Ok(self
                 .erc20_native_pools
@@ -308,6 +291,7 @@ impl Application {
     ) -> Result<(), PoolError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
         pool.erc20._burn(from, liquidity);
+        self.update_pool(pool).await?;
         Ok(())
     }
 
@@ -343,6 +327,8 @@ impl Application {
         pool.block_timestamp = block_timestamp;
         pool.k_last = pool.reserve_0.saturating_mul(pool.reserve_1.into());
 
+        self.update_pool(pool).await?;
+
         Ok(())
     }
 
@@ -361,6 +347,7 @@ impl Application {
                 let liquidity = Amount::from_attos(numerator.saturating_div(denominator));
                 if liquidity > Amount::ZERO {
                     pool.erc20._mint(pool.fee_to, liquidity);
+                    self.update_pool(pool).await?;
                 }
             }
         }

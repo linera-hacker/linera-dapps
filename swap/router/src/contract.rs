@@ -428,6 +428,8 @@ impl ApplicationContract {
             )?
         };
 
+        // TODO: check balance
+
         let to = match to {
             Some(_to) => _to,
             None => ChainAccountOwner {
@@ -668,19 +670,16 @@ impl ApplicationContract {
             .send_to(dest);
     }
 
-    fn receive_erc20_from(&mut self, token: ApplicationId, amount: Amount) {
+    fn receive_erc20_from(
+        &mut self,
+        token: ApplicationId,
+        amount: Amount,
+        from: ChainAccountOwner,
+    ) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
 
-        let message_id = self.runtime.message_id().expect("Invalid message id");
-
-        let from = ChainAccountOwner {
-            chain_id: message_id.chain_id,
-            owner: Some(AccountOwner::User(
-                self.runtime.authenticated_signer().expect("Invalid owner"),
-            )),
-        };
         let to = ChainAccountOwner {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: Some(AccountOwner::Application(
@@ -726,7 +725,30 @@ impl ApplicationContract {
         to: ChainAccountOwner,
         deadline: Timestamp,
     ) -> Result<(), RouterError> {
-        let pool = self.get_pool(token_0, token_1).expect("Invalid pool");
+        let Some(pool) = self.get_pool(token_0, token_1) else {
+            if !created_pool {
+                return Err(RouterError::InvalidPool);
+            }
+            // TODO: Workaround: If it's a created pool, it may still in flying so we just wait for
+            // a monent
+            self.runtime
+                .prepare_message(RouterMessage::AddLiquidity {
+                    origin,
+                    token_0,
+                    token_1,
+                    amount_0_desired,
+                    amount_1_desired,
+                    amount_0_min,
+                    amount_1_min,
+                    created_pool,
+                    to,
+                    deadline,
+                })
+                .with_authentication()
+                .send_to(self.runtime.chain_id());
+            return Ok(());
+        };
+
         let (amount_0, amount_1) = if created_pool {
             (amount_0_desired, amount_1_desired)
         } else {
@@ -739,17 +761,23 @@ impl ApplicationContract {
             )?
         };
 
-        if amount_0 > Amount::ZERO {
-            self.receive_erc20_from(token_0, amount_0);
-        }
-        if amount_1 > Amount::ZERO {
-            match token_1 {
-                Some(_token_1) => self.receive_erc20_from(_token_1, amount_1),
-                None => self.receive_native_from(amount_1),
+        // Create pool will mint shares and transfer tokens directly
+        if !created_pool {
+            if amount_0 > Amount::ZERO {
+                self.receive_erc20_from(token_0, amount_0, origin);
             }
+            if amount_1 > Amount::ZERO {
+                match token_1 {
+                    Some(_token_1) => {
+                        self.receive_erc20_from(_token_1, amount_1, origin);
+                    }
+                    None => {
+                        self.receive_native_from(amount_1);
+                    }
+                }
+            }
+            self.mint(pool, amount_0, amount_1, to);
         }
-
-        self.mint(pool, amount_0, amount_1, to);
 
         self.publish_message(RouterMessage::AddLiquidity {
             origin,
@@ -882,11 +910,11 @@ impl ApplicationContract {
         }
 
         if amount_0_out > Amount::ZERO {
-            self.receive_erc20_from(token_0, amount_0_in.unwrap());
+            self.receive_erc20_from(token_0, amount_0_in.unwrap(), origin);
         }
         if amount_1_out > Amount::ZERO {
             match token_1 {
-                Some(_token_1) => self.receive_erc20_from(_token_1, amount_0_in.unwrap()),
+                Some(_token_1) => self.receive_erc20_from(_token_1, amount_0_in.unwrap(), origin),
                 None => self.receive_native_from(amount_0_in.unwrap()),
             }
         }

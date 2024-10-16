@@ -242,7 +242,8 @@ impl ApplicationContract {
             }
         }
 
-        self.state
+        let pool = self
+            .state
             .create_pool(
                 token_0,
                 token_1,
@@ -254,6 +255,10 @@ impl ApplicationContract {
                 self.runtime.system_time(),
             )
             .await?;
+        if !pool.virtual_initial_liquidity {
+            self.mint(pool.id, amount_0_initial, amount_1_initial, creator)
+                .await?;
+        }
 
         self.runtime
             .prepare_message(PoolMessage::CreatePool {
@@ -267,6 +272,7 @@ impl ApplicationContract {
             })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
+
         // We cannot get pool here so we just let creator to process it and return Ok
         Ok(PoolResponse::Ok)
     }
@@ -589,10 +595,9 @@ impl ApplicationContract {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
-        let creator = self.message_owner();
-
         if origin.chain_id != self.runtime.chain_id() {
-            self.state
+            let pool = self
+                .state
                 .create_pool(
                     token_0,
                     token_1,
@@ -600,9 +605,11 @@ impl ApplicationContract {
                     amount_1_initial,
                     amount_0_virtual,
                     amount_1_virtual,
-                    creator,
+                    origin,
                     self.runtime.system_time(),
                 )
+                .await?;
+            self.mint(pool.id, amount_0_initial, amount_1_initial, origin)
                 .await?;
         }
 
@@ -655,6 +662,27 @@ impl ApplicationContract {
         Ok(())
     }
 
+    async fn mint(
+        &mut self,
+        pool_id: u64,
+        amount_0: Amount,
+        amount_1: Amount,
+        to: ChainAccountOwner,
+    ) -> Result<(), PoolError> {
+        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
+
+        let balance_0 = pool.reserve_0.saturating_add(amount_0);
+        let balance_1 = pool.reserve_0.saturating_add(amount_1);
+
+        self.state.mint_fee(pool_id).await?;
+        let liquidity = pool.calculate_liquidity(amount_0, amount_1);
+        self.state.mint(pool_id, liquidity, to.clone()).await?;
+        Ok(self
+            .state
+            .update(pool_id, balance_0, balance_1, self.runtime.system_time())
+            .await?)
+    }
+
     async fn on_msg_mint(
         &mut self,
         origin: ChainAccountOwner,
@@ -663,33 +691,7 @@ impl ApplicationContract {
         amount_1: Amount,
         to: ChainAccountOwner,
     ) -> Result<(), PoolError> {
-        let pool = self.state.get_pool(pool_id).await?.expect("Invalid pool");
-
-        let balance_0 = self.balance_of_erc20(pool.token_0);
-        let balance_1 = match pool.token_1 {
-            Some(token_1) => self.balance_of_erc20(token_1),
-            // TODO: here we should get balance of this application instance
-            _ => return Err(PoolError::NotSupported),
-            /*
-                self
-                .runtime
-                .chain_balance(self.runtime.application_creator_chain_id()),
-            */
-        };
-
-        if balance_0.saturating_sub(pool.reserve_0) < amount_0 {
-            return Err(PoolError::InsufficientFunds);
-        }
-        if balance_1.saturating_sub(pool.reserve_1) < amount_1 {
-            return Err(PoolError::InsufficientFunds);
-        }
-
-        self.state.mint_fee(pool_id).await?;
-        let liquidity = pool.calculate_liquidity(amount_0, amount_1);
-        self.state.mint(pool_id, liquidity, to.clone()).await?;
-        self.state
-            .update(pool_id, balance_0, balance_1, self.runtime.system_time())
-            .await?;
+        self.mint(pool_id, amount_0, amount_1, to).await?;
 
         self.publish_message(PoolMessage::Mint {
             origin,

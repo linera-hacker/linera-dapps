@@ -464,4 +464,10 @@ pub trait RouterMutationRoot {
         amount_1_out_min: Option<Amount>,
         to: Option<ChainAccountOwner>,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    // TODO: how to inherit trait from base
+    fn subscribe_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }

@@ -1,6 +1,6 @@
 use crate::account::ChainAccountOwner;
 use crate::base::{BaseMessage, BaseOperation};
-use async_graphql::{scalar, Context, Error, Request, Response};
+use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
     base::Amount,
@@ -186,13 +186,11 @@ pub trait ERC20MutationRoot {
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Default, SimpleObject)]
 pub struct ERC20 {
     pub total_supply: Amount,
     pub balances: HashMap<ChainAccountOwner, Amount>,
 }
-
-scalar!(ERC20);
 
 impl ERC20 {
     pub fn _mint(&mut self, to: ChainAccountOwner, amount: Amount) {

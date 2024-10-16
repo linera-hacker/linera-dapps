@@ -11,6 +11,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
+    base::BaseOperation,
     swap::{RouterMutationRoot, RouterOperation, RouterQueryRoot},
 };
 use std::sync::Arc;
@@ -128,6 +129,13 @@ impl RouterMutationRoot for MutationRoot {
             amount_1_out_min,
             to,
         })
+        .unwrap()
+    }
+
+    async fn subscribe_creator_chain(&self) -> Vec<u8> {
+        bcs::to_bytes(&RouterOperation::BaseOperation(
+            BaseOperation::SubscribeCreatorChain,
+        ))
         .unwrap()
     }
 }
