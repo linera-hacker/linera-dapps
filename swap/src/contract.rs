@@ -4,11 +4,8 @@ mod state;
 
 use self::state::Application;
 use linera_sdk::{
-    base::{
-        ChannelName, Destination,
-        WithContractAbi,
-    },
-    views::{View, RootView},
+    base::{ChannelName, Destination, WithContractAbi},
+    views::{RootView, View},
     Contract, ContractRuntime,
 };
 use spec::{
@@ -16,6 +13,7 @@ use spec::{
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     swap::{
         abi::{SwapMessage, SwapOperation, SwapResponse},
+        pool::PoolOperation,
         state::SubscriberSyncState,
     },
 };
@@ -65,12 +63,10 @@ impl Contract for ApplicationContract {
             SwapOperation::BaseOperation(base_operation) => self
                 .execute_base_operation(base_operation)
                 .expect("Failed OP: base operation"),
-            SwapOperation::PoolOperation(pool_operation) => SwapResponse::PoolResponse(
-                self.pool_manager
-                    .execute_operation(&mut self.runtime, &mut self.state, pool_operation)
-                    .await
-                    .expect("Failed OP: pool operation"),
-            ),
+            SwapOperation::PoolOperation(pool_operation) => self
+                .execute_pool_operation(pool_operation)
+                .await
+                .expect("Failed OP: pool operation"),
             SwapOperation::RouterOperation(router_operation) => SwapResponse::RouterResponse(
                 self.router
                     .execute_operation(&mut self.runtime, &mut self.state, router_operation)
@@ -177,5 +173,25 @@ impl ApplicationContract {
         self.state.from_subscriber_sync_state(state.clone()).await?;
         self.publish_message(SwapMessage::SubscriberSync { origin, state });
         Ok(())
+    }
+
+    async fn execute_pool_operation(
+        &mut self,
+        operation: PoolOperation,
+    ) -> Result<SwapResponse, SwapError> {
+        let (response, msg) = self
+            .pool_manager
+            .execute_operation(&mut self.runtime, &mut self.state, operation)
+            .await?;
+        match msg {
+            Some((_msg, true)) => {
+                self.runtime
+                    .prepare_message(SwapMessage::PoolMessage(_msg))
+                    .with_authentication()
+                    .send_to(self.runtime.application_creator_chain_id());
+            }
+            _ => {}
+        }
+        Ok(SwapResponse::PoolResponse(response))
     }
 }

@@ -1,7 +1,7 @@
 use linera_sdk::{Contract, ContractRuntime};
 use spec::swap::{
+    router::{RouterMessage, RouterOperation, RouterResponse},
     state::SwapApplicationState,
-    router::{RouterOperation, RouterMessage, RouterResponse},
 };
 use std::sync::Arc;
 use thiserror::Error;
@@ -33,8 +33,7 @@ impl Router {
         state: &mut SwapApplicationState,
         message: RouterMessage,
     ) -> Result<(), RouterError> {
-        self.execute_router_message(runtime, state, message)
-            .await
+        self.execute_router_message(runtime, state, message).await
     }
 
     async fn execute_router_operation<T: Contract>(
