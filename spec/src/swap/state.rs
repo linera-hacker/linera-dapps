@@ -332,6 +332,20 @@ impl SwapApplicationState {
         }
     }
 
+    pub async fn get_pool_exchangable(
+        &self,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+    ) -> Result<Option<Pool>, StateError> {
+        if let Some(pool) = self.get_pool_with_token_pair(token_0, token_1).await? {
+            return Ok(Some(pool));
+        }
+        if token_1.is_none() {
+            return Ok(None);
+        }
+        self.get_pool_with_token_pair(token_1.unwrap(), Some(token_0)).await
+    }
+
     pub async fn set_fee_to(
         &mut self,
         pool_id: u64,
