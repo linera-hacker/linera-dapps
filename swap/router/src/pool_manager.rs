@@ -144,10 +144,7 @@ impl PoolManager {
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
         // Check exists
-        if let (Some(poo), _) = state
-            .get_pool_exchangable(token_0, token_1)
-            .await?
-        {
+        if let (Some(poo), _) = state.get_pool_exchangable(token_0, token_1).await? {
             return Ok(());
         }
         // TODO: check if called by token creator
@@ -193,11 +190,6 @@ impl PoolManager {
     ) -> Result<(PoolResponse, Option<(PoolMessage, bool)>), PoolError> {
         // Receive tokens
         if amount_0_initial > Amount::ZERO {
-            log::info!(
-                "Recieve {} from {:?}",
-                amount_0_initial,
-                runtime_owner(runtime)
-            );
             receive_erc20_from_runtime_owner_to_application_creation(
                 runtime,
                 token_0,
