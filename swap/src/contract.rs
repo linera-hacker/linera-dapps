@@ -5,20 +5,17 @@ mod state;
 use self::state::Application;
 use linera_sdk::{
     base::{
-        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Timestamp,
+        ChannelName, Destination,
         WithContractAbi,
     },
-    views::{RootView, View},
+    views::{View, RootView},
     Contract, ContractRuntime,
 };
 use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
     swap::{
         abi::{SwapMessage, SwapOperation, SwapResponse},
-        pool::{PoolMessage, PoolOperation},
-        router::{RouterMessage, RouterOperation},
         state::SubscriberSyncState,
     },
 };
@@ -68,7 +65,18 @@ impl Contract for ApplicationContract {
             SwapOperation::BaseOperation(base_operation) => self
                 .execute_base_operation(base_operation)
                 .expect("Failed OP: base operation"),
-            SwapOperation::PoolOperation(_) | SwapOperation::RouterOperation(_) => todo!(),
+            SwapOperation::PoolOperation(pool_operation) => SwapResponse::PoolResponse(
+                self.pool_manager
+                    .execute_operation(&mut self.runtime, &mut self.state, pool_operation)
+                    .await
+                    .expect("Failed OP: pool operation"),
+            ),
+            SwapOperation::RouterOperation(router_operation) => SwapResponse::RouterResponse(
+                self.router
+                    .execute_operation(&mut self.runtime, &mut self.state, router_operation)
+                    .await
+                    .expect("Failed OP: router operation"),
+            ),
         }
     }
 
@@ -78,7 +86,16 @@ impl Contract for ApplicationContract {
                 .execute_base_message(base_message)
                 .await
                 .expect("Failed MSG: base message"),
-            SwapMessage::PoolMessage(_) | SwapMessage::RouterMessage(_) => todo!(),
+            SwapMessage::PoolMessage(pool_message) => self
+                .pool_manager
+                .execute_message(&mut self.runtime, &mut self.state, pool_message)
+                .await
+                .expect("Fail MSG: pool message"),
+            SwapMessage::RouterMessage(router_message) => self
+                .router
+                .execute_message(&mut self.runtime, &mut self.state, router_message)
+                .await
+                .expect("Fail MSG: router message"),
             SwapMessage::SubscriberSync { origin, state } => self
                 .on_msg_subscriber_sync(origin, state)
                 .await
