@@ -1,5 +1,4 @@
-#![cfg_attr(target_arch = "wasm32", no_main)]
-
+use crate::state::Application;
 use linera_sdk::{
     base::{
         Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Timestamp,
@@ -17,213 +16,31 @@ use spec::{
         RouterResponse, RouterSubscriberSyncState,
     },
 };
-use swap_router::{
-    errno::{RouterError, PoolError},
-    state::Application,
-    ApplicationAbi,
-};
+use swap_router::{PoolError, RouterError};
 
-pub struct ApplicationContract {
+pub struct PoolManager<T> {
     state: Application,
-    runtime: ContractRuntime<Self>,
+    runtime: ContractRuntime<T>,
 }
 
-linera_sdk::contract!(ApplicationContract);
-
-impl WithContractAbi for ApplicationContract {
-    type Abi = ApplicationAbi;
-}
-
-impl Contract for ApplicationContract {
-    type Message = RouterMessage;
-    type Parameters = ();
-    type InstantiationArgument = ();
-
-    async fn load(runtime: ContractRuntime<Self>) -> Self {
+impl<T> PoolManager<T> {
+    pub async fn new(runtime: ContractRuntime<T>) -> Self {
         let state = Application::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
-        ApplicationContract { state, runtime }
+        PoolManager { state, runtime }
     }
 
-    async fn instantiate(&mut self, _argument: Self::InstantiationArgument) {
-        self.runtime.application_parameters();
+    pub async fn execute_operation(&mut self, operation: Self::Operation) -> Self::Response {
+        self.execute_pool_operation(operation).await
     }
 
-    async fn execute_operation(&mut self, operation: Self::Operation) -> Self::Response {
-        match operation {
-            RouterOperation::BaseOperation(base_operation) => self
-                .execute_base_operation(base_operation)
-                .expect("Failed OP: base operation"),
-            RouterOperation::PoolOperation(pool_operation) => self
-                .execute_pool_operation(pool_operation)
-                .await
-                .expect("Fail OP: pool operation"),
-            RouterOperation::AddLiquidity {
-                token_0,
-                token_1,
-                amount_0_desired,
-                amount_1_desired,
-                amount_0_min,
-                amount_1_min,
-                to,
-                deadline,
-            } => self
-                .on_op_add_liquidity(
-                    token_0,
-                    token_1,
-                    amount_0_desired,
-                    amount_1_desired,
-                    amount_0_min,
-                    amount_1_min,
-                    to,
-                    deadline,
-                )
-                .await
-                .expect("Failed OP: add liquidity"),
-            RouterOperation::RemoveLiquidity {
-                token_0,
-                token_1,
-                liquidity,
-                amount_0_min,
-                amount_1_min,
-                to,
-                deadline,
-            } => self
-                .on_op_remove_liquidity(
-                    token_0,
-                    token_1,
-                    liquidity,
-                    amount_0_min,
-                    amount_1_min,
-                    to,
-                    deadline,
-                )
-                .await
-                .expect("Failed OP: remove liquidity"),
-            RouterOperation::CalculateSwapAmount {
-                token_0,
-                token_1,
-                amount_1,
-            } => self
-                .on_op_calculate_swap_amount(token_0, token_1, amount_1)
-                .await
-                .expect("Failed OP: calculate swap amount"),
-            RouterOperation::Swap {
-                token_0,
-                token_1,
-                amount_0_in,
-                amount_1_in,
-                amount_0_out_min,
-                amount_1_out_min,
-                to,
-            } => self
-                .on_op_swap(
-                    token_0,
-                    token_1,
-                    amount_0_in,
-                    amount_1_in,
-                    amount_0_out_min,
-                    amount_1_out_min,
-                    to,
-                )
-                .await
-                .expect("Failed OP: swap"),
-        }
-    }
-
-    async fn execute_message(&mut self, message: Self::Message) {
-        match message {
-            RouterMessage::BaseMessage(base_message) => self
-                .execute_base_message(base_message)
-                .expect("Failed MSG: base message"),
-            RouterMessage::PoolMessage(pool_message) => self
-                .execute_pool_message(pool_message)
-                .await
-                .expect("Failed MSG: pool message"),
-            RouterMessage::AddLiquidity {
-                origin,
-                token_0,
-                token_1,
-                amount_0_desired,
-                amount_1_desired,
-                amount_0_min,
-                amount_1_min,
-                created_pool,
-                to,
-                deadline,
-            } => self
-                .on_msg_add_liquidity(
-                    origin,
-                    token_0,
-                    token_1,
-                    amount_0_desired,
-                    amount_1_desired,
-                    amount_0_min,
-                    amount_1_min,
-                    created_pool,
-                    to,
-                    deadline,
-                )
-                .await
-                .expect("Failed MSG: add liquidity"),
-            RouterMessage::RemoveLiquidity {
-                origin,
-                token_0,
-                token_1,
-                liquidity,
-                amount_0_min,
-                amount_1_min,
-                to,
-                deadline,
-            } => self
-                .on_msg_remove_liquidity(
-                    origin,
-                    token_0,
-                    token_1,
-                    liquidity,
-                    amount_0_min,
-                    amount_1_min,
-                    to,
-                    deadline,
-                )
-                .await
-                .expect("Failed MSG: remove liquidity"),
-            RouterMessage::Swap {
-                origin,
-                token_0,
-                token_1,
-                amount_0_in,
-                amount_1_in,
-                amount_0_out_min,
-                amount_1_out_min,
-                to,
-            } => self
-                .on_msg_swap(
-                    origin,
-                    token_0,
-                    token_1,
-                    amount_0_in,
-                    amount_1_in,
-                    amount_0_out_min,
-                    amount_1_out_min,
-                    to,
-                )
-                .await
-                .expect("Failed MSG: swap"),
-            RouterMessage::SubscriberSync { origin, state } => self
-                .on_msg_subscriber_sync(origin, state)
-                .await
-                .expect("Failed MSG: subscriber sync"),
-        }
-    }
-
-    async fn store(mut self) {
-        self.state.save().await.expect("Failed to save state");
+    pub async fn execute_message(&mut self, message: Self::Message) {
+        self.execute_pool_message(message).await
     }
 }
 
-impl ApplicationContract {
+impl PoolManager {
     fn message_owner(&mut self) -> ChainAccountOwner {
         let message_id = self.runtime.message_id().expect("Invalid message id");
         ChainAccountOwner {
@@ -241,26 +58,6 @@ impl ApplicationContract {
                 self.runtime.authenticated_signer().expect("Invalid owner"),
             )),
         }
-    }
-
-    fn execute_base_operation(
-        &mut self,
-        operation: BaseOperation,
-    ) -> Result<RouterResponse, RouterError> {
-        match operation {
-            BaseOperation::SubscribeCreatorChain => self.on_op_subscribe_creator_chain(),
-        }
-    }
-
-    fn on_op_subscribe_creator_chain(&mut self) -> Result<RouterResponse, RouterError> {
-        let origin = self.runtime_owner();
-        self.runtime
-            .prepare_message(RouterMessage::BaseMessage(
-                BaseMessage::SubscribeCreatorChain { origin },
-            ))
-            .with_authentication()
-            .send_to(self.runtime.application_creator_chain_id());
-        Ok(RouterResponse::Ok)
     }
 
     async fn get_pool_exchangable(
@@ -398,12 +195,6 @@ impl ApplicationContract {
             .await
             .expect("Invalid pool");
 
-        log::info!(
-            "Op add liquidity 111 {}, {}",
-            self.runtime.chain_id(),
-            created
-        );
-
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
         let token_1 = if exchanged { Some(token_0) } else { token_1 };
         let amount_0_desired = if exchanged {
@@ -450,8 +241,6 @@ impl ApplicationContract {
                 )),
             },
         };
-
-        log::info!("Op add liquidity {}", created);
 
         // Fake add reserves to calculate liquidity, it'll be persisted later
         let mut fake_pool = pool.clone();
