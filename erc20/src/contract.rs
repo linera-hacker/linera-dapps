@@ -274,7 +274,7 @@ impl ApplicationContract {
         let owner = self.state.owner.get().expect("Invalid owner");
         Ok(ERC20Response::Owner(owner))
     }
-    
+
     async fn on_op_mint(&mut self, amount: Amount) -> Result<ERC20Response, ERC20Error> {
         let to = self.message_owner();
         let origin = self.runtime_owner();
