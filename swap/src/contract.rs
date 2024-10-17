@@ -13,7 +13,7 @@ use spec::{
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     swap::{
         abi::{SwapMessage, SwapOperation, SwapResponse},
-        pool::PoolOperation,
+        pool::{PoolMessage, PoolOperation},
         state::SubscriberSyncState,
     },
 };
@@ -83,8 +83,7 @@ impl Contract for ApplicationContract {
                 .await
                 .expect("Failed MSG: base message"),
             SwapMessage::PoolMessage(pool_message) => self
-                .pool_manager
-                .execute_message(&mut self.runtime, &mut self.state, pool_message)
+                .execute_pool_message(pool_message)
                 .await
                 .expect("Fail MSG: pool message"),
             SwapMessage::RouterMessage(router_message) => self
@@ -193,5 +192,19 @@ impl ApplicationContract {
             _ => {}
         }
         Ok(SwapResponse::PoolResponse(response))
+    }
+
+    async fn execute_pool_message(&mut self, message: PoolMessage) -> Result<(), SwapError> {
+        match self
+            .pool_manager
+            .execute_message(&mut self.runtime, &mut self.state, message)
+            .await?
+        {
+            Some((msg, true)) => {
+                self.publish_message(SwapMessage::PoolMessage(msg));
+            }
+            _ => {}
+        }
+        Ok(())
     }
 }

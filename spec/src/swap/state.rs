@@ -343,7 +343,8 @@ impl SwapApplicationState {
         if token_1.is_none() {
             return Ok(None);
         }
-        self.get_pool_with_token_pair(token_1.unwrap(), Some(token_0)).await
+        self.get_pool_with_token_pair(token_1.unwrap(), Some(token_0))
+            .await
     }
 
     pub async fn set_fee_to(

@@ -44,7 +44,7 @@ impl PoolManager {
         runtime: &mut ContractRuntime<T>,
         state: &mut SwapApplicationState,
         message: PoolMessage,
-    ) -> Result<(), PoolError> {
+    ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
         self.execute_pool_message(runtime, state, message).await
     }
 
@@ -75,7 +75,7 @@ impl PoolManager {
                 )
                 .await
             }
-            _ => todo!()
+            _ => todo!(),
         }
     }
 
@@ -84,8 +84,32 @@ impl PoolManager {
         runtime: &mut ContractRuntime<T>,
         state: &mut SwapApplicationState,
         message: PoolMessage,
-    ) -> Result<(), PoolError> {
-        Ok(())
+    ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
+        match message {
+            PoolMessage::CreatePool {
+                origin,
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+            } => {
+                self.on_msg_create_pool(
+                    runtime,
+                    state,
+                    origin,
+                    token_0,
+                    token_1,
+                    amount_0_initial,
+                    amount_1_initial,
+                    amount_0_virtual,
+                    amount_1_virtual,
+                )
+                .await
+            }
+            _ => todo!(),
+        }
     }
 
     async fn mint_shares<T: Contract>(
@@ -120,7 +144,11 @@ impl PoolManager {
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
         // Check exists
-        if state.get_pool_exchangable(token_0, token_1).await?.is_some() {
+        if state
+            .get_pool_exchangable(token_0, token_1)
+            .await?
+            .is_some()
+        {
             return Ok(());
         }
         // TODO: check if called by token creator
@@ -139,8 +167,8 @@ impl PoolManager {
             )
             .await?;
         // If initial liquidity is not virtual, mint shares to creator
-        Ok(self
-            .mint_shares(
+        if !pool.virtual_initial_liquidity {
+            self.mint_shares(
                 runtime,
                 state,
                 pool,
@@ -148,7 +176,9 @@ impl PoolManager {
                 amount_1_initial,
                 creator,
             )
-            .await?)
+            .await?
+        }
+        Ok(())
     }
 
     async fn on_op_create_pool<T: Contract>(
@@ -164,6 +194,11 @@ impl PoolManager {
     ) -> Result<(PoolResponse, Option<(PoolMessage, bool)>), PoolError> {
         // Receive tokens
         if amount_0_initial > Amount::ZERO {
+            log::info!(
+                "Recieve {} from {:?}",
+                amount_0_initial,
+                runtime_owner(runtime)
+            );
             receive_erc20_from_runtime_owner_to_application_creation(
                 runtime,
                 token_0,
@@ -205,5 +240,44 @@ impl PoolManager {
                 true,
             )),
         ))
+    }
+
+    async fn on_msg_create_pool<T: Contract>(
+        &mut self,
+        runtime: &mut ContractRuntime<T>,
+        state: &mut SwapApplicationState,
+        origin: ChainAccountOwner,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_0_initial: Amount,
+        amount_1_initial: Amount,
+        amount_0_virtual: Amount,
+        amount_1_virtual: Amount,
+    ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
+        if origin.chain_id != runtime.chain_id() {
+            self.create_pool(
+                runtime,
+                state,
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+            )
+            .await?;
+        }
+        Ok(Some((
+            PoolMessage::CreatePool {
+                origin,
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+            },
+            true,
+        )))
     }
 }
