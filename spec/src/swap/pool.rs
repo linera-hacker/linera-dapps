@@ -168,8 +168,10 @@ impl Pool {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub enum PoolResponse {
+    #[default]
+    Ok,
     Liquidity(Amount),
     AmountPair((Amount, Amount)),
     Pool(Option<Pool>),
