@@ -9,7 +9,7 @@ use spec::{
     swap::{Pool, RouterSubscriberSyncState},
 };
 use std::{collections::HashMap, str::FromStr};
-use swap_router::PoolError;
+use swap_router::errno::PoolError;
 
 #[derive(RootView, async_graphql::SimpleObject)]
 #[view(context = "ViewStorageContext")]
@@ -66,7 +66,7 @@ impl Application {
         }
     }
 
-    pub(crate) async fn _create_pool(
+    pub async fn _create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -122,7 +122,7 @@ impl Application {
         self.insert_pool(pool, required).await
     }
 
-    pub(crate) async fn create_pool(
+    pub async fn create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -147,7 +147,7 @@ impl Application {
         .await
     }
 
-    pub(crate) async fn require_create_pool(
+    pub async fn require_create_pool(
         &mut self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -172,7 +172,7 @@ impl Application {
         .await
     }
 
-    pub(crate) async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
+    pub async fn get_pool(&self, pool_id: u64) -> Result<Option<Pool>, PoolError> {
         match self.pool_erc20_erc20s.get(&pool_id).await? {
             Some(tokens) => Ok(self
                 .erc20_erc20_pools
@@ -188,7 +188,7 @@ impl Application {
         }
     }
 
-    pub(crate) async fn update_pool(&mut self, pool: Pool) -> Result<(), PoolError> {
+    pub async fn update_pool(&mut self, pool: Pool) -> Result<(), PoolError> {
         let Some(_pool) = self
             .get_pool_with_token_pair(pool.token_0, pool.token_1)
             .await?
@@ -212,7 +212,7 @@ impl Application {
         }
     }
 
-    pub(crate) async fn get_pool_with_token_pair(
+    pub async fn get_pool_with_token_pair(
         &self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
@@ -232,7 +232,7 @@ impl Application {
         }
     }
 
-    pub(crate) async fn set_fee_to(
+    pub async fn set_fee_to(
         &mut self,
         pool_id: u64,
         account: ChainAccountOwner,
@@ -247,7 +247,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn set_fee_to_setter(
+    pub async fn set_fee_to_setter(
         &mut self,
         pool_id: u64,
         account: ChainAccountOwner,
@@ -262,7 +262,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn mint(
+    pub async fn mint(
         &mut self,
         pool_id: u64,
         liquidity: Amount,
@@ -274,7 +274,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn burn(
+    pub async fn burn(
         &mut self,
         pool_id: u64,
         liquidity: Amount,
@@ -286,7 +286,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn update(
+    pub async fn update(
         &mut self,
         pool_id: u64,
         balance_0: Amount,
@@ -323,7 +323,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn mint_fee(&mut self, pool_id: u64) -> Result<(), PoolError> {
+    pub async fn mint_fee(&mut self, pool_id: u64) -> Result<(), PoolError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
 
         if pool.k_last != Amount::ZERO {
@@ -346,7 +346,7 @@ impl Application {
         Ok(())
     }
 
-    pub(crate) async fn to_subscriber_sync_state(
+    pub async fn to_subscriber_sync_state(
         &self,
     ) -> Result<RouterSubscriberSyncState, PoolError> {
         let mut state = RouterSubscriberSyncState {
@@ -383,7 +383,7 @@ impl Application {
         Ok(state)
     }
 
-    pub(crate) async fn from_subscriber_sync_state(
+    pub async fn from_subscriber_sync_state(
         &mut self,
         state: RouterSubscriberSyncState,
     ) -> Result<(), PoolError> {

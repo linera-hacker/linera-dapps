@@ -1,5 +1,7 @@
-use crate::account::ChainAccountOwner;
-use crate::base::{BaseMessage, BaseOperation};
+use crate::{
+    account::ChainAccountOwner,
+    base::{BaseMessage, BaseOperation},
+};
 use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
