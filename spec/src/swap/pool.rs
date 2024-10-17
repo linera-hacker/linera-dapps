@@ -5,6 +5,7 @@ use linera_sdk::{
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
 #[derive(Debug, Clone, Deserialize, Eq, PartialEq, Serialize, SimpleObject)]
 pub struct Pool {
@@ -125,7 +126,21 @@ pub enum PoolOperation {
 
 scalar!(PoolOperation);
 
+#[derive(Debug, Error)]
+#[allow(dead_code)]
+pub enum PoolError {
+    #[error("Invalid liquidity")]
+    InvalidLiquidity,
+
+    #[error("Invalid amount")]
+    InvalidAmount,
+}
+
 impl Pool {
+    pub fn calculate_initial_liquidity(amount_0: Amount, amount_1: Amount) -> Amount {
+        base::sqrt(amount_0.saturating_mul(amount_1.into()))
+    }
+
     pub fn calculate_liquidity(&self, amount_0: Amount, amount_1: Amount) -> Amount {
         let total_supply = self.erc20.total_supply;
 
@@ -145,12 +160,12 @@ impl Pool {
         }
     }
 
-    pub fn calculate_amount_pair(
+    pub fn calculate_liquidity_amount_pair(
         &self,
         liquidity: Amount,
         balance_0: Amount,
         balance_1: Amount,
-    ) -> (Amount, Amount) {
+    ) -> Result<(Amount, Amount), PoolError> {
         let amount_0: Amount = Amount::from_attos(
             liquidity
                 .saturating_mul(balance_0.into())
@@ -162,9 +177,58 @@ impl Pool {
                 .saturating_div(self.erc20.total_supply),
         );
         if amount_0 == Amount::ZERO || amount_1 == Amount::ZERO {
-            panic!("Invalid liquidity");
+            return Err(PoolError::InvalidAmount);
         }
-        (amount_0, amount_1)
+        Ok((amount_0, amount_1))
+    }
+
+    fn calculate_swap_amount_1(&self, amount_0: Amount) -> Result<Amount, PoolError> {
+        if self.reserve_0 <= Amount::ZERO || self.reserve_1 <= Amount::ZERO {
+            return Err(PoolError::InvalidAmount);
+        }
+        Ok(Amount::from_attos(
+            amount_0
+                .saturating_div(self.reserve_0.into())
+                .saturating_mul(self.reserve_1.into()),
+        ))
+    }
+
+    fn calculate_swap_amount_0(&self, amount_1: Amount) -> Result<Amount, PoolError> {
+        if self.reserve_0 <= Amount::ZERO || self.reserve_1 <= Amount::ZERO {
+            return Err(PoolError::InvalidAmount);
+        }
+        Ok(Amount::from_attos(
+            amount_1
+                .saturating_div(self.reserve_1.into())
+                .saturating_mul(self.reserve_0.into()),
+        ))
+    }
+
+    pub fn calculate_swap_amount_pair(
+        &self,
+        amount_0_desired: Amount,
+        amount_1_desired: Amount,
+        amount_0_min: Amount,
+        amount_1_min: Amount,
+    ) -> Result<(Amount, Amount), PoolError> {
+        if self.reserve_0 == Amount::ZERO && self.reserve_1 == Amount::ZERO {
+            return Ok((amount_0_desired, amount_1_desired));
+        }
+        let amount_1_optimal = self.calculate_swap_amount_1(amount_0_desired)?;
+        if amount_1_optimal <= amount_1_desired {
+            if amount_1_optimal < amount_1_min {
+                return Err(PoolError::InvalidAmount);
+            }
+            return Ok((amount_0_desired, amount_1_optimal));
+        }
+        let amount_0_optimal = self.calculate_swap_amount_0(amount_1_desired)?;
+        if amount_0_optimal > amount_0_desired {
+            return Err(PoolError::InvalidAmount);
+        }
+        if amount_0_optimal < amount_0_min {
+            return Err(PoolError::InvalidAmount);
+        }
+        Ok((amount_0_optimal, amount_1_desired))
     }
 }
 

@@ -3,7 +3,7 @@ use crate::runtime::{
     receive_token_from_runtime_owner_to_application_creation, runtime_owner,
 };
 use linera_sdk::{
-    base::{Amount, ApplicationId, ParseAmountError},
+    base::{Amount, ApplicationId, ParseAmountError, Timestamp},
     Contract, ContractRuntime,
 };
 use spec::{
@@ -144,10 +144,9 @@ impl PoolManager {
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
         // Check exists
-        if state
+        if let (Some(poo), _) = state
             .get_pool_exchangable(token_0, token_1)
             .await?
-            .is_some()
         {
             return Ok(());
         }

@@ -14,6 +14,7 @@ use spec::{
     swap::{
         abi::{SwapMessage, SwapOperation, SwapResponse},
         pool::{PoolMessage, PoolOperation},
+        router::{RouterMessage, RouterOperation},
         state::SubscriberSyncState,
     },
 };
@@ -67,12 +68,10 @@ impl Contract for ApplicationContract {
                 .execute_pool_operation(pool_operation)
                 .await
                 .expect("Failed OP: pool operation"),
-            SwapOperation::RouterOperation(router_operation) => SwapResponse::RouterResponse(
-                self.router
-                    .execute_operation(&mut self.runtime, &mut self.state, router_operation)
-                    .await
-                    .expect("Failed OP: router operation"),
-            ),
+            SwapOperation::RouterOperation(router_operation) => self
+                .execute_router_operation(router_operation)
+                .await
+                .expect("Failed OP: router operation"),
         }
     }
 
@@ -206,5 +205,25 @@ impl ApplicationContract {
             _ => {}
         }
         Ok(())
+    }
+
+    async fn execute_router_operation(
+        &mut self,
+        operation: RouterOperation,
+    ) -> Result<SwapResponse, SwapError> {
+        let (response, msg) = self
+            .router
+            .execute_operation(&mut self.runtime, &mut self.state, operation)
+            .await?;
+        match msg {
+            Some((_msg, true)) => {
+                self.runtime
+                    .prepare_message(SwapMessage::RouterMessage(_msg))
+                    .with_authentication()
+                    .send_to(self.runtime.application_creator_chain_id());
+            }
+            _ => {}
+        }
+        Ok(SwapResponse::RouterResponse(response))
     }
 }
