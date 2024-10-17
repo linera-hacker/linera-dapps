@@ -66,11 +66,46 @@ pub fn transfer_erc20<T>(
     runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
 }
 
-pub fn transfer_native<T>(runtime: &mut ContractRuntime<T>, amount: Amount, to: ChainAccountOwner)
-where
+pub fn receive_erc20_from_runtime_owner<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+    amount: Amount,
+    to: ChainAccountOwner,
+) where
     T: Contract,
 {
-    let owner = runtime.authenticated_signer();
+    let owner = runtime_owner(runtime);
+    transfer_erc20(runtime, token, amount, owner, to)
+}
+
+pub fn receive_erc20_from_runtime_owner_to_application_creation<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+    amount: Amount,
+) where
+    T: Contract,
+{
+    let to = ChainAccountOwner {
+        chain_id: runtime.application_creator_chain_id(),
+        owner: Some(AccountOwner::Application(
+            runtime.application_id().forget_abi(),
+        )),
+    };
+    receive_erc20_from_runtime_owner(runtime, token, amount, to)
+}
+
+pub fn transfer_native<T>(
+    runtime: &mut ContractRuntime<T>,
+    amount: Amount,
+    from: ChainAccountOwner,
+    to: ChainAccountOwner,
+) where
+    T: Contract,
+{
+    let from = match from.owner {
+        Some(AccountOwner::User(owner)) => Some(owner),
+        _ => None,
+    };
     let to = Account {
         chain_id: to.chain_id,
         owner: match to.owner {
@@ -78,5 +113,59 @@ where
             _ => None,
         },
     };
-    runtime.transfer(owner, to, amount);
+    runtime.transfer(from, to, amount);
+}
+
+pub fn receive_native_from_runtime_owner<T>(
+    runtime: &mut ContractRuntime<T>,
+    amount: Amount,
+    to: ChainAccountOwner,
+) where
+    T: Contract,
+{
+    let owner = runtime_owner(runtime);
+    transfer_native(runtime, amount, owner, to)
+}
+
+pub fn transfer_token<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: Option<ApplicationId>,
+    amount: Amount,
+    from: ChainAccountOwner,
+    to: ChainAccountOwner,
+) where
+    T: Contract,
+{
+    match token {
+        Some(_token) => transfer_erc20(runtime, _token, amount, from, to),
+        _ => transfer_native(runtime, amount, from, to),
+    }
+}
+
+pub fn receive_token_from_runtime_owner<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: Option<ApplicationId>,
+    amount: Amount,
+    to: ChainAccountOwner,
+) where
+    T: Contract,
+{
+    let owner = runtime_owner(runtime);
+    transfer_token(runtime, token, amount, owner, to)
+}
+
+pub fn receive_token_from_runtime_owner_to_application_creation<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: Option<ApplicationId>,
+    amount: Amount,
+) where
+    T: Contract,
+{
+    let to = ChainAccountOwner {
+        chain_id: runtime.application_creator_chain_id(),
+        owner: Some(AccountOwner::Application(
+            runtime.application_id().forget_abi(),
+        )),
+    };
+    receive_token_from_runtime_owner(runtime, token, amount, to)
 }
