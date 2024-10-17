@@ -3346,6 +3346,7 @@ dependencies = [
  "async-graphql",
  "linera-sdk",
  "linera-views",
+ "log",
  "num-bigint",
  "num-traits",
  "serde",

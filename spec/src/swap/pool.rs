@@ -138,25 +138,20 @@ pub enum PoolError {
 
 impl Pool {
     pub fn calculate_initial_liquidity(amount_0: Amount, amount_1: Amount) -> Amount {
-        base::sqrt(amount_0.saturating_mul(amount_1.into()))
+        base::mul_then_sqrt(amount_0, amount_1)
     }
 
     pub fn calculate_liquidity(&self, amount_0: Amount, amount_1: Amount) -> Amount {
         let total_supply = self.erc20.total_supply;
 
         if total_supply == Amount::ZERO {
-            base::sqrt(amount_0.saturating_mul(amount_1.into()))
+            base::mul_then_sqrt(amount_0, amount_1)
         } else {
-            Amount::from_attos(
-                amount_0
-                    .saturating_mul(total_supply.into())
-                    .saturating_div(self.reserve_0.into())
-                    .min(
-                        amount_1
-                            .saturating_mul(total_supply.into())
-                            .saturating_div(self.reserve_1.into()),
-                    ),
-            )
+            base::mul_then_div(amount_0, total_supply, self.reserve_0).min(base::mul_then_div(
+                amount_1,
+                total_supply,
+                self.reserve_1,
+            ))
         }
     }
 
@@ -166,16 +161,8 @@ impl Pool {
         balance_0: Amount,
         balance_1: Amount,
     ) -> Result<(Amount, Amount), PoolError> {
-        let amount_0: Amount = Amount::from_attos(
-            liquidity
-                .saturating_mul(balance_0.into())
-                .saturating_div(self.erc20.total_supply),
-        );
-        let amount_1: Amount = Amount::from_attos(
-            liquidity
-                .saturating_mul(balance_1.into())
-                .saturating_div(self.erc20.total_supply),
-        );
+        let amount_0 = base::mul_then_div(liquidity, balance_0, self.erc20.total_supply);
+        let amount_1 = base::mul_then_div(liquidity, balance_1, self.erc20.total_supply);
         if amount_0 == Amount::ZERO || amount_1 == Amount::ZERO {
             return Err(PoolError::InvalidAmount);
         }
@@ -186,22 +173,14 @@ impl Pool {
         if self.reserve_0 <= Amount::ZERO || self.reserve_1 <= Amount::ZERO {
             return Err(PoolError::InvalidAmount);
         }
-        Ok(Amount::from_attos(
-            amount_0
-                .saturating_div(self.reserve_0.into())
-                .saturating_mul(self.reserve_1.into()),
-        ))
+        Ok(base::mul_then_div(amount_0, self.reserve_1, self.reserve_0))
     }
 
     fn calculate_swap_amount_0(&self, amount_1: Amount) -> Result<Amount, PoolError> {
         if self.reserve_0 <= Amount::ZERO || self.reserve_1 <= Amount::ZERO {
             return Err(PoolError::InvalidAmount);
         }
-        Ok(Amount::from_attos(
-            amount_1
-                .saturating_div(self.reserve_1.into())
-                .saturating_mul(self.reserve_0.into()),
-        ))
+        Ok(base::mul_then_div(amount_1, self.reserve_0, self.reserve_1))
     }
 
     pub fn calculate_swap_amount_pair(
@@ -215,6 +194,14 @@ impl Pool {
             return Ok((amount_0_desired, amount_1_desired));
         }
         let amount_1_optimal = self.calculate_swap_amount_1(amount_0_desired)?;
+        log::info!(
+            "{}, {}, {}, {}, {}",
+            amount_0_desired,
+            amount_1_optimal,
+            self.reserve_0,
+            self.reserve_1,
+            amount_1_desired
+        );
         if amount_1_optimal <= amount_1_desired {
             if amount_1_optimal < amount_1_min {
                 return Err(PoolError::InvalidAmount);
