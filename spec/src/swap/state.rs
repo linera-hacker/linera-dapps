@@ -336,15 +336,20 @@ impl SwapApplicationState {
         &self,
         token_0: ApplicationId,
         token_1: Option<ApplicationId>,
-    ) -> Result<Option<Pool>, StateError> {
+    ) -> Result<(Option<Pool>, bool), StateError> {
         if let Some(pool) = self.get_pool_with_token_pair(token_0, token_1).await? {
-            return Ok(Some(pool));
+            return Ok((Some(pool), false));
         }
         if token_1.is_none() {
-            return Ok(None);
+            return Ok((None, false));
         }
-        self.get_pool_with_token_pair(token_1.unwrap(), Some(token_0))
-            .await
+        if let Some(pool) = self
+            .get_pool_with_token_pair(token_1.unwrap(), Some(token_0))
+            .await?
+        {
+            return Ok((Some(pool), true));
+        }
+        Ok((None, false))
     }
 
     pub async fn set_fee_to(

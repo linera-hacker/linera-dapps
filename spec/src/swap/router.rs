@@ -16,7 +16,6 @@ pub enum RouterMessage {
         amount_1_desired: Amount,
         amount_0_min: Amount,
         amount_1_min: Amount,
-        created_pool: bool,
         to: ChainAccountOwner,
         deadline: Timestamp,
     },
