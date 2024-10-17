@@ -7,7 +7,7 @@ use spec::{
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
 };
 
-pub fn message_owner<T>(mut runtime: ContractRuntime<T>) -> ChainAccountOwner
+pub fn message_owner<T>(runtime: &mut ContractRuntime<T>) -> ChainAccountOwner
 where
     T: Contract,
 {
@@ -20,7 +20,7 @@ where
     }
 }
 
-pub fn runtime_owner<T>(mut runtime: ContractRuntime<T>) -> ChainAccountOwner
+pub fn runtime_owner<T>(runtime: &mut ContractRuntime<T>) -> ChainAccountOwner
 where
     T: Contract,
 {
@@ -33,7 +33,7 @@ where
 }
 
 pub fn balance_of_erc20<T>(
-    mut runtime: ContractRuntime<T>,
+    runtime: &mut ContractRuntime<T>,
     token: ApplicationId,
     owner: ChainAccountOwner,
 ) -> Amount
@@ -50,7 +50,7 @@ where
 }
 
 pub fn transfer_erc20<T>(
-    mut runtime: ContractRuntime<T>,
+    runtime: &mut ContractRuntime<T>,
     token: ApplicationId,
     amount: Amount,
     owner: ChainAccountOwner,
@@ -66,7 +66,7 @@ pub fn transfer_erc20<T>(
     runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
 }
 
-pub fn transfer_native<T>(mut runtime: ContractRuntime<T>, amount: Amount, to: ChainAccountOwner)
+pub fn transfer_native<T>(runtime: &mut ContractRuntime<T>, amount: Amount, to: ChainAccountOwner)
 where
     T: Contract,
 {

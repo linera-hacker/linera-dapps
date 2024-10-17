@@ -12,16 +12,20 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    swap::{Pool, PoolOperation, RouterMutationRoot, RouterOperation, RouterQueryRoot},
+    swap::{
+        abi::{SwapMutationRoot, SwapOperation, SwapQueryRoot},
+        pool::{Pool, PoolOperation},
+        router::RouterOperation,
+    },
 };
 use std::sync::Arc;
 
-struct RouterContext {
+struct SwapContext {
     state: Arc<Application>,
 }
 
 pub struct ApplicationService {
-    context: Arc<RouterContext>,
+    context: Arc<SwapContext>,
 }
 
 linera_sdk::service!(ApplicationService);
@@ -38,7 +42,7 @@ impl Service for ApplicationService {
             .await
             .expect("Failed to load state");
         ApplicationService {
-            context: Arc::new(RouterContext {
+            context: Arc::new(SwapContext {
                 state: Arc::new(state),
             }),
         }
@@ -55,7 +59,7 @@ impl Service for ApplicationService {
 struct QueryRoot;
 
 #[Object]
-impl RouterQueryRoot for QueryRoot {
+impl SwapQueryRoot for QueryRoot {
     async fn calculate_swap_amount(
         &self,
         _token_0: ApplicationId,
@@ -66,7 +70,7 @@ impl RouterQueryRoot for QueryRoot {
     }
 
     async fn get_pool(&self, ctx: &Context<'_>, pool_id: u64) -> Option<Pool> {
-        let context = ctx.data::<Arc<RouterContext>>().unwrap();
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
         match context.state.get_pool(pool_id).await {
             Ok(pool) => pool,
             _ => None,
@@ -74,7 +78,7 @@ impl RouterQueryRoot for QueryRoot {
     }
 
     async fn get_fee_to(&self, ctx: &Context<'_>, pool_id: u64) -> Option<ChainAccountOwner> {
-        let context = ctx.data::<Arc<RouterContext>>().unwrap();
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
         match context.state.get_pool(pool_id).await {
             Ok(pool) => Some(pool.unwrap().fee_to),
             _ => None,
@@ -82,7 +86,7 @@ impl RouterQueryRoot for QueryRoot {
     }
 
     async fn get_pools(&self, ctx: &Context<'_>) -> Vec<Pool> {
-        let context = ctx.data::<Arc<RouterContext>>().unwrap();
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
         let mut pools = Vec::<Pool>::new();
         context
             .state
@@ -111,7 +115,7 @@ impl RouterQueryRoot for QueryRoot {
 struct MutationRoot;
 
 #[Object]
-impl RouterMutationRoot for MutationRoot {
+impl SwapMutationRoot for MutationRoot {
     // Return pair token amount and liquidity
     async fn add_liquidity(
         &self,
@@ -124,16 +128,18 @@ impl RouterMutationRoot for MutationRoot {
         to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::AddLiquidity {
-            token_0,
-            token_1,
-            amount_0_desired,
-            amount_1_desired,
-            amount_0_min,
-            amount_1_min,
-            to,
-            deadline,
-        })
+        bcs::to_bytes(&SwapOperation::RouterOperation(
+            RouterOperation::AddLiquidity {
+                token_0,
+                token_1,
+                amount_0_desired,
+                amount_1_desired,
+                amount_0_min,
+                amount_1_min,
+                to,
+                deadline,
+            },
+        ))
         .unwrap()
     }
 
@@ -148,15 +154,17 @@ impl RouterMutationRoot for MutationRoot {
         to: Option<ChainAccountOwner>,
         deadline: Timestamp,
     ) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::RemoveLiquidity {
-            token_0,
-            token_1,
-            liquidity,
-            amount_0_min,
-            amount_1_min,
-            to,
-            deadline,
-        })
+        bcs::to_bytes(&SwapOperation::RouterOperation(
+            RouterOperation::RemoveLiquidity {
+                token_0,
+                token_1,
+                liquidity,
+                amount_0_min,
+                amount_1_min,
+                to,
+                deadline,
+            },
+        ))
         .unwrap()
     }
 
@@ -170,7 +178,7 @@ impl RouterMutationRoot for MutationRoot {
         amount_1_out_min: Option<Amount>,
         to: Option<ChainAccountOwner>,
     ) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::Swap {
+        bcs::to_bytes(&SwapOperation::RouterOperation(RouterOperation::Swap {
             token_0,
             token_1,
             amount_0_in,
@@ -178,12 +186,12 @@ impl RouterMutationRoot for MutationRoot {
             amount_0_out_min,
             amount_1_out_min,
             to,
-        })
+        }))
         .unwrap()
     }
 
     async fn subscribe_creator_chain(&self) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::BaseOperation(
+        bcs::to_bytes(&SwapOperation::BaseOperation(
             BaseOperation::SubscribeCreatorChain,
         ))
         .unwrap()
@@ -199,7 +207,7 @@ impl RouterMutationRoot for MutationRoot {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::PoolOperation(PoolOperation::CreatePool {
+        bcs::to_bytes(&SwapOperation::PoolOperation(PoolOperation::CreatePool {
             token_0,
             token_1,
             amount_0_initial,
@@ -211,7 +219,7 @@ impl RouterMutationRoot for MutationRoot {
     }
 
     async fn set_fee_to(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::PoolOperation(PoolOperation::SetFeeTo {
+        bcs::to_bytes(&SwapOperation::PoolOperation(PoolOperation::SetFeeTo {
             pool_id,
             account,
         }))
@@ -219,7 +227,7 @@ impl RouterMutationRoot for MutationRoot {
     }
 
     async fn set_fee_to_setter(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::PoolOperation(
+        bcs::to_bytes(&SwapOperation::PoolOperation(
             PoolOperation::SetFeeToSetter { pool_id, account },
         ))
         .unwrap()
