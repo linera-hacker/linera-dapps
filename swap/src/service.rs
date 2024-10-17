@@ -27,7 +27,7 @@ pub struct ApplicationService {
 linera_sdk::service!(ApplicationService);
 
 impl WithServiceAbi for ApplicationService {
-    type Abi = swap_router::ApplicationAbi;
+    type Abi = swap::ApplicationAbi;
 }
 
 impl Service for ApplicationService {

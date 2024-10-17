@@ -10,6 +10,7 @@ linera-views.workspace = true
 serde.workspace = true
 num-bigint.workspace = true
 num-traits.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }
