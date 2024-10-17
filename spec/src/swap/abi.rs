@@ -133,13 +133,6 @@ pub trait SwapMutationRoot {
         amount_1_virtual: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 
-    fn get_pool_with_token_pair(
-        &self,
-        ctx: &Context<'_>,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
     fn set_fee_to(
         &self,
         ctx: &Context<'_>,
