@@ -3349,6 +3349,7 @@ dependencies = [
  "num-bigint",
  "num-traits",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

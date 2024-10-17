@@ -15,9 +15,7 @@ use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
-    swap::abi::{
-        SubscriberSyncState, SwapOperation, SwapMessage, SwapResponse,
-    },
+    swap::abi::{SubscriberSyncState, SwapMessage, SwapOperation, SwapResponse},
 };
 
 pub struct ApplicationContract {
@@ -50,10 +48,20 @@ impl Contract for ApplicationContract {
     }
 
     async fn execute_operation(&mut self, operation: Self::Operation) -> Self::Response {
-        SwapResponse::Ok
+        match operation {
+            SwapOperation::BaseOperation(base_operation) => self
+                .execute_base_operation(base_operation)
+                .expect("Failed OP: base operation"),
+        }
     }
 
     async fn execute_message(&mut self, message: Self::Message) {
+        match message {
+            SwapMessage::BaseMessage(base_message) => self
+                .execute_base_message(base_message)
+                .await
+                .expect("Failed MSG: base message"),
+        }
     }
 
     async fn store(mut self) {
@@ -61,3 +69,53 @@ impl Contract for ApplicationContract {
     }
 }
 
+impl ApplicationContract {
+    fn execute_base_operation(
+        &mut self,
+        operation: BaseOperation,
+    ) -> Result<PoolResponse, PoolError> {
+        match operation {
+            BaseOperation::SubscribeCreatorChain => self.on_op_subscribe_creator_chain(),
+        }
+    }
+
+    fn on_op_subscribe_creator_chain(&mut self) -> Result<PoolResponse, PoolError> {
+        let origin = self.runtime_owner();
+        self.runtime
+            .prepare_message(SwapMessage::BaseMessage(
+                BaseMessage::SubscribeCreatorChain { origin },
+            ))
+            .with_authentication()
+            .send_to(self.runtime.application_creator_chain_id());
+        Ok(SwapResponse::Ok)
+    }
+
+    async fn execute_base_message(&mut self, message: BaseMessage) -> Result<(), PoolError> {
+        match message {
+            BaseMessage::SubscribeCreatorChain { origin: _ } => {
+                self.on_msg_subscribe_creator_chain().await
+            }
+        }
+    }
+
+    async fn on_msg_subscribe_creator_chain(&mut self) -> Result<(), PoolError> {
+        let message_id = self.runtime.message_id().expect("Invalid message id");
+        if message_id.chain_id == self.runtime.application_creator_chain_id() {
+            return Ok(());
+        }
+
+        self.runtime.subscribe(
+            message_id.chain_id,
+            ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()),
+        );
+
+        let origin = message_owner(self.runtime);
+        let state = self.state.to_subscriber_sync_state().await?;
+        self.runtime
+            .prepare_message(PoolMessage::SubscriberSync { origin, state })
+            .with_authentication()
+            .send_to(message_id.chain_id);
+
+        Ok(())
+    }
+}
