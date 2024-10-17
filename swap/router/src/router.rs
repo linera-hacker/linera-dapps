@@ -1,5 +1,5 @@
 use linera_sdk::{Contract, ContractRuntime};
-use spec::swap::abi::SwapApplicationState;
+use spec::swap::state::SwapApplicationState;
 use thiserror::Error;
 
 #[derive(Debug, Error)]

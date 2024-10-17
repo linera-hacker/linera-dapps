@@ -210,17 +210,6 @@ impl RouterMutationRoot for MutationRoot {
         .unwrap()
     }
 
-    async fn get_pool_with_token_pair(
-        &self,
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
-    ) -> Vec<u8> {
-        bcs::to_bytes(&RouterOperation::PoolOperation(
-            PoolOperation::GetPoolWithTokenPair { token_0, token_1 },
-        ))
-        .unwrap()
-    }
-
     async fn set_fee_to(&self, pool_id: u64, account: ChainAccountOwner) -> Vec<u8> {
         bcs::to_bytes(&RouterOperation::PoolOperation(PoolOperation::SetFeeTo {
             pool_id,
