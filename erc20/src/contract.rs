@@ -87,7 +87,7 @@ impl Contract for ApplicationContract {
             ERC20Operation::GetOwner {} => self
                 .on_op_get_owner()
                 .await
-                .expect("Failed OP: transfer ownership"),
+                .expect("Failed OP: get owner"),
         }
     }
 
