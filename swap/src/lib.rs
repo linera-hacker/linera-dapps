@@ -1,9 +1,6 @@
 use spec::swap::abi::SwapApplicationAbi;
 use spec::swap::state::StateError;
-use swap_router::{
-    pool_manager::PoolError,
-    router::RouterError,
-};
+use swap_router::{pool_manager::PoolError, router::RouterError};
 use thiserror::Error;
 
 pub type ApplicationAbi = SwapApplicationAbi;

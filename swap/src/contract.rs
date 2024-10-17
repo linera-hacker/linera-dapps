@@ -86,8 +86,7 @@ impl Contract for ApplicationContract {
                 .await
                 .expect("Fail MSG: pool message"),
             SwapMessage::RouterMessage(router_message) => self
-                .router
-                .execute_message(&mut self.runtime, &mut self.state, router_message)
+                .execute_router_message(router_message)
                 .await
                 .expect("Fail MSG: router message"),
             SwapMessage::SubscriberSync { origin, state } => self
@@ -225,5 +224,19 @@ impl ApplicationContract {
             _ => {}
         }
         Ok(SwapResponse::RouterResponse(response))
+    }
+
+    async fn execute_router_message(&mut self, message: RouterMessage) -> Result<(), SwapError> {
+        match self
+            .router
+            .execute_message(&mut self.runtime, &mut self.state, message)
+            .await?
+        {
+            Some((msg, true)) => {
+                self.publish_message(SwapMessage::RouterMessage(msg));
+            }
+            _ => {}
+        }
+        Ok(())
     }
 }
