@@ -81,8 +81,10 @@ pub enum RouterOperation {
 
 scalar!(RouterOperation);
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Default)]
 pub enum RouterResponse {
+    #[default]
+    Ok,
     Liquidity((Amount, Amount, Amount)),
     Amount(Amount),
     AmountPair((Amount, Amount)),

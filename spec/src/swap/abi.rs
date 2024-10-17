@@ -6,11 +6,12 @@ use crate::{
         router::{RouterMessage, RouterOperation, RouterResponse},
     },
 };
-use async_graphql::{Context, Error, Request, Response};
+use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
+    views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -24,6 +25,16 @@ pub struct SubscriberSyncState {
     pub pool_id: u64,
     pub pool_erc20_erc20s: HashMap<u64, Vec<ApplicationId>>,
     pub pool_erc20_natives: HashMap<u64, ApplicationId>,
+}
+
+#[derive(RootView, SimpleObject)]
+#[view(context = "ViewStorageContext")]
+pub struct SwapApplicationState {
+    pub erc20_erc20_pools: MapView<ApplicationId, HashMap<ApplicationId, Pool>>,
+    pub erc20_native_pools: MapView<ApplicationId, Pool>,
+    pub pool_id: RegisterView<u64>,
+    pub pool_erc20_erc20s: MapView<u64, Vec<ApplicationId>>,
+    pub pool_erc20_natives: MapView<u64, ApplicationId>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
