@@ -101,6 +101,7 @@ pub enum ERC20Operation {
     TransferOwnership {
         new_owner: ChainAccountOwner,
     },
+    GetOwner {},
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -108,6 +109,7 @@ pub enum ERC20Response {
     #[default]
     Ok,
     Balance(Amount),
+    Owner(ChainAccountOwner),
 }
 
 pub struct ERC20ApplicationAbi;

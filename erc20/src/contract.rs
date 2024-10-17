@@ -84,6 +84,10 @@ impl Contract for ApplicationContract {
                 .on_op_transfer_ownership(new_owner)
                 .await
                 .expect("Failed OP: transfer ownership"),
+            ERC20Operation::GetOwner {} => self
+                .on_op_get_owner()
+                .await
+                .expect("Failed OP: transfer ownership"),
         }
     }
 
@@ -261,6 +265,13 @@ impl ApplicationContract {
         Ok(ERC20Response::Ok)
     }
 
+    async fn on_op_get_owner(
+        &mut self,
+    ) -> Result<ERC20Response, ERC20Error> {
+        let owner = self.state.owner.get().expect("Invalid owner");
+        Ok(ERC20Response::Owner(owner))
+    }
+    
     async fn on_op_mint(&mut self, amount: Amount) -> Result<ERC20Response, ERC20Error> {
         let to = self.message_owner();
         let origin = self.runtime_owner();
