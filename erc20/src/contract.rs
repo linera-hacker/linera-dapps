@@ -400,11 +400,10 @@ impl ApplicationContract {
                 token_1,
                 amount_1: amount,
             });
-            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) = self.runtime.call_application(
-                true,
-                token_0.with_abi::<SwapApplicationAbi>(),
-                &call,
-            ) else {
+            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) = self
+                .runtime
+                .call_application(true, token_0.with_abi::<SwapApplicationAbi>(), &call)
+            else {
                 todo!()
             };
             cur_currency = currency;
