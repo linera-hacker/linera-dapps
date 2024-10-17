@@ -1,7 +1,7 @@
 use linera_sdk::base::ParseAmountError;
 use linera_sdk::{Contract, ContractRuntime};
 use spec::swap::{
-    abi::SwapApplicationState,
+    state::SwapApplicationState,
     pool::{PoolMessage, PoolOperation, PoolResponse},
 };
 use thiserror::Error;
