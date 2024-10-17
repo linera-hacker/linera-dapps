@@ -54,7 +54,29 @@ impl PoolManager {
         state: &mut SwapApplicationState,
         operation: PoolOperation,
     ) -> Result<(PoolResponse, Option<(PoolMessage, bool)>), PoolError> {
-        Ok((PoolResponse::Ok, None))
+        match operation {
+            PoolOperation::CreatePool {
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+            } => {
+                self.on_op_create_pool(
+                    runtime,
+                    state,
+                    token_0,
+                    token_1,
+                    amount_0_initial,
+                    amount_1_initial,
+                    amount_0_virtual,
+                    amount_1_virtual,
+                )
+                .await
+            }
+            _ => todo!()
+        }
     }
 
     async fn execute_pool_message<T: Contract>(
@@ -97,7 +119,11 @@ impl PoolManager {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
     ) -> Result<(), PoolError> {
-        // TODO: check exists
+        // Check exists
+        if state.get_pool_exchangable(token_0, token_1).await?.is_some() {
+            return Ok(());
+        }
+        // TODO: check if called by token creator
         // Create pool if it's not exists
         let creator = runtime_owner(runtime);
         let pool = state
@@ -125,7 +151,7 @@ impl PoolManager {
             .await?)
     }
 
-    async fn on_op_crete_pool<T: Contract>(
+    async fn on_op_create_pool<T: Contract>(
         &mut self,
         runtime: &mut ContractRuntime<T>,
         state: &mut SwapApplicationState,
@@ -167,16 +193,16 @@ impl PoolManager {
         Ok((
             PoolResponse::Ok,
             Some((
-            PoolMessage::CreatePool {
-                origin: runtime_owner(runtime),
-                token_0,
-                token_1,
-                amount_0_initial,
-                amount_1_initial,
-                amount_0_virtual,
-                amount_1_virtual,
-            },
-            true,
+                PoolMessage::CreatePool {
+                    origin: runtime_owner(runtime),
+                    token_0,
+                    token_1,
+                    amount_0_initial,
+                    amount_1_initial,
+                    amount_0_virtual,
+                    amount_1_virtual,
+                },
+                true,
             )),
         ))
     }

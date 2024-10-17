@@ -17,7 +17,10 @@ use spec::{
         ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument,
         SubscriberSyncState,
     },
-    swap::{RouterApplicationAbi, RouterOperation, RouterResponse},
+    swap::{
+        abi::{SwapApplicationAbi, SwapOperation, SwapResponse},
+        router::{RouterOperation, RouterResponse},
+    },
 };
 
 pub struct ApplicationContract {
@@ -403,14 +406,14 @@ impl ApplicationContract {
         if !*fixed_currency {
             let token_0 = self.runtime.application_id().forget_abi();
             let token_1 = None;
-            let call = RouterOperation::CalculateSwapAmount {
+            let call = SwapOperation::RouterOperation(RouterOperation::CalculateSwapAmount {
                 token_0,
                 token_1,
                 amount_1: amount,
-            };
-            let RouterResponse::Amount(currency) = self.runtime.call_application(
+            });
+            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) = self.runtime.call_application(
                 true,
-                token_0.with_abi::<RouterApplicationAbi>(),
+                token_0.with_abi::<SwapApplicationAbi>(),
                 &call,
             ) else {
                 todo!()
