@@ -415,28 +415,30 @@ impl SwapApplicationState {
     ) -> Result<(), StateError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
 
+        // Calculated in seconds
         let time_elapsed = u128::from(
             block_timestamp
                 .delta_since(pool.block_timestamp)
-                .as_micros(),
+                .as_micros()
+                .saturating_div(1_000_000),
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
-            pool.price_0_cumulative = Amount::from_attos(
-                pool.reserve_1
-                    .saturating_div(pool.reserve_0)
-                    .saturating_mul(time_elapsed),
-            );
-            pool.price_1_cumulative = Amount::from_attos(
-                pool.reserve_0
-                    .saturating_div(pool.reserve_1)
-                    .saturating_mul(time_elapsed),
-            );
+            pool.price_0_cumulative = pool.price_0_cumulative.saturating_add(base::mul_then_div(
+                pool.reserve_1,
+                Amount::from_attos(time_elapsed),
+                pool.reserve_0,
+            ));
+            pool.price_1_cumulative = pool.price_1_cumulative.saturating_add(base::mul_then_div(
+                pool.reserve_0,
+                Amount::from_attos(time_elapsed),
+                pool.reserve_1,
+            ));
         }
 
         pool.reserve_0 = balance_0;
         pool.reserve_1 = balance_1;
         pool.block_timestamp = block_timestamp;
-        pool.k_last = pool.reserve_0.saturating_mul(pool.reserve_1.into());
+        pool.k_last = base::mul_then_sqrt(pool.reserve_0, pool.reserve_1);
 
         self.update_pool(pool).await?;
 
@@ -447,15 +449,16 @@ impl SwapApplicationState {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
 
         if pool.k_last != Amount::ZERO {
-            let root_k = base::sqrt(pool.reserve_0.saturating_mul(pool.reserve_1.into()));
-            let root_k_last = base::sqrt(pool.k_last);
+            let root_k = base::mul_then_sqrt(pool.reserve_0, pool.reserve_1);
+            let root_k_last = pool.k_last;
             if root_k > root_k_last {
-                let numerator = pool
-                    .erc20
-                    .total_supply
-                    .saturating_mul(root_k.saturating_sub(root_k_last.into()).into());
-                let denominator = root_k.saturating_mul(5).saturating_add(root_k_last.into());
-                let liquidity = Amount::from_attos(numerator.saturating_div(denominator));
+                let denominator =
+                    base::mul(root_k, Amount::from_attos(5)).saturating_add(root_k_last.into());
+                let liquidity = base::mul_then_div(
+                    pool.erc20.total_supply,
+                    root_k.saturating_sub(root_k_last.into()),
+                    denominator,
+                );
                 if liquidity > Amount::ZERO {
                     pool.erc20._mint(pool.fee_to, liquidity);
                     self.update_pool(pool).await?;
