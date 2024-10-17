@@ -297,11 +297,13 @@ impl Router {
             _pool.calculate_liquidity(amount_0, amount_1)
         };
 
-        if amount_0 > Amount::ZERO {
-            receive_erc20_from_runtime_owner_to_application_creation(runtime, token_0, amount_0);
-        }
-        if amount_1 > Amount::ZERO {
-            receive_token_from_runtime_owner_to_application_creation(runtime, token_1, amount_1);
+        if origin.chain_id == runtime.chain_id() {
+            if amount_0 > Amount::ZERO {
+                receive_erc20_from_runtime_owner_to_application_creation(runtime, token_0, amount_0);
+            }
+            if amount_1 > Amount::ZERO {
+                receive_token_from_runtime_owner_to_application_creation(runtime, token_1, amount_1);
+            }
         }
         self.mint_shares(runtime, state, pool, amount_0, amount_1, to)
             .await?;
