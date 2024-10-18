@@ -1,9 +1,14 @@
-use crate::{account::ChainAccountOwner, base, erc20::ERC20};
+use crate::{
+    account::ChainAccountOwner,
+    base::{self, BigAmount},
+    erc20::ERC20,
+};
 use async_graphql::{scalar, SimpleObject};
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
 };
+use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -23,8 +28,8 @@ pub struct Pool {
     pub erc20: ERC20,
     pub fee_to: ChainAccountOwner,
     pub fee_to_setter: ChainAccountOwner,
-    pub price_0_cumulative: Amount,
-    pub price_1_cumulative: Amount,
+    pub price_0_cumulative: BigAmount,
+    pub price_1_cumulative: BigAmount,
     pub k_last: Amount,
     pub block_timestamp: Timestamp,
 }
@@ -194,14 +199,6 @@ impl Pool {
             return Ok((amount_0_desired, amount_1_desired));
         }
         let amount_1_optimal = self.calculate_swap_amount_1(amount_0_desired)?;
-        log::info!(
-            "{}, {}, {}, {}, {}",
-            amount_0_desired,
-            amount_1_optimal,
-            self.reserve_0,
-            self.reserve_1,
-            amount_1_desired
-        );
         if amount_1_optimal <= amount_1_desired {
             if amount_1_optimal < amount_1_min {
                 return Err(PoolError::InvalidAmount);

@@ -1,10 +1,17 @@
-use crate::{account::ChainAccountOwner, base, erc20::ERC20, swap::pool::Pool};
+use crate::{
+    account::ChainAccountOwner,
+    base::{self, BigAmount},
+    erc20::ERC20,
+    swap::pool::Pool,
+};
 use async_graphql::SimpleObject;
 use linera_sdk::{
     base::{Amount, ApplicationId, ParseAmountError, Timestamp},
     views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
+use num_traits::FromPrimitive;
 use serde::{Deserialize, Serialize};
+use std::ops::Add;
 use std::{collections::HashMap, str::FromStr};
 use thiserror::Error;
 
@@ -213,8 +220,8 @@ impl SwapApplicationState {
             erc20: ERC20::default(),
             fee_to: creator.clone(),
             fee_to_setter: creator.clone(),
-            price_0_cumulative: Amount::ZERO,
-            price_1_cumulative: Amount::ZERO,
+            price_0_cumulative: BigAmount::default(),
+            price_1_cumulative: BigAmount::default(),
             k_last: Amount::ZERO,
             block_timestamp: block_timestamp,
         };
@@ -419,20 +426,23 @@ impl SwapApplicationState {
         let time_elapsed = u128::from(
             block_timestamp
                 .delta_since(pool.block_timestamp)
-                .as_micros()
-                .saturating_div(1_000_000),
+                .as_micros(),
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
-            pool.price_0_cumulative = pool.price_0_cumulative.saturating_add(base::mul_then_div(
-                pool.reserve_1,
-                Amount::from_attos(time_elapsed),
-                pool.reserve_0,
-            ));
-            pool.price_1_cumulative = pool.price_1_cumulative.saturating_add(base::mul_then_div(
-                pool.reserve_0,
-                Amount::from_attos(time_elapsed),
-                pool.reserve_1,
-            ));
+            pool.price_0_cumulative =
+                pool.price_0_cumulative
+                    .add(base::uq128_encode_divisor_div_then_mul_to_big_amount(
+                        pool.reserve_1,
+                        pool.reserve_0,
+                        Amount::from_attos(time_elapsed),
+                    ));
+            pool.price_1_cumulative =
+                pool.price_1_cumulative
+                    .add(base::uq128_encode_divisor_div_then_mul_to_big_amount(
+                        pool.reserve_0,
+                        pool.reserve_1,
+                        Amount::from_attos(time_elapsed),
+                    ));
         }
 
         pool.reserve_0 = balance_0;

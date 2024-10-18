@@ -14,7 +14,7 @@ linera-views = { version = "0.13.0", git = "https://github.com/linera-io/linera-
 thiserror = "1.0.57"
 serde = { version = "1.0.197", features = ["derive"] }
 bcs = "0.1.6"
-num-bigint = "0.4.3"
+num-bigint = { version = "0.4.3", features = ["serde"] }
 num-traits = "0.2.18"
 log = "0.4.21"
 serde_json = "1.0.114"
