@@ -18,6 +18,7 @@ pub enum RouterMessage {
         amount_1_min: Amount,
         to: ChainAccountOwner,
         deadline: Timestamp,
+        block_timestamp: Timestamp,
     },
     RemoveLiquidity {
         origin: ChainAccountOwner,
@@ -28,6 +29,7 @@ pub enum RouterMessage {
         amount_1_min: Amount,
         to: ChainAccountOwner,
         deadline: Timestamp,
+        block_timestamp: Timestamp,
     },
     Swap {
         origin: ChainAccountOwner,
@@ -38,6 +40,7 @@ pub enum RouterMessage {
         amount_0_out_min: Option<Amount>,
         amount_1_out_min: Option<Amount>,
         to: ChainAccountOwner,
+        block_timestamp: Timestamp,
     },
 }
 

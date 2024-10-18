@@ -381,6 +381,19 @@ echo -e "mutation {\n\
   )\n\
 }"
 
+print $'\U01F4AB' $YELLOW " Swap with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_service"
+echo -e "mutation {\n\
+  swap (\n\
+    token0: \"$erc20_1_appid\",\n\
+    token1: \"$erc20_2_appid\",\n\
+    amount0In: \"10.\",\n\
+    amount1In: \"10.\",\n\
+    amount0OutMin: \"1.\",\n\
+    amount1OutMin: \"1.\",\n\
+  )\n\
+}"
+
 print $'\U01F4AB' $YELLOW " Query pools with..."
 print $'\U01F4AB' $LIGHTGREEN " $wallet_12_public_swap_service"
 print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_service"
@@ -389,14 +402,14 @@ echo -e "query {\n\
     id\n\
     token0\n\
     token1\n\
-    poolFeeRate\n\
+    poolFeePercent\n\
     price0Cumulative\n\
     price1Cumulative\n\
     amount0Initial\n\
     amount1Initial\n\
     kLast\n\
     blockTimestamp\n\
-    protocolFeeRate\n\
+    protocolFeePercent\n\
     virtualInitialLiquidity\n\
     reserve0\n\
     reserve1\n\

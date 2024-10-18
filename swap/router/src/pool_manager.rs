@@ -3,13 +3,12 @@ use crate::runtime::{
     receive_token_from_runtime_owner_to_application_creation, runtime_owner,
 };
 use linera_sdk::{
-    base::{Amount, ApplicationId, ParseAmountError, Timestamp},
+    base::{Amount, ApplicationId, Timestamp},
     Contract, ContractRuntime,
 };
 use spec::{
     account::ChainAccountOwner,
     swap::{
-        abi::SwapMessage,
         pool::{Pool, PoolMessage, PoolOperation, PoolResponse},
         state::{StateError, SwapApplicationState},
     },
@@ -94,6 +93,7 @@ impl PoolManager {
                 amount_1_initial,
                 amount_0_virtual,
                 amount_1_virtual,
+                block_timestamp,
             } => {
                 self.on_msg_create_pool(
                     runtime,
@@ -105,6 +105,7 @@ impl PoolManager {
                     amount_1_initial,
                     amount_0_virtual,
                     amount_1_virtual,
+                    block_timestamp,
                 )
                 .await
             }
@@ -112,14 +113,14 @@ impl PoolManager {
         }
     }
 
-    async fn mint_shares<T: Contract>(
+    async fn mint_shares(
         &mut self,
-        runtime: &mut ContractRuntime<T>,
         state: &mut SwapApplicationState,
         pool: Pool,
         amount_0: Amount,
         amount_1: Amount,
         to: ChainAccountOwner,
+        block_timestamp: Timestamp,
     ) -> Result<(), PoolError> {
         let balance_0 = pool.reserve_0.saturating_add(amount_0);
         let balance_1 = pool.reserve_0.saturating_add(amount_1);
@@ -128,7 +129,7 @@ impl PoolManager {
         let liquidity = pool.calculate_liquidity(amount_0, amount_1);
         state.mint(pool.id, liquidity, to.clone()).await?;
         Ok(state
-            .update(pool.id, balance_0, balance_1, runtime.system_time())
+            .update(pool.id, balance_0, balance_1, block_timestamp)
             .await?)
     }
 
@@ -142,9 +143,10 @@ impl PoolManager {
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
+        block_timestamp: Timestamp,
     ) -> Result<(), PoolError> {
         // Check exists
-        if let (Some(poo), _) = state.get_pool_exchangable(token_0, token_1).await? {
+        if let (Some(_), _) = state.get_pool_exchangable(token_0, token_1).await? {
             return Ok(());
         }
         // TODO: check if called by token creator
@@ -165,12 +167,12 @@ impl PoolManager {
         // If initial liquidity is not virtual, mint shares to creator
         if !pool.virtual_initial_liquidity {
             self.mint_shares(
-                runtime,
                 state,
                 pool,
                 amount_0_initial,
                 amount_1_initial,
                 creator,
+                block_timestamp,
             )
             .await?
         }
@@ -203,6 +205,9 @@ impl PoolManager {
                 amount_1_initial,
             );
         }
+
+        let block_timestamp = runtime.system_time();
+
         // Create pool if it's not exists
         self.create_pool(
             runtime,
@@ -213,6 +218,7 @@ impl PoolManager {
             amount_1_initial,
             amount_0_virtual,
             amount_1_virtual,
+            block_timestamp,
         )
         .await?;
         // Broadcast pool creation
@@ -227,6 +233,7 @@ impl PoolManager {
                     amount_1_initial,
                     amount_0_virtual,
                     amount_1_virtual,
+                    block_timestamp,
                 },
                 true,
             )),
@@ -244,6 +251,7 @@ impl PoolManager {
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
+        block_timestamp: Timestamp,
     ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
         if origin.chain_id != runtime.chain_id() {
             self.create_pool(
@@ -255,6 +263,7 @@ impl PoolManager {
                 amount_1_initial,
                 amount_0_virtual,
                 amount_1_virtual,
+                block_timestamp,
             )
             .await?;
         }
@@ -267,6 +276,7 @@ impl PoolManager {
                 amount_1_initial,
                 amount_0_virtual,
                 amount_1_virtual,
+                block_timestamp,
             },
             true,
         )))
