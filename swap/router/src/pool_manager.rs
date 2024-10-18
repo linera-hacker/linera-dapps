@@ -77,7 +77,14 @@ impl PoolManager {
                 )
                 .await
             }
-            _ => todo!(),
+            PoolOperation::SetFeeTo { pool_id, account } => {
+                self.on_op_set_fee_to(runtime, state, pool_id, account)
+                    .await
+            }
+            PoolOperation::SetFeeToSetter { pool_id, account } => {
+                self.on_op_set_fee_to_setter(runtime, state, pool_id, account)
+                    .await
+            }
         }
     }
 
@@ -112,7 +119,22 @@ impl PoolManager {
                 )
                 .await
             }
-            _ => todo!(),
+            PoolMessage::SetFeeTo {
+                origin,
+                pool_id,
+                account,
+            } => {
+                self.on_msg_set_fee_to(runtime, state, origin, pool_id, account)
+                    .await
+            }
+            PoolMessage::SetFeeToSetter {
+                origin,
+                pool_id,
+                account,
+            } => {
+                self.on_msg_set_fee_to_setter(runtime, state, origin, pool_id, account)
+                    .await
+            }
         }
     }
 
@@ -298,6 +320,84 @@ impl PoolManager {
                 amount_0_virtual,
                 amount_1_virtual,
                 block_timestamp,
+            },
+            true,
+        )))
+    }
+
+    async fn on_op_set_fee_to<T: Contract>(
+        &mut self,
+        runtime: &mut ContractRuntime<T>,
+        _state: &mut SwapApplicationState,
+        pool_id: u64,
+        account: ChainAccountOwner,
+    ) -> Result<(PoolResponse, Option<(PoolMessage, bool)>), PoolError> {
+        Ok((
+            PoolResponse::Ok,
+            Some((
+                PoolMessage::SetFeeTo {
+                    origin: runtime_owner(runtime),
+                    pool_id,
+                    account,
+                },
+                true,
+            )),
+        ))
+    }
+
+    async fn on_msg_set_fee_to<T: Contract>(
+        &mut self,
+        _runtime: &mut ContractRuntime<T>,
+        state: &mut SwapApplicationState,
+        origin: ChainAccountOwner,
+        pool_id: u64,
+        account: ChainAccountOwner,
+    ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
+        state.set_fee_to(pool_id, account, origin).await?;
+        Ok(Some((
+            PoolMessage::SetFeeTo {
+                origin,
+                pool_id,
+                account,
+            },
+            true,
+        )))
+    }
+
+    async fn on_op_set_fee_to_setter<T: Contract>(
+        &mut self,
+        runtime: &mut ContractRuntime<T>,
+        _state: &mut SwapApplicationState,
+        pool_id: u64,
+        account: ChainAccountOwner,
+    ) -> Result<(PoolResponse, Option<(PoolMessage, bool)>), PoolError> {
+        Ok((
+            PoolResponse::Ok,
+            Some((
+                PoolMessage::SetFeeToSetter {
+                    origin: runtime_owner(runtime),
+                    pool_id,
+                    account,
+                },
+                true,
+            )),
+        ))
+    }
+
+    async fn on_msg_set_fee_to_setter<T: Contract>(
+        &mut self,
+        _runtime: &mut ContractRuntime<T>,
+        state: &mut SwapApplicationState,
+        origin: ChainAccountOwner,
+        pool_id: u64,
+        account: ChainAccountOwner,
+    ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
+        state.set_fee_to_setter(pool_id, account, origin).await?;
+        Ok(Some((
+            PoolMessage::SetFeeToSetter {
+                origin,
+                pool_id,
+                account,
             },
             true,
         )))

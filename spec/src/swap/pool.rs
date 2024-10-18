@@ -57,26 +57,6 @@ pub enum PoolMessage {
         pool_id: u64,
         account: ChainAccountOwner,
     },
-    Mint {
-        origin: ChainAccountOwner,
-        pool_id: u64,
-        amount_0: Amount,
-        amount_1: Amount,
-        to: ChainAccountOwner,
-    },
-    Burn {
-        origin: ChainAccountOwner,
-        pool_id: u64,
-        liquidity: Amount,
-        to: ChainAccountOwner,
-    },
-    SwapWithPool {
-        origin: ChainAccountOwner,
-        pool_id: u64,
-        amount_0_out: Amount,
-        amount_1_out: Amount,
-        to: ChainAccountOwner,
-    },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
@@ -103,29 +83,6 @@ pub enum PoolOperation {
     SetFeeToSetter {
         pool_id: u64,
         account: ChainAccountOwner,
-    },
-    Mint {
-        pool_id: u64,
-        amount_0: Amount,
-        amount_1: Amount,
-        to: ChainAccountOwner,
-    },
-    Burn {
-        pool_id: u64,
-        liquidity: Amount,
-        to: ChainAccountOwner,
-    },
-    SwapWithPool {
-        pool_id: u64,
-        amount_0_out: Amount,
-        amount_1_out: Amount,
-        to: ChainAccountOwner,
-    },
-
-    // Helper operation
-    GetPoolWithTokenPair {
-        token_0: ApplicationId,
-        token_1: Option<ApplicationId>,
     },
 }
 
