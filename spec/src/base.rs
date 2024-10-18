@@ -125,17 +125,9 @@ pub fn mul_then_add(amount_1: Amount, amount_2: Amount, amount_3: Amount) -> Amo
     )
 }
 
-pub fn div_then_mul_to_big_amount(
-    divisor: Amount,
-    dividend: Amount,
-    extra: Amount,
-) -> BigAmount {
+pub fn div_then_mul_to_big_amount(divisor: Amount, dividend: Amount, extra: Amount) -> BigAmount {
     let _divisor = BigUint::from_u128(u128::from(divisor)).expect("Couldn't convert amount");
     let _dividend = BigUint::from_u128(u128::from(dividend)).expect("Couldn't convert amount");
     let _extra = BigUint::from_u128(u128::from(extra)).expect("Couldn't convert amount");
-    BigAmount(
-        _divisor
-            .mul(_extra)
-            .div(_dividend),
-    )
+    BigAmount(_divisor.mul(_extra).div(_dividend))
 }

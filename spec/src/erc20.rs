@@ -103,7 +103,7 @@ pub enum ERC20Operation {
     TransferOwnership {
         new_owner: ChainAccountOwner,
     },
-    GetOwner {},
+    OwnerOf,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]

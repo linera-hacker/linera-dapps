@@ -44,6 +44,22 @@ where
     }
 }
 
+pub fn erc20_application_owner<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+) -> ChainAccountOwner
+where
+    T: Contract,
+{
+    let call = ERC20Operation::OwnerOf;
+    let ERC20Response::Owner(owner) =
+        runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call)
+    else {
+        todo!();
+    };
+    owner
+}
+
 pub fn balance_of_erc20<T>(
     runtime: &mut ContractRuntime<T>,
     token: ApplicationId,

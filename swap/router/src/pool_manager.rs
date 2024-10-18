@@ -1,5 +1,5 @@
 use crate::runtime::{
-    receive_erc20_from_runtime_owner_to_application_creation,
+    erc20_application_owner, receive_erc20_from_runtime_owner_to_application_creation,
     receive_token_from_runtime_owner_to_application_creation, runtime_owner,
 };
 use linera_sdk::{
@@ -22,6 +22,9 @@ pub struct PoolManager {}
 pub enum PoolError {
     #[error(transparent)]
     StateError(#[from] StateError),
+
+    #[error("Permission denied")]
+    PermissionDenied,
 }
 
 impl PoolManager {
@@ -144,12 +147,11 @@ impl PoolManager {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
         block_timestamp: Timestamp,
-    ) -> Result<(), PoolError> {
+    ) -> Result<Pool, PoolError> {
         // Check exists
-        if let (Some(_), _) = state.get_pool_exchangable(token_0, token_1).await? {
-            return Ok(());
+        if let (Some(pool), _) = state.get_pool_exchangable(token_0, token_1).await? {
+            return Ok(pool);
         }
-        // TODO: check if called by token creator
         // Create pool if it's not exists
         let creator = runtime_owner(runtime);
         let pool = state
@@ -168,7 +170,7 @@ impl PoolManager {
         if !pool.virtual_initial_liquidity {
             self.mint_shares(
                 state,
-                pool,
+                pool.clone(),
                 amount_0_initial,
                 amount_1_initial,
                 creator,
@@ -176,7 +178,7 @@ impl PoolManager {
             )
             .await?
         }
-        Ok(())
+        Ok(pool)
     }
 
     async fn on_op_create_pool<T: Contract>(
@@ -206,27 +208,45 @@ impl PoolManager {
             );
         }
 
+        let origin = runtime_owner(runtime);
         let block_timestamp = runtime.system_time();
 
         // Create pool if it's not exists
-        self.create_pool(
-            runtime,
-            state,
-            token_0,
-            token_1,
-            amount_0_initial,
-            amount_1_initial,
-            amount_0_virtual,
-            amount_1_virtual,
-            block_timestamp,
-        )
-        .await?;
+        let pool = self
+            .create_pool(
+                runtime,
+                state,
+                token_0,
+                token_1,
+                amount_0_initial,
+                amount_1_initial,
+                amount_0_virtual,
+                amount_1_virtual,
+                block_timestamp,
+            )
+            .await?;
+
+        // Only creator can create virtual pool
+        if pool.virtual_initial_liquidity {
+            let mut owner = erc20_application_owner(runtime, token_0);
+            if owner != origin {
+                if let Some(_token_1) = token_1 {
+                    owner = erc20_application_owner(runtime, _token_1);
+                    if owner != origin {
+                        return Err(PoolError::PermissionDenied);
+                    }
+                } else {
+                    return Err(PoolError::PermissionDenied);
+                }
+            }
+        }
+
         // Broadcast pool creation
         Ok((
             PoolResponse::Ok,
             Some((
                 PoolMessage::CreatePool {
-                    origin: runtime_owner(runtime),
+                    origin,
                     token_0,
                     token_1,
                     amount_0_initial,
@@ -254,18 +274,19 @@ impl PoolManager {
         block_timestamp: Timestamp,
     ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
         if origin.chain_id != runtime.chain_id() {
-            self.create_pool(
-                runtime,
-                state,
-                token_0,
-                token_1,
-                amount_0_initial,
-                amount_1_initial,
-                amount_0_virtual,
-                amount_1_virtual,
-                block_timestamp,
-            )
-            .await?;
+            let _ = self
+                .create_pool(
+                    runtime,
+                    state,
+                    token_0,
+                    token_1,
+                    amount_0_initial,
+                    amount_1_initial,
+                    amount_0_virtual,
+                    amount_1_virtual,
+                    block_timestamp,
+                )
+                .await?;
         }
         Ok(Some((
             PoolMessage::CreatePool {

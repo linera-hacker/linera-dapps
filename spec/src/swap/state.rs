@@ -430,7 +430,7 @@ impl SwapApplicationState {
         let time_elapsed = u128::from(
             block_timestamp
                 .delta_since(pool.block_timestamp)
-                .as_micros()
+                .as_micros(),
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
             pool.price_0_cumulative =
