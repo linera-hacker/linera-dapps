@@ -173,13 +173,13 @@ impl PoolManager {
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
         block_timestamp: Timestamp,
+        creator: ChainAccountOwner,
     ) -> Result<Pool, PoolError> {
         // Check exists
         if let (Some(pool), _) = state.get_pool_exchangable(token_0, token_1).await? {
             return Ok(pool);
         }
         // Create pool if it's not exists
-        let creator = runtime_owner(runtime);
         let pool = state
             .create_pool(
                 token_0,
@@ -249,6 +249,7 @@ impl PoolManager {
                 amount_0_virtual,
                 amount_1_virtual,
                 block_timestamp,
+                origin,
             )
             .await?;
 
@@ -321,6 +322,7 @@ impl PoolManager {
                     amount_0_virtual,
                     amount_1_virtual,
                     block_timestamp,
+                    origin,
                 )
                 .await?;
         }
