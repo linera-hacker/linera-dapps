@@ -4,7 +4,7 @@ mod state;
 
 use self::state::Application;
 use linera_sdk::{
-    base::{ChannelName, Destination, WithContractAbi},
+    base::{ApplicationId, ChannelName, Destination, WithContractAbi},
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -12,7 +12,7 @@ use spec::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     swap::{
-        abi::{SwapMessage, SwapOperation, SwapResponse},
+        abi::{SwapMessage, SwapOperation, SwapParameters, SwapResponse},
         pool::{PoolMessage, PoolOperation},
         router::{RouterMessage, RouterOperation},
         state::SubscriberSyncState,
@@ -40,13 +40,16 @@ impl WithContractAbi for ApplicationContract {
 
 impl Contract for ApplicationContract {
     type Message = SwapMessage;
-    type Parameters = ();
+    type Parameters = SwapParameters;
     type InstantiationArgument = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
         let state = Application::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
+        state
+            .wlinera_application_id
+            .set(runtime.application_parameters().wlinera_application_id);
         ApplicationContract {
             state,
             runtime,
