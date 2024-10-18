@@ -4,7 +4,7 @@ mod state;
 
 use self::state::Application;
 use linera_sdk::{
-    base::{ApplicationId, ChannelName, Destination, WithContractAbi},
+    base::{ChannelName, Destination, WithContractAbi},
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -43,8 +43,8 @@ impl Contract for ApplicationContract {
     type Parameters = SwapParameters;
     type InstantiationArgument = ();
 
-    async fn load(runtime: ContractRuntime<Self>) -> Self {
-        let state = Application::load(runtime.root_view_storage_context())
+    async fn load(mut runtime: ContractRuntime<Self>) -> Self {
+        let mut state = Application::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
         state
