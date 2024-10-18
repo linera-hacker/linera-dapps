@@ -24,4 +24,7 @@ pub enum ERC20Error {
 
     #[error("Not supported")]
     NotSupported,
+
+    #[error("Failed calculate currency")]
+    CalculateCurrencyError,
 }

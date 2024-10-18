@@ -774,7 +774,14 @@ impl Router {
         token_1: Option<ApplicationId>,
         amount_1: Amount,
     ) -> Result<(RouterResponse, Option<(RouterMessage, bool)>), RouterError> {
-        let (pool, exchanged) = state.get_pool_exchangable(token_0, token_1).await?;
+        let token_1 = match token_1 {
+            Some(__token_1) => __token_1,
+            _ => match *state.wlinera_application_id.get() {
+                Some(__token_1) => __token_1,
+                _ => return Err(RouterError::InvalidPool),
+            },
+        };
+        let (pool, exchanged) = state.get_pool_exchangable(token_0, Some(token_1)).await?;
         let Some(pool) = pool else {
             return Err(RouterError::InvalidPool);
         };

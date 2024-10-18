@@ -5,7 +5,7 @@ use crate::{
 use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
-    base::Amount,
+    base::{Amount, ApplicationId},
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
@@ -14,6 +14,7 @@ use std::collections::HashMap;
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct ERC20Parameters {
     pub initial_balances: HashMap<String, Amount>,
+    pub swap_application_id: Option<ApplicationId>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -67,6 +68,7 @@ pub enum ERC20Message {
         origin: ChainAccountOwner,
         to: ChainAccountOwner,
         amount: Amount,
+        currency: Amount,
     },
     TransferOwnership {
         origin: ChainAccountOwner,
@@ -98,6 +100,7 @@ pub enum ERC20Operation {
         owner: ChainAccountOwner,
     },
     Mint {
+        to: Option<ChainAccountOwner>,
         amount: Amount,
     },
     TransferOwnership {
@@ -187,6 +190,13 @@ pub trait ERC20MutationRoot {
     fn subscribe_creator_chain(
         &self,
         ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn mint(
+        &self,
+        ctx: &Context<'_>,
+        to: Option<ChainAccountOwner>,
+        amount: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 

@@ -112,4 +112,8 @@ impl ERC20MutationRoot for MutationRoot {
         ))
         .unwrap()
     }
+
+    async fn mint(&self, to: Option<ChainAccountOwner>, amount: Amount) -> Vec<u8> {
+        bcs::to_bytes(&ERC20Operation::Mint { to, amount }).unwrap()
+    }
 }

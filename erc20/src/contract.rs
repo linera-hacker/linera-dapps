@@ -3,7 +3,9 @@
 mod state;
 
 use linera_sdk::{
-    base::{Account, AccountOwner, Amount, ChannelName, Destination, WithContractAbi},
+    base::{
+        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, WithContractAbi,
+    },
     views::{RootView, View},
     Contract, ContractRuntime,
 };
@@ -80,8 +82,8 @@ impl Contract for ApplicationContract {
                 .on_op_balance_of(owner)
                 .await
                 .expect("Failed OP: balance of"),
-            ERC20Operation::Mint { amount } => {
-                self.on_op_mint(amount).await.expect("Failed OP: mint")
+            ERC20Operation::Mint { to, amount } => {
+                self.on_op_mint(to, amount).await.expect("Failed OP: mint")
             }
             ERC20Operation::TransferOwnership { new_owner } => self
                 .on_op_transfer_ownership(new_owner)
@@ -119,8 +121,13 @@ impl Contract for ApplicationContract {
                 .on_msg_approve(origin, spender, value)
                 .await
                 .expect("Failed MSG: approve"),
-            ERC20Message::Mint { origin, to, amount } => self
-                .on_msg_mint(origin, to, amount)
+            ERC20Message::Mint {
+                origin,
+                to,
+                amount,
+                currency,
+            } => self
+                .on_msg_mint(origin, to, amount, currency)
                 .await
                 .expect("Failed MSG: mint"),
             ERC20Message::TransferOwnership { origin, new_owner } => self
@@ -140,6 +147,10 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
+    fn swap_application_id(&mut self) -> Option<ApplicationId> {
+        self.runtime.application_parameters().swap_application_id
+    }
+
     fn message_owner(&mut self) -> ChainAccountOwner {
         let message_id = self.runtime.message_id().expect("Invalid message id");
         ChainAccountOwner {
@@ -276,11 +287,47 @@ impl ApplicationContract {
         Ok(ERC20Response::Owner(owner))
     }
 
-    async fn on_op_mint(&mut self, amount: Amount) -> Result<ERC20Response, ERC20Error> {
-        let to = self.message_owner();
+    async fn on_op_mint(
+        &mut self,
+        to: Option<ChainAccountOwner>,
+        amount: Amount,
+    ) -> Result<ERC20Response, ERC20Error> {
         let origin = self.runtime_owner();
+        let to = to.unwrap_or(origin);
+
+        let swap_application_id = self.swap_application_id();
+        let mut cur_currency = *self.state.initial_currency.get();
+        let fixed_currency = self.state.fixed_currency.get();
+
+        if !*fixed_currency && swap_application_id.is_some() {
+            let token_0 = self.runtime.application_id().forget_abi();
+            let token_1 = None;
+            let call = SwapOperation::RouterOperation(RouterOperation::CalculateSwapAmount {
+                token_0,
+                token_1,
+                amount_1: amount,
+            });
+            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) =
+                self.runtime.call_application(
+                    true,
+                    swap_application_id
+                        .unwrap()
+                        .with_abi::<SwapApplicationAbi>(),
+                    &call,
+                )
+            else {
+                return Err(ERC20Error::CalculateCurrencyError);
+            };
+            cur_currency = currency;
+        }
+
         self.runtime
-            .prepare_message(ERC20Message::Mint { origin, to, amount })
+            .prepare_message(ERC20Message::Mint {
+                origin,
+                to,
+                amount,
+                currency: cur_currency,
+            })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
         Ok(ERC20Response::Ok)
@@ -401,26 +448,8 @@ impl ApplicationContract {
         origin: ChainAccountOwner,
         to: ChainAccountOwner,
         amount: Amount,
+        currency: Amount,
     ) -> Result<(), ERC20Error> {
-        let mut cur_currency = *self.state.initial_currency.get();
-        let fixed_currency = self.state.fixed_currency.get();
-        if !*fixed_currency {
-            let token_0 = self.runtime.application_id().forget_abi();
-            let token_1 = None;
-            let call = SwapOperation::RouterOperation(RouterOperation::CalculateSwapAmount {
-                token_0,
-                token_1,
-                amount_1: amount,
-            });
-            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) = self
-                .runtime
-                .call_application(true, token_0.with_abi::<SwapApplicationAbi>(), &call)
-            else {
-                todo!()
-            };
-            cur_currency = currency;
-        }
-
         let created_owner = Account {
             chain_id: self.runtime.application_creator_chain_id(),
             owner: None,
@@ -430,10 +459,15 @@ impl ApplicationContract {
         self.runtime.transfer(to_owner, created_owner, amount);
 
         self.state
-            .deposit_native_and_exchange(to.clone(), amount, cur_currency)
+            .deposit_native_and_exchange(to.clone(), amount, currency)
             .await?;
 
-        self.publish_message(ERC20Message::Mint { origin, to, amount });
+        self.publish_message(ERC20Message::Mint {
+            origin,
+            to,
+            amount,
+            currency,
+        });
         Ok(())
     }
 

@@ -102,16 +102,6 @@ wallet_10_owner=`linera --with-wallet 10 wallet show | grep "Owner" | awk '{prin
 ## Mint ERC20 token and WLINERA token initial liquidity to wallet 14 default chain directly
 ####
 
-print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
-erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
-    --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."}}' \
-    `
-print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
-echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
-echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
-
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
@@ -130,6 +120,16 @@ swap_appid=`linera --with-wallet 12 create-application $swap_bid \
 print $'\U01f499' $LIGHTGREEN " Swap application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_bid$NC"
 echo -e "    Application ID: $BLUE$swap_appid$NC"
+
+print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
+erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
+erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
+    --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0"}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'"}' \
+    `
+print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
+echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
+echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
 
 linera --with-wallet 12 request-application $erc20_1_appid
 linera --with-wallet 12 request-application $erc20_2_appid
@@ -422,6 +422,12 @@ echo -e "query {\n\
     feeTo\n\
     feeToSetter\n\
   }\n\
+}"
+
+print $'\U01F4AB' $YELLOW " Mint ERC20 1 with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_erc20_1_service"
+echo -e "mutation {\n\
+  mint(amount: \"1.\")\n\
 }"
 
 trap cleanup INT
