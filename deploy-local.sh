@@ -145,7 +145,7 @@ function print_apps() {
   echo -e "  Owner:          $LIGHTGREEN$4$NC"
   echo -e "    ERC20:        $BLUE$2/chains/$3/applications/$erc20_1_appid$NC"
   echo -e "    WLINERA:      $BLUE$2/chains/$3/applications/$erc20_2_appid$NC"
-  echo -e "    Swap:  $BLUE$2/chains/$3/applications/$swap_appid$NC"
+  echo -e "    Swap:         $BLUE$2/chains/$3/applications/$swap_appid$NC"
 }
 
 HTTP_HOST="http://$WALLET_10_PUBLIC_IPORT"
@@ -364,6 +364,19 @@ echo -e "mutation {\n\
     amount1Desired: \"20\",\n\
     amount0Min: \"20\",\n\
     amount1Min: \"20\",\n\
+    deadline: 0,\n\
+  )\n\
+}"
+
+print $'\U01F4AB' $YELLOW " Remove liquidity with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_swap_service"
+echo -e "mutation {\n\
+  removeLiquidity (\n\
+    token0: \"$erc20_1_appid\",\n\
+    token1: \"$erc20_2_appid\",\n\
+    liquidity: \"5\",\n\
+    amount0Min: \"1.\",\n\
+    amount1Min: \"1.\",\n\
     deadline: 0,\n\
   )\n\
 }"

@@ -32,6 +32,18 @@ where
     }
 }
 
+pub fn runtime_application_creation<T>(runtime: &mut ContractRuntime<T>) -> ChainAccountOwner
+where
+    T: Contract,
+{
+    ChainAccountOwner {
+        chain_id: runtime.application_creator_chain_id(),
+        owner: Some(AccountOwner::Application(
+            runtime.application_id().forget_abi(),
+        )),
+    }
+}
+
 pub fn balance_of_erc20<T>(
     runtime: &mut ContractRuntime<T>,
     token: ApplicationId,
@@ -49,7 +61,18 @@ where
     balance
 }
 
-pub fn transfer_erc20<T>(
+pub fn balance_of_erc20_of_runtime_application_creation<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+) -> Amount
+where
+    T: Contract,
+{
+    let owner = runtime_application_creation(runtime);
+    balance_of_erc20(runtime, token, owner)
+}
+
+pub fn transfer_from_erc20<T>(
     runtime: &mut ContractRuntime<T>,
     token: ApplicationId,
     amount: Amount,
@@ -66,6 +89,18 @@ pub fn transfer_erc20<T>(
     runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
 }
 
+pub fn transfer_erc20<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+    amount: Amount,
+    to: ChainAccountOwner,
+) where
+    T: Contract,
+{
+    let call = ERC20Operation::Transfer { amount, to };
+    runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
+}
+
 pub fn receive_erc20_from_runtime_owner<T>(
     runtime: &mut ContractRuntime<T>,
     token: ApplicationId,
@@ -75,7 +110,7 @@ pub fn receive_erc20_from_runtime_owner<T>(
     T: Contract,
 {
     let owner = runtime_owner(runtime);
-    transfer_erc20(runtime, token, amount, owner, to)
+    transfer_from_erc20(runtime, token, amount, owner, to)
 }
 
 pub fn receive_erc20_from_runtime_owner_to_application_creation<T>(
@@ -137,7 +172,7 @@ pub fn transfer_token<T>(
     T: Contract,
 {
     match token {
-        Some(_token) => transfer_erc20(runtime, _token, amount, from, to),
+        Some(_token) => transfer_from_erc20(runtime, _token, amount, from, to),
         _ => transfer_native(runtime, amount, from, to),
     }
 }
