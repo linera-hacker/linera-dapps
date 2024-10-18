@@ -3472,6 +3472,7 @@ dependencies = [
  "bcs",
  "linera-sdk",
  "log",
+ "num-traits",
  "spec",
  "thiserror",
 ]

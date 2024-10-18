@@ -426,27 +426,14 @@ impl SwapApplicationState {
     ) -> Result<(), StateError> {
         let mut pool = self.get_pool(pool_id).await?.expect("Invalid pool");
 
-        // Calculated in seconds
         let time_elapsed = u128::from(
             block_timestamp
                 .delta_since(pool.block_timestamp)
                 .as_micros(),
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
-            pool.price_0_cumulative =
-                pool.price_0_cumulative
-                    .add(base::div_then_mul_to_big_amount(
-                        pool.reserve_1,
-                        pool.reserve_0,
-                        Amount::from_attos(time_elapsed),
-                    ));
-            pool.price_1_cumulative =
-                pool.price_1_cumulative
-                    .add(base::div_then_mul_to_big_amount(
-                        pool.reserve_0,
-                        pool.reserve_1,
-                        Amount::from_attos(time_elapsed),
-                    ));
+            (pool.price_0_cumulative, pool.price_1_cumulative) =
+                pool.calculate_price_cumulative_pair(time_elapsed);
         }
 
         pool.reserve_0 = balance_0;

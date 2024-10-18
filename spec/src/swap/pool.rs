@@ -209,6 +209,32 @@ impl Pool {
         }
         Ok((amount_0_in, amount_1_in))
     }
+
+    pub fn calculate_price_cumulative_pair(&self, time_elapsed: u128) -> (BigAmount, BigAmount) {
+        let mut price_0_cumulative = self.price_0_cumulative.clone();
+        let mut price_1_cumulative = self.price_1_cumulative.clone();
+
+        if time_elapsed > 0 && self.reserve_0 > Amount::ZERO && self.reserve_1 > Amount::ZERO {
+            price_0_cumulative =
+                self.price_0_cumulative
+                    .clone()
+                    .add(base::div_then_mul_to_big_amount(
+                        self.reserve_1,
+                        self.reserve_0,
+                        Amount::from_attos(time_elapsed),
+                    ));
+            price_1_cumulative =
+                self.price_1_cumulative
+                    .clone()
+                    .add(base::div_then_mul_to_big_amount(
+                        self.reserve_0,
+                        self.reserve_1,
+                        Amount::from_attos(time_elapsed),
+                    ));
+        }
+
+        (price_0_cumulative, price_1_cumulative)
+    }
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]

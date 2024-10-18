@@ -5,7 +5,7 @@ use num_bigint::BigUint;
 use num_traits::{cast::ToPrimitive, FromPrimitive};
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::{
-    ops::{Add, Div, Mul},
+    ops::{Add, Div, Mul, Sub},
     str::FromStr,
 };
 
@@ -44,6 +44,26 @@ pub struct BigAmount(BigUint);
 impl BigAmount {
     pub fn add(self, amount: BigAmount) -> BigAmount {
         BigAmount(self.0.add(amount.0))
+    }
+
+    pub fn sub(self, amount: BigAmount) -> BigAmount {
+        BigAmount(self.0.sub(amount.0))
+    }
+
+    pub fn div(self, amount: BigAmount) -> BigAmount {
+        BigAmount(self.0.div(amount.0))
+    }
+}
+
+impl Into<Amount> for BigAmount {
+    fn into(self) -> Amount {
+        Amount::from_attos(self.0.to_u128().expect("Couldn't convert BigUint"))
+    }
+}
+
+impl From<u128> for BigAmount {
+    fn from(u: u128) -> BigAmount {
+        BigAmount(BigUint::from_u128(u).expect("Couldn't convert number"))
     }
 }
 

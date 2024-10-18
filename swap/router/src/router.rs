@@ -6,8 +6,10 @@ use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     Contract, ContractRuntime,
 };
+use num_traits::cast::ToPrimitive;
 use spec::{
     account::ChainAccountOwner,
+    base,
     swap::{
         pool::{Pool, PoolError},
         router::{RouterMessage, RouterOperation, RouterResponse},
@@ -30,6 +32,12 @@ pub enum RouterError {
 
     #[error("Invalid pool")]
     InvalidPool,
+
+    #[error("Invoke later")]
+    InvokeLater,
+
+    #[error("Invalid liquidity")]
+    InvalidLiquidity,
 }
 
 pub struct Router {}
@@ -133,7 +141,14 @@ impl Router {
                 )
                 .await
             }
-            RouterOperation::CalculateSwapAmount { .. } => todo!(),
+            RouterOperation::CalculateSwapAmount {
+                token_0,
+                token_1,
+                amount_1,
+            } => {
+                self.on_op_calculate_swap_amount(runtime, state, token_0, token_1, amount_1)
+                    .await
+            }
         }
     }
 
@@ -749,5 +764,44 @@ impl Router {
             },
             true,
         )))
+    }
+
+    async fn on_op_calculate_swap_amount<T: Contract>(
+        &mut self,
+        runtime: &mut ContractRuntime<T>,
+        state: &mut SwapApplicationState,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_1: Amount,
+    ) -> Result<(RouterResponse, Option<(RouterMessage, bool)>), RouterError> {
+        let (pool, exchanged) = state.get_pool_exchangable(token_0, token_1).await?;
+        let Some(pool) = pool else {
+            return Err(RouterError::InvalidPool);
+        };
+        let block_timestamp = runtime.system_time();
+        let time_elapsed = u128::from(
+            block_timestamp
+                .delta_since(pool.block_timestamp)
+                .as_micros(),
+        );
+        if time_elapsed == 0 {
+            return Err(RouterError::InvokeLater);
+        }
+        if pool.reserve_0 == Amount::ZERO || pool.reserve_1 == Amount::ZERO {
+            return Err(RouterError::InvalidLiquidity);
+        }
+        let (price_0_cumulative, price_1_cumulative) =
+            pool.calculate_price_cumulative_pair(time_elapsed);
+        let (price_0_cumulative, _) = if exchanged {
+            (price_1_cumulative, price_0_cumulative)
+        } else {
+            (price_0_cumulative, price_1_cumulative)
+        };
+        let price_0: Amount = price_0_cumulative
+            .sub(pool.price_0_cumulative)
+            .div(time_elapsed.into())
+            .into();
+        let amount_0 = Amount::from_attos(base::mul(price_0, amount_1).to_u128().unwrap());
+        Ok((RouterResponse::Amount(amount_0), None))
     }
 }
