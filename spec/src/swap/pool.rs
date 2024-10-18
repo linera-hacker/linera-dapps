@@ -22,8 +22,8 @@ pub struct Pool {
     pub amount_1_initial: Amount,
     pub reserve_0: Amount,
     pub reserve_1: Amount,
-    pub pool_fee_rate: Amount,
-    pub protocol_fee_rate: Amount,
+    pub pool_fee_percent: u16,
+    pub protocol_fee_percent: u16,
     pub erc20: ERC20,
     pub fee_to: ChainAccountOwner,
     pub fee_to_setter: ChainAccountOwner,
@@ -45,6 +45,7 @@ pub enum PoolMessage {
         amount_1_initial: Amount,
         amount_0_virtual: Amount,
         amount_1_virtual: Amount,
+        block_timestamp: Timestamp,
     },
     SetFeeTo {
         origin: ChainAccountOwner,
@@ -138,6 +139,12 @@ pub enum PoolError {
 
     #[error("Invalid amount")]
     InvalidAmount,
+
+    #[error("Invalid liquidity")]
+    InsufficientLiquidity,
+
+    #[error("Broken K")]
+    BrokenK,
 }
 
 impl Pool {
@@ -173,14 +180,14 @@ impl Pool {
         Ok((amount_0, amount_1))
     }
 
-    fn calculate_swap_amount_1(&self, amount_0: Amount) -> Result<Amount, PoolError> {
+    pub fn calculate_swap_amount_1(&self, amount_0: Amount) -> Result<Amount, PoolError> {
         if self.reserve_0 <= Amount::ZERO || self.reserve_1 <= Amount::ZERO {
             return Err(PoolError::InvalidAmount);
         }
         Ok(base::mul_then_div(amount_0, self.reserve_1, self.reserve_0))
     }
 
-    fn calculate_swap_amount_0(&self, amount_1: Amount) -> Result<Amount, PoolError> {
+    pub fn calculate_swap_amount_0(&self, amount_1: Amount) -> Result<Amount, PoolError> {
         if self.reserve_0 <= Amount::ZERO || self.reserve_1 <= Amount::ZERO {
             return Err(PoolError::InvalidAmount);
         }
@@ -212,6 +219,38 @@ impl Pool {
             return Err(PoolError::InvalidAmount);
         }
         Ok((amount_0_optimal, amount_1_desired))
+    }
+
+    pub fn calculate_adjust_amount_pair(
+        &self,
+        amount_0_out: Amount,
+        amount_1_out: Amount,
+    ) -> Result<(Amount, Amount), PoolError> {
+        let amount_0_in = if self.reserve_0 > amount_0_out {
+            amount_0_out
+        } else {
+            Amount::ZERO
+        };
+        let amount_1_in = if self.reserve_1 > amount_1_out {
+            amount_1_out
+        } else {
+            Amount::ZERO
+        };
+        if amount_0_in <= Amount::ZERO && amount_1_in <= Amount::ZERO {
+            return Err(PoolError::InsufficientLiquidity);
+        }
+        let balance_0_adjusted = self
+            .reserve_0
+            .saturating_sub(base::mul_percent_10000(amount_0_in, self.pool_fee_percent));
+        let balance_1_adjusted = self
+            .reserve_1
+            .saturating_sub(base::mul_percent_10000(amount_1_in, self.pool_fee_percent));
+        if base::mul(balance_0_adjusted, balance_1_adjusted)
+            >= base::mul(self.reserve_0, self.reserve_1)
+        {
+            return Err(PoolError::BrokenK);
+        }
+        Ok((amount_0_in, amount_1_in))
     }
 }
 

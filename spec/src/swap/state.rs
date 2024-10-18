@@ -10,8 +10,7 @@ use linera_sdk::{
     views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
 use serde::{Deserialize, Serialize};
-use std::ops::Add;
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -220,8 +219,8 @@ impl SwapApplicationState {
             amount_1_initial,
             reserve_0: Amount::ZERO,
             reserve_1: Amount::ZERO,
-            pool_fee_rate: Amount::from_str("0.3")?,
-            protocol_fee_rate: Amount::from_str("0.05")?,
+            pool_fee_percent: 30,    // 0.3%
+            protocol_fee_percent: 5, // 0.05%
             erc20: ERC20::default(),
             fee_to: creator.clone(),
             fee_to_setter: creator.clone(),
@@ -431,19 +430,19 @@ impl SwapApplicationState {
         let time_elapsed = u128::from(
             block_timestamp
                 .delta_since(pool.block_timestamp)
-                .as_micros(),
+                .as_micros()
         );
         if time_elapsed > 0 && pool.reserve_0 > Amount::ZERO && pool.reserve_1 > Amount::ZERO {
             pool.price_0_cumulative =
                 pool.price_0_cumulative
-                    .add(base::uq128_encode_divisor_div_then_mul_to_big_amount(
+                    .add(base::div_then_mul_to_big_amount(
                         pool.reserve_1,
                         pool.reserve_0,
                         Amount::from_attos(time_elapsed),
                     ));
             pool.price_1_cumulative =
                 pool.price_1_cumulative
-                    .add(base::uq128_encode_divisor_div_then_mul_to_big_amount(
+                    .add(base::div_then_mul_to_big_amount(
                         pool.reserve_0,
                         pool.reserve_1,
                         Amount::from_attos(time_elapsed),
@@ -467,8 +466,7 @@ impl SwapApplicationState {
             let root_k = base::mul_then_sqrt(pool.reserve_0, pool.reserve_1);
             let root_k_last = pool.k_last;
             if root_k > root_k_last {
-                let denominator =
-                    base::mul(root_k, Amount::from_attos(5)).saturating_add(root_k_last.into());
+                let denominator = base::mul_then_add(root_k, Amount::from_attos(5), root_k_last);
                 let liquidity = base::mul_then_div(
                     pool.erc20.total_supply,
                     root_k.saturating_sub(root_k_last.into()),
