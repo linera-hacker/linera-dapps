@@ -209,8 +209,8 @@ wallet_13_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid
 ####
 ## We should
 ##   1 subscribe to pool creator chain
-##   2 set swap application id to pool
-##   3 authorize balance from wallet 13 default chain to swap pool
+##   2 authorize balance from wallet 13 default chain to swap pool
+## Swap will subscribe to chain directly when it's pool is created
 ####
 
 run_service 10 &
@@ -221,12 +221,12 @@ run_service 13 &
 sleep 5
 
 print $'\U01F4AB' $YELLOW " Subscribe ERC20 creator chain..."
-curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_1_service
+# curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_1_service
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_erc20_1_service
 echo
 print $'\U01F4AB' $YELLOW " Subscribe WLINERA creator chain..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_10_erc20_2_service
-curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_2_service
+# curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_2_service
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_13_erc20_2_service
 echo
 print $'\U01F4AB' $YELLOW " Subscribe swap creator chain..."

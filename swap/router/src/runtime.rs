@@ -4,6 +4,7 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
+    base::BaseOperation,
     erc20::{ERC20ApplicationAbi, ERC20Operation, ERC20Response},
 };
 
@@ -219,4 +220,14 @@ pub fn receive_token_from_runtime_owner_to_application_creation<T>(
         )),
     };
     receive_token_from_runtime_owner(runtime, token, amount, to)
+}
+
+pub fn subscribe_erc20_application_creation<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+) where
+    T: Contract,
+{
+    let call = ERC20Operation::BaseOperation(BaseOperation::SubscribeCreatorChain);
+    let _ = runtime.call_application(true, token.with_abi::<ERC20ApplicationAbi>(), &call);
 }

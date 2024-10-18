@@ -1,6 +1,7 @@
 use crate::runtime::{
     erc20_application_owner, receive_erc20_from_runtime_owner_to_application_creation,
     receive_token_from_runtime_owner_to_application_creation, runtime_owner,
+    subscribe_erc20_application_creation,
 };
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
@@ -25,6 +26,9 @@ pub enum PoolError {
 
     #[error("Permission denied")]
     PermissionDenied,
+
+    #[error("Invalid pool")]
+    InvalidPool,
 }
 
 impl PoolManager {
@@ -295,6 +299,16 @@ impl PoolManager {
         amount_1_virtual: Amount,
         block_timestamp: Timestamp,
     ) -> Result<Option<(PoolMessage, bool)>, PoolError> {
+        subscribe_erc20_application_creation(runtime, token_0);
+        let _token_1 = match token_1 {
+            Some(__token_1) => __token_1,
+            _ => match *state.wlinera_application_id.get() {
+                Some(__token_1) => __token_1,
+                _ => return Err(PoolError::InvalidPool),
+            },
+        };
+        subscribe_erc20_application_creation(runtime, _token_1);
+
         if origin.chain_id != runtime.chain_id() {
             let _ = self
                 .create_pool(
