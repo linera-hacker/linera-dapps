@@ -1,5 +1,5 @@
 [package]
-name = "swap-pool"
+name = "swap"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,19 +9,18 @@ linera-sdk.workspace = true
 spec.workspace = true
 thiserror.workspace = true
 bcs.workspace = true
-num-bigint.workspace = true
-num-traits.workspace = true
 log.workspace = true
+swap-router.workspace = true
 
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }
 
 [[bin]]
-name = "swap_pool_contract"
+name = "swap_contract"
 path = "src/contract.rs"
 
 [[bin]]
-name = "swap_pool_service"
+name = "swap_service"
 path = "src/service.rs"
 
 [profile.release]

@@ -14,16 +14,3 @@ log.workspace = true
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }
 
-[[bin]]
-name = "swap_router_contract"
-path = "src/contract.rs"
-
-[[bin]]
-name = "swap_router_service"
-path = "src/service.rs"
-
-[profile.release]
-debug = true
-lto = true
-opt-level = 'z'
-strip = 'debuginfo'

@@ -1,8 +1,5 @@
 use linera_sdk::base::ParseAmountError;
-use spec::swap::PoolApplicationAbi;
 use thiserror::Error;
-
-pub type ApplicationAbi = PoolApplicationAbi;
 
 #[derive(Debug, Error)]
 #[allow(dead_code)]
@@ -39,4 +36,17 @@ pub enum PoolError {
 
     #[error("Broken K")]
     BrokenK,
+}
+
+#[derive(Debug, Error)]
+#[allow(dead_code)]
+pub enum RouterError {
+    #[error("Invalid amount")]
+    InvalidAmount,
+
+    #[error("Invalid pool")]
+    InvalidPool,
+
+    #[error(transparent)]
+    PoolError(#[from] PoolError),
 }

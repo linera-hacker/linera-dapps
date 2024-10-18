@@ -2391,6 +2391,7 @@ checksum = "a5e44f723f1133c9deac646763579fdb3ac745e418f2a7af9cd0c431da1f20b9"
 dependencies = [
  "num-integer",
  "num-traits",
+ "serde",
 ]
 
 [[package]]
@@ -3346,9 +3347,11 @@ dependencies = [
  "async-graphql",
  "linera-sdk",
  "linera-views",
+ "log",
  "num-bigint",
  "num-traits",
  "serde",
+ "thiserror",
 ]
 
 [[package]]
@@ -3449,16 +3452,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 
 [[package]]
-name = "swap-pool"
+name = "swap"
 version = "0.1.0"
 dependencies = [
  "async-graphql",
  "bcs",
  "linera-sdk",
  "log",
- "num-bigint",
- "num-traits",
  "spec",
+ "swap-router",
  "thiserror",
 ]
 

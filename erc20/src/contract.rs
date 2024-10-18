@@ -17,7 +17,10 @@ use spec::{
         ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument,
         SubscriberSyncState,
     },
-    swap::{RouterApplicationAbi, RouterOperation, RouterResponse},
+    swap::{
+        abi::{SwapApplicationAbi, SwapOperation, SwapResponse},
+        router::{RouterOperation, RouterResponse},
+    },
 };
 
 pub struct ApplicationContract {
@@ -84,10 +87,9 @@ impl Contract for ApplicationContract {
                 .on_op_transfer_ownership(new_owner)
                 .await
                 .expect("Failed OP: transfer ownership"),
-            ERC20Operation::GetOwner {} => self
-                .on_op_get_owner()
-                .await
-                .expect("Failed OP: get owner"),
+            ERC20Operation::GetOwner {} => {
+                self.on_op_get_owner().await.expect("Failed OP: get owner")
+            }
         }
     }
 
@@ -128,7 +130,7 @@ impl Contract for ApplicationContract {
                 .await
                 .expect("Failed MSG: transfer ownership"),
             ERC20Message::SubscriberSync { origin: _, state } => self
-                .on_msg_subscriber_sync_state(state)
+                .on_msg_subscriber_sync(state)
                 .await
                 .expect("Failed MSG: subscriber sync state"),
         }
@@ -151,11 +153,17 @@ impl ApplicationContract {
     }
 
     fn runtime_owner(&mut self) -> ChainAccountOwner {
-        ChainAccountOwner {
-            chain_id: self.runtime.chain_id(),
-            owner: Some(AccountOwner::User(
-                self.runtime.authenticated_signer().expect("Invalid owner"),
-            )),
+        match self.runtime.authenticated_caller_id() {
+            Some(application_id) => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::Application(application_id)),
+            },
+            _ => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::User(
+                    self.runtime.authenticated_signer().expect("Invalid owner"),
+                )),
+            },
         }
     }
 
@@ -265,13 +273,11 @@ impl ApplicationContract {
         Ok(ERC20Response::Ok)
     }
 
-    async fn on_op_get_owner(
-        &mut self,
-    ) -> Result<ERC20Response, ERC20Error> {
+    async fn on_op_get_owner(&mut self) -> Result<ERC20Response, ERC20Error> {
         let owner = self.state.owner.get().expect("Invalid owner");
         Ok(ERC20Response::Owner(owner))
     }
-    
+
     async fn on_op_mint(&mut self, amount: Amount) -> Result<ERC20Response, ERC20Error> {
         let to = self.message_owner();
         let origin = self.runtime_owner();
@@ -403,16 +409,15 @@ impl ApplicationContract {
         if !*fixed_currency {
             let token_0 = self.runtime.application_id().forget_abi();
             let token_1 = None;
-            let call = RouterOperation::CalculateSwapAmount {
+            let call = SwapOperation::RouterOperation(RouterOperation::CalculateSwapAmount {
                 token_0,
                 token_1,
                 amount_1: amount,
-            };
-            let RouterResponse::Amount(currency) = self.runtime.call_application(
-                true,
-                token_0.with_abi::<RouterApplicationAbi>(),
-                &call,
-            ) else {
+            });
+            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) = self
+                .runtime
+                .call_application(true, token_0.with_abi::<SwapApplicationAbi>(), &call)
+            else {
                 todo!()
             };
             cur_currency = currency;
@@ -434,10 +439,14 @@ impl ApplicationContract {
         Ok(())
     }
 
-    async fn on_msg_subscriber_sync_state(
+    async fn on_msg_subscriber_sync(
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), ERC20Error> {
+        if *self.state.total_supply.get() > Amount::ZERO {
+            log::warn!("Stale subscriber state on {}", self.runtime.chain_id());
+            return Ok(());
+        }
         self.state.from_subscriber_sync_state(state).await
     }
 }
