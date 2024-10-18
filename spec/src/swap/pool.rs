@@ -8,7 +8,6 @@ use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     graphql::GraphQLMutationRoot,
 };
-use num_bigint::BigUint;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 

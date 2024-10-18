@@ -9,7 +9,6 @@ use linera_sdk::{
     base::{Amount, ApplicationId, ParseAmountError, Timestamp},
     views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
-use num_traits::FromPrimitive;
 use serde::{Deserialize, Serialize};
 use std::ops::Add;
 use std::{collections::HashMap, str::FromStr};
@@ -59,6 +58,8 @@ pub struct SubscriberSyncState {
     pub pool_id: u64,
     pub pool_erc20_erc20s: HashMap<u64, Vec<ApplicationId>>,
     pub pool_erc20_natives: HashMap<u64, ApplicationId>,
+    // TODO: after we support lock native token to application, it'll be removed
+    pub wlinera_application_id: Option<ApplicationId>,
 }
 
 #[derive(RootView, SimpleObject)]
@@ -69,6 +70,7 @@ pub struct SwapApplicationState {
     pub pool_id: RegisterView<u64>,
     pub pool_erc20_erc20s: MapView<u64, Vec<ApplicationId>>,
     pub pool_erc20_natives: MapView<u64, ApplicationId>,
+    pub wlinera_application_id: RegisterView<Option<ApplicationId>>,
 }
 
 impl SwapApplicationState {
@@ -79,6 +81,7 @@ impl SwapApplicationState {
             pool_id: *self.pool_id.get(),
             pool_erc20_erc20s: HashMap::new(),
             pool_erc20_natives: HashMap::new(),
+            wlinera_application_id: self.wlinera_application_id.get().clone(),
         };
         self.erc20_erc20_pools
             .for_each_index_value(|index, pools| {
@@ -112,6 +115,8 @@ impl SwapApplicationState {
         state: SubscriberSyncState,
     ) -> Result<(), StateError> {
         self.pool_id.set(state.pool_id);
+        self.wlinera_application_id
+            .set(state.wlinera_application_id);
         for (key, pools) in &state.erc20_erc20_pools {
             self.erc20_erc20_pools.insert(key, pools.clone())?;
         }

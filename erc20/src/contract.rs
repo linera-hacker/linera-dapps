@@ -153,11 +153,17 @@ impl ApplicationContract {
     }
 
     fn runtime_owner(&mut self) -> ChainAccountOwner {
-        ChainAccountOwner {
-            chain_id: self.runtime.chain_id(),
-            owner: Some(AccountOwner::User(
-                self.runtime.authenticated_signer().expect("Invalid owner"),
-            )),
+        match self.runtime.authenticated_caller_id() {
+            Some(application_id) => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::Application(application_id)),
+            },
+            _ => ChainAccountOwner {
+                chain_id: self.runtime.chain_id(),
+                owner: Some(AccountOwner::User(
+                    self.runtime.authenticated_signer().expect("Invalid owner"),
+                )),
+            },
         }
     }
 
