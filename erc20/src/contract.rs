@@ -321,6 +321,18 @@ impl ApplicationContract {
             cur_currency = currency;
         }
 
+        let chain_owner = self.state.owner.get().expect("Invalid owner");
+        let created_owner = Account {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: match chain_owner.owner {
+                Some(AccountOwner::User(owner)) => Some(owner),
+                _ => None,
+            },
+        };
+
+        let to_owner = self.runtime.authenticated_signer();
+        self.runtime.transfer(to_owner, created_owner, amount);
+
         self.runtime
             .prepare_message(ERC20Message::Mint {
                 origin,
@@ -450,17 +462,11 @@ impl ApplicationContract {
         amount: Amount,
         currency: Amount,
     ) -> Result<(), ERC20Error> {
-        let created_owner = Account {
-            chain_id: self.runtime.application_creator_chain_id(),
-            owner: None,
-        };
-
-        let to_owner = self.runtime.authenticated_signer();
-        self.runtime.transfer(to_owner, created_owner, amount);
-
-        self.state
+        if origin.chain_id != self.runtime.chain_id() {
+            self.state
             .deposit_native_and_exchange(to.clone(), amount, currency)
             .await?;
+        }
 
         self.publish_message(ERC20Message::Mint {
             origin,
