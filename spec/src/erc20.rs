@@ -67,8 +67,7 @@ pub enum ERC20Message {
     Mint {
         origin: ChainAccountOwner,
         to: ChainAccountOwner,
-        amount: Amount,
-        currency: Amount,
+        cur_amount: Amount,
     },
     TransferOwnership {
         origin: ChainAccountOwner,

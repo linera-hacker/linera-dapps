@@ -4,7 +4,7 @@ mod state;
 
 use linera_sdk::{
     base::{
-        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, WithContractAbi,
+        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Owner, WithContractAbi,
     },
     views::{RootView, View},
     Contract, ContractRuntime,
@@ -124,10 +124,9 @@ impl Contract for ApplicationContract {
             ERC20Message::Mint {
                 origin,
                 to,
-                amount,
-                currency,
+                cur_amount,
             } => self
-                .on_msg_mint(origin, to, amount, currency)
+                .on_msg_mint(origin, to, cur_amount)
                 .await
                 .expect("Failed MSG: mint"),
             ERC20Message::TransferOwnership { origin, new_owner } => self
@@ -296,8 +295,8 @@ impl ApplicationContract {
         let to = to.unwrap_or(origin);
 
         let swap_application_id = self.swap_application_id();
-        let mut cur_currency = *self.state.initial_currency.get();
         let fixed_currency = self.state.fixed_currency.get();
+        let mut cur_amount = amount;
 
         if !*fixed_currency && swap_application_id.is_some() {
             let token_0 = self.runtime.application_id().forget_abi();
@@ -307,7 +306,7 @@ impl ApplicationContract {
                 token_1,
                 amount_1: amount,
             });
-            let SwapResponse::RouterResponse(RouterResponse::Amount(currency)) =
+            let SwapResponse::RouterResponse(RouterResponse::Amount(swap_amount)) =
                 self.runtime.call_application(
                     true,
                     swap_application_id
@@ -318,27 +317,43 @@ impl ApplicationContract {
             else {
                 return Err(ERC20Error::CalculateCurrencyError);
             };
-            cur_currency = currency;
+            cur_amount = swap_amount;
         }
 
-        let chain_owner = self.state.owner.get().expect("Invalid owner");
-        let created_owner = Account {
-            chain_id: self.runtime.application_creator_chain_id(),
-            owner: match chain_owner.owner {
+        let to_account = Account {
+            chain_id: to.chain_id,
+            owner: match to.owner {
                 Some(AccountOwner::User(owner)) => Some(owner),
                 _ => None,
             },
         };
 
-        let to_owner = self.runtime.authenticated_signer();
-        self.runtime.transfer(to_owner, created_owner, amount);
+        let chain_owner = self.state.owner.get().expect("Invalid owner");
+
+        if to == chain_owner {
+            return Err(ERC20Error::PermissionDenied);
+        }
+        let chain_balance = self.runtime.chain_balance();
+
+        let mut from_owner: Option<Owner> = None;
+        if chain_balance < cur_amount {
+            from_owner = match chain_owner.owner {
+                Some(AccountOwner::User(owner)) => Some(owner),
+                _ => None,
+            };
+        }
+
+        self.runtime.transfer(from_owner, to_account, amount);
+
+        self.state
+        .deposit_native_and_exchange(to.clone(), cur_amount)
+        .await?;
 
         self.runtime
             .prepare_message(ERC20Message::Mint {
                 origin,
                 to,
-                amount,
-                currency: cur_currency,
+                cur_amount,
             })
             .with_authentication()
             .send_to(self.runtime.application_creator_chain_id());
@@ -459,20 +474,18 @@ impl ApplicationContract {
         &mut self,
         origin: ChainAccountOwner,
         to: ChainAccountOwner,
-        amount: Amount,
-        currency: Amount,
+        cur_amount: Amount,
     ) -> Result<(), ERC20Error> {
         if origin.chain_id != self.runtime.chain_id() {
             self.state
-            .deposit_native_and_exchange(to.clone(), amount, currency)
+            .deposit_native_and_exchange(to.clone(), cur_amount)
             .await?;
         }
 
         self.publish_message(ERC20Message::Mint {
             origin,
             to,
-            amount,
-            currency,
+            cur_amount,
         });
         Ok(())
     }

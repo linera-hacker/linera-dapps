@@ -223,17 +223,16 @@ impl Application {
         &mut self,
         caller: ChainAccountOwner,
         exchange_amount: Amount,
-        currency: Amount,
     ) -> Result<(), ERC20Error> {
-        let mut exchange_currency = self.initial_currency.get();
-        if !self.fixed_currency.get() {
-            exchange_currency = &currency
+        let mut erc20_amount = exchange_amount;
+        if *self.fixed_currency.get() {
+            let exchange_currency = self.initial_currency.get();
+            erc20_amount = Amount::from_attos(
+                exchange_currency
+                    .saturating_mul(exchange_amount.into())
+                    .saturating_div(Amount::ONE),
+            );
         }
-        let erc20_amount = Amount::from_attos(
-            exchange_currency
-                .saturating_mul(exchange_amount.into())
-                .saturating_div(Amount::ONE),
-        );
 
         let user_balance = self.balance_of(caller).await?;
         let owner_balance = *self.owner_balance.get();
