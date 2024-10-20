@@ -1,6 +1,7 @@
 use crate::runtime::{
     receive_erc20_from_runtime_owner_to_application_creation,
-    receive_token_from_runtime_owner_to_application_creation, runtime_owner, transfer_erc20,
+    receive_token_from_runtime_owner_to_application_creation, runtime_owner,
+    subscribe_erc20_application_creation, transfer_erc20,
 };
 use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
@@ -241,6 +242,9 @@ impl Router {
                     block_timestamp,
                 )
                 .await
+            }
+            RouterMessage::SubscribeNewERC20Token { origin, token } => {
+                self.on_msg_subscribe_new_erc20_token(runtime, state, origin, token)
             }
         }
     }
@@ -813,5 +817,17 @@ impl Router {
             .into();
         let amount_0 = Amount::from_attos(base::mul(price_0, amount_1).to_u128().unwrap());
         Ok((RouterResponse::Amount(amount_0), None))
+    }
+
+    fn on_msg_subscribe_new_erc20_token<T: Contract>(
+        &mut self,
+        runtime: &mut ContractRuntime<T>,
+        _state: &mut SwapApplicationState,
+        _origin: ChainAccountOwner,
+        token: ApplicationId,
+    ) -> Result<Option<(RouterMessage, bool)>, RouterError> {
+        // Must not on creation chain, return None
+        subscribe_erc20_application_creation(runtime, token);
+        Ok(None)
     }
 }

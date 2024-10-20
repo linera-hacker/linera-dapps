@@ -192,6 +192,39 @@ impl ApplicationContract {
             }
             _ => {}
         }
+        match operation {
+            PoolOperation::CreatePool {
+                token_0,
+                token_1,
+                amount_0_initial: _,
+                amount_1_initial: _,
+                amount_0_virtual: _,
+                amount_1_virtual: _,
+            } => {
+                let origin = runtime_owner(&mut self.runtime);
+                self.runtime
+                    .prepare_message(SwapMessage::RouterMessage(
+                        RouterMessage::SubscribeNewERC20Token {
+                            origin,
+                            token: token_0,
+                        },
+                    ))
+                    .with_authentication()
+                    .send_to(self.runtime.application_creator_chain_id());
+                if let Some(token_1) = token_1 {
+                    self.runtime
+                        .prepare_message(SwapMessage::RouterMessage(
+                            RouterMessage::SubscribeNewERC20Token {
+                                origin,
+                                token: token_1,
+                            },
+                        ))
+                        .with_authentication()
+                        .send_to(self.runtime.application_creator_chain_id());
+                }
+            }
+            _ => {}
+        }
         Ok(SwapResponse::PoolResponse(response))
     }
 

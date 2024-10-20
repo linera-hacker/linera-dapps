@@ -59,7 +59,7 @@ pub enum PoolMessage {
     },
 }
 
-#[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum PoolOperation {
     // Only for application creator to create pool with virtual initial liquidity
     CreatePool {

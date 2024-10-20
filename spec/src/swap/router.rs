@@ -42,6 +42,11 @@ pub enum RouterMessage {
         to: ChainAccountOwner,
         block_timestamp: Timestamp,
     },
+    // Process one token in each message to let requested tokens to be subscribed
+    SubscribeNewERC20Token {
+        origin: ChainAccountOwner,
+        token: ApplicationId,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]

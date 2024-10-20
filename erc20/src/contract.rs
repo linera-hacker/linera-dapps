@@ -4,7 +4,8 @@ mod state;
 
 use linera_sdk::{
     base::{
-        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Owner, WithContractAbi,
+        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Owner,
+        WithContractAbi,
     },
     views::{RootView, View},
     Contract, ContractRuntime,
@@ -346,8 +347,8 @@ impl ApplicationContract {
         self.runtime.transfer(from_owner, to_account, amount);
 
         self.state
-        .deposit_native_and_exchange(to.clone(), cur_amount)
-        .await?;
+            .deposit_native_and_exchange(to.clone(), cur_amount)
+            .await?;
 
         self.runtime
             .prepare_message(ERC20Message::Mint {
@@ -478,8 +479,8 @@ impl ApplicationContract {
     ) -> Result<(), ERC20Error> {
         if origin.chain_id != self.runtime.chain_id() {
             self.state
-            .deposit_native_and_exchange(to.clone(), cur_amount)
-            .await?;
+                .deposit_native_and_exchange(to.clone(), cur_amount)
+                .await?;
         }
 
         self.publish_message(ERC20Message::Mint {

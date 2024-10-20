@@ -90,6 +90,7 @@ wallet_60_owner=`linera --with-wallet 60 wallet show | grep "Owner" | awk '{prin
 swap_creation_chain=`grep "SWAP_CREATION_CHAIN" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 swap_creation_owner=`grep "SWAP_CREATION_OWNER" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_workaround_creation_chain_rpc_endpoint=`grep "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 
 print $'\U01f499' $LIGHTGREEN " WLINERA application"
