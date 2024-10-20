@@ -32,7 +32,7 @@ case $NETWORK_ID in
     ;;
   2)
     WALLET_50_PUBLIC_IPORT='172.16.31.73:41150'
-    LOCAL_IP='localhost'
+    LOCAL_IP='172.16.31.73'
     ;;
   3)
     WALLET_50_PUBLIC_IPORT='localhost:31130'
@@ -93,11 +93,9 @@ swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':'
 wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
 
 print $'\U01f499' $LIGHTGREEN " WLINERA application"
-echo -e "    Bytecode ID:    $BLUE$wlinera_bid$NC"
 echo -e "    Application ID: $BLUE$wlinera_appid$NC"
 
 print $'\U01f499' $LIGHTGREEN " Swap application"
-echo -e "    Bytecode ID:    $BLUE$swap_bid$NC"
 echo -e "    Application ID: $BLUE$swap_appid$NC"
 echo -e "    Creation chain: $BLUE$swap_creation_chain$NC"
 echo -e "    Creation owner: $BLUE$swap_creation_owner$NC"
@@ -119,8 +117,9 @@ function print_apps() {
   print $'\U01F4AB' $YELLOW " $1"
   echo -e "  Default Chain:  $LIGHTGREEN$3$NC"
   echo -e "  Owner:          $LIGHTGREEN$4$NC"
-  echo -e "    WLINERA:      $BLUE$2/chains/$3/applications/$wlinera_appid$NC"
   echo -e "    Swap:         $BLUE$2/chains/$3/applications/$swap_appid$NC"
+  echo -e "    WLINERA:      $BLUE$2/chains/$3/applications/$wlinera_appid$NC"
+  echo -e "    TLMY:         $BLUE$2/chains/$3/applications/$erc20_1_appid$NC"
 }
 
 HTTP_HOST="http://$WALLET_50_PUBLIC_IPORT"
@@ -137,6 +136,8 @@ wallet_50_owner=$owner
 wallet_50_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 wallet_50_public_wlinera_service="$HTTP_HOST/chains/$chain/applications/$wlinera_appid"
 wallet_50_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid"
+
+echo "ERC20_TLMY_APPID:$erc20_1_appid" >> $PROJECT_ROOT/.local-defi-materials
 
 ####
 ## We should
