@@ -87,9 +87,9 @@ wallet_80_owner=`linera --with-wallet 80 wallet show | grep "Owner" | awk '{prin
 ## Use WLINERA and SWAP application created by deploy-local.sh
 ####
 
-swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-tlmy_appid=`grep "ERC20_TLMY_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
+swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+tlmy_appid=`grep "ERC20_TLMY_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 
 print $'\U01f499' $LIGHTGREEN " WLINERA application"
 echo -e "    Application ID: $BLUE$wlinera_appid$NC"
@@ -118,9 +118,9 @@ chain=`linera --with-wallet 80 wallet show | grep "Public Key" | awk '{print $2}
 owner=`linera --with-wallet 80 wallet show | grep "Owner" | awk '{print $4}'`
 print_apps "Wallet 80" $HTTP_HOST $chain $owner
 
-wallet_80_tlmy_service="http://$LOCAL_IP:31140/chains/$chain/applications/$tlmy_appid"
-wallet_80_wlinera_service="http://$LOCAL_IP:31140/chains/$chain/applications/$wlinera_appid"
-wallet_80_swap_service="http://$LOCAL_IP:31140/chains/$chain/applications/$swap_appid"
+wallet_80_tlmy_service="http://$LOCAL_IP:31160/chains/$chain/applications/$tlmy_appid"
+wallet_80_wlinera_service="http://$LOCAL_IP:31160/chains/$chain/applications/$wlinera_appid"
+wallet_80_swap_service="http://$LOCAL_IP:31160/chains/$chain/applications/$swap_appid"
 wallet_80_default_chain=$chain
 wallet_80_owner=$owner
 
@@ -154,6 +154,8 @@ echo
 print $'\U01F4AB' $YELLOW " Subscribe swap creator chain..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_80_swap_service
 echo
+print $'\U01F4AB' $YELLOW " Wait for subscription execution..."
+sleep 3
 print $'\U01F4AB' $YELLOW " Mint WLINERA..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { mint(amount: \"2.2318\") }"}' $wallet_80_wlinera_service
 echo

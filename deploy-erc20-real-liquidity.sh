@@ -27,15 +27,15 @@ NETWORK_ID=1
 
 case $NETWORK_ID in
   1)
-    WALLET_50_PUBLIC_IPORT='210.209.69.38:23109'
+    WALLET_50_PUBLIC_IPORT='210.209.69.38:23301'
     LOCAL_IP='172.21.132.203'
     ;;
   2)
-    WALLET_50_PUBLIC_IPORT='172.16.31.73:41150'
+    WALLET_50_PUBLIC_IPORT='172.16.31.73:31130'
     LOCAL_IP='172.16.31.73'
     ;;
   3)
-    WALLET_50_PUBLIC_IPORT='localhost:31130'
+    WALLET_50_PUBLIC_IPORT='172.16.31.73:41150'
     LOCAL_IP='localhost'
     ;;
 esac
@@ -87,10 +87,11 @@ wallet_50_owner=`linera --with-wallet 50 wallet show | grep "Owner" | awk '{prin
 ## Use WLINERA and SWAP application created by deploy-local.sh
 ####
 
-swap_creation_chain=`grep "SWAP_CREATION_CHAIN" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-swap_creation_owner=`grep "SWAP_CREATION_OWNER" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
+swap_creation_chain=`grep "SWAP_CREATION_CHAIN" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_creation_owner=`grep "SWAP_CREATION_OWNER" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_workaround_creation_chain_rpc_endpoint=`grep "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 
 print $'\U01f499' $LIGHTGREEN " WLINERA application"
 echo -e "    Application ID: $BLUE$wlinera_appid$NC"
@@ -137,7 +138,8 @@ wallet_50_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1
 wallet_50_public_wlinera_service="$HTTP_HOST/chains/$chain/applications/$wlinera_appid"
 wallet_50_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid"
 
-echo "ERC20_TLMY_APPID:$erc20_1_appid" >> $PROJECT_ROOT/.local-defi-materials
+sed -i '/ERC20_TLMY_APPID/d' $PROJECT_ROOT/.local-defi-materials
+echo "ERC20_TLMY_APPID=$erc20_1_appid" >> $PROJECT_ROOT/.local-defi-materials
 
 ####
 ## We should
@@ -151,6 +153,18 @@ run_service 50 &
 sleep 5
 
 ####
+## We should request our application on swap chain firstly and this may be not needed in future
+####
+print $'\U01F4AB' $YELLOW " Request TLMY on SWAP creator chain..."
+curl -H 'Content-Type: application/json' -X POST \
+    -d '{ "query": "mutation { requestApplication(chainId: \"'$swap_creation_chain'\", applicationId: \"'$erc20_1_appid'\", targetChainId: \"'$wallet_50_default_chain'\") }" }' \
+    $swap_workaround_creation_chain_rpc_endpoint
+echo
+
+print $'\U01F4AB' $YELLOW " Wait for requestApplication execution..."
+sleep 3
+
+####
 ## If we create TLMY/WLINERA pool in swap later, we don't need to subscribe here
 ####
 
@@ -160,6 +174,10 @@ echo
 print $'\U01F4AB' $YELLOW " Subscribe swap creator chain..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_50_swap_service
 echo
+
+print $'\U01F4AB' $YELLOW " Wait for subscription execution..."
+sleep 3
+
 print $'\U01F4AB' $YELLOW " Authorize ERC20 to swap application..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$swap_creation_chain\\\", owner:\\\"Application:$swap_appid\\\"},value:\\\"4500000.\\\")}\"}" $wallet_50_erc20_1_service
 echo
@@ -168,9 +186,19 @@ echo
 ## We don't have any WLINERA here, so if we would like to create TLMY/WLINERA pool, we should mint it with native token
 ## After we mint WLINERA, we should authorize to swap application
 ####
+print $'\U01F4AB' $YELLOW " Mint WLINERA..."
+curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { mint(amount: \"2.2318\") }"}' $wallet_50_wlinera_service
+echo
+
+print $'\U01F4AB' $YELLOW " Wait for subscription execution..."
+sleep 3
+
 print $'\U01F4AB' $YELLOW " Authorize WLINERA to swap application..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$swap_creation_chain\\\", owner:\\\"Application:$swap_appid\\\"},value:\\\"2.\\\")}\"}" $wallet_50_wlinera_service
 echo
+
+print $'\U01F4AB' $YELLOW " Wait for authorization..."
+sleep 3
 
 print $'\U01F4AB' $YELLOW " Create liquidity pool by ERC20 1 creator..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { createPool(token0: \\\"$erc20_1_appid\\\", token1: \\\"$wlinera_appid\\\", amount0Initial:\\\"5\\\", amount1Initial:\\\"1\\\", amount0Virtual:\\\"5\\\", amount1Virtual:\\\"1\\\")}\"}" $wallet_50_swap_service

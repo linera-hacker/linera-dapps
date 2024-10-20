@@ -27,7 +27,7 @@ NETWORK_ID=1
 
 case $NETWORK_ID in
   1)
-    WALLET_60_PUBLIC_IPORT='210.209.69.38:23111'
+    WALLET_60_PUBLIC_IPORT='210.209.69.38:23303'
     LOCAL_IP='172.21.132.203'
     ;;
   2)
@@ -87,10 +87,10 @@ wallet_60_owner=`linera --with-wallet 60 wallet show | grep "Owner" | awk '{prin
 ## Use WLINERA and SWAP application created by deploy-local.sh
 ####
 
-swap_creation_chain=`grep "SWAP_CREATION_CHAIN" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-swap_creation_owner=`grep "SWAP_CREATION_OWNER" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
-wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F ':' '{print $2}'`
+swap_creation_chain=`grep "SWAP_CREATION_CHAIN" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_creation_owner=`grep "SWAP_CREATION_OWNER" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 
 print $'\U01f499' $LIGHTGREEN " WLINERA application"
 echo -e "    Bytecode ID:    $BLUE$wlinera_bid$NC"
@@ -159,10 +159,13 @@ echo
 print $'\U01F4AB' $YELLOW " Subscribe swap creator chain..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_60_swap_service
 echo
+print $'\U01F4AB' $YELLOW " Wait for subscription execution..."
+sleep 3
 print $'\U01F4AB' $YELLOW " Authorize ERC20 to swap application..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$swap_creation_chain\\\", owner:\\\"Application:$swap_appid\\\"},value:\\\"4500000.\\\")}\"}" $wallet_60_erc20_1_service
 echo
-
+print $'\U01F4AB' $YELLOW " Wait for authorization..."
+sleep 3
 print $'\U01F4AB' $YELLOW " Create liquidity pool by ERC20 1 creator..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { createPool(token0: \\\"$erc20_1_appid\\\", token1: \\\"$wlinera_appid\\\", amount0Initial:\\\"5\\\", amount1Initial:\\\"0\\\", amount0Virtual:\\\"5\\\", amount1Virtual:\\\"1\\\")}\"}" $wallet_60_swap_service
 echo

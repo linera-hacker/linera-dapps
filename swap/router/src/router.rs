@@ -38,6 +38,9 @@ pub enum RouterError {
 
     #[error("Invalid liquidity")]
     InvalidLiquidity,
+
+    #[error("Invalid native token")]
+    InvalidNativeToken,
 }
 
 pub struct Router {}
@@ -778,7 +781,7 @@ impl Router {
             Some(__token_1) => __token_1,
             _ => match *state.wlinera_application_id.get() {
                 Some(__token_1) => __token_1,
-                _ => return Err(RouterError::InvalidPool),
+                _ => return Err(RouterError::InvalidNativeToken),
             },
         };
         let (pool, exchanged) = state.get_pool_exchangable(token_0, Some(token_1)).await?;

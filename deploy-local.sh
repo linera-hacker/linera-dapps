@@ -143,6 +143,7 @@ linera --with-wallet 12 request-application $erc20_2_appid
 
 linera --with-wallet 10 request-application $swap_appid
 linera --with-wallet 10 request-application $erc20_2_appid
+linera --with-wallet 10 request-application $swap_appid
 
 linera --with-wallet 13 request-application $erc20_1_appid
 linera --with-wallet 13 request-application $erc20_2_appid
@@ -200,10 +201,11 @@ wallet_12_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1
 wallet_12_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
 wallet_12_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid"
 
-echo "SWAP_CREATION_CHAIN:$chain" > $PROJECT_ROOT/.local-defi-materials
-echo "SWAP_CREATION_OWNER:$owner" >> $PROJECT_ROOT/.local-defi-materials
-echo "SWAP_APPID:$swap_appid" >> $PROJECT_ROOT/.local-defi-materials
-echo "WLINERA_APPID:$erc20_2_appid" >> $PROJECT_ROOT/.local-defi-materials
+echo "SWAP_CREATION_CHAIN=$chain" > $PROJECT_ROOT/.local-defi-materials
+echo "SWAP_CREATION_OWNER=$owner" >> $PROJECT_ROOT/.local-defi-materials
+echo "SWAP_APPID=$swap_appid" >> $PROJECT_ROOT/.local-defi-materials
+echo "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30092" >> $PROJECT_ROOT/.local-defi-materials
+echo "WLINERA_APPID=$erc20_2_appid" >> $PROJECT_ROOT/.local-defi-materials
 
 HTTP_HOST="http://$WALLET_13_PUBLIC_IPORT"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
