@@ -232,7 +232,6 @@ impl Pool {
                         Amount::from_attos(time_elapsed),
                     ));
         }
-
         (price_0_cumulative, price_1_cumulative)
     }
 }

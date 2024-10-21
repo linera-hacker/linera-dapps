@@ -53,11 +53,21 @@ impl BigAmount {
     pub fn div(self, amount: BigAmount) -> BigAmount {
         BigAmount(self.0.div(amount.0))
     }
+
+    pub fn mul(self, amount: BigAmount) -> BigAmount {
+        BigAmount(self.0.mul(amount.0))
+    }
 }
 
 impl Into<Amount> for BigAmount {
     fn into(self) -> Amount {
         Amount::from_attos(self.0.to_u128().expect("Couldn't convert BigUint"))
+    }
+}
+
+impl From<Amount> for BigAmount {
+    fn from(amount: Amount) -> BigAmount {
+        BigAmount(BigUint::from_u128(u128::from(amount)).expect("Couldn't convert amount"))
     }
 }
 

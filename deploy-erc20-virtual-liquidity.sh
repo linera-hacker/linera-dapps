@@ -151,7 +151,19 @@ run_service 60 &
 sleep 5
 
 ####
-## If we create TLMY/WLINERA pool in swap later, we don't need to subscribe here
+## We should request our application on swap chain firstly and this may be not needed in future
+####
+print $'\U01F4AB' $YELLOW " Request TLMYA on SWAP creator chain..."
+curl -H 'Content-Type: application/json' -X POST \
+    -d '{ "query": "mutation { requestApplication(chainId: \"'$swap_creation_chain'\", applicationId: \"'$erc20_1_appid'\", targetChainId: \"'$wallet_60_default_chain'\") }" }' \
+    $swap_workaround_creation_chain_rpc_endpoint
+echo
+
+print $'\U01F4AB' $YELLOW " Wait for requestApplication execution..."
+sleep 3
+
+####
+## If we create TLMYV/WLINERA pool in swap later, we don't need to subscribe here
 ####
 
 print $'\U01F4AB' $YELLOW " Subscribe WLINERA creator chain..."
@@ -160,13 +172,17 @@ echo
 print $'\U01F4AB' $YELLOW " Subscribe swap creator chain..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_60_swap_service
 echo
+
 print $'\U01F4AB' $YELLOW " Wait for subscription execution..."
 sleep 3
+
 print $'\U01F4AB' $YELLOW " Authorize ERC20 to swap application..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { approve(spender: {chain_id: \\\"$swap_creation_chain\\\", owner:\\\"Application:$swap_appid\\\"},value:\\\"4500000.\\\")}\"}" $wallet_60_erc20_1_service
 echo
+
 print $'\U01F4AB' $YELLOW " Wait for authorization..."
 sleep 3
+
 print $'\U01F4AB' $YELLOW " Create liquidity pool by ERC20 1 creator..."
 curl -H 'Content-Type: application/json' -X POST -d "{ \"query\": \"mutation { createPool(token0: \\\"$erc20_1_appid\\\", token1: \\\"$wlinera_appid\\\", amount0Initial:\\\"5\\\", amount1Initial:\\\"0\\\", amount0Virtual:\\\"5\\\", amount1Virtual:\\\"1\\\")}\"}" $wallet_60_swap_service
 echo

@@ -296,10 +296,10 @@ impl ApplicationContract {
         let to = to.unwrap_or(origin);
 
         let swap_application_id = self.swap_application_id();
-        let fixed_currency = self.state.fixed_currency.get();
+        let fixed_currency = *self.state.fixed_currency.get();
         let mut cur_amount = amount;
 
-        if !*fixed_currency && swap_application_id.is_some() {
+        if !fixed_currency && swap_application_id.is_some() {
             let token_0 = self.runtime.application_id().forget_abi();
             let token_1 = None;
             let call = SwapOperation::RouterOperation(RouterOperation::CalculateSwapAmount {

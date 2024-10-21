@@ -76,8 +76,8 @@ impl Application {
         if let Some(owner) = self.owner.get() {
             if fee > Amount::ZERO {
                 let owner_balance = self.owner_balance.get();
-                let newbalance_of = owner_balance.saturating_add(fee);
-                self.update_owner_balance(*owner, newbalance_of).await?;
+                let new_balance_of = owner_balance.saturating_add(fee);
+                self.update_owner_balance(*owner, new_balance_of).await?;
             }
         }
         Ok(())
@@ -194,8 +194,8 @@ impl Application {
         if let Some(owner) = self.owner.get() {
             if fee > Amount::ZERO {
                 let owner_balance = self.owner_balance.get();
-                let newbalance_of = owner_balance.saturating_add(fee);
-                self.update_owner_balance(*owner, newbalance_of).await?;
+                let new_balance_of = owner_balance.saturating_add(fee);
+                self.update_owner_balance(*owner, new_balance_of).await?;
             }
         }
 
@@ -241,9 +241,9 @@ impl Application {
         }
 
         let new_user_balance = user_balance.saturating_add(erc20_amount);
-        let newbalance_of = owner_balance.saturating_sub(erc20_amount);
+        let new_balance_of = owner_balance.saturating_sub(erc20_amount);
 
-        self.owner_balance.set(newbalance_of);
+        self.owner_balance.set(new_balance_of);
         Ok(self.balances.insert(&caller, new_user_balance)?)
     }
 

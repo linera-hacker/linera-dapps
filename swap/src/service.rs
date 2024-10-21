@@ -18,10 +18,12 @@ use spec::{
         router::RouterOperation,
     },
 };
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
+use swap_router::router::calculate_swap_amount;
 
 struct SwapContext {
     state: Arc<Application>,
+    runtime: Mutex<ServiceRuntime<ApplicationService>>,
 }
 
 pub struct ApplicationService {
@@ -44,6 +46,7 @@ impl Service for ApplicationService {
         ApplicationService {
             context: Arc::new(SwapContext {
                 state: Arc::new(state),
+                runtime: Mutex::new(runtime),
             }),
         }
     }
@@ -62,11 +65,19 @@ struct QueryRoot;
 impl SwapQueryRoot for QueryRoot {
     async fn calculate_swap_amount(
         &self,
-        _token_0: ApplicationId,
-        _token_1: Option<ApplicationId>,
-        _amount_1: Amount,
+        ctx: &Context<'_>,
+        token_0: ApplicationId,
+        token_1: Option<ApplicationId>,
+        amount_1: Amount,
     ) -> Amount {
-        Amount::ZERO
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
+        let block_timestamp = context.runtime.lock().unwrap().system_time();
+        match calculate_swap_amount(&context.state, token_0, token_1, amount_1, block_timestamp)
+            .await
+        {
+            Ok(amount) => amount,
+            _ => Amount::ZERO,
+        }
     }
 
     async fn get_pool(&self, ctx: &Context<'_>, pool_id: u64) -> Option<Pool> {

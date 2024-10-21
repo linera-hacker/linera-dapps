@@ -7,10 +7,8 @@ use linera_sdk::{
     base::{Amount, ApplicationId, Timestamp},
     Contract, ContractRuntime,
 };
-use num_traits::cast::ToPrimitive;
 use spec::{
     account::ChainAccountOwner,
-    base,
     swap::{
         pool::{Pool, PoolError},
         router::{RouterMessage, RouterOperation, RouterResponse},
@@ -781,42 +779,13 @@ impl Router {
         token_1: Option<ApplicationId>,
         amount_1: Amount,
     ) -> Result<(RouterResponse, Option<(RouterMessage, bool)>), RouterError> {
-        let token_1 = match token_1 {
-            Some(__token_1) => __token_1,
-            _ => match *state.wlinera_application_id.get() {
-                Some(__token_1) => __token_1,
-                _ => return Err(RouterError::InvalidNativeToken),
-            },
-        };
-        let (pool, exchanged) = state.get_pool_exchangable(token_0, Some(token_1)).await?;
-        let Some(pool) = pool else {
-            return Err(RouterError::InvalidPool);
-        };
-        let block_timestamp = runtime.system_time();
-        let time_elapsed = u128::from(
-            block_timestamp
-                .delta_since(pool.block_timestamp)
-                .as_micros(),
-        );
-        if time_elapsed == 0 {
-            return Err(RouterError::InvokeLater);
-        }
-        if pool.reserve_0 == Amount::ZERO || pool.reserve_1 == Amount::ZERO {
-            return Err(RouterError::InvalidLiquidity);
-        }
-        let (price_0_cumulative, price_1_cumulative) =
-            pool.calculate_price_cumulative_pair(time_elapsed);
-        let (price_0_cumulative, _) = if exchanged {
-            (price_1_cumulative, price_0_cumulative)
-        } else {
-            (price_0_cumulative, price_1_cumulative)
-        };
-        let price_0: Amount = price_0_cumulative
-            .sub(pool.price_0_cumulative)
-            .div(time_elapsed.into())
-            .into();
-        let amount_0 = Amount::from_attos(base::mul(price_0, amount_1).to_u128().unwrap());
-        Ok((RouterResponse::Amount(amount_0), None))
+        Ok((
+            RouterResponse::Amount(
+                calculate_swap_amount(state, token_0, token_1, amount_1, runtime.system_time())
+                    .await?,
+            ),
+            None,
+        ))
     }
 
     fn on_msg_subscribe_new_erc20_token<T: Contract>(
@@ -830,4 +799,48 @@ impl Router {
         subscribe_erc20_application_creation(runtime, token);
         Ok(None)
     }
+}
+
+pub async fn calculate_swap_amount(
+    state: &SwapApplicationState,
+    token_0: ApplicationId,
+    token_1: Option<ApplicationId>,
+    amount_1: Amount,
+    block_timestamp: Timestamp,
+) -> Result<Amount, RouterError> {
+    let token_1 = match token_1 {
+        Some(__token_1) => __token_1,
+        _ => match *state.wlinera_application_id.get() {
+            Some(__token_1) => __token_1,
+            _ => return Err(RouterError::InvalidNativeToken),
+        },
+    };
+    let (pool, exchanged) = state.get_pool_exchangable(token_0, Some(token_1)).await?;
+    let Some(pool) = pool else {
+        return Err(RouterError::InvalidPool);
+    };
+    let time_elapsed = u128::from(
+        block_timestamp
+            .delta_since(pool.block_timestamp)
+            .as_micros(),
+    );
+    if time_elapsed == 0 {
+        return Err(RouterError::InvokeLater);
+    }
+    if pool.reserve_0 == Amount::ZERO || pool.reserve_1 == Amount::ZERO {
+        return Err(RouterError::InvalidLiquidity);
+    }
+    let (price_0_cumulative, price_1_cumulative) =
+        pool.calculate_price_cumulative_pair(time_elapsed);
+    let (price_0_cumulative, _price_1_cumulative) = if exchanged {
+        (price_1_cumulative, price_0_cumulative)
+    } else {
+        (price_0_cumulative, price_1_cumulative)
+    };
+    let amount_0: Amount = price_0_cumulative
+        .sub(pool.price_0_cumulative)
+        .mul(amount_1.into())
+        .div(time_elapsed.into())
+        .into();
+    Ok(amount_0)
 }

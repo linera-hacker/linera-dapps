@@ -190,7 +190,7 @@ print $'\U01F4AB' $YELLOW " Mint WLINERA..."
 curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { mint(amount: \"2.2318\") }"}' $wallet_50_wlinera_service
 echo
 
-print $'\U01F4AB' $YELLOW " Wait for subscription execution..."
+print $'\U01F4AB' $YELLOW " Wait for mint execution..."
 sleep 3
 
 print $'\U01F4AB' $YELLOW " Authorize WLINERA to swap application..."

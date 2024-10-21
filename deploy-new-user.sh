@@ -27,7 +27,7 @@ NETWORK_ID=1
 
 case $NETWORK_ID in
   1)
-    WALLET_80_PUBLIC_IPORT='210.209.69.38:23131'
+    WALLET_80_PUBLIC_IPORT='210.209.69.38:23305'
     LOCAL_IP='172.21.132.203'
     ;;
   2)
@@ -87,6 +87,8 @@ wallet_80_owner=`linera --with-wallet 80 wallet show | grep "Owner" | awk '{prin
 ## Use WLINERA and SWAP application created by deploy-local.sh
 ####
 
+swap_creation_chain=`grep "SWAP_CREATION_CHAIN" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
+swap_creation_owner=`grep "SWAP_CREATION_OWNER" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 swap_appid=`grep "SWAP_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 wlinera_appid=`grep "WLINERA_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
 tlmy_appid=`grep "ERC20_TLMY_APPID" ${PROJECT_ROOT}/.local-defi-materials | awk -F '=' '{print $2}'`
@@ -232,7 +234,7 @@ print $'\U01F4AB' $LIGHTGREEN " $wallet_80_public_swap_service"
 echo -e "mutation {\n\
   swap (\n\
     token0: \"$tlmy_appid\",\n\
-    token1: \"$linera_appid\",\n\
+    token1: \"$wlinera_appid\",\n\
     amount0In: \"1.\",\n\
     amount1In: \"1.\",\n\
     amount0OutMin: \"0.01\",\n\
@@ -277,6 +279,16 @@ print $'\U01F4AB' $YELLOW " Mint TLMY with..."
 print $'\U01F4AB' $LIGHTGREEN " $wallet_80_public_tlmy_service"
 echo -e "mutation {\n\
   mint(amount: \"1.\")\n\
+}"
+
+print $'\U01F4AB' $YELLOW " Query TLMY/WLINERA price with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_80_public_swap_service"
+echo -e "query {\n\
+  calculateSwapAmount(\n\
+    token0: \"$tlmy_appid\",\n\
+    token1: \"$wlinera_appid\",\n\
+    amount1: \"1\"\n\
+  )\n\
 }"
 
 trap cleanup INT
