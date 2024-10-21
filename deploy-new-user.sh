@@ -34,11 +34,11 @@ while getopts $options opt; do
   esac
 done
 
-case $METWORK_TYPE in
+case $NETWORK_TYPE in
   localnet)
-    faucet_url=https://localhost:40080
+    faucet_url=http://localhost:40080
     ;;
-  devnet | *)
+  devnet|*)
     faucet_url=https://faucet.devnet-2024-09-04.linera.net
     ;;
 esac
