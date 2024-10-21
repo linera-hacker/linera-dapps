@@ -16,14 +16,32 @@ unset all_proxy
 
 cargo build --release --target wasm32-unknown-unknown
 
-WALLET_BASE=/tmp/linera/dapps
+PROJECT_ROOT=$HOME/linera-project
+mkdir -p $PROJECT_ROOT
+
+WALLET_BASE=$PROJECT_ROOT/linera/dapps
 mkdir -p $WALLET_BASE
 rm $WALLET_BASE/* -rf
 
-unset all_proxy
-unset ALL_PROXY
-
+options="N:n:"
 NETWORK_ID=1
+NETWORK_TYPE=devnet
+
+while getopts $options opt; do
+  case ${opt} in
+    N) NETWORK_TYPE=${OPTARG} ;;
+    n) NETWORK_ID=${OPTARG} ;;
+  esac
+done
+
+case $METWORK_TYPE in
+  localnet)
+    faucet_url=https://localhost:40080
+    ;;
+  devnet | *)
+    faucet_url=https://faucet.devnet-2024-09-04.linera.net
+    ;;
+esac
 
 case $NETWORK_ID in
   1)
@@ -45,9 +63,6 @@ YELLOW='\033[1;33m'
 LIGHTGREEN='\033[1;32m'
 NC='\033[0m'
 
-PROJECT_ROOT=$HOME/linera-project
-mkdir -p $PROJECT_ROOT
-
 function print() {
   echo -e $1$2$3$NC
 }
@@ -56,7 +71,7 @@ function create_wallet() {
   export LINERA_WALLET_$1=$WALLET_BASE/wallet_$1.json
   export LINERA_STORAGE_$1=rocksdb:$WALLET_BASE/client_$1.db
 
-  linera -w $1 wallet init --faucet http://localhost:40080 --with-new-chain
+  linera -w $1 wallet init --faucet $faucet_url --with-new-chain
   linera -w $1 wallet show
 }
 
@@ -105,6 +120,9 @@ echo -e "    Application ID: $BLUE$swap_appid$NC"
 linera --with-wallet 80 request-application $swap_appid
 linera --with-wallet 80 request-application $wlinera_appid
 linera --with-wallet 80 request-application $tlmy_appid
+
+print $'\U01F4AB' $YELLOW " Wait for requestApplication execution..."
+sleep 3
 
 function print_apps() {
   print $'\U01F4AB' $YELLOW " $1"
