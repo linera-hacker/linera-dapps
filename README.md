@@ -10,7 +10,7 @@
 ### Note
 
 Official Devnet is compatible with v0.12.1 in which the order of executed message is not correct.
-ResPeer fork cherry-pick thie fix commit from latest branch then it could work with current Devnet.
+ResPeer fork cherry-pick the fix commit from latest branch then it could work with current Devnet.
 
 ### Compile toolchain
 ```
