@@ -20,9 +20,6 @@ WALLET_BASE=/tmp/linera/dapps
 mkdir -p $WALLET_BASE
 rm $WALLET_BASE/* -rf
 
-unset all_proxy
-unset ALL_PROXY
-
 NETWORK_ID=1
 
 case $NETWORK_ID in
