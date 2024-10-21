@@ -175,7 +175,7 @@ sleep 5
 ####
 ## We should request our application on swap chain firstly and this may be not needed in future
 ####
-print $'\U01F4AB' $YELLOW " Request TLMYA on SWAP creator chain..."
+print $'\U01F4AB' $YELLOW " Request TLMYV on SWAP creator chain..."
 curl -H 'Content-Type: application/json' -X POST \
     -d '{ "query": "mutation { requestApplication(chainId: \"'$swap_creation_chain'\", applicationId: \"'$erc20_1_appid'\", targetChainId: \"'$wallet_60_default_chain'\") }" }' \
     $swap_workaround_creation_chain_rpc_endpoint
