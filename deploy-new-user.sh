@@ -56,6 +56,10 @@ case $NETWORK_ID in
     WALLET_80_PUBLIC_IPORT='localhost:31160'
     LOCAL_IP='localhost'
     ;;
+  4)
+    WALLET_50_PUBLIC_IPORT='172.16.31.73:31160'
+    LOCAL_IP='172.16.31.73'
+    ;;
 esac
 
 BLUE='\033[1;34m'
