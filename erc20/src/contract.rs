@@ -60,6 +60,10 @@ impl Contract for ApplicationContract {
 
         let initial_balances = self.runtime.application_parameters().initial_balances;
         let _ = self.state.airdrop(initial_balances).await;
+        let token_metadata = self.runtime.application_parameters().token_metadata;
+        if token_metadata != None {
+            let _ = self.state.set_token_metadata(token_metadata.unwrap()).await;
+        }
     }
 
     async fn execute_operation(&mut self, operation: ERC20Operation) -> ERC20Response {

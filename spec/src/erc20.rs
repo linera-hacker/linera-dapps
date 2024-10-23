@@ -1,6 +1,6 @@
 use crate::{
     account::ChainAccountOwner,
-    base::{BaseMessage, BaseOperation},
+    base::{BaseMessage, BaseOperation}, extra_info::TokenMetadata,
 };
 use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
@@ -15,6 +15,7 @@ use std::collections::HashMap;
 pub struct ERC20Parameters {
     pub initial_balances: HashMap<String, Amount>,
     pub swap_application_id: Option<ApplicationId>,
+    pub token_metadata: Option<TokenMetadata>,
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
@@ -42,6 +43,7 @@ pub struct SubscriberSyncState {
     pub fee_percent: Amount,
     pub owner: Option<ChainAccountOwner>,
     pub owner_balance: Amount,
+    pub token_metadata: Option<TokenMetadata>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -161,6 +163,11 @@ pub trait ERC20QueryRoot {
         owner: ChainAccountOwner,
         spender: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+
+    fn token_metadata(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<TokenMetadata, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {

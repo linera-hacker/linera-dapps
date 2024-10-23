@@ -12,7 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
+    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot}, extra_info::TokenMetadata,
 };
 use std::sync::Arc;
 
@@ -82,6 +82,11 @@ impl ERC20QueryRoot for QueryRoot {
             .owner_allowance(owner, spender)
             .await
             .unwrap_or(Amount::ZERO)
+    }
+
+    async fn token_metadata(&self) -> TokenMetadata {
+        let token_metadata = self.state.token_metadata.get().as_ref().unwrap().clone();
+        token_metadata
     }
 }
 

@@ -4,6 +4,7 @@ use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStora
 use spec::{
     account::ChainAccountOwner,
     erc20::{InstantiationArgument, SubscriberSyncState},
+    extra_info::TokenMetadata,
 };
 
 use std::collections::HashMap;
@@ -24,6 +25,7 @@ pub struct Application {
     pub fee_percent: RegisterView<Amount>,
     pub owner: RegisterView<Option<ChainAccountOwner>>,
     pub owner_balance: RegisterView<Amount>,
+    pub token_metadata: RegisterView<Option<TokenMetadata>>,
 }
 
 #[allow(dead_code)]
@@ -266,6 +268,14 @@ impl Application {
         Ok(())
     }
 
+    pub(crate) async fn set_token_metadata(
+        &mut self,
+        token_metadata: TokenMetadata,
+    ) -> Result<(), ERC20Error> {
+        self.token_metadata.set(Some(token_metadata));
+        Ok(())
+    }
+
     pub(crate) async fn transfer_ownership(
         &mut self,
         owner: ChainAccountOwner,
@@ -314,6 +324,7 @@ impl Application {
             fee_percent: *self.fee_percent.get(),
             owner: self.owner.get().clone(),
             owner_balance: *self.owner_balance.get(),
+            token_metadata: self.token_metadata.get().clone(),
         };
         self.balances
             .for_each_index_value(|index, value| {
@@ -358,6 +369,7 @@ impl Application {
         self.fee_percent.set(state.fee_percent);
         self.owner.set(state.owner);
         self.owner_balance.set(state.owner_balance);
+        self.token_metadata.set(state.token_metadata);
         Ok(())
     }
 }
