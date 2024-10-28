@@ -84,8 +84,8 @@ impl ERC20QueryRoot for QueryRoot {
             .unwrap_or(Amount::ZERO)
     }
 
-    async fn token_metadata(&self) -> TokenMetadata {
-        let token_metadata = self.state.token_metadata.get().as_ref().unwrap().clone();
+    async fn token_metadata(&self) -> Option<TokenMetadata> {
+        let token_metadata = self.state.token_metadata.get().clone();
         token_metadata
     }
 }

@@ -167,7 +167,7 @@ pub trait ERC20QueryRoot {
     fn token_metadata(
         &self,
         ctx: &Context<'_>,
-    ) -> impl std::future::Future<Output = Result<TokenMetadata, Error>> + Send;
+    ) -> impl std::future::Future<Output = Result<Option<TokenMetadata>, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {
