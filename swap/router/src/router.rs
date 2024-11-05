@@ -615,10 +615,12 @@ impl Router {
             return Err(RouterError::InvalidPool);
         };
 
+        let _token_0 = token_0.clone();
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
-        let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let token_1 = if exchanged { Some(_token_0) } else { token_1 };
+        let _amount_0_in = amount_0_in.clone();
         let amount_0_in = if exchanged { amount_1_in } else { amount_0_in };
-        let amount_1_in = if exchanged { amount_0_in } else { amount_1_in };
+        let amount_1_in = if exchanged { _amount_0_in } else { amount_1_in };
         let amount_0_out_min = if exchanged {
             amount_1_out_min
         } else {
