@@ -697,9 +697,6 @@ impl Router {
                 if amount_0_out < _amount_0_out_min {
                     return Err(RouterError::InvalidAmount);
                 }
-                if amount_0_out == Amount::ZERO {
-                    return Err(RouterError::InvalidAmount);
-                }
             }
         }
         if let Some(_amount_1_out_min) = amount_1_out_min {
@@ -708,10 +705,11 @@ impl Router {
                 if amount_1_out < _amount_1_out_min {
                     return Err(RouterError::InvalidAmount);
                 }
-                if amount_1_out == Amount::ZERO {
-                    return Err(RouterError::InvalidAmount);
-                }
             }
+        }
+
+        if amount_0_out == Amount::ZERO && amount_1_out == Amount::ZERO {
+            return Err(RouterError::InvalidAmount);
         }
 
         let _token_1 = match token_1 {
@@ -751,7 +749,7 @@ impl Router {
         let _ = pool.calculate_adjust_amount_pair(amount_0_out, amount_1_out)?;
 
         let balance_0 = pool.reserve_0.saturating_sub(amount_0_out);
-        let balance_1 = pool.reserve_0.saturating_sub(amount_1_out);
+        let balance_1 = pool.reserve_1.saturating_sub(amount_1_out);
 
         state
             .update(pool.id, balance_0, balance_1, block_timestamp)
