@@ -298,7 +298,7 @@ impl Router {
 
         let liquidity = if let Some(mut _pool) = pool {
             _pool.reserve_0.saturating_add_assign(amount_0);
-            _pool.reserve_0.saturating_add_assign(amount_1);
+            _pool.reserve_1.saturating_add_assign(amount_1);
             _pool.calculate_liquidity(amount_0, amount_1)
         } else {
             Pool::calculate_initial_liquidity(amount_0, amount_1)
@@ -338,7 +338,7 @@ impl Router {
         block_timestamp: Timestamp,
     ) -> Result<(), RouterError> {
         let balance_0 = pool.reserve_0.saturating_add(amount_0);
-        let balance_1 = pool.reserve_0.saturating_add(amount_1);
+        let balance_1 = pool.reserve_1.saturating_add(amount_1);
 
         state.mint_fee(pool.id).await?;
         state.mint(pool.id, liquidity, to.clone()).await?;
@@ -420,7 +420,7 @@ impl Router {
         } else {
             let mut _pool = pool.clone();
             _pool.reserve_0.saturating_add_assign(amount_0);
-            _pool.reserve_0.saturating_add_assign(amount_1);
+            _pool.reserve_1.saturating_add_assign(amount_1);
             _pool.calculate_liquidity(amount_0, amount_1)
         };
 
@@ -576,7 +576,7 @@ impl Router {
         state.burn(pool.id, liquidity, to).await?;
 
         let balance_0 = pool.reserve_0.saturating_sub(amount_0);
-        let balance_1 = pool.reserve_0.saturating_sub(amount_1);
+        let balance_1 = pool.reserve_1.saturating_sub(amount_1);
 
         state
             .update(pool.id, balance_0, balance_1, block_timestamp)
