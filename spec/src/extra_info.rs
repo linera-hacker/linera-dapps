@@ -4,16 +4,18 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 pub struct TokenMetadata {
     pub logo: String,
+    pub description: String,
     pub twitter: String,
     pub telegram: String,
     pub discord: String,
     pub website: String,
+    pub github: String,
 }
 
 scalar!(TokenMetadata);
 
 impl std::fmt::Display for TokenMetadata {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "TokenMetadata:{}:{:?}:{:?}:{:?}:{:?}", self.logo, self.twitter, self.telegram, self.discord, self.website)
+        write!(f, "TokenMetadata:{}:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}", self.logo, self.description, self.twitter, self.telegram, self.discord, self.website, self.github)
     }
 }
