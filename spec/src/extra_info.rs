@@ -10,12 +10,13 @@ pub struct TokenMetadata {
     pub discord: String,
     pub website: String,
     pub github: String,
+    pub mintable: bool,
 }
 
 scalar!(TokenMetadata);
 
 impl std::fmt::Display for TokenMetadata {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "TokenMetadata:{}:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}", self.logo, self.description, self.twitter, self.telegram, self.discord, self.website, self.github)
+        write!(f, "TokenMetadata:{}:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}:{:?}", self.logo, self.description, self.twitter, self.telegram, self.discord, self.website, self.github, self.mintable)
     }
 }
