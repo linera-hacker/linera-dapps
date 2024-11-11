@@ -4,10 +4,10 @@ use crate::{
     erc20::ERC20,
     swap::pool::Pool,
 };
-use async_graphql::SimpleObject;
+use async_graphql::{Enum, SimpleObject};
 use linera_sdk::{
     base::{Amount, ApplicationId, ParseAmountError, Timestamp},
-    views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
+    views::{linera_views, MapView, RegisterView, QueueView, RootView, ViewStorageContext},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -50,6 +50,28 @@ pub enum StateError {
     BrokenK,
 }
 
+pub const MAX_LAST_TRANSACTIONS: usize = 5000;
+
+#[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq, Serialize, Enum)]
+pub enum TransactionType {
+    AddLiquidity,
+    Swap,
+    RemoveLiquidity,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SimpleObject)]
+pub struct Transaction {
+    pub transaction_id: u64,
+    pub transaction_type: TransactionType,
+    pub pool_id: u64,
+    pub owner: ChainAccountOwner,
+    pub token_0_amount_in: Option<Amount>,
+    pub token_1_amount_in: Option<Amount>,
+    pub token_0_amount_out: Option<Amount>,
+    pub token_1_amount_out: Option<Amount>,
+    pub timestamp: Timestamp,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubscriberSyncState {
     pub erc20_erc20_pools: HashMap<ApplicationId, HashMap<ApplicationId, Pool>>,
@@ -59,6 +81,9 @@ pub struct SubscriberSyncState {
     pub pool_erc20_natives: HashMap<u64, ApplicationId>,
     // TODO: after we support lock native token to application, it'll be removed
     pub wlinera_application_id: Option<ApplicationId>,
+    // TODO: after blockchain support event, it should be removed
+    pub last_transactions: Vec<Transaction>,
+    pub transaction_id: u64,
 }
 
 #[derive(RootView, SimpleObject)]
@@ -70,6 +95,8 @@ pub struct SwapApplicationState {
     pub pool_erc20_erc20s: MapView<u64, Vec<ApplicationId>>,
     pub pool_erc20_natives: MapView<u64, ApplicationId>,
     pub wlinera_application_id: RegisterView<Option<ApplicationId>>,
+    pub last_transactions: QueueView<Transaction>,
+    pub transaction_id: RegisterView<u64>,
 }
 
 impl SwapApplicationState {
@@ -81,6 +108,8 @@ impl SwapApplicationState {
             pool_erc20_erc20s: HashMap::new(),
             pool_erc20_natives: HashMap::new(),
             wlinera_application_id: self.wlinera_application_id.get().clone(),
+            last_transactions: self.last_transactions.elements().await?,
+            transaction_id: *self.transaction_id.get(),
         };
         self.erc20_erc20_pools
             .for_each_index_value(|index, pools| {
@@ -116,6 +145,7 @@ impl SwapApplicationState {
         self.pool_id.set(state.pool_id);
         self.wlinera_application_id
             .set(state.wlinera_application_id);
+        self.transaction_id.set(state.transaction_id);
         for (key, pools) in &state.erc20_erc20_pools {
             self.erc20_erc20_pools.insert(key, pools.clone())?;
         }
@@ -127,6 +157,12 @@ impl SwapApplicationState {
         }
         for (key, token) in &state.pool_erc20_natives {
             self.pool_erc20_natives.insert(key, *token)?;
+        }
+        for transaction in state.last_transactions.iter() {
+            self.last_transactions.push_back(transaction.clone());
+        }
+        while self.last_transactions.count() > MAX_LAST_TRANSACTIONS {
+            self.last_transactions.delete_front();
         }
         Ok(())
     }
