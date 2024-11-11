@@ -146,6 +146,23 @@ pub fn receive_erc20_from_runtime_owner_to_application_creation<T>(
     receive_erc20_from_runtime_owner(runtime, token, amount, to)
 }
 
+pub fn receive_erc20_from_origin_owner_to_application_creation<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: ApplicationId,
+    amount: Amount,
+    origin_owner: ChainAccountOwner,
+) where
+    T: Contract,
+{
+    let to = ChainAccountOwner {
+        chain_id: runtime.application_creator_chain_id(),
+        owner: Some(AccountOwner::Application(
+            runtime.application_id().forget_abi(),
+        )),
+    };
+    transfer_from_erc20(runtime, token, amount, origin_owner, to)
+}
+
 pub fn transfer_native<T>(
     runtime: &mut ContractRuntime<T>,
     amount: Amount,
@@ -220,6 +237,23 @@ pub fn receive_token_from_runtime_owner_to_application_creation<T>(
         )),
     };
     receive_token_from_runtime_owner(runtime, token, amount, to)
+}
+
+pub fn receive_token_from_origin_owner_to_application_creation<T>(
+    runtime: &mut ContractRuntime<T>,
+    token: Option<ApplicationId>,
+    amount: Amount,
+    origin_owner: ChainAccountOwner
+) where
+    T: Contract,
+{
+    let to = ChainAccountOwner {
+        chain_id: runtime.application_creator_chain_id(),
+        owner: Some(AccountOwner::Application(
+            runtime.application_id().forget_abi(),
+        )),
+    };
+    transfer_token(runtime, token, amount, origin_owner, to)
 }
 
 pub fn subscribe_erc20_application_creation<T>(

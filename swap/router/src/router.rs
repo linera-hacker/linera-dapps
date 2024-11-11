@@ -1,6 +1,7 @@
 use crate::runtime::{
-    receive_erc20_from_runtime_owner_to_application_creation,
-    receive_token_from_runtime_owner_to_application_creation, runtime_owner,
+    receive_erc20_from_origin_owner_to_application_creation,
+    receive_token_from_origin_owner_to_application_creation,
+    runtime_owner,
     subscribe_erc20_application_creation, transfer_erc20,
 };
 use linera_sdk::{
@@ -424,15 +425,15 @@ impl Router {
             _pool.calculate_liquidity(amount_0, amount_1)
         };
 
-        if origin.chain_id == runtime.chain_id() {
+        if runtime.application_creator_chain_id() == runtime.chain_id() {
             if amount_0 > Amount::ZERO {
-                receive_erc20_from_runtime_owner_to_application_creation(
-                    runtime, token_0, amount_0,
+                receive_erc20_from_origin_owner_to_application_creation(
+                    runtime, token_0, amount_0, origin,
                 );
             }
             if amount_1 > Amount::ZERO {
-                receive_token_from_runtime_owner_to_application_creation(
-                    runtime, token_1, amount_1,
+                receive_token_from_origin_owner_to_application_creation(
+                    runtime, token_1, amount_1, origin,
                 );
             }
         }
@@ -744,28 +745,25 @@ impl Router {
             },
         };
 
-        if origin.chain_id == runtime.chain_id() {
+        if runtime.application_creator_chain_id() == runtime.chain_id() {
             if amount_0_out > Amount::ZERO {
-                receive_erc20_from_runtime_owner_to_application_creation(
+                receive_erc20_from_origin_owner_to_application_creation(
                     runtime,
                     _token_1,
                     amount_1_in.unwrap(),
+                    origin,
                 );
-            }
-            if amount_1_out > Amount::ZERO {
-                receive_erc20_from_runtime_owner_to_application_creation(
-                    runtime,
-                    token_0,
-                    amount_0_in.unwrap(),
-                );
-            }
-        }
 
-        if runtime.application_creator_chain_id() == runtime.chain_id() {
-            if amount_0_out > Amount::ZERO {
                 transfer_erc20(runtime, token_0, amount_0_out, to);
             }
             if amount_1_out > Amount::ZERO {
+                receive_erc20_from_origin_owner_to_application_creation(
+                    runtime,
+                    token_0,
+                    amount_0_in.unwrap(),
+                    origin,
+                );
+
                 transfer_erc20(runtime, _token_1, amount_1_out, to);
             }
         }
