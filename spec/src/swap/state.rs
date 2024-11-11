@@ -7,7 +7,7 @@ use crate::{
 use async_graphql::{Enum, SimpleObject};
 use linera_sdk::{
     base::{Amount, ApplicationId, ParseAmountError, Timestamp},
-    views::{linera_views, MapView, RegisterView, QueueView, RootView, ViewStorageContext},
+    views::{linera_views, MapView, QueueView, RegisterView, RootView, ViewStorageContext},
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -65,10 +65,10 @@ pub struct Transaction {
     pub transaction_type: TransactionType,
     pub pool_id: u64,
     pub owner: ChainAccountOwner,
-    pub token_0_amount_in: Option<Amount>,
-    pub token_1_amount_in: Option<Amount>,
-    pub token_0_amount_out: Option<Amount>,
-    pub token_1_amount_out: Option<Amount>,
+    pub amount_0_in: Option<Amount>,
+    pub amount_1_in: Option<Amount>,
+    pub amount_0_out: Option<Amount>,
+    pub amount_1_out: Option<Amount>,
     pub timestamp: Timestamp,
 }
 
@@ -502,6 +502,36 @@ impl SwapApplicationState {
             }
         }
 
+        Ok(())
+    }
+
+    pub async fn add_transaction(
+        &mut self,
+        pool_id: u64,
+        transaction_type: TransactionType,
+        owner: ChainAccountOwner,
+        amount_0_in: Option<Amount>,
+        amount_1_in: Option<Amount>,
+        amount_0_out: Option<Amount>,
+        amount_1_out: Option<Amount>,
+        timestamp: Timestamp,
+    ) -> Result<(), StateError> {
+        let transaction_id = *self.transaction_id.get();
+        self.last_transactions.push_back(Transaction {
+            transaction_id,
+            transaction_type,
+            pool_id,
+            owner,
+            amount_0_in,
+            amount_1_in,
+            amount_0_out,
+            amount_1_out,
+            timestamp,
+        });
+        if self.last_transactions.count() > MAX_LAST_TRANSACTIONS {
+            self.last_transactions.delete_front();
+        }
+        self.transaction_id.set(transaction_id + 1);
         Ok(())
     }
 }

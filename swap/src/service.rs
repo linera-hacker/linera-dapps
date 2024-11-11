@@ -16,6 +16,7 @@ use spec::{
         abi::{SwapMutationRoot, SwapOperation, SwapQueryRoot},
         pool::{Pool, PoolOperation},
         router::RouterOperation,
+        state::Transaction,
     },
 };
 use std::sync::{Arc, Mutex};
@@ -120,6 +121,37 @@ impl SwapQueryRoot for QueryRoot {
             .await
             .expect("Fail get native pools");
         pools
+    }
+
+    async fn get_transactions(
+        &self,
+        ctx: &Context<'_>,
+        pool_id: Option<u64>,
+        start_id: Option<u64>,
+        start_timestamp: Option<Timestamp>,
+    ) -> Vec<Transaction> {
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
+        context
+            .state
+            .last_transactions
+            .elements()
+            .await
+            .expect("Fail get transactions")
+            .into_iter()
+            .filter(|transaction| {
+                let mut ok = true;
+                if let Some(pool_id) = pool_id {
+                    ok = ok && transaction.pool_id == pool_id;
+                }
+                if let Some(start_id) = start_id {
+                    ok = ok && transaction.transaction_id >= start_id;
+                }
+                if let Some(start_timestamp) = start_timestamp {
+                    ok = ok && transaction.timestamp >= start_timestamp;
+                }
+                ok
+            })
+            .collect()
     }
 }
 

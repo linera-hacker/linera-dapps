@@ -1,6 +1,7 @@
 use crate::{
     account::ChainAccountOwner,
-    base::{BaseMessage, BaseOperation}, extra_info::TokenMetadata,
+    base::{BaseMessage, BaseOperation},
+    extra_info::TokenMetadata,
 };
 use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{

@@ -12,7 +12,7 @@ use spec::{
     swap::{
         pool::{Pool, PoolError},
         router::{RouterMessage, RouterOperation, RouterResponse},
-        state::{StateError, SwapApplicationState},
+        state::{StateError, SwapApplicationState, TransactionType},
     },
 };
 use thiserror::Error;
@@ -438,7 +438,7 @@ impl Router {
         }
         self.mint_shares(
             state,
-            pool,
+            pool.clone(),
             liquidity,
             amount_0,
             amount_1,
@@ -446,6 +446,18 @@ impl Router {
             block_timestamp,
         )
         .await?;
+        state
+            .add_transaction(
+                pool.id,
+                TransactionType::AddLiquidity,
+                origin,
+                Some(amount_0),
+                Some(amount_1),
+                Some(Amount::ZERO),
+                Some(Amount::ZERO),
+                block_timestamp,
+            )
+            .await?;
 
         Ok(Some((
             RouterMessage::AddLiquidity {
@@ -580,6 +592,18 @@ impl Router {
 
         state
             .update(pool.id, balance_0, balance_1, block_timestamp)
+            .await?;
+        state
+            .add_transaction(
+                pool.id,
+                TransactionType::RemoveLiquidity,
+                origin,
+                Some(Amount::ZERO),
+                Some(Amount::ZERO),
+                Some(amount_0),
+                Some(amount_1),
+                block_timestamp,
+            )
             .await?;
 
         Ok(Some((
@@ -753,6 +777,18 @@ impl Router {
 
         state
             .update(pool.id, balance_0, balance_1, block_timestamp)
+            .await?;
+        state
+            .add_transaction(
+                pool.id,
+                TransactionType::Swap,
+                origin,
+                amount_0_in,
+                amount_1_in,
+                Some(amount_0_out),
+                Some(amount_1_out),
+                block_timestamp,
+            )
             .await?;
 
         Ok(Some((

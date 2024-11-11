@@ -4,7 +4,7 @@ use crate::{
     swap::{
         pool::{Pool, PoolMessage, PoolOperation, PoolResponse},
         router::{RouterMessage, RouterOperation, RouterResponse},
-        state::SubscriberSyncState,
+        state::{SubscriberSyncState, Transaction},
     },
 };
 use async_graphql::{Context, Error, Request, Response};
@@ -84,6 +84,14 @@ pub trait SwapQueryRoot {
         &self,
         ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<Vec<Pool>, Error>> + Send;
+
+    fn get_transactions(
+        &self,
+        ctx: &Context<'_>,
+        pool_id: Option<u64>,
+        start_id: Option<u64>,
+        start_timestamp: Option<Timestamp>,
+    ) -> impl std::future::Future<Output = Result<Vec<Transaction>, Error>> + Send;
 }
 
 pub trait SwapMutationRoot {
