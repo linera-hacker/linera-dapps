@@ -190,6 +190,8 @@ wallet_10_owner=$owner
 wallet_10_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 wallet_10_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid"
 
+erc20_1_creation_chain=$chain
+
 HTTP_HOST="http://$WALLET_11_PUBLIC_IPORT"
 chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}'`
 owner=`linera --with-wallet 11 wallet show | grep "Owner" | awk '{print $4}'`
@@ -203,6 +205,8 @@ wallet_11_owner=$owner
 
 wallet_11_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 wallet_11_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
+
+wlinera_creation_chain=$chain
 
 HTTP_HOST="http://$WALLET_12_PUBLIC_IPORT"
 chain=`linera --with-wallet 12 wallet show | grep "Public Key" | awk '{print $2}'`
@@ -224,6 +228,8 @@ echo "SWAP_CREATION_OWNER=$owner" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_APPID=$swap_appid" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30092" >> $PROJECT_ROOT/.local-defi-materials
 echo "WLINERA_APPID=$erc20_2_appid" >> $PROJECT_ROOT/.local-defi-materials
+
+swap_creation_chain=$chain
 
 HTTP_HOST="http://$WALLET_13_PUBLIC_IPORT"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
@@ -461,6 +467,13 @@ print $'\U01F4AB' $LIGHTGREEN " $wallet_13_public_erc20_1_service"
 echo -e "mutation {\n\
   mint(amount: \"1.\")\n\
 }"
+
+print $'\U01F4AB' $LIGHTGREEN " Swap Application: $swap_appid"
+print $'\U01F4AB' $LIGHTGREEN " Swap Creation Chain: $swap_creation_chain"
+print $'\U01F4AB' $LIGHTGREEN " WLINERA Application: $erc20_2_appid"
+print $'\U01F4AB' $LIGHTGREEN " WLINERA Creation Chain: $wlinera_creation_chain"
+print $'\U01F4AB' $LIGHTGREEN " TLA Application: $erc20_1_appid"
+print $'\U01F4AB' $LIGHTGREEN " TLA Creation Chain: $erc20_1_creation_chain"
 
 trap cleanup INT
 read -p "  Press any key to exit"
