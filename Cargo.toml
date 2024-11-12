@@ -9,8 +9,8 @@ resolver = "2"
 
 [workspace.dependencies]
 async-graphql = { version = "=7.0.2", default-features = false }
-linera-sdk = { version = "0.13.0", git = "https://github.com/linera-io/linera-protocol.git" }
-linera-views = { version = "0.13.0", git = "https://github.com/linera-io/linera-protocol.git" }
+linera-sdk = { version = "0.13.0", git = "https://github.com/linera-io/linera-protocol.git", rev = "v0.13.0" }
+linera-views = { version = "0.13.0", git = "https://github.com/linera-io/linera-protocol.git", rev = "v0.13.0" }
 thiserror = "1.0.57"
 serde = { version = "1.0.197", features = ["derive"] }
 bcs = "0.1.6"
