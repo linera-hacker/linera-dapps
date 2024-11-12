@@ -61,6 +61,8 @@ impl Application {
         }
 
         let new_sender_balance = sender_balance.saturating_sub(amount);
+        self.update_owner_balance(sender, new_sender_balance)
+            .await?;
         let receiver_balance = self.balance_of(to).await?;
         let fee_percent = *self.fee_percent.get();
         let fee = Amount::from_attos(
@@ -70,9 +72,7 @@ impl Application {
         );
         let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
-
-        self.update_owner_balance(sender, new_sender_balance)
-            .await?;
+        
         self.update_owner_balance(to, new_receiver_balance).await?;
 
         if let Some(owner) = self.owner.get() {
@@ -175,6 +175,9 @@ impl Application {
 
         let new_from_balance = from_balance.saturating_sub(amount);
         let new_allowance = allowance.saturating_sub(amount);
+        self.update_owner_balance(from, new_from_balance).await?;
+        self.update_owner_allowance(from, caller, new_allowance)
+            .await?;
 
         let to_balance = self.balance_of(to).await?;
 
@@ -188,10 +191,7 @@ impl Application {
         let send_amount = amount.saturating_sub(fee);
         let new_to_balance = to_balance.saturating_add(send_amount);
 
-        self.update_owner_balance(from, new_from_balance).await?;
         self.update_owner_balance(to, new_to_balance).await?;
-        self.update_owner_allowance(from, caller, new_allowance)
-            .await?;
 
         if let Some(owner) = self.owner.get() {
             if fee > Amount::ZERO {
