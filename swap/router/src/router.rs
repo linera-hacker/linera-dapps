@@ -263,25 +263,28 @@ impl Router {
     ) -> Result<(RouterResponse, Option<(RouterMessage, bool)>), RouterError> {
         let (pool, exchanged) = state.get_pool_exchangable(token_0, token_1).await?;
 
+        let _token_0 = token_0.clone();
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
         let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let _amount_0_desired = amount_0_desired.clone();
         let amount_0_desired = if exchanged {
             amount_1_desired
         } else {
             amount_0_desired
         };
         let amount_1_desired = if exchanged {
-            amount_0_desired
+            _amount_0_desired
         } else {
             amount_1_desired
         };
+        let _amount_0_min = amount_0_min.clone();
         let amount_0_min = if exchanged {
             amount_1_min
         } else {
             amount_0_min
         };
         let amount_1_min = if exchanged {
-            amount_0_min
+            _amount_0_min
         } else {
             amount_1_min
         };
@@ -382,25 +385,28 @@ impl Router {
                 true,
             ),
         };
+        let _token_0 = token_0.clone();
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
-        let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let token_1 = if exchanged { Some(_token_0) } else { token_1 };
+        let _amount_0_desired = amount_0_desired.clone();
         let amount_0_desired = if exchanged {
             amount_1_desired
         } else {
             amount_0_desired
         };
         let amount_1_desired = if exchanged {
-            amount_0_desired
+            _amount_0_desired
         } else {
             amount_1_desired
         };
+        let _amount_0_min = amount_0_min.clone();
         let amount_0_min = if exchanged {
             amount_1_min
         } else {
             amount_0_min
         };
         let amount_1_min = if exchanged {
-            amount_0_min
+            _amount_0_min
         } else {
             amount_1_min
         };
@@ -494,15 +500,17 @@ impl Router {
             return Err(RouterError::InvalidPool);
         };
 
+        let _token_0 = token_0.clone();
         let token_0 = if exchanged { token_1.unwrap() } else { token_0 };
-        let token_1 = if exchanged { Some(token_0) } else { token_1 };
+        let token_1 = if exchanged { Some(_token_0) } else { token_1 };
+        let _amount_0_min = amount_0_min.clone();
         let amount_0_min = if exchanged {
             amount_1_min
         } else {
             amount_0_min
         };
         let amount_1_min = if exchanged {
-            amount_0_min
+            _amount_0_min
         } else {
             amount_1_min
         };
@@ -646,13 +654,14 @@ impl Router {
         let _amount_0_in = amount_0_in.clone();
         let amount_0_in = if exchanged { amount_1_in } else { amount_0_in };
         let amount_1_in = if exchanged { _amount_0_in } else { amount_1_in };
+        let _amount_0_out_min = amount_0_out_min.clone();
         let amount_0_out_min = if exchanged {
             amount_1_out_min
         } else {
             amount_0_out_min
         };
         let amount_1_out_min = if exchanged {
-            amount_0_out_min
+            _amount_0_out_min
         } else {
             amount_1_out_min
         };
