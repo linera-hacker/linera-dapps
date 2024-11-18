@@ -151,7 +151,7 @@ impl PoolManager {
         block_timestamp: Timestamp,
     ) -> Result<(), PoolError> {
         let balance_0 = pool.reserve_0.saturating_add(amount_0);
-        let balance_1 = pool.reserve_0.saturating_add(amount_1);
+        let balance_1 = pool.reserve_1.saturating_add(amount_1);
 
         state.mint_fee(pool.id).await?;
         let liquidity = pool.calculate_liquidity(amount_0, amount_1);
