@@ -325,9 +325,15 @@ impl ApplicationContract {
             cur_amount = swap_amount;
         }
 
+        let runtime_application_creation = ChainAccountOwner {
+            chain_id: self.runtime.application_creator_chain_id(),
+            owner: Some(AccountOwner::Application(
+                self.runtime.application_id().forget_abi(),
+            )),
+        };
         let to_account = Account {
-            chain_id: to.chain_id,
-            owner: match to.owner {
+            chain_id: runtime_application_creation.chain_id,
+            owner: match runtime_application_creation.owner {
                 Some(AccountOwner::User(owner)) => Some(owner),
                 _ => None,
             },
