@@ -243,7 +243,7 @@ pub fn receive_token_from_origin_owner_to_application_creation<T>(
     runtime: &mut ContractRuntime<T>,
     token: Option<ApplicationId>,
     amount: Amount,
-    origin_owner: ChainAccountOwner
+    origin_owner: ChainAccountOwner,
 ) where
     T: Contract,
 {
