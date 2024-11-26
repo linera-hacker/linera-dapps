@@ -45,11 +45,9 @@ impl Application {
 
     pub(crate) async fn register_application(
         &mut self,
-        owner: ChainAccountOwner,
-        mut application: Metadata,
+        application: Metadata,
     ) -> Result<(), AMSError> {
         let application_id = application.application_id;
-        application.creator = owner;
         match self.applications.get(&application_id).await? {
             Some(_) => {
                 return Err(AMSError::AlreadyExists);

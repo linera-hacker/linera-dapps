@@ -162,8 +162,12 @@ impl ApplicationContract {
         Ok(AMSResponse::Ok)
     }
 
-    async fn on_op_register(&mut self, metadata: Metadata) -> Result<AMSResponse, AMSError> {
+    async fn on_op_register(&mut self, mut metadata: Metadata) -> Result<AMSResponse, AMSError> {
         let origin = self.runtime_owner();
+
+        metadata.creator = Some(origin);
+        metadata.created_at = Some(self.runtime.system_time());
+
         self.runtime
             .prepare_message(AMSMessage::Register { origin, metadata })
             .with_authentication()
@@ -249,9 +253,7 @@ impl ApplicationContract {
         origin: ChainAccountOwner,
         metadata: Metadata,
     ) -> Result<(), AMSError> {
-        self.state
-            .register_application(origin, metadata.clone())
-            .await?;
+        self.state.register_application(metadata.clone()).await?;
         self.publish_message(AMSMessage::Register { origin, metadata });
         Ok(())
     }

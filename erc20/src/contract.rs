@@ -200,7 +200,7 @@ impl ApplicationContract {
     ) {
         let call = AMSOperation::Register {
             metadata: Metadata {
-                creator: self.runtime_owner(),
+                creator: Some(self.runtime_owner()),
                 application_name: argument.name,
                 application_id: self.runtime.application_id().forget_abi(),
                 application_type: "ERC20".to_string(),

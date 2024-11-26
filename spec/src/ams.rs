@@ -19,7 +19,7 @@ pub struct InstantiationArgument {
 
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Metadata {
-    pub creator: ChainAccountOwner,
+    pub creator: Option<ChainAccountOwner>,
     pub application_name: String,
     pub application_id: ApplicationId,
     pub application_type: String,
