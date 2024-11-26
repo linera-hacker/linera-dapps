@@ -212,8 +212,10 @@ impl ApplicationContract {
                 ]
                 .to_vec(),
                 logo: token_metadata.logo,
-                // TODO: add token info like symbol, name here
-                spec: None,
+                spec: Some(format!(
+                    "{}\"ticker\":\"{}\",\"initial_supply\":\"{}\"{}",
+                    "{", argument.symbol, argument.initial_supply, "}"
+                )),
                 description: token_metadata.description,
                 discord: token_metadata.discord,
                 twitter: token_metadata.twitter,
