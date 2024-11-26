@@ -213,8 +213,8 @@ impl ApplicationContract {
                 .to_vec(),
                 logo: token_metadata.logo,
                 spec: Some(format!(
-                    "{}\"ticker\":\"{}\",\"initial_supply\":\"{}\"{}",
-                    "{", argument.symbol, argument.initial_supply, "}"
+                    "{}\"ticker\":\"{}\",\"initial_supply\":\"{}\",\"mintable\":{}{}",
+                    "{", argument.symbol, argument.initial_supply, token_metadata.mintable, "}"
                 )),
                 description: token_metadata.description,
                 discord: token_metadata.discord,
