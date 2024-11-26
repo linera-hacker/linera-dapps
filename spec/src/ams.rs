@@ -20,19 +20,20 @@ pub struct InstantiationArgument {
 #[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 pub struct Metadata {
     pub creator: ChainAccountOwner,
+    pub application_name: String,
     pub application_id: ApplicationId,
     pub application_type: String,
     pub key_words: Vec<String>,
     pub logo: String,
     pub description: String,
-    pub twitter: String,
-    pub telegram: String,
-    pub discord: String,
-    pub website: String,
-    pub github: String,
+    pub twitter: Option<String>,
+    pub telegram: Option<String>,
+    pub discord: Option<String>,
+    pub website: Option<String>,
+    pub github: Option<String>,
     /// JSON spec of registered application
-    pub spec: String,
-    pub created_at: Timestamp,
+    pub spec: Option<String>,
+    pub created_at: Option<Timestamp>,
 }
 
 scalar!(Metadata);

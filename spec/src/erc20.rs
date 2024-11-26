@@ -31,15 +31,15 @@ pub struct InstantiationArgument {
     pub ams_application_id: Option<ApplicationId>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+#[derive(Default, Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 pub struct TokenMetadata {
     pub logo: String,
     pub description: String,
-    pub twitter: String,
-    pub telegram: String,
-    pub discord: String,
-    pub website: String,
-    pub github: String,
+    pub twitter: Option<String>,
+    pub telegram: Option<String>,
+    pub discord: Option<String>,
+    pub website: Option<String>,
+    pub github: Option<String>,
     pub mintable: bool,
 }
 

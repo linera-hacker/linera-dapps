@@ -15,10 +15,11 @@ use self::state::Application;
 use erc20::ERC20Error;
 use spec::{
     account::ChainAccountOwner,
+    ams::{AMSApplicationAbi, AMSOperation, Metadata},
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     erc20::{
         ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument,
-        SubscriberSyncState,
+        SubscriberSyncState, TokenMetadata,
     },
     swap::{
         abi::{SwapApplicationAbi, SwapOperation, SwapResponse},
@@ -56,13 +57,24 @@ impl Contract for ApplicationContract {
                 self.runtime.authenticated_signer().expect("Invalid owner"),
             )),
         };
-        self.state.instantiate(argument, owner).await;
+        self.state.instantiate(argument.clone(), owner).await;
 
         let initial_balances = self.runtime.application_parameters().initial_balances;
         let _ = self.state.airdrop(initial_balances).await;
-        let token_metadata = self.runtime.application_parameters().token_metadata;
-        if token_metadata != None {
-            let _ = self.state.set_token_metadata(token_metadata.unwrap()).await;
+        let token_metadata = match self.runtime.application_parameters().token_metadata {
+            Some(metadata) => metadata,
+            _ => TokenMetadata::default(),
+        };
+        self.state
+            .set_token_metadata(token_metadata.clone())
+            .await
+            .expect("Invalid metadata");
+
+        match argument.ams_application_id {
+            Some(application_id) => {
+                self.register_ams(application_id, argument, token_metadata);
+            }
+            _ => {}
         }
     }
 
@@ -178,6 +190,44 @@ impl ApplicationContract {
                 )),
             },
         }
+    }
+
+    fn register_ams(
+        &mut self,
+        ams_application_id: ApplicationId,
+        argument: InstantiationArgument,
+        token_metadata: TokenMetadata,
+    ) {
+        let call = AMSOperation::Register {
+            metadata: Metadata {
+                creator: self.runtime_owner(),
+                application_name: argument.name,
+                application_id: self.runtime.application_id().forget_abi(),
+                application_type: "SWAP".to_string(),
+                key_words: [
+                    "ResPeer".to_string(),
+                    "DEX".to_string(),
+                    "CheCko".to_string(),
+                    "Linera".to_string(),
+                ]
+                .to_vec(),
+                logo: token_metadata.logo,
+                // TODO: add token info like symbol, name here
+                spec: None,
+                description: token_metadata.description,
+                discord: token_metadata.discord,
+                twitter: token_metadata.twitter,
+                telegram: token_metadata.telegram,
+                github: token_metadata.github,
+                website: token_metadata.website,
+                created_at: None,
+            },
+        };
+        self.runtime.call_application(
+            true,
+            ams_application_id.with_abi::<AMSApplicationAbi>(),
+            &call,
+        );
     }
 
     fn execute_base_operation(

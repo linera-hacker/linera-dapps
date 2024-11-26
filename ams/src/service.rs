@@ -64,10 +64,10 @@ impl AMSQueryRoot for QueryRoot {
         self.state
             .applications
             .for_each_index_value_while(|_, value| {
-                if created_before.is_some() && value.created_at > created_before.unwrap() {
+                if created_before.is_some() && value.created_at.unwrap() > created_before.unwrap() {
                     return Ok(true);
                 }
-                if created_after.is_some() && value.created_at > created_after.unwrap() {
+                if created_after.is_some() && value.created_at.unwrap() > created_after.unwrap() {
                     return Ok(true);
                 }
                 if let Some(application_type) = application_type.clone() {
