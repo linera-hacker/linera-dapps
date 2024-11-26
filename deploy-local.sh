@@ -94,6 +94,8 @@ function create_wallet() {
   export LINERA_WALLET_$1=$WALLET_BASE/wallet_$1.json
   export LINERA_STORAGE_$1=rocksdb:$WALLET_BASE/client_$1.db
 
+  rm -rf $WALLET_BASE/wallet_$1.json $WALLET_BASE/client_$1.db
+
   linera -w $1 wallet init --faucet $faucet_url --with-new-chain
   linera -w $1 wallet show
 }
