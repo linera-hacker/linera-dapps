@@ -1,13 +1,22 @@
 use ams::AMSError;
-use linera_sdk::base::Amount;
-use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
+use async_graphql::SimpleObject;
+use linera_sdk::{
+    base::ApplicationId,
+    views::{linera_views, MapView, QueueView, RegisterView, RootView, ViewStorageContext},
+};
 use spec::{
     account::ChainAccountOwner,
-    ams::{InstantiationArgument, Metadata, SubscriberSyncState, AMS},
+    ams::{InstantiationArgument, Metadata, SubscriberSyncState},
 };
 use std::collections::HashMap;
 
-pub type Application = AMS;
+#[derive(RootView, SimpleObject)]
+#[view(context = "ViewStorageContext")]
+pub struct Application {
+    pub application_types: QueueView<String>,
+    pub applications: MapView<ApplicationId, Metadata>,
+    pub operator: RegisterView<Option<ChainAccountOwner>>,
+}
 
 #[allow(dead_code)]
 impl Application {
@@ -16,7 +25,7 @@ impl Application {
         argument: InstantiationArgument,
         owner: ChainAccountOwner,
     ) {
-        self.operator.set(owner);
+        self.operator.set(Some(owner));
         for application_type in argument.application_types {
             self.application_types.push_back(application_type);
         }
@@ -27,7 +36,7 @@ impl Application {
         owner: ChainAccountOwner,
         application_type: String,
     ) -> Result<(), AMSError> {
-        if *self.operator.get() != owner {
+        if self.operator.get().unwrap() != owner {
             return Err(AMSError::PermissionDenied);
         }
         self.application_types.push_back(application_type);
@@ -37,16 +46,16 @@ impl Application {
     pub(crate) async fn register_application(
         &mut self,
         owner: ChainAccountOwner,
-        application: Metadata,
+        mut application: Metadata,
     ) -> Result<(), AMSError> {
-        applition.creator = owner;
-        match self.applications.get(application.application_id).await? {
+        let application_id = application.application_id;
+        application.creator = owner;
+        match self.applications.get(&application_id).await? {
             Some(_) => {
                 return Err(AMSError::AlreadyExists);
             }
             _ => {
-                self.applications
-                    .insert(application.application_id, application);
+                self.applications.insert(&application_id, application)?;
             }
         }
         Ok(())
@@ -54,17 +63,13 @@ impl Application {
 
     pub(crate) async fn to_subscriber_sync_state(&self) -> Result<SubscriberSyncState, AMSError> {
         let mut state = SubscriberSyncState {
-            opreator: *self.operator.get(),
+            operator: *self.operator.get(),
+            applications: HashMap::new(),
+            application_types: self.application_types.elements().await?,
         };
-        self.application_types
-            .for_each_index_value(|index, value| {
-                state.application_types.push_back(value);
-                Ok(())
-            })
-            .await?;
         self.applications
             .for_each_index_value(|index, application| {
-                state.applications.insert(index, applications);
+                state.applications.insert(index, application);
                 Ok(())
             })
             .await?;
@@ -76,11 +81,11 @@ impl Application {
         state: SubscriberSyncState,
     ) -> Result<(), AMSError> {
         self.operator.set(state.operator);
-        for (key, value) in &state.application_types {
-            self.applications.insert(key, *value)?;
+        for application_type in state.application_types {
+            self.application_types.push_back(application_type);
         }
-        for (application_id, application) in &state.applications {
-            self.applications.insert(application_id, application)?;
+        for (application_id, application) in state.applications {
+            self.applications.insert(&application_id, application)?;
         }
         Ok(())
     }

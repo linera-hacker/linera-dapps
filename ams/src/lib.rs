@@ -14,4 +14,7 @@ pub enum AMSError {
 
     #[error("Permission denied")]
     PermissionDenied,
+
+    #[error("Not implemented")]
+    NotImplemented,
 }

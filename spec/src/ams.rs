@@ -3,13 +3,11 @@ use crate::{
     base::{BaseMessage, BaseOperation},
 };
 use async_graphql::scalar;
-use async_graphql::{Context, Error, Request, Response, SimpleObject};
+use async_graphql::{Context, Error, Request, Response};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
     base::{ApplicationId, Signature, Timestamp},
     graphql::GraphQLMutationRoot,
-    views::{MapView, QueueView, RegisterView, RootView},
-    ViewStorageContext,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -43,7 +41,7 @@ scalar!(Metadata);
 pub struct SubscriberSyncState {
     pub application_types: Vec<String>,
     pub applications: HashMap<ApplicationId, Metadata>,
-    pub operator: ChainAccountOwner,
+    pub operator: Option<ChainAccountOwner>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -53,15 +51,17 @@ pub enum AMSMessage {
         origin: ChainAccountOwner,
         metadata: Metadata,
     },
-    claim {
+    Claim {
         origin: ChainAccountOwner,
         application_id: ApplicationId,
         signature: Signature,
     },
     AddApplicationType {
+        origin: ChainAccountOwner,
         application_type: String,
     },
     Update {
+        origin: ChainAccountOwner,
         application_id: ApplicationId,
         metadata: Metadata,
     },
@@ -77,7 +77,7 @@ pub enum AMSOperation {
     Register {
         metadata: Metadata,
     },
-    claim {
+    Claim {
         application_id: ApplicationId,
         signature: Signature,
     },
@@ -115,6 +115,7 @@ pub trait AMSQueryRoot {
         created_before: Option<Timestamp>,
         created_after: Option<Timestamp>,
         application_type: Option<String>,
+        limit: usize,
     ) -> impl std::future::Future<Output = Result<Vec<Metadata>, Error>> + Send;
 
     fn application(
@@ -122,12 +123,4 @@ pub trait AMSQueryRoot {
         ctx: &Context<'_>,
         application_id: ApplicationId,
     ) -> impl std::future::Future<Output = Result<Option<Metadata>, Error>> + Send;
-}
-
-#[derive(RootView, SimpleObject)]
-#[view(context = "ViewStorageContext")]
-pub struct AMS {
-    pub application_types: QueueView<String>,
-    pub applications: MapView<ApplicationId, Metadata>,
-    pub operator: RegisterView<Option<ChainAccountOwner>>,
 }
