@@ -118,6 +118,9 @@ function run_service () {
   socat TCP4-LISTEN:$pub_port TCP4:localhost:$local_port
 }
 
+rm $WALLET_BASE -rf
+mkdir $WALLET_BASE -p
+
 create_wallet 10
 create_wallet 11
 create_wallet 12
