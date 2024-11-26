@@ -240,6 +240,7 @@ echo "SWAP_CREATION_OWNER=$owner" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_APPID=$swap_appid" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30092" >> $PROJECT_ROOT/.local-defi-materials
 echo "WLINERA_APPID=$erc20_2_appid" >> $PROJECT_ROOT/.local-defi-materials
+echo "AMS_APPID=$ams_appid" >> $PROJECT_ROOT/.local-defi-materials
 
 swap_creation_chain=$chain
 
