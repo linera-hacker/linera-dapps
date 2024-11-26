@@ -20,6 +20,7 @@ pub struct SwapApplicationAbi;
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct SwapParameters {
     pub wlinera_application_id: Option<ApplicationId>,
+    pub ams_application_id: Option<ApplicationId>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
