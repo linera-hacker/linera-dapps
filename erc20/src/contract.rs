@@ -203,10 +203,10 @@ impl ApplicationContract {
                 creator: self.runtime_owner(),
                 application_name: argument.name,
                 application_id: self.runtime.application_id().forget_abi(),
-                application_type: "SWAP".to_string(),
+                application_type: "ERC20".to_string(),
                 key_words: [
                     "ResPeer".to_string(),
-                    "DEX".to_string(),
+                    "ERC20".to_string(),
                     "CheCko".to_string(),
                     "Linera".to_string(),
                 ]
