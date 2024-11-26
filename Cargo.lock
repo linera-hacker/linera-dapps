@@ -66,6 +66,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c6cb57a04249c6480766f7f7cef5467412af1490f8d1e243141daddada3264f"
 
 [[package]]
+name = "ams"
+version = "0.1.0"
+dependencies = [
+ "async-graphql",
+ "bcs",
+ "linera-sdk",
+ "log",
+ "serde",
+ "serde_json",
+ "spec",
+ "thiserror",
+]
+
+[[package]]
 name = "anstream"
 version = "0.6.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"

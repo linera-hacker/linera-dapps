@@ -8,7 +8,7 @@ use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
     base::{ApplicationId, Signature, Timestamp},
     graphql::GraphQLMutationRoot,
-    views::{MapView, QueueView, RootView},
+    views::{MapView, QueueView, RegisterView, RootView},
     ViewStorageContext,
 };
 use serde::{Deserialize, Serialize};
@@ -43,6 +43,7 @@ scalar!(Metadata);
 pub struct SubscriberSyncState {
     pub application_types: Vec<String>,
     pub applications: HashMap<ApplicationId, Metadata>,
+    pub operator: ChainAccountOwner,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -50,6 +51,18 @@ pub enum AMSMessage {
     BaseMessage(BaseMessage),
     Register {
         origin: ChainAccountOwner,
+        metadata: Metadata,
+    },
+    claim {
+        origin: ChainAccountOwner,
+        application_id: ApplicationId,
+        signature: Signature,
+    },
+    AddApplicationType {
+        application_type: String,
+    },
+    Update {
+        application_id: ApplicationId,
         metadata: Metadata,
     },
     SubscriberSync {
@@ -61,7 +74,20 @@ pub enum AMSMessage {
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum AMSOperation {
     BaseOperation(BaseOperation),
-    Register { metadata: Metadata },
+    Register {
+        metadata: Metadata,
+    },
+    claim {
+        application_id: ApplicationId,
+        signature: Signature,
+    },
+    AddApplicationType {
+        application_type: String,
+    },
+    Update {
+        application_id: ApplicationId,
+        metadata: Metadata,
+    },
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -95,34 +121,7 @@ pub trait AMSQueryRoot {
         &self,
         ctx: &Context<'_>,
         application_id: ApplicationId,
-    ) -> impl std::future::Future<Output = Result<Metadata, Error>> + Send;
-}
-
-pub trait AMSMutationRoot {
-    fn claim(
-        &self,
-        ctx: &Context<'_>,
-        application_id: ApplicationId,
-        signature: Signature,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    fn add_application_type(
-        &self,
-        ctx: &Context<'_>,
-        application_type: Option<String>,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    fn update(
-        &self,
-        ctx: &Context<'_>,
-        application_id: ApplicationId,
-        metadata: Metadata,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
-
-    fn subscribe_creator_chain(
-        &self,
-        ctx: &Context<'_>,
-    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+    ) -> impl std::future::Future<Output = Result<Option<Metadata>, Error>> + Send;
 }
 
 #[derive(RootView, SimpleObject)]
@@ -130,4 +129,5 @@ pub trait AMSMutationRoot {
 pub struct AMS {
     pub application_types: QueueView<String>,
     pub applications: MapView<ApplicationId, Metadata>,
+    pub operator: RegisterView<Option<ChainAccountOwner>>,
 }

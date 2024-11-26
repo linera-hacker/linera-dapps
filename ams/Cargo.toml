@@ -1,0 +1,31 @@
+[package]
+name = "ams"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+async-graphql.workspace = true
+linera-sdk.workspace = true
+spec.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+bcs.workspace = true
+serde_json.workspace = true
+log.workspace = true
+
+[dev-dependencies]
+linera-sdk = { workspace = true, features = ["test"] }
+
+[[bin]]
+name = "ams_contract"
+path = "src/contract.rs"
+
+[[bin]]
+name = "ams_service"
+path = "src/service.rs"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = 'z'
+strip = 'debuginfo'

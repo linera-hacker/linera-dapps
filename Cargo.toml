@@ -4,6 +4,7 @@ members = [
     "erc20",
     "swap",
     "swap/router",
+    "ams",
 ]
 resolver = "2"
 
