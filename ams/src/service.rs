@@ -80,6 +80,7 @@ impl AMSQueryRoot for QueryRoot {
             })
             .await
             .expect("Failed get applications");
+        values.sort_by(|a, b| a.created_at.unwrap().cmp(&b.created_at.unwrap()));
         values
     }
 
