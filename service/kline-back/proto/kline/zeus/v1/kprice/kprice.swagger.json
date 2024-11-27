@@ -1,0 +1,213 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kline/zeus/v1/kprice/kprice.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Manager"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "klineInt32SliceVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "klineUint32Val": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpriceConds": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "TokenPairID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "Timestamp": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "IDs": {
+          "$ref": "#/definitions/klineInt32SliceVal"
+        }
+      }
+    },
+    "kpriceCreateKPriceResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpriceKPrice"
+        }
+      }
+    },
+    "kpriceDeleteKPriceResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpriceKPrice"
+        }
+      }
+    },
+    "kpriceExistKPriceCondsResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "kpriceExistKPriceResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "kpriceGetKPriceResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpriceKPrice"
+        }
+      }
+    },
+    "kpriceGetKPricesResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/kpriceKPrice"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpriceKPrice": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"id\""
+        },
+        "TokenPairID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"token_pair_id\""
+        },
+        "Price": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"price\""
+        },
+        "Timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"timestamp\""
+        },
+        "CreatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"created_at\""
+        },
+        "UpdatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"updated_at\""
+        }
+      }
+    },
+    "kpriceKPriceReq": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "TokenPairID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Price": {
+          "type": "number",
+          "format": "double"
+        },
+        "Timestamp": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpriceUpdateKPriceResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpriceKPrice"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

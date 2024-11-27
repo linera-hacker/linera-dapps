@@ -1,0 +1,348 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kline/zeus/v1/tokenpair/tokenpair.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Manager"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/get/token/pairs": {
+      "post": {
+        "operationId": "Manager_GetTokenPairs",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/tokenpaireGetTokenPairsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/tokenpaireGetTokenPairsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "klineStringVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      }
+    },
+    "klineUint32SliceVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      }
+    },
+    "klineUint32Val": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "klineUint64SliceVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uint64"
+          }
+        }
+      }
+    },
+    "klineUint64Val": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "tokenpaireConds": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "PoolID": {
+          "$ref": "#/definitions/klineUint64Val"
+        },
+        "TokenZeroID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "TokenOneID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "Remark": {
+          "$ref": "#/definitions/klineStringVal"
+        },
+        "IDs": {
+          "$ref": "#/definitions/klineUint32SliceVal"
+        },
+        "PoolIDs": {
+          "$ref": "#/definitions/klineUint64SliceVal"
+        }
+      }
+    },
+    "tokenpaireCreateTokenPairResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/tokenpaireTokenPair"
+        }
+      }
+    },
+    "tokenpaireDeleteTokenPairResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/tokenpaireTokenPair"
+        }
+      }
+    },
+    "tokenpaireExistTokenPairCondsResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tokenpaireExistTokenPairResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "tokenpaireGetTokenPairResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/tokenpaireTokenPair"
+        }
+      }
+    },
+    "tokenpaireGetTokenPairsRequest": {
+      "type": "object",
+      "properties": {
+        "Conds": {
+          "$ref": "#/definitions/tokenpaireConds"
+        },
+        "Offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "tokenpaireGetTokenPairsResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/tokenpaireTokenPair"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "tokenpaireTokenPair": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"id\""
+        },
+        "PoolID": {
+          "type": "string",
+          "format": "uint64",
+          "title": "@inject_tag: sql:\"pool_id\""
+        },
+        "TokenZeroID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"token_zero_id\""
+        },
+        "TokenZeroName": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_zero_name\""
+        },
+        "TokenZeroAddress": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_zero_address\""
+        },
+        "TokenZeroIcon": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_zero_icon\""
+        },
+        "TokenZeroSymbol": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_zero_symbol\""
+        },
+        "TokenOneID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"token_one_id\""
+        },
+        "TokenOneName": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_one_name\""
+        },
+        "TokenOneAddress": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_one_address\""
+        },
+        "TokenOneIcon": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_one_icon\""
+        },
+        "TokenOneSymbol": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_one_symbol\""
+        },
+        "Remark": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"remark\""
+        },
+        "CreatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"created_at\""
+        },
+        "UpdatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"updated_at\""
+        }
+      }
+    },
+    "tokenpaireTokenPairReq": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TokenZeroID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "TokenOneID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Remark": {
+          "type": "string"
+        }
+      }
+    },
+    "tokenpaireUpdateTokenPairResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/tokenpaireTokenPair"
+        }
+      }
+    }
+  }
+}
