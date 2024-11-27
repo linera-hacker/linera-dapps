@@ -2,9 +2,9 @@
 
 ## dApps
 - [x] Linera ERC20 fungible token
-- [ ] Linera ERC20 fungible token web app
+- [X] Linera ERC20 fungible token web app
 - [x] Linera dex
-- [ ] Linera dex web app
+- [X] Linera dex web app
 
 ## How to run
 ### Note
