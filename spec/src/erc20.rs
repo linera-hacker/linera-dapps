@@ -45,6 +45,12 @@ pub struct TokenMetadata {
 
 scalar!(TokenMetadata);
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SimpleObject)]
+pub struct ChainAccountOwnerBalance {
+    pub owner: ChainAccountOwner,
+    pub balance: Amount,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubscriberSyncState {
     pub total_supply: Amount,
@@ -184,6 +190,12 @@ pub trait ERC20QueryRoot {
         &self,
         ctx: &Context<'_>,
     ) -> impl std::future::Future<Output = Result<Option<TokenMetadata>, Error>> + Send;
+
+    fn balance_top_list(
+        &self,
+        ctx: &Context<'_>,
+        limit: usize,
+    ) -> impl std::future::Future<Output = Result<Vec<ChainAccountOwnerBalance>, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {

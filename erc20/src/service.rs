@@ -12,7 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot, TokenMetadata},
+    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot, TokenMetadata, ChainAccountOwnerBalance},
 };
 use std::sync::Arc;
 
@@ -87,6 +87,20 @@ impl ERC20QueryRoot for QueryRoot {
     async fn token_metadata(&self) -> Option<TokenMetadata> {
         let token_metadata = self.state.token_metadata.get().clone();
         token_metadata
+    }
+
+    async fn balance_top_list(&self, limit: usize) -> Vec<ChainAccountOwnerBalance> {
+        let mut balances_vec: Vec<ChainAccountOwnerBalance> = Vec::new();
+
+        self.state.balances.for_each_index_value(|chain_owner, value| {
+            balances_vec.push(ChainAccountOwnerBalance{ owner:chain_owner, balance: value });
+            Ok(())
+        })
+        .await
+        .expect("Failed get applications");
+        balances_vec.sort_by(|a, b| b.balance.partial_cmp(&a.balance).unwrap());
+
+        balances_vec.into_iter().take(limit).collect()
     }
 }
 
