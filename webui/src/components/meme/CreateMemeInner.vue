@@ -262,8 +262,8 @@ const createApplication = async (): Promise<any> => {
 
   const publicKey = account.value
   const query = gql`
-    mutation createApplication($bytecodeId: String!, $parameters: String!, $instantiationArgument: String!, $requiredApplicationIds: String!, ) {
-      createApplication(bytecodeId: $bytecodeId, parameters: $parameters, instantiationArgument: $instantiationArgument, requiredApplicationIds: $requiredApplicationIds)
+    mutation createApplication($chainId: String!, $bytecodeId: String!, $parameters: String!, $instantiationArgument: String!, $requiredApplicationIds: String!, ) {
+      createApplication(chainId: $chainId, bytecodeId: $bytecodeId, parameters: $parameters, instantiationArgument: $instantiationArgument, requiredApplicationIds: $requiredApplicationIds)
     }`
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -272,6 +272,7 @@ const createApplication = async (): Promise<any> => {
       params: {
         publicKey: publicKey,
         query: {
+          chainId: chainId.value,
           query: query.loc?.source?.body,
           variables: {
             bytecodeId: constants.constants.erc20BID,

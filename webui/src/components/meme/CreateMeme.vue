@@ -190,8 +190,8 @@ const requestApplication = async (appID: string) => {
   const publicKey = account.value
   const creatorChainId = applicationCreatorChainId(appID)
   const query = gql`
-    mutation requestApplication ($chainId: String!, $applicationId: String!) {
-      requestApplication(chainId: $chainId, applicationId: $applicationId)
+    mutation requestApplication ($chainId: String!, $applicationId: String!, $targetChainId: String!) {
+      requestApplication(chainId: $chainId, applicationId: $applicationId, targetChainId: $targetChainId)
     }`
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -202,8 +202,9 @@ const requestApplication = async (appID: string) => {
         query: {
           query: query.loc?.source?.body,
           variables: {
-            chainId: creatorChainId,
-            applicationId: appID
+            chainId: chainId.value,
+            applicationId: appID,
+            targetChainId: creatorChainId
           },
           operationName: 'requestApplication'
         }
