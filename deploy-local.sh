@@ -49,6 +49,7 @@ case $NETWORK_ID in
     WALLET_11_PUBLIC_IPORT='210.209.69.38:23101'
     WALLET_12_PUBLIC_IPORT='210.209.69.38:23103'
     WALLET_13_PUBLIC_IPORT='210.209.69.38:23105'
+    WALLET_14_PUBLIC_IPORT='210.209.69.38:23106'
     LOCAL_IP='172.21.132.203'
     ;;
   2)
@@ -56,6 +57,7 @@ case $NETWORK_ID in
     WALLET_11_PUBLIC_IPORT='172.16.31.73:40111'
     WALLET_12_PUBLIC_IPORT='172.16.31.73:40112'
     WALLET_13_PUBLIC_IPORT='172.16.31.73:40113'
+    WALLET_14_PUBLIC_IPORT='172.16.31.73:40114'
     LOCAL_IP='172.16.31.73'
     ;;
   3)
@@ -63,6 +65,7 @@ case $NETWORK_ID in
     WALLET_11_PUBLIC_IPORT='localhost:30091'
     WALLET_12_PUBLIC_IPORT='localhost:30092'
     WALLET_13_PUBLIC_IPORT='localhost:30093'
+    WALLET_14_PUBLIC_IPORT='localhost:30094'
     LOCAL_IP='localhost'
     ;;
   4)
@@ -70,6 +73,7 @@ case $NETWORK_ID in
     WALLET_11_PUBLIC_IPORT='172.16.31.73:30091'
     WALLET_12_PUBLIC_IPORT='172.16.31.73:30092'
     WALLET_13_PUBLIC_IPORT='172.16.31.73:30093'
+    WALLET_14_PUBLIC_IPORT='172.16.31.73:30094'
     LOCAL_IP='172.16.31.73'
     ;;
 esac
@@ -126,6 +130,9 @@ ams_bid=`linera --with-wallet 14 publish-bytecode ./target/wasm32-unknown-unknow
 ams_appid=`linera --with-wallet 14 create-application $ams_bid \
     --json-argument '{"application_types": ["SWAP", "ERC20", "AMS"]}' \
     `
+print $'\U01f499' $LIGHTGREEN " AMS application deployed"
+echo -e "    Bytecode ID:    $BLUE$ams_bid$NC"
+echo -e "    Application ID: $BLUE$ams_appid$NC"
 
 linera --with-wallet 10 request-application $ams_appid
 linera --with-wallet 11 request-application $ams_appid
@@ -272,6 +279,16 @@ wallet_13_owner=$owner
 wallet_13_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1_appid"
 wallet_13_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
 wallet_13_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid"
+
+
+HTTP_HOST="http://$WALLET_14_PUBLIC_IPORT"
+chain=`linera --with-wallet 14 wallet show | grep "Public Key" | awk '{print $2}'`
+owner=`linera --with-wallet 14 wallet show | grep "Owner" | awk '{print $4}'`
+print_apps "Wallet 14" $HTTP_HOST $chain $owner
+
+wallet_14_public_ams_service="$HTTP_HOST/chains/$chain/applications/$ams_appid"
+
+ams_creation_chain=$chain
 
 ####
 ## We should
@@ -496,6 +513,28 @@ echo -e "mutation {\n\
   mint(amount: \"1.\")\n\
 }"
 
+print $'\U01F4AB' $YELLOW " Query Applications with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_14_public_ams_service"
+timestamp_us=$(date +%s%6N)
+echo -e "query {\n\
+  applications(\n\
+    createdBefore: $timestamp_us\n\
+    createdAfter: 0\n\
+    applicationType: \"ERC20\"\n\
+    limit: 5\n\
+  )\n\
+}"
+
+print $'\U01F4AB' $YELLOW " Query Application with..."
+print $'\U01F4AB' $LIGHTGREEN " $wallet_14_public_ams_service"
+echo -e "query {\n\
+  application(\n\
+    applicationId: \"$swap_appid\"\n\
+  )\n\
+}"
+
+print $'\U01F4AB' $LIGHTGREEN " AMS Application: $ams_appid"
+print $'\U01F4AB' $LIGHTGREEN " AMS Creation Chain: $ams_creation_chain"
 print $'\U01F4AB' $LIGHTGREEN " Swap Application: $swap_appid"
 print $'\U01F4AB' $LIGHTGREEN " Swap Creation Chain: $swap_creation_chain"
 print $'\U01F4AB' $LIGHTGREEN " WLINERA Application: $erc20_2_appid"
