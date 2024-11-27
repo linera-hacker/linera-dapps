@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package kline.v1.summary;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/summary";
+import "google/api/annotations.proto";
+import "kline/kline.proto";
+
+service Manager {
+  rpc GetTokenLastCond(GetTokenLastCondRequest)
+    returns (GetTokenLastCondResponse) {
+      option (google.api.http) = {
+        post : "/v1/get/token/last/cond"
+        body : "*"
+      };
+  }
+  rpc GetOneDayVolumn(GetOneDayVolumnRequest)
+    returns (GetOneDayVolumnResponse) {
+      option (google.api.http) = {
+        post : "/v1/get/one/day/volumn"
+        body : "*"
+      };
+  }
+  rpc ExistToken(ExistTokenRequest) returns (ExistTokenResponse) {
+      option (google.api.http) = {
+        post : "/v1/exit/token/by/symbol"
+        body : "*"
+      };
+  }
+}
+
+message TokenLastCond {
+  uint64 PoolID = 10;
+  string TokenZeroAddress = 20;
+  string TokenOneAddress = 30;
+  uint32 LastTxAt = 40;
+  double LastTxZeroAmount = 50;
+  double LastTxOneAmount = 51;
+  double OneDayZeroAmountVolumn = 60;
+  double OneDayOneAmountVolumn = 61;
+  double NowPrice = 70;
+  double OneDayIncresePercent = 80;
+}
+
+message GetTokenLastCondRequest { 
+  uint64 PoolID = 10;
+  string TokenZeroAddress = 20;
+  string TokenOneAddress = 30;
+}
+
+message GetTokenLastCondResponse { TokenLastCond Info = 10; }
+
+message ExistTokenRequest { string Symbol = 10; }
+message ExistTokenResponse { bool Exist = 10; }
+
+
+message TokenVolumn {
+  uint64 PoolID = 10;
+  string Address = 20;
+  string Name = 30;
+  string Icon = 40;
+  string Symbol = 50;
+  double Amount = 60;
+}
+
+message GetOneDayVolumnRequest {}
+
+message GetOneDayVolumnResponse { repeated TokenVolumn Infos = 10; }

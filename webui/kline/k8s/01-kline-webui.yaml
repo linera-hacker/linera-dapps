@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webui-template
+  namespace: kube-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: webui-template
+  template:
+    metadata:
+      labels:
+        app: webui-template
+    spec:
+      containers:
+        - name: webui-template
+          image: uhub.service.ucloud.cn/entropypool/webui-template:latest
+          imagePullPolicy: Always
+          env:
+            - name: ENV_ENVIRONMENT_TARGET
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.target
+            - name: ENV_CONSUL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_host
+            - name: ENV_CONSUL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_port
+            - name: ENV_CLUSTER_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webui-template
+  namespace: kube-system
+spec:
+  ports:
+    - name: api
+      port: 80
+      targetPort: 80
+  selector:
+    app: webui-template

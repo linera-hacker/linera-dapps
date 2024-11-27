@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package basetype;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/basetype/v1";
+
+enum KPointType {
+  KPointTypeUnknown = 0;
+  FiveSecond = 10;
+  OneMinute = 20;
+  TenMinute = 30;
+  OneHour = 40;
+  OneDay = 50;
+  OneWeek = 60;
+  OneMonth = 70;
+}

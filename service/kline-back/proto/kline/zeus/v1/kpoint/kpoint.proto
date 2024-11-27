@@ -1,0 +1,144 @@
+syntax = "proto3";
+
+package kline.v1.kpoint;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint";
+import "google/api/annotations.proto";
+import "kline/kline.proto";
+import "kline/basetype/v1/kpoint.proto";
+
+service Manager {
+  rpc CreateKPoint(CreateKPointRequest) returns (CreateKPointResponse) {}
+  rpc UpdateKPoint(UpdateKPointRequest) returns (UpdateKPointResponse) {}
+  rpc GetKPoint(GetKPointRequest) returns (GetKPointResponse) {}
+  rpc GetKPoints(GetKPointsRequest) returns (GetKPointsResponse) {}
+  rpc GetKPointsForLine(GetKPointsForLineRequest)
+      returns (GetKPointsForLineResponse) {
+    option (google.api.http) = {
+      post : "/v1/get/kpoints/for/line"
+      body : "*"
+    };
+  }
+  rpc GetKPointTypes(GetKPointTypesRequest) returns (GetKPointTypesResponse) {
+    option (google.api.http) = {
+      post : "/v1/get/kpoint/types"
+      body : "*"
+    };
+  }
+  rpc ExistKPoint(ExistKPointRequest) returns (ExistKPointResponse) {}
+  rpc ExistKPointConds(ExistKPointCondsRequest)
+      returns (ExistKPointCondsResponse) {}
+  rpc DeleteKPoint(DeleteKPointRequest) returns (DeleteKPointResponse) {}
+}
+
+message KPointReq {
+  optional uint32 ID = 10;
+  optional uint32 TokenPairID = 20;
+  optional basetype.KPointType KPointType = 30;
+  optional double Open = 40;
+  optional double High = 50;
+  optional double Low = 60;
+  optional double Close = 70;
+  optional uint32 StartTime = 80;
+  optional uint32 EndTime = 90;
+}
+
+message KPoint {
+  // @inject_tag: sql:"id"
+  uint32 ID = 10;
+  // @inject_tag: sql:"token_pair_id"
+  uint32 TokenPairID = 20;
+  // @inject_tag: sql:"k_point_type"
+  string KPointTypeStr = 30;
+  basetype.KPointType KPointType = 31;
+  // @inject_tag: sql:"open"
+  double Open = 40;
+  // @inject_tag: sql:"high"
+  double High = 50;
+  // @inject_tag: sql:"low"
+  double Low = 60;
+  // @inject_tag: sql:"close"
+  double Close = 70;
+  // @inject_tag: sql:"start_time"
+  uint32 StartTime = 80;
+  // @inject_tag: sql:"end_time"
+  uint32 EndTime = 90;
+  // @inject_tag: sql:"created_at"
+  uint32 CreatedAt = 190;
+  // @inject_tag: sql:"updated_at"
+  uint32 UpdatedAt = 200;
+}
+
+message Conds {
+  kline.Uint32Val ID = 10;
+  kline.Uint32Val TokenPairID = 20;
+  kline.Uint32Val KPointType = 30;
+  kline.Uint32Val StartAt = 40;
+  kline.Uint32Val EndAt = 50;
+  kline.Int32SliceVal IDs = 190;
+}
+
+message CreateKPointRequest { KPointReq Info = 10; }
+message CreateKPointResponse { KPoint Info = 10; }
+
+message GetKPointRequest { uint32 ID = 10; }
+message GetKPointResponse { KPoint Info = 10; }
+
+message GetKPointsRequest {
+  Conds Conds = 10;
+  int32 Offset = 20;
+  int32 Limit = 30;
+}
+
+message GetKPointsResponse {
+  repeated KPoint Infos = 10;
+  uint32 Total = 20;
+}
+
+message KPointTypeInfo {
+  basetype.KPointType KPointType = 10;
+  string ShortName = 20;
+  uint32 Seconds = 30;
+}
+
+message GetKPointTypesRequest {}
+
+message GetKPointTypesResponse { repeated KPointTypeInfo Infos = 10; }
+
+message KPointForLine {
+  // open close low high
+  repeated double Nums = 10;
+  // start time -> end time
+  repeated uint32 Times = 20;
+  repeated string FormatTimes = 30;
+}
+
+message GetKPointsForLineRequest {
+  uint32 OriginalTime = 10;
+  basetype.KPointType KPointType = 20;
+  uint32 TokenPairID = 30;
+  int32 Offset = 40;
+  int32 Limit = 50;
+}
+
+message GetKPointsForLineResponse {
+  uint32 OriginalTime = 10;
+  basetype.KPointType KPointType = 20;
+  uint32 TokenPairID = 30;
+  int32 Offset = 40;
+  int32 Limit = 50;
+  repeated KPointForLine KPoints = 60;
+  uint32 Total = 70;
+}
+
+message UpdateKPointRequest { KPointReq Info = 10; }
+message UpdateKPointResponse { KPoint Info = 10; }
+
+message ExistKPointRequest { uint32 ID = 10; }
+message ExistKPointResponse { bool Exist = 10; }
+
+message ExistKPointCondsRequest { Conds Conds = 10; }
+message ExistKPointCondsResponse { bool Exist = 10; }
+
+message DeleteKPointRequest { uint32 ID = 10; }
+message DeleteKPointResponse { KPoint Info = 10; }

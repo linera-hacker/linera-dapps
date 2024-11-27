@@ -1,0 +1,460 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kline/zeus/v1/kpoint/kpoint.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Manager"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/get/kpoint/types": {
+      "post": {
+        "operationId": "Manager_GetKPointTypes",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/kpointGetKPointTypesResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/kpointGetKPointTypesRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/v1/get/kpoints/for/line": {
+      "post": {
+        "operationId": "Manager_GetKPointsForLine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/kpointGetKPointsForLineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/kpointGetKPointsForLineRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "basetypeKPointType": {
+      "type": "string",
+      "enum": [
+        "KPointTypeUnknown",
+        "FiveSecond",
+        "OneMinute",
+        "TenMinute",
+        "OneHour",
+        "OneDay",
+        "OneWeek",
+        "OneMonth"
+      ],
+      "default": "KPointTypeUnknown"
+    },
+    "klineInt32SliceVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "klineUint32Val": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpointConds": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "TokenPairID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "KPointType": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "StartAt": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "EndAt": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "IDs": {
+          "$ref": "#/definitions/klineInt32SliceVal"
+        }
+      }
+    },
+    "kpointCreateKPointResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpointKPoint"
+        }
+      }
+    },
+    "kpointDeleteKPointResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpointKPoint"
+        }
+      }
+    },
+    "kpointExistKPointCondsResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "kpointExistKPointResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "kpointGetKPointResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpointKPoint"
+        }
+      }
+    },
+    "kpointGetKPointTypesRequest": {
+      "type": "object"
+    },
+    "kpointGetKPointTypesResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/kpointKPointTypeInfo"
+          }
+        }
+      }
+    },
+    "kpointGetKPointsForLineRequest": {
+      "type": "object",
+      "properties": {
+        "OriginalTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "KPointType": {
+          "$ref": "#/definitions/basetypeKPointType"
+        },
+        "TokenPairID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "kpointGetKPointsForLineResponse": {
+      "type": "object",
+      "properties": {
+        "OriginalTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "KPointType": {
+          "$ref": "#/definitions/basetypeKPointType"
+        },
+        "TokenPairID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "Offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "KPoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/kpointKPointForLine"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpointGetKPointsResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/kpointKPoint"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpointKPoint": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"id\""
+        },
+        "TokenPairID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"token_pair_id\""
+        },
+        "KPointTypeStr": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"k_point_type\""
+        },
+        "KPointType": {
+          "$ref": "#/definitions/basetypeKPointType"
+        },
+        "Open": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"open\""
+        },
+        "High": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"high\""
+        },
+        "Low": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"low\""
+        },
+        "Close": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"close\""
+        },
+        "StartTime": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"start_time\""
+        },
+        "EndTime": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"end_time\""
+        },
+        "CreatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"created_at\""
+        },
+        "UpdatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"updated_at\""
+        }
+      }
+    },
+    "kpointKPointForLine": {
+      "type": "object",
+      "properties": {
+        "Nums": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "format": "double"
+          },
+          "title": "open close low high"
+        },
+        "Times": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "title": "start time -\u003e end time"
+        },
+        "FormatTimes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "kpointKPointReq": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "TokenPairID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "KPointType": {
+          "$ref": "#/definitions/basetypeKPointType"
+        },
+        "Open": {
+          "type": "number",
+          "format": "double"
+        },
+        "High": {
+          "type": "number",
+          "format": "double"
+        },
+        "Low": {
+          "type": "number",
+          "format": "double"
+        },
+        "Close": {
+          "type": "number",
+          "format": "double"
+        },
+        "StartTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "EndTime": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpointKPointTypeInfo": {
+      "type": "object",
+      "properties": {
+        "KPointType": {
+          "$ref": "#/definitions/basetypeKPointType"
+        },
+        "ShortName": {
+          "type": "string"
+        },
+        "Seconds": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "kpointUpdateKPointResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/kpointKPoint"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

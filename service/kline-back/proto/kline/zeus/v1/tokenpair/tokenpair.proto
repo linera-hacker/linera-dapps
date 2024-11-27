@@ -1,0 +1,109 @@
+syntax = "proto3";
+
+package kline.v1.tokenpaire;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/tokenpair";
+import "kline/kline.proto";
+import "google/api/annotations.proto";
+
+service Manager {
+  rpc CreateTokenPair(CreateTokenPairRequest)
+      returns (CreateTokenPairResponse) {}
+  rpc UpdateTokenPair(UpdateTokenPairRequest)
+      returns (UpdateTokenPairResponse) {}
+  rpc GetTokenPair(GetTokenPairRequest) returns (GetTokenPairResponse) {}
+  rpc GetTokenPairs(GetTokenPairsRequest) returns (GetTokenPairsResponse) {
+    option (google.api.http) = {
+      post : "/v1/get/token/pairs"
+      body : "*"
+    };
+  }
+  rpc ExistTokenPair(ExistTokenPairRequest) returns (ExistTokenPairResponse) {}
+  rpc ExistTokenPairConds(ExistTokenPairCondsRequest)
+      returns (ExistTokenPairCondsResponse) {}
+  rpc DeleteTokenPair(DeleteTokenPairRequest)
+      returns (DeleteTokenPairResponse) {}
+}
+
+message TokenPairReq {
+  optional uint32 ID = 10;
+  optional uint64 PoolID = 11;
+  optional uint32 TokenZeroID = 20;
+  optional uint32 TokenOneID = 30;
+  optional string Remark = 40;
+}
+
+message TokenPair {
+  // @inject_tag: sql:"id"
+  uint32 ID = 10;
+  // @inject_tag: sql:"pool_id"
+  uint64 PoolID = 11;
+  // @inject_tag: sql:"token_zero_id"
+  uint32 TokenZeroID = 20;
+  // @inject_tag: sql:"token_zero_name"
+  string TokenZeroName = 21;
+  // @inject_tag: sql:"token_zero_address"
+  string TokenZeroAddress = 22;
+  // @inject_tag: sql:"token_zero_icon"
+  string TokenZeroIcon = 23;
+  // @inject_tag: sql:"token_zero_symbol"
+  string TokenZeroSymbol = 24;
+  // @inject_tag: sql:"token_one_id"
+  uint32 TokenOneID = 30;
+  // @inject_tag: sql:"token_one_name"
+  string TokenOneName = 31;
+  // @inject_tag: sql:"token_one_address"
+  string TokenOneAddress = 32;
+  // @inject_tag: sql:"token_one_icon"
+  string TokenOneIcon = 33;
+  // @inject_tag: sql:"token_one_symbol"
+  string TokenOneSymbol = 34;
+  // @inject_tag: sql:"remark"
+  string Remark = 40;
+  // @inject_tag: sql:"created_at"
+  uint32 CreatedAt = 90;
+  // @inject_tag: sql:"updated_at"
+  uint32 UpdatedAt = 100;
+}
+
+message Conds {
+  optional kline.Uint32Val ID = 10;
+  optional kline.Uint64Val PoolID = 11;
+  optional kline.Uint32Val TokenZeroID = 20;
+  optional kline.Uint32Val TokenOneID = 30;
+  optional kline.StringVal Remark = 40;
+  optional kline.Uint32SliceVal IDs = 200;
+  optional kline.Uint64SliceVal PoolIDs = 210;
+}
+
+message CreateTokenPairRequest { TokenPairReq Info = 10; }
+message CreateTokenPairResponse { TokenPair Info = 10; }
+
+message GetTokenPairRequest { uint32 ID = 10; }
+message GetTokenPairResponse { TokenPair Info = 10; }
+
+message GetTokenPairsRequest {
+  Conds Conds = 10;
+  int32 Offset = 20;
+  int32 Limit = 30;
+}
+
+message GetTokenPairsResponse {
+  repeated TokenPair Infos = 10;
+  uint32 Total = 20;
+}
+
+message GetTokenPairOnlyRequest { Conds Conds = 10; }
+message GetTokenPairOnlyResponse { TokenPair Info = 10; }
+
+message UpdateTokenPairRequest { TokenPairReq Info = 10; }
+message UpdateTokenPairResponse { TokenPair Info = 10; }
+
+message ExistTokenPairRequest { uint32 ID = 10; }
+message ExistTokenPairResponse { bool Exist = 10; }
+
+message ExistTokenPairCondsRequest { Conds Conds = 10; }
+message ExistTokenPairCondsResponse { bool Exist = 10; }
+
+message DeleteTokenPairRequest { uint32 ID = 10; }
+message DeleteTokenPairResponse { TokenPair Info = 10; }

@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package kline;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline";
+
+import "google/protobuf/struct.proto";
+
+message VersionResponse { string Info = 10; }
+
+message FilterCond {
+  string Op = 10;
+  google.protobuf.Value Val = 20;
+}
+
+message Int32Val {
+  string Op = 10;
+  int32 Value = 20;
+}
+
+message Int64Val {
+  string Op = 10;
+  int64 Value = 20;
+}
+
+message Uint32Val {
+  string Op = 10;
+  uint32 Value = 20;
+}
+
+message Uint64Val {
+  string Op = 10;
+  uint64 Value = 20;
+}
+
+message DoubleVal {
+  string Op = 10;
+  double Value = 20;
+}
+
+message StringVal {
+  string Op = 10;
+  string Value = 20;
+}
+
+message BoolVal {
+  string Op = 10;
+  bool Value = 20;
+}
+
+message StringSliceVal {
+  string Op = 10;
+  repeated string Value = 20;
+}
+
+message Uint32SliceVal {
+  string Op = 10;
+  repeated uint32 Value = 20;
+}
+
+message Int32SliceVal {
+  string Op = 10;
+  repeated int32 Value = 20;
+}
+
+message Int64SliceVal {
+  string Op = 10;
+  repeated int64 Value = 20;
+}
+
+message Uint64SliceVal {
+  string Op = 10;
+  repeated uint64 Value = 20;
+}
