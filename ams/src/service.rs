@@ -58,16 +58,24 @@ impl AMSQueryRoot for QueryRoot {
         created_before: Option<Timestamp>,
         created_after: Option<Timestamp>,
         application_type: Option<String>,
+        spec: Option<String>,
+        application_ids: Option<Vec<ApplicationId>>,
         limit: usize,
     ) -> Vec<Metadata> {
         let mut values = Vec::new();
         self.state
             .applications
             .for_each_index_value_while(|_, value| {
+                if application_ids.is_some() && !application_ids.clone().unwrap().contains(&value.clone().application_id) {
+                    return Ok(true);
+                }
+                if spec.is_some() && (!value.spec.is_some() || !value.clone().spec.unwrap().to_lowercase().contains(&spec.clone().unwrap().to_lowercase())) {
+                    return Ok(true);
+                }
                 if created_before.is_some() && value.created_at.unwrap() > created_before.unwrap() {
                     return Ok(true);
                 }
-                if created_after.is_some() && value.created_at.unwrap() > created_after.unwrap() {
+                if created_after.is_some() && value.created_at.unwrap() < created_after.unwrap() {
                     return Ok(true);
                 }
                 if let Some(application_type) = application_type.clone() {

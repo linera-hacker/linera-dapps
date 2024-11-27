@@ -116,6 +116,8 @@ pub trait AMSQueryRoot {
         created_before: Option<Timestamp>,
         created_after: Option<Timestamp>,
         application_type: Option<String>,
+        spec: Option<String>,
+        application_ids: Option<Vec<ApplicationId>>,
         limit: usize,
     ) -> impl std::future::Future<Output = Result<Vec<Metadata>, Error>> + Send;
 
