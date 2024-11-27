@@ -9,7 +9,10 @@ use linera_sdk::{
     views::View,
     Service, ServiceRuntime,
 };
-use spec::ams::{AMSQueryRoot, Metadata};
+use spec::{
+    ams::{AMSOperation, AMSQueryRoot, Metadata},
+    base::BaseOperation,
+};
 use std::sync::Arc;
 
 pub struct ApplicationService {
@@ -107,5 +110,12 @@ struct MutationRoot {}
 impl MutationRoot {
     async fn do_nothing(&self) -> Vec<u8> {
         Vec::new()
+    }
+
+    async fn subscribe_creator_chain(&self) -> Vec<u8> {
+        bcs::to_bytes(&AMSOperation::BaseOperation(
+            BaseOperation::SubscribeCreatorChain,
+        ))
+        .unwrap()
     }
 }
