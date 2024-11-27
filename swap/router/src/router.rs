@@ -1,7 +1,6 @@
 use crate::runtime::{
     receive_erc20_from_origin_owner_to_application_creation,
-    receive_token_from_origin_owner_to_application_creation,
-    runtime_owner,
+    receive_token_from_origin_owner_to_application_creation, runtime_owner,
     subscribe_erc20_application_creation, transfer_erc20,
 };
 use linera_sdk::{

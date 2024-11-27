@@ -4,12 +4,13 @@ mod state;
 
 use self::state::Application;
 use linera_sdk::{
-    base::{ChannelName, Destination, WithContractAbi},
+    base::{ApplicationId, ChannelName, Destination, WithContractAbi},
     views::{RootView, View},
     Contract, ContractRuntime,
 };
 use spec::{
     account::ChainAccountOwner,
+    ams::{AMSApplicationAbi, AMSOperation, Metadata},
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
     swap::{
         abi::{SwapMessage, SwapOperation, SwapParameters, SwapResponse},
@@ -59,7 +60,14 @@ impl Contract for ApplicationContract {
     }
 
     async fn instantiate(&mut self, _argument: Self::InstantiationArgument) {
-        self.runtime.application_parameters();
+        let parameters = self.runtime.application_parameters();
+
+        match parameters.ams_application_id {
+            Some(application_id) => {
+                self.register_ams(application_id, parameters);
+            }
+            _ => {}
+        }
     }
 
     async fn execute_operation(&mut self, operation: Self::Operation) -> Self::Response {
@@ -105,6 +113,38 @@ impl Contract for ApplicationContract {
 }
 
 impl ApplicationContract {
+    fn register_ams(&mut self, ams_application_id: ApplicationId, parameters: SwapParameters) {
+        let call = AMSOperation::Register {
+            metadata: Metadata {
+                creator: Some(runtime_owner(&mut self.runtime)),
+                application_name: parameters.application_name,
+                application_id: self.runtime.application_id().forget_abi(),
+                application_type: "SWAP".to_string(),
+                key_words: [
+                    "ResPeer".to_string(),
+                    "SWAP".to_string(),
+                    "CheCko".to_string(),
+                    "Linera".to_string(),
+                ]
+                .to_vec(),
+                logo: parameters.logo,
+                spec: None,
+                description: parameters.description,
+                discord: None,
+                twitter: None,
+                telegram: None,
+                github: None,
+                website: None,
+                created_at: None,
+            },
+        };
+        self.runtime.call_application(
+            true,
+            ams_application_id.with_abi::<AMSApplicationAbi>(),
+            &call,
+        );
+    }
+
     fn execute_base_operation(
         &mut self,
         operation: BaseOperation,

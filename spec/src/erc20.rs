@@ -1,8 +1,8 @@
 use crate::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation},
-    extra_info::TokenMetadata,
 };
+use async_graphql::scalar;
 use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
@@ -28,7 +28,22 @@ pub struct InstantiationArgument {
     pub initial_currency: Option<Amount>,
     pub fixed_currency: Option<bool>,
     pub fee_percent: Option<Amount>,
+    pub ams_application_id: Option<ApplicationId>,
 }
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+pub struct TokenMetadata {
+    pub logo: String,
+    pub description: String,
+    pub twitter: Option<String>,
+    pub telegram: Option<String>,
+    pub discord: Option<String>,
+    pub website: Option<String>,
+    pub github: Option<String>,
+    pub mintable: bool,
+}
+
+scalar!(TokenMetadata);
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct SubscriberSyncState {

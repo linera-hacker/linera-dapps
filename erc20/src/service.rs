@@ -12,8 +12,7 @@ use linera_sdk::{
 use spec::{
     account::ChainAccountOwner,
     base::BaseOperation,
-    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
-    extra_info::TokenMetadata,
+    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot, TokenMetadata},
 };
 use std::sync::Arc;
 

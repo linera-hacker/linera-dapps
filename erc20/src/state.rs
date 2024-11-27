@@ -3,8 +3,7 @@ use linera_sdk::base::Amount;
 use linera_sdk::views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext};
 use spec::{
     account::ChainAccountOwner,
-    erc20::{InstantiationArgument, SubscriberSyncState},
-    extra_info::TokenMetadata,
+    erc20::{InstantiationArgument, SubscriberSyncState, TokenMetadata},
 };
 
 use std::collections::HashMap;
@@ -72,7 +71,7 @@ impl Application {
         );
         let send_amount = amount.saturating_sub(fee);
         let new_receiver_balance = receiver_balance.saturating_add(send_amount);
-        
+
         self.update_owner_balance(to, new_receiver_balance).await?;
 
         if let Some(owner) = self.owner.get() {
