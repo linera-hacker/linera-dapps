@@ -154,7 +154,8 @@ linera --with-wallet 13 request-application $ams_appid
 sleep 3
 
 function run_service_timeout() {
-  timeout 3s ./run_service.sh $1
+  local_port=`expr 30080 + $1`
+  timeout 3s linera -w $1 service --port $local_port --external-signing false
 }
 
 run_service_timeout 10 &
