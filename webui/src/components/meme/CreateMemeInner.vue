@@ -272,9 +272,9 @@ const createApplication = async (): Promise<any> => {
       params: {
         publicKey: publicKey,
         query: {
-          chainId: chainId.value,
           query: query.loc?.source?.body,
           variables: {
+            chainId: chainId.value,
             bytecodeId: constants.constants.erc20BID,
             parameters: JSON.stringify(applicationParameters, (key, value) => {
               if (value instanceof Map) {
