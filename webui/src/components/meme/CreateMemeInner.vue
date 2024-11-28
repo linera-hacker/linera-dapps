@@ -1,7 +1,7 @@
 <template>
   <div>
     <q-input v-model='memeInfo.name' :label='$t("MSG_NAME")' hide-bottom-space :error='nameError' />
-    <q-input v-model='memeInfo.symbol' :label='$t("MSG_TICKER")' hide-bottom-space :error='nameError' />
+    <q-input v-model='memeInfo.symbol' :label='$t("MSG_TICKER")' hide-bottom-space :error='tickerError' />
     <div
       :class='[ "file-upload-area vertical-inner-y-margin", imageError ? "file-upload-area-error shake" : "" ]'
       @dragover.prevent
@@ -97,7 +97,22 @@ const memeInfo = ref({
   description: "Creator didn't leave any information about this token. You should know if you interact with malfunction application, you may lose your assets!"
 } as NewMemeInfo)
 
-const MAXSIZE = 4 * 1024
+const onCheckSymbol = async () => {
+  const appID = constants.constants.amsAppID
+  const symbol = memeInfo.value.symbol
+  await getApplicationExistBySymbol(appID, symbol)
+    .then((exist) => {
+      if (exist) {
+        throw new Error('Invalid same symbol')
+      }
+    })
+    .catch((error) => {
+      console.log('getApplicationSymbol error: ', error)
+      throw error
+    })
+}
+
+const MAXSIZE = 4 * 1024 * 1024
 const errorMessage = ref('')
 const onFileDrop = (event: DragEvent): void => {
   const files = event.dataTransfer?.files
@@ -172,26 +187,42 @@ const getApplicationIds = async (): Promise<string[]> => {
   })
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getApplicationExistBySymbol = async (appID: string, symbol: string): Promise<boolean> => {
+  const publicKey = account.value
+  const query = gql`
+    query applications ($spec: String!, $limit: Int!) {
+      applications(spec: $spec, limit: $limit)
+    }`
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    window.linera.request({
+      method: 'linera_graphqlQuery',
+      params: {
+        applicationId: appID,
+        publicKey: publicKey,
+        query: {
+          query: query.loc?.source?.body,
+          variables: {
+            spec: symbol,
+            limit: 1
+          }
+        }
+      }
+    }).then((result) => {
+      const applications = graphqlResult.keyValue(result, 'applications') as []
+      resolve(applications.length > 0)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+}
+
 const validateParams = (): boolean => {
   nameError.value = !memeInfo.value.name?.length
   tickerError.value = !memeInfo.value.symbol?.length
   imageError.value = !memeInfo.value.logo?.length
-  tickerError.value = validateTickerExist()
   return !(nameError.value || tickerError.value || imageError.value)
-}
-
-const validateTickerExist = (): boolean => {
-  let exist = false
-  user.existToken({
-    Symbol: memeInfo.value.symbol
-  }, (error: boolean, resp: boolean) => {
-    if (error) {
-      return
-    }
-    exist = resp
-    return
-  })
-  return exist
 }
 
 interface InstantiationArgument {
@@ -320,6 +351,12 @@ const getCreatedApplicationId = (retries: number) => {
 
 const onCreateMemeTokenClick = async () => {
   if (!validateParams()) return
+  try {
+    await onCheckSymbol()
+  } catch (error) {
+    tickerError.value = true
+    throw error
+  }
 
   emit('creating')
 
