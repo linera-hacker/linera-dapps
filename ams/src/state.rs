@@ -48,15 +48,7 @@ impl Application {
         application: Metadata,
     ) -> Result<(), AMSError> {
         let application_id = application.application_id;
-        match self.applications.get(&application_id).await? {
-            Some(_) => {
-                return Err(AMSError::AlreadyExists);
-            }
-            _ => {
-                self.applications.insert(&application_id, application)?;
-            }
-        }
-        Ok(())
+        Ok(self.applications.insert(&application_id, application)?)
     }
 
     pub(crate) async fn to_subscriber_sync_state(&self) -> Result<SubscriberSyncState, AMSError> {

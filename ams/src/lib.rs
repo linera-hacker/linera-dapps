@@ -9,9 +9,6 @@ pub enum AMSError {
     #[error(transparent)]
     ViewError(#[from] linera_sdk::views::ViewError),
 
-    #[error("Already exists")]
-    AlreadyExists,
-
     #[error("Permission denied")]
     PermissionDenied,
 
