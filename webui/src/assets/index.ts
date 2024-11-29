@@ -13,6 +13,9 @@ import discordLogo from './Discord.svg'
 import twitterLogo from './Twitter.svg'
 import telegramLogo from './Telegram.svg'
 import internetLogo from './Internet.svg'
+import trophyNo1 from './TrophyNo1.svg'
+import trophyNo2 from './TrophyNo2.svg'
+import trophyNo3 from './TrophyNo3.svg'
 
 export {
   bellMsg,
@@ -29,5 +32,8 @@ export {
   discordLogo,
   twitterLogo,
   telegramLogo,
-  internetLogo
+  internetLogo,
+  trophyNo1,
+  trophyNo2,
+  trophyNo3
 }
