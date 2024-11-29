@@ -35,27 +35,27 @@
             <q-img
               v-if='memeInfo.github' :src='githubLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.github)'
+              @click='goLink(memeInfo.github, $event)'
             />
             <q-img
               v-if='memeInfo.discord?.length > 0' :src='discordLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.discord)'
+              @click='goLink(memeInfo.discord, $event)'
             />
             <q-img
               v-if='memeInfo.twitter?.length > 0' :src='twitterLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.twitter)'
+              @click='goLink(memeInfo.twitter, $event)'
             />
             <q-img
               v-if='memeInfo.telegram?.length > 0' :src='telegramLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.telegram)'
+              @click='goLink(memeInfo.telegram, $event)'
             />
             <q-img
               v-if='memeInfo.website?.length > 0' :src='internetLogo' width='20px' height='20px'
               class='cursor-pointer'
-              @click='goLink(memeInfo.website)'
+              @click='goLink(memeInfo.website, $event)'
             />
           </div>
         </q-item-label>
@@ -93,7 +93,8 @@ const onSwap = (token0: string) => {
   })
 }
 
-const goLink = (url: string) => {
+const goLink = (url: string, event: MouseEvent) => {
+  event.stopPropagation()
   window.open(url, '_blank')
 }
 
