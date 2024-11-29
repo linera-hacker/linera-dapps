@@ -1,10 +1,12 @@
 <template>
   <q-page>
-    <div class='row'>
-      <div v-for='item in memeInfos' :key='item.appID' class='col-xs-12 col-sm-6 col-md-4'>
-        <MemeCard :meme-info='item' />
+    <q-infinite-scroll @load='onLoad' :offset='300'>
+      <div class='row'>
+        <div v-for='item in memeAppInfos' :key='item.appID' class='col-xs-12 col-sm-6 col-md-4'>
+          <MemeCard :meme-info='item' />
+        </div>
       </div>
-    </div>
+    </q-infinite-scroll>
     <div class='q-pa-md q-gutter-xs flex flex-center'>
       <div class='q-gutter-md row justify-center'>
         <q-spinner-ball
@@ -14,21 +16,12 @@
         />
       </div>
     </div>
-    <div v-if='maxPage > 1' class='q-pa-lg flex flex-center'>
-      <q-pagination
-        v-model='currentPage'
-        color='black'
-        :max='maxPage'
-        :max-pages='5'
-        :boundary-numbers='false'
-      />
-    </div>
   </q-page>
 </template>
 
 <script setup lang='ts'>
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { MemeInfo } from 'src/stores/memeInfo'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { MemeAppRespInfo, MemeAppInfoSpec, MemeAppInfoDisplay } from 'src/stores/memeInfo'
 import * as constants from 'src/const'
 import { ApolloClient } from '@apollo/client/core'
 import gql from 'graphql-tag'
@@ -39,79 +32,23 @@ import { Pool } from 'src/stores/pool'
 
 import MemeCard from './MemeCard.vue'
 
-const currentPage = ref(1)
-const maxPage = ref(10)
-const limit = ref(40)
-
-const memeInfos = ref([] as MemeInfo[])
-
-const loading = ref(false)
-
-const onLoading = () => {
-  loading.value = true
-}
-
-const onHiding = () => {
-  loading.value = false
-}
-
-watch(currentPage, () => {
-  onLoadPageData()
-    .catch((error) => {
-      console.log('onGetApplicationsByPage error: ', error)
-    })
-})
-
-const onGetApplicationsByPage = async () => {
-  await Promise.resolve()
-  memeInfos.value.length = 0
-  const offset = currentPage.value - 1
-  const startCount = offset * limit.value
-  const nextCount = appIDs.value.length - startCount
-  const size = (nextCount > limit.value) ? limit.value : nextCount
-  for (let i = startCount; i < (startCount + size); i++) {
-    const appID = appIDs.value[i]
-    await getAppInfo(appID)
-      .catch((error) => {
-        console.log('getAppInfos error: ', error)
-      })
-  }
-}
-
-const curChainID = ref(constants.constants.swapCreationChainID)
-
+const swapChainID = ref(constants.constants.swapCreationChainID)
 const swapAppID = ref(constants.constants.swapAppID)
+const swapEndPoint = ref(constants.constants.swapEndPoint)
 
-const curEndPoint = ref(constants.constants.swapEndPoint)
+const amsChainID = ref(constants.constants.amsCreationChainID)
+const amsAppID = ref(constants.constants.amsAppID)
+const amsEndPoint = ref(constants.constants.amsEndPoint)
 
-const swapService = ref(curEndPoint.value + '/chains/' + curChainID.value + '/applications/' + swapAppID.value)
+const swapService = ref(swapEndPoint.value + '/chains/' + swapChainID.value + '/applications/' + swapAppID.value)
+const amsService = ref(amsEndPoint.value + '/chains/' + amsChainID.value + '/applications/' + amsAppID.value)
 
+const limit = ref(40)
+const appPoolIDsMap = ref<Map<string, string>>(new Map())
 const appIDsMap = ref<Map<string, string>>(new Map())
-const appIDs = ref<string[]>([])
-
-const sleep = async (ms: number): Promise<void> => {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-const onGetPools = async () => {
-  const url = swapService.value
-  await getPools(url)
-    .then((pools) => {
-      for (let i = 0; i < pools.length; i++) {
-        const token0 = pools[i].token0
-        const token1 = pools[i].token1
-        appIDsMap.value.set(token0, pools[i].id.toString())
-        appIDsMap.value.set(token1, pools[i].id.toString())
-      }
-      appIDsMap.value.forEach((value, key) => {
-        appIDs.value.push(key)
-      })
-      maxPage.value = Math.ceil(appIDs.value.length / limit.value)
-    })
-    .catch((error) => {
-      console.log('getPool error: ', error)
-    })
-}
+const memeAppInfos = ref([] as MemeAppInfoDisplay[])
+const lastCreatedAt = ref(0)
+const curPageSize = ref(limit.value)
 
 const getPools = async (url: string): Promise<Array<Pool>> => {
   const appOptions = /* await */ getAppClientOptions(url)
@@ -122,28 +59,11 @@ const getPools = async (url: string): Promise<Array<Pool>> => {
         id
         token0
         token1
-        virtualInitialLiquidity
-        amount0Initial
-        amount1Initial
-        reserve0
-        reserve1
-        poolFeePercent
-        protocolFeePercent
-        erc20 {
-          totalSupply
-          balances
-        }
-        feeTo
-        feeToSetter
-        price0Cumulative
-        price1Cumulative
-        kLast
-        blockTimestamp
       }
     }
   `, {
     endpoint: 'swap',
-    chainId: curChainID.value
+    chainId: swapChainID.value
   }, {
     fetchPolicy: 'network-only'
   }))
@@ -160,125 +80,132 @@ const getPools = async (url: string): Promise<Array<Pool>> => {
   })
 }
 
-const getAppInfo = async (appID: string) => {
-  const url = curEndPoint.value + '/chains/' + curChainID.value + '/applications/' + appID
-  console.log('url: ', url)
-  const appOptions = /* await */ getAppClientOptions(url)
-  const appApolloClient = new ApolloClient(appOptions)
-  const { /* result, refetch, fetchMore, */ onResult /*, onError */ } = provideApolloClient(appApolloClient)(() => useQuery(gql`
-    query {
-      name,
-      symbol,
-      totalSupply,
-      decimals
-      tokenMetadata
-    }
-  `, {
-    endpoint: 'main',
-    chainId: curChainID.value
-  }, {
-    fetchPolicy: 'network-only'
-  }))
-
-  onResult((res) => {
-    if (res.loading) return
-    const memeInfo = res.data as MemeInfo
-    const poolId = appIDsMap.value.get(appID)
-    const meme = {
-      appID: appID,
-      link: url,
-      name: memeInfo.name,
-      symbol: memeInfo.symbol,
-      totalSupply: memeInfo.totalSupply,
-      decimals: memeInfo.decimals,
-      tokenMetadata: memeInfo.tokenMetadata,
-      poolId: poolId,
-    } as MemeInfo
-    if (meme.tokenMetadata === null) {
-      // DO NOTHING
-    } else {
-      memeInfos.value.push(meme)
-    }
-  })
-}
-
-onMounted(async () => {
-  await Promise.resolve()
-  if (!memeInfos.value?.length) {
-    onLoadData()
-      .catch((error) => {
-        console.log('onLoadData error: ', error)
-      })
-  }
-})
-
-const onLoadPageData = async () => {
-  memeInfos.value.length = 0
-  onLoading()
-  try {
-    await onGetApplicationsByPage()
-  } catch (error) {
-    console.log('onLoadPageData error: ', onLoadPageData)
-  }
-  onHiding()
-}
-
-const onLoadData = async () => {
-  onLoading()
-  onGetPools()
-    .catch((error) => {
-      console.log('onGetPools error: ', error)
-    })
-  await sleep(1000)
-  onLoadPageData()
-    .catch((error) => {
-      console.log('onLoadPageData error: ', error)
-    })
-}
-
-const curPageCountChange = ref(false)
-const checkCurPageCountChange = () => {
-  const offset = currentPage.value - 1
-  const startCount = offset * limit.value
-  const nextCount = appIDs.value.length - startCount
-  const size = (nextCount > limit.value) ? limit.value : nextCount
-  if (size < limit.value) {
-    curPageCountChange.value = true
-  }
-}
-
-const onRefreshData = async () => {
+const onGetAppPools = async () => {
   const url = swapService.value
   await getPools(url)
-    .then(async (pools) => {
+    .then((pools) => {
       for (let i = 0; i < pools.length; i++) {
         const token0 = pools[i].token0
         const token1 = pools[i].token1
-        const app0 = appIDsMap.value.get(token0) as string
-        const app1 = appIDsMap.value.get(token1) as string
-        if (app0 == undefined || app0 == null || app0 == '') {
-          appIDsMap.value.set(token0, pools[i].id.toString())
-          appIDs.value.push(token0)
-          await checkCurPageCountChange()
-        }
-        if (app1 == undefined || app1 == null || app1 == '') {
-          appIDsMap.value.set(token1, pools[i].id.toString())
-          appIDs.value.push(token1)
-          await checkCurPageCountChange()
-        }
+        appPoolIDsMap.value.set(token0, pools[i].id.toString())
+        appPoolIDsMap.value.set(token1, pools[i].id.toString())
       }
-      maxPage.value = Math.ceil(appIDs.value.length / limit.value)
-      if (curPageCountChange.value) {
-        await onLoadPageData()
-      }
-      curPageCountChange.value = false
     })
     .catch((error) => {
       console.log('getPool error: ', error)
     })
 }
 
-const interval = setInterval(onRefreshData, 20 * 1000)
+const getApplicationInfos = async (url: string) => {
+  const appOptions = /* await */ getAppClientOptions(url)
+  const appApolloClient = new ApolloClient(appOptions)
+  const { /* result, refetch, fetchMore, */ onResult /*, onError */ } = provideApolloClient(appApolloClient)(() => useQuery(gql`
+    query getApplications($createdAfter: Int!, $limit: Int!){
+      applications(createdAfter: $createdAfter, limit: $limit)
+    }
+  `, {
+    createdAfter: lastCreatedAt.value,
+    limit: limit.value
+  }, {
+    fetchPolicy: 'network-only'
+  }))
+
+  onResult((res) => {
+    if (res.loading) return
+    const apps = graphqlResult.data(res, 'applications') as Array<MemeAppRespInfo>
+    for (let i = 0; i < apps.length; i++) {
+      const poolId = appPoolIDsMap.value.get(apps[i].application_id)
+      if (poolId === undefined || poolId === null || poolId === "") {
+        console.log(apps[i].application_id + ' not in pools')
+        continue
+      }
+      const checkExist = appIDsMap.value.get(apps[i].application_id)
+      if (checkExist) {
+        console.log(apps[i].application_id + ' exist')
+        continue
+      }
+      appIDsMap.value.set(apps[i].application_id, apps[i].application_id)
+      const parsedSpec: MemeAppInfoSpec = JSON.parse(apps[i].spec);
+      const meme = {
+        poolID: poolId,
+        appID: apps[i].application_id,
+        appName: apps[i].application_name,
+        appType: apps[i].application_type,
+        createdAt: apps[i].created_at,
+        description: apps[i].description,
+        discord: apps[i].discord,
+        github: apps[i].github,
+        logo: apps[i].logo,
+        telegram: apps[i].telegram,
+        twitter: apps[i].twitter,
+        website: apps[i].website,
+        ticker: parsedSpec.ticker,
+        initialSupply: parsedSpec.initial_supply,
+        mintable: parsedSpec.mintable
+      } as MemeAppInfoDisplay
+      memeAppInfos.value.push(meme)
+      if (apps[i].created_at > lastCreatedAt.value) {
+        lastCreatedAt.value = apps[i].created_at
+      }
+    }
+    if (memeAppInfos.value.length >= curPageSize.value) {
+      runningInterval.value = false
+      curPageSize.value += limit.value
+      return    
+    } 
+    runningInterval.value = true
+  })
+}
+
+const sleep = async (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+const onGetAppInfos = async () => {
+  await onGetAppPools()
+  await sleep(1000)
+  await getApplicationInfos(amsService.value)
+} 
+
+onMounted(async () => {
+  await Promise.resolve()
+  if (!memeAppInfos.value?.length) {
+    onLoading()
+    onGetAppInfos()
+      .catch((error) => {
+        console.log('onGetAppInfos error: ', error)
+      })
+    onHiding()
+  }
+})
+
+const loading = ref(false)
+
+const onLoading = () => {
+  loading.value = true
+}
+
+const onHiding = () => {
+  loading.value = false
+}
+
+const onLoad = (index, done) => {
+  onLoading()
+  setTimeout(() => {
+    onGetAppInfos()
+    onHiding()
+    done()
+  }, 2000)
+}
+
+const runningInterval = ref(true)
+
+const useIntervalLoadData = () => {
+  if (!runningInterval.value) return
+  onGetAppInfos()
+}
+
+const interval = setInterval(useIntervalLoadData, 20 * 1000)
 
 onBeforeUnmount(() => {
   clearInterval(interval)
