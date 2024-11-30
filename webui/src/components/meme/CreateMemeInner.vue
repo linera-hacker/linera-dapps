@@ -266,7 +266,8 @@ const createApplication = async (): Promise<any> => {
     decimals: 6,
     initial_currency: '0.00001',
     fixed_currency: false,
-    fee_percent: '0'
+    fee_percent: '0',
+    ams_application_id: constants.constants.amsAppID
   } as InstantiationArgument
   const applicationParameters = {
     initial_balances: new Map([

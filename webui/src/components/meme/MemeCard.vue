@@ -2,16 +2,16 @@
   <q-card flat :class='newTx ? "meme-card cursor-pointer shake" : "meme-card cursor-pointer"' @click='onSwap(memeInfo.appID)'>
     <q-item>
       <div class='horizontal-inner-x-margin-right vertical-card-align' avatar>
-        <q-img :src='processBase64Img(memeInfo.tokenMetadata.logo)' width='128px' />
+        <q-img :src='processBase64Img(memeInfo.logo)' width='128px' />
       </div>
 
       <div>
         <q-item-label class='text-h6'>
-          <q-badge color='green-6'>{{ memeInfo.symbol }}</q-badge> {{ memeInfo.name }}
+          <q-badge color='green-6'>{{ memeInfo.ticker }}</q-badge> {{ memeInfo.appName }}
         </q-item-label>
         <q-item-label>
           <div class='vertical-inner-y-margin'>
-            {{ memeInfo.tokenMetadata.description }}
+            {{ memeInfo.description }}
           </div>
         </q-item-label>
         <q-item-label>
@@ -23,39 +23,39 @@
               <span class='label text-grey-8'>Last 24H Volume</span> {{ lastTransaction.OneDayOneAmountVolumn }} WTLINERA
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>{{ memeInfo.symbol }}/WTLINERA</span> {{ lastTransaction.NowPrice }} WLINERA <span :class='Number(lastTransaction.OneDayIncresePercent) < 0 ? "change text-red" : "change text-green"'>{{ Number(lastTransaction.OneDayIncresePercent) < 0 ? "" : "+" }}{{ lastTransaction.OneDayIncresePercent }}%</span>
+              <span class='label text-grey-8'>{{ memeInfo.ticker }}/WTLINERA</span> {{ lastTransaction.NowPrice }} WLINERA <span :class='Number(lastTransaction.OneDayIncresePercent) < 0 ? "change text-red" : "change text-green"'>{{ Number(lastTransaction.OneDayIncresePercent) < 0 ? "" : "+" }}{{ lastTransaction.OneDayIncresePercent }}%</span>
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Market Capacity</span> {{ Number(memeInfo.totalSupply) * Number(lastTransaction.NowPrice) }} WTLINERA
+              <span class='label text-grey-8'>Market Capacity</span> {{ Number(memeInfo.initialSupply) * Number(lastTransaction.NowPrice) }} WTLINERA
             </div>
           </div>
         </q-item-label>
         <q-item-label caption>
           <div class='row vertical-section-y-margin'>
             <q-img
-              v-if='memeInfo.tokenMetadata.github' :src='githubLogo' width='20px' height='20px'
+              v-if='memeInfo.github' :src='githubLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.tokenMetadata.github)'
+              @click='goLink(memeInfo.github, $event)'
             />
             <q-img
-              v-if='memeInfo.tokenMetadata.discord?.length > 0' :src='discordLogo' width='20px' height='20px'
+              v-if='memeInfo.discord?.length > 0' :src='discordLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.tokenMetadata.discord)'
+              @click='goLink(memeInfo.discord, $event)'
             />
             <q-img
-              v-if='memeInfo.tokenMetadata.twitter?.length > 0' :src='twitterLogo' width='20px' height='20px'
+              v-if='memeInfo.twitter?.length > 0' :src='twitterLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.tokenMetadata.twitter)'
+              @click='goLink(memeInfo.twitter, $event)'
             />
             <q-img
-              v-if='memeInfo.tokenMetadata.telegram?.length > 0' :src='telegramLogo' width='20px' height='20px'
+              v-if='memeInfo.telegram?.length > 0' :src='telegramLogo' width='20px' height='20px'
               class='cursor-pointer horizontal-inner-x-margin-right'
-              @click='goLink(memeInfo.tokenMetadata.telegram)'
+              @click='goLink(memeInfo.telegram, $event)'
             />
             <q-img
-              v-if='memeInfo.tokenMetadata.website?.length > 0' :src='internetLogo' width='20px' height='20px'
+              v-if='memeInfo.website?.length > 0' :src='internetLogo' width='20px' height='20px'
               class='cursor-pointer'
-              @click='goLink(memeInfo.tokenMetadata.website)'
+              @click='goLink(memeInfo.website, $event)'
             />
           </div>
         </q-item-label>
@@ -66,7 +66,7 @@
 
 <script setup lang='ts'>
 import { toRef, ref, onBeforeUnmount, onMounted } from 'vue'
-import { MemeInfo } from 'src/stores/memeInfo'
+import { MemeAppInfoDisplay } from 'src/stores/memeInfo'
 import { discordLogo, githubLogo, internetLogo, telegramLogo, twitterLogo } from 'src/assets'
 import { useRouter } from 'vue-router'
 import { wlineraAppID } from 'src/const/const'
@@ -75,7 +75,7 @@ import { LastTranscation, useUserStore } from 'src/mystore/user'
 const userStore = useUserStore()
 
 interface Props {
-  memeInfo: MemeInfo
+  memeInfo: MemeAppInfoDisplay
 }
 const props = defineProps<Props>()
 const memeInfo = toRef(props, 'memeInfo')
@@ -93,7 +93,8 @@ const onSwap = (token0: string) => {
   })
 }
 
-const goLink = (url: string) => {
+const goLink = (url: string, event: MouseEvent) => {
+  event.stopPropagation()
   window.open(url, '_blank')
 }
 
@@ -143,7 +144,7 @@ const getNewTxInfo = () => {
     return
   }
   userStore.getLastTranscation({
-    PoolID: Number(memeInfo.value.poolId),
+    PoolID: Number(memeInfo.value.poolID),
     TokenZeroAddress: memeInfo.value.appID,
     TokenOneAddress: wlineraAppID,
   }, (error: boolean, row: LastTranscation) => {

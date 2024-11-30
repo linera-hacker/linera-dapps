@@ -27,7 +27,7 @@
                   {{ shortid.shortId(account, 14) }}
                 </div>
                 <div :style='{marginLeft: "8px"}' class='cursor-pointer'>
-                  <q-img :src='copyIcon' width='16px' height='16px' />
+                  <q-img :src='copyIcon' width='16px' height='16px' @click='copyToClipboard(account)' />
                 </div>
               </div>
               <div class='text-grey-6'>
@@ -48,7 +48,7 @@
                   {{ shortid.shortId(chainId, 14) }}
                 </div>
                 <div :style='{marginLeft: "8px"}' class='cursor-pointer'>
-                  <q-img :src='copyIcon' width='16px' height='16px' />
+                  <q-img :src='copyIcon' width='16px' height='16px' @click='copyToClipboard(chainId)' />
                 </div>
               </div>
               <div class='text-grey-6'>
@@ -82,6 +82,7 @@ import { shortid } from 'src/utils'
 import { Web3 } from 'web3'
 import { addressIcon, microchainIcon, copyIcon } from 'src/assets'
 import { gql } from '@apollo/client'
+import { graphqlResult } from 'src/utils'
 
 const user = useUserStore()
 const account = computed(() => user.account?.trim())
@@ -99,6 +100,7 @@ const getProviderState = () => {
     user.account = ((result as Record<string, string>).accounts)[0]
     Cookies.set('CheCko-Login-Account', user.account)
     Cookies.set('CheCko-Login-Microchain', user.chainId)
+    getBalances()
   }).catch((e) => {
     console.log('metamask_getProviderState', e)
   })
@@ -112,6 +114,7 @@ const onConnectClick = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const web3 = new Web3(window.linera)
   await web3.eth.requestAccounts()
+  await getBalances()
 }
 
 const onLogoutClick = () => {
@@ -127,9 +130,49 @@ const walletReadyCall = (f: () => void) => {
   f()
 }
 
+const copyToClipboard = async (content: string) => {
+  await navigator.clipboard.writeText(content)
+}
+
 onMounted(() => {
   walletReadyCall(() => getProviderState())
 })
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getBalances = async () => {
+  console.log('--getBalances')
+  const publicKey = account.value
+  const query = gql`
+    query getBalances ($chainIds: [String!], $publicKeys: [String!], $chainId: String!, $publicKey: String!){
+      balances(chainIds: $chainIds, publicKeys: $publicKeys)
+      balance(chainId: $chainId, publicKey: $publicKey)
+    }`
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  window.linera.request({
+    method: 'linera_graphqlQuery',
+    params: {
+      publicKey: publicKey,
+      query: {
+        query: query.loc?.source?.body,
+        variables: {
+          chainIds: [chainId.value],
+          publicKeys: [publicKey],
+          chainId: chainId.value,
+          publicKey: publicKey
+        }
+      }
+    }
+  }).then((result) => {
+    const balances = graphqlResult.keyValue(result, 'balances')
+    const _balances = graphqlResult.keyValue(balances, chainId.value)
+    const chainBalance = graphqlResult.keyValue(_balances, 'chain_balance') as string
+    const accountBalance = graphqlResult.keyValue(result, 'balance') as string
+    user.chainBalance = chainBalance
+    user.accountBalance = accountBalance
+  }).catch((e) => {
+    console.log(e)
+  })
+}
 
 </script>
 

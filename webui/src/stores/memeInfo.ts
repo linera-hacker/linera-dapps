@@ -41,6 +41,55 @@ export interface NewMemeInfo {
   feePercent: string
 }
 
+export interface MemeAppInfoSpec {
+  ticker: string
+  initial_supply: string
+  mintable: boolean
+}
+
+export interface MemeAppRespInfo {
+  application_id: string
+  application_name: string
+  application_type: string
+  created_at: number
+  description: string
+  discord: string
+  github: string
+  logo: string
+  spec: string
+  telegram: string
+  twitter: string
+  website: string
+}
+
+export interface MemeAppInfoDisplay {
+  poolID: string
+  appID: string
+  appName: string
+  appType: string
+  createdAt: number
+  description: string
+  discord: string
+  github: string
+  logo: string
+  telegram: string
+  twitter: string
+  website: string
+  ticker: string
+  initialSupply: string
+  mintable: boolean
+}
+
+export interface ChainOwner {
+  chain_id: string
+  owner: string
+}
+
+export interface OwnerBalance {
+  owner: ChainOwner
+  balance: number
+}
+
 export interface InitPoolLiquidity {
   amount0Initial: string
   amount1Initial: string

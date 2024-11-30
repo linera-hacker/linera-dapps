@@ -239,6 +239,11 @@ chain=`linera --with-wallet 11 wallet show | grep "Public Key" | awk '{print $2}
 owner=`linera --with-wallet 11 wallet show | grep "Owner" | awk '{print $4}'`
 print_apps "Wallet 11" $HTTP_HOST $chain $owner
 
+echo "ERC20_BID=$erc20_2_bid" > $PROJECT_ROOT/.local-defi-materials
+echo "WLINERA_CREATION_CHAIN=$chain" >> $PROJECT_ROOT/.local-defi-materials
+echo "WLINERA_CREATION_OWNER=$owner" >> $PROJECT_ROOT/.local-defi-materials
+echo "WLINERA_APPID=$erc20_2_appid" >> $PROJECT_ROOT/.local-defi-materials
+
 wallet_11_erc20_1_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_1_appid"
 wallet_11_erc20_2_service="http://$LOCAL_IP:30091/chains/$chain/applications/$erc20_2_appid"
 wallet_11_swap_service="http://$LOCAL_IP:30091/chains/$chain/applications/$swap_appid"
@@ -265,12 +270,10 @@ wallet_12_public_erc20_1_service="$HTTP_HOST/chains/$chain/applications/$erc20_1
 wallet_12_public_erc20_2_service="$HTTP_HOST/chains/$chain/applications/$erc20_2_appid"
 wallet_12_public_swap_service="$HTTP_HOST/chains/$chain/applications/$swap_appid"
 
-echo "SWAP_CREATION_CHAIN=$chain" > $PROJECT_ROOT/.local-defi-materials
+echo "SWAP_CREATION_CHAIN=$chain" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_CREATION_OWNER=$owner" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_APPID=$swap_appid" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30092" >> $PROJECT_ROOT/.local-defi-materials
-echo "WLINERA_APPID=$erc20_2_appid" >> $PROJECT_ROOT/.local-defi-materials
-echo "AMS_APPID=$ams_appid" >> $PROJECT_ROOT/.local-defi-materials
 
 swap_creation_chain=$chain
 
@@ -296,6 +299,11 @@ owner=`linera --with-wallet 14 wallet show | grep "Owner" | awk '{print $4}'`
 print_apps "Wallet 14" $HTTP_HOST $chain $owner
 
 wallet_14_public_ams_service="$HTTP_HOST/chains/$chain/applications/$ams_appid"
+
+echo "AMS_CREATION_CHAIN=$chain" >> $PROJECT_ROOT/.local-defi-materials
+echo "AMS_CREATION_OWNER=$owner" >> $PROJECT_ROOT/.local-defi-materials
+echo "AMS_APPID=$ams_appid" >> $PROJECT_ROOT/.local-defi-materials
+echo "AMS_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30094" >> $PROJECT_ROOT/.local-defi-materials
 
 ams_creation_chain=$chain
 
