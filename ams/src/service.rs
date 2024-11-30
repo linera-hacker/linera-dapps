@@ -72,7 +72,7 @@ impl AMSQueryRoot for QueryRoot {
                 if application_ids.is_some() && !application_ids.clone().unwrap().contains(&value.clone().application_id) {
                     return Ok(true);
                 }
-                if spec.is_some() && (!value.spec.is_some() || !value.clone().spec.unwrap().to_lowercase().contains(&spec.clone().unwrap().to_lowercase())) {
+                if spec.is_some() && (!value.spec.is_some() || !value.clone().spec.unwrap().to_lowercase().contains(&format!("\"{}\"", &spec.clone().unwrap().to_lowercase()))) {
                     return Ok(true);
                 }
                 if created_before.is_some() && value.created_at.unwrap() > created_before.unwrap() {
