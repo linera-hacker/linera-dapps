@@ -84,11 +84,7 @@ function create_wallet() {
 }
 
 function __run_service() {
-  linera -w $1 service --port $2 --external-signing false
-  if [ ! $? -eq 0 ]; then
-    echo "Run with official release"
-    linera -w $1 service --port $2
-  fi
+  linera -w $1 service --port $2
 }
 
 function run_service () {
