@@ -25,6 +25,7 @@ pub struct Application {
     pub owner: RegisterView<Option<ChainAccountOwner>>,
     pub owner_balance: RegisterView<Amount>,
     pub token_metadata: RegisterView<Option<TokenMetadata>>,
+    pub subscribed_creator_chain: RegisterView<bool>,
 }
 
 #[allow(dead_code)]
@@ -350,6 +351,9 @@ impl Application {
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), ERC20Error> {
+        if *self.subscribed_creator_chain.get() {
+            return Ok(());
+        }
         self.total_supply.set(state.total_supply);
         for (key, value) in &state.balances {
             self.balances.insert(key, *value)?;
@@ -369,6 +373,7 @@ impl Application {
         self.owner.set(state.owner);
         self.owner_balance.set(state.owner_balance);
         self.token_metadata.set(state.token_metadata);
+        self.subscribed_creator_chain.set(true);
         Ok(())
     }
 }

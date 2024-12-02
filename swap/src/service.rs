@@ -153,6 +153,11 @@ impl SwapQueryRoot for QueryRoot {
             })
             .collect()
     }
+
+    async fn subscribed_creator_chain(&self, ctx: &Context<'_>) -> bool {
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
+        *context.state.subscribed_creator_chain.get()
+    }
 }
 
 struct MutationRoot;

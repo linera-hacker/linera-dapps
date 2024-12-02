@@ -97,6 +97,7 @@ pub struct SwapApplicationState {
     pub wlinera_application_id: RegisterView<Option<ApplicationId>>,
     pub last_transactions: QueueView<Transaction>,
     pub transaction_id: RegisterView<u64>,
+    pub subscribed_creator_chain: RegisterView<bool>,
 }
 
 impl SwapApplicationState {
@@ -142,6 +143,9 @@ impl SwapApplicationState {
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), StateError> {
+        if *self.subscribed_creator_chain.get() {
+            return Ok(());
+        }
         self.pool_id.set(state.pool_id);
         self.wlinera_application_id
             .set(state.wlinera_application_id);
@@ -164,6 +168,7 @@ impl SwapApplicationState {
         while self.last_transactions.count() > MAX_LAST_TRANSACTIONS {
             self.last_transactions.delete_front();
         }
+        self.subscribed_creator_chain.set(true);
         Ok(())
     }
 

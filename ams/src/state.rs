@@ -16,6 +16,7 @@ pub struct Application {
     pub application_types: QueueView<String>,
     pub applications: MapView<ApplicationId, Metadata>,
     pub operator: RegisterView<Option<ChainAccountOwner>>,
+    pub subscribed_creator_chain: RegisterView<bool>,
 }
 
 #[allow(dead_code)]
@@ -70,6 +71,9 @@ impl Application {
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), AMSError> {
+        if *self.subscribed_creator_chain.get() {
+            return Ok(());
+        }
         self.operator.set(state.operator);
         for application_type in state.application_types {
             self.application_types.push_back(application_type);
@@ -77,6 +81,7 @@ impl Application {
         for (application_id, application) in state.applications {
             self.applications.insert(&application_id, application)?;
         }
+        self.subscribed_creator_chain.set(true);
         Ok(())
     }
 }

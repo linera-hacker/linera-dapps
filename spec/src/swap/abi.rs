@@ -96,6 +96,11 @@ pub trait SwapQueryRoot {
         start_id: Option<u64>,
         start_timestamp: Option<Timestamp>,
     ) -> impl std::future::Future<Output = Result<Vec<Transaction>, Error>> + Send;
+
+    fn subscribed_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<bool, Error>> + Send;
 }
 
 pub trait SwapMutationRoot {

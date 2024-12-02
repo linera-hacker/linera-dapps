@@ -126,4 +126,9 @@ pub trait AMSQueryRoot {
         ctx: &Context<'_>,
         application_id: ApplicationId,
     ) -> impl std::future::Future<Output = Result<Option<Metadata>, Error>> + Send;
+
+    fn subscribed_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<bool, Error>> + Send;
 }

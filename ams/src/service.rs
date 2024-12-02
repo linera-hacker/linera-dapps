@@ -69,10 +69,23 @@ impl AMSQueryRoot for QueryRoot {
         self.state
             .applications
             .for_each_index_value_while(|_, value| {
-                if application_ids.is_some() && !application_ids.clone().unwrap().contains(&value.clone().application_id) {
+                if application_ids.is_some()
+                    && !application_ids
+                        .clone()
+                        .unwrap()
+                        .contains(&value.clone().application_id)
+                {
                     return Ok(true);
                 }
-                if spec.is_some() && (!value.spec.is_some() || !value.clone().spec.unwrap().to_lowercase().contains(&format!("\"{}\"", &spec.clone().unwrap().to_lowercase()))) {
+                if spec.is_some()
+                    && (!value.spec.is_some()
+                        || !value
+                            .clone()
+                            .spec
+                            .unwrap()
+                            .to_lowercase()
+                            .contains(&format!("\"{}\"", &spec.clone().unwrap().to_lowercase())))
+                {
                     return Ok(true);
                 }
                 if created_before.is_some() && value.created_at.unwrap() > created_before.unwrap() {
@@ -101,6 +114,10 @@ impl AMSQueryRoot for QueryRoot {
             .get(&application_id)
             .await
             .expect("Failed get application")
+    }
+
+    async fn subscribed_creator_chain(&self) -> bool {
+        *self.state.subscribed_creator_chain.get()
     }
 }
 

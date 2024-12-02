@@ -196,6 +196,11 @@ pub trait ERC20QueryRoot {
         ctx: &Context<'_>,
         limit: usize,
     ) -> impl std::future::Future<Output = Result<Vec<ChainAccountOwnerBalance>, Error>> + Send;
+
+    fn subscribed_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<bool, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {
