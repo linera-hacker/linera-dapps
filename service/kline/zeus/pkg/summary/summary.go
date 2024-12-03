@@ -71,7 +71,6 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(utils.PrettyStruct(oneDayPrices))
 		txVolumn, err := GetOneDayVolumn(ctx, poolID)
 		if err != nil {
 			return nil, err
