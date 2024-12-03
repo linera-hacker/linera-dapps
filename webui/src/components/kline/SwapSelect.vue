@@ -89,6 +89,7 @@ watch(() => swapStore.SelectedToken, (selected) => {
 
 onMounted(() => {
   if (swapStore.IsInitilazed) {
+    setSpecifyTokenPair()
     return
   }
   swapStore.IsInitilazed = true
