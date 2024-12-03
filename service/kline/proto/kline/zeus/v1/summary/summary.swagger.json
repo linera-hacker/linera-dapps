@@ -111,6 +111,38 @@
           "Manager"
         ]
       }
+    },
+    "/v1/get/token/last/conds": {
+      "post": {
+        "operationId": "Manager_GetTokenLastConds",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/summaryGetTokenLastCondsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/summaryGetTokenLastCondsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
     }
   },
   "definitions": {
@@ -193,6 +225,45 @@
       "properties": {
         "Info": {
           "$ref": "#/definitions/summaryTokenLastCond"
+        }
+      }
+    },
+    "summaryGetTokenLastCondsRequest": {
+      "type": "object",
+      "properties": {
+        "PoolTokenConds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/summaryPoolTokenCond"
+          }
+        }
+      }
+    },
+    "summaryGetTokenLastCondsResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/summaryTokenLastCond"
+          }
+        }
+      }
+    },
+    "summaryPoolTokenCond": {
+      "type": "object",
+      "properties": {
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TokenZeroAddress": {
+          "type": "string"
+        },
+        "TokenOneAddress": {
+          "type": "string"
         }
       }
     },

@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ManagerClient interface {
 	GetTokenLastCond(ctx context.Context, in *GetTokenLastCondRequest, opts ...grpc.CallOption) (*GetTokenLastCondResponse, error)
+	GetTokenLastConds(ctx context.Context, in *GetTokenLastCondsRequest, opts ...grpc.CallOption) (*GetTokenLastCondsResponse, error)
 	GetOneDayVolumn(ctx context.Context, in *GetOneDayVolumnRequest, opts ...grpc.CallOption) (*GetOneDayVolumnResponse, error)
 	ExistToken(ctx context.Context, in *ExistTokenRequest, opts ...grpc.CallOption) (*ExistTokenResponse, error)
 }
@@ -38,6 +39,15 @@ func NewManagerClient(cc grpc.ClientConnInterface) ManagerClient {
 func (c *managerClient) GetTokenLastCond(ctx context.Context, in *GetTokenLastCondRequest, opts ...grpc.CallOption) (*GetTokenLastCondResponse, error) {
 	out := new(GetTokenLastCondResponse)
 	err := c.cc.Invoke(ctx, "/kline.v1.summary.Manager/GetTokenLastCond", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *managerClient) GetTokenLastConds(ctx context.Context, in *GetTokenLastCondsRequest, opts ...grpc.CallOption) (*GetTokenLastCondsResponse, error) {
+	out := new(GetTokenLastCondsResponse)
+	err := c.cc.Invoke(ctx, "/kline.v1.summary.Manager/GetTokenLastConds", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -67,6 +77,7 @@ func (c *managerClient) ExistToken(ctx context.Context, in *ExistTokenRequest, o
 // for forward compatibility
 type ManagerServer interface {
 	GetTokenLastCond(context.Context, *GetTokenLastCondRequest) (*GetTokenLastCondResponse, error)
+	GetTokenLastConds(context.Context, *GetTokenLastCondsRequest) (*GetTokenLastCondsResponse, error)
 	GetOneDayVolumn(context.Context, *GetOneDayVolumnRequest) (*GetOneDayVolumnResponse, error)
 	ExistToken(context.Context, *ExistTokenRequest) (*ExistTokenResponse, error)
 	mustEmbedUnimplementedManagerServer()
@@ -78,6 +89,9 @@ type UnimplementedManagerServer struct {
 
 func (UnimplementedManagerServer) GetTokenLastCond(context.Context, *GetTokenLastCondRequest) (*GetTokenLastCondResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenLastCond not implemented")
+}
+func (UnimplementedManagerServer) GetTokenLastConds(context.Context, *GetTokenLastCondsRequest) (*GetTokenLastCondsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTokenLastConds not implemented")
 }
 func (UnimplementedManagerServer) GetOneDayVolumn(context.Context, *GetOneDayVolumnRequest) (*GetOneDayVolumnResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOneDayVolumn not implemented")
@@ -112,6 +126,24 @@ func _Manager_GetTokenLastCond_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ManagerServer).GetTokenLastCond(ctx, req.(*GetTokenLastCondRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Manager_GetTokenLastConds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTokenLastCondsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ManagerServer).GetTokenLastConds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/kline.v1.summary.Manager/GetTokenLastConds",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ManagerServer).GetTokenLastConds(ctx, req.(*GetTokenLastCondsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -162,6 +194,10 @@ var Manager_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetTokenLastCond",
 			Handler:    _Manager_GetTokenLastCond_Handler,
+		},
+		{
+			MethodName: "GetTokenLastConds",
+			Handler:    _Manager_GetTokenLastConds_Handler,
 		},
 		{
 			MethodName: "GetOneDayVolumn",

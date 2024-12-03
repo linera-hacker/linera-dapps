@@ -28,6 +28,23 @@ func (s *Server) GetTokenLastCond(ctx context.Context, in *summaryproto.GetToken
 	}, nil
 }
 
+func (s *Server) GetTokenLastConds(ctx context.Context, in *summaryproto.GetTokenLastCondsRequest) (*summaryproto.GetTokenLastCondsResponse, error) {
+	infos, err := summary.GetTokenLastConds(ctx, in.PoolTokenConds)
+
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetTokenLastConds",
+			"In", in,
+			"Error", err,
+		)
+		return &summaryproto.GetTokenLastCondsResponse{}, status.Error(codes.Internal, "internal server err")
+	}
+
+	return &summaryproto.GetTokenLastCondsResponse{
+		Infos: infos,
+	}, nil
+}
+
 func (s *Server) GetOneDayVolumn(ctx context.Context, in *summaryproto.GetOneDayVolumnRequest) (*summaryproto.GetOneDayVolumnResponse, error) {
 	infos, err := summary.GetOneDayVolumnRank(ctx, 8)
 

@@ -53,6 +53,50 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 	}, nil
 }
 
+func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
+	results := []*summaryproto.TokenLastCond{}
+	for i := 0; i < len(poolTokens); i++ {
+		poolID := poolTokens[i].PoolID
+		t0Addr := poolTokens[i].TokenZeroAddress
+		t1Addr := poolTokens[i].TokenOneAddress
+		fmt.Println(poolID, t0Addr, t1Addr)
+		tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
+		if err != nil {
+			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
+			continue
+		}
+		lastTx, err := GetLastTransaction(ctx, poolID)
+		if err != nil {
+			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
+			continue
+		}
+		oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
+		if err != nil {
+			return nil, err
+		}
+		fmt.Println(utils.PrettyStruct(oneDayPrices))
+		txVolumn, err := GetOneDayVolumn(ctx, poolID)
+		if err != nil {
+			return nil, err
+		}
+		tokenLastCond := &summaryproto.TokenLastCond{
+			PoolID:                 poolID,
+			TokenZeroAddress:       t0Addr,
+			TokenOneAddress:        t1Addr,
+			LastTxAt:               lastTx.Timestamp,
+			LastTxZeroAmount:       lastTx.AmountZeroIn,
+			LastTxOneAmount:        lastTx.AmountOneIn,
+			OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
+			OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
+			NowPrice:               oneDayPrices[1].Price,
+			OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
+		}
+		results = append(results, tokenLastCond)
+	}
+
+	return results, nil
+}
+
 func GetTokenPair(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*tokenpairproto.TokenPair, error) {
 	conds := tokenpairproto.Conds{
 		PoolID: &kline.Uint64Val{Op: cruder.EQ, Value: poolID},

@@ -4,13 +4,19 @@ package kline.v1.summary;
 
 option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/summary";
 import "google/api/annotations.proto";
-import "kline/kline.proto";
 
 service Manager {
   rpc GetTokenLastCond(GetTokenLastCondRequest)
     returns (GetTokenLastCondResponse) {
       option (google.api.http) = {
         post : "/v1/get/token/last/cond"
+        body : "*"
+      };
+  }
+  rpc GetTokenLastConds(GetTokenLastCondsRequest)
+    returns (GetTokenLastCondsResponse) {
+      option (google.api.http) = {
+        post : "/v1/get/token/last/conds"
         body : "*"
       };
   }
@@ -49,6 +55,19 @@ message GetTokenLastCondRequest {
 }
 
 message GetTokenLastCondResponse { TokenLastCond Info = 10; }
+
+message PoolTokenCond {
+  uint64 PoolID = 10;
+  string TokenZeroAddress = 20;
+  string TokenOneAddress = 30;
+}
+
+message GetTokenLastCondsRequest { 
+  repeated PoolTokenCond PoolTokenConds = 10;
+}
+
+message GetTokenLastCondsResponse { repeated TokenLastCond Infos = 10; }
+
 
 message ExistTokenRequest { string Symbol = 10; }
 message ExistTokenResponse { bool Exist = 10; }
