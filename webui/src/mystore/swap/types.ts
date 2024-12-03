@@ -13,7 +13,6 @@ export interface Token {
   Icon: string;
   Name: string;
   Symbol: string;
-  Balance: number;
   CreatedAt: number;
   UpdatedAt: number;
 }
@@ -36,7 +35,6 @@ export interface TokenPair {
   TokenOneAddress: string;
   TokenOneIcon: string;
   TokenOneSymbol: string;
-  TokenOneBalance: number;
   Remark: string;
   CreatedAt: number;
   UpdatedAt: number;

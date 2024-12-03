@@ -27,84 +27,6 @@
     <div id='chart-container' />
   </div>
 </template>
-<style>
-* {
-  margin: 0;
-  padding: 0;
-}
-#chart-container {
-  position: relative;
-  height: 50vh;
-  min-height: 700px;
-  display: block;
-  overflow: auto;
-}
-.token-pair-tip{
-  width: 63%;
-  display: inline-block;
-  vertical-align: middle;
-}
-.token-pair-tip img{
-  width: 1.5rem;
-  border: 2px solid #dadada;
-  border-radius: 0.7rem;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.token-pair-tip div{
-  margin-left: 5px;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #555;
-  display: inline-block;
-  vertical-align: middle;
-}
-
-.radio-buttons-tip{
-  width: 37%;
-  display: inline-block;
-  vertical-align: middle;
-  text-align: right;
-}
-
-.radio-buttons{
-  display: inline-block;
-  padding: 2px;
-  background-color: #dadada;
-  border-radius: 5px;
-}
-
-.radio-buttons:hover *{
-  cursor: pointer;
-}
-
-.radio-button{
-  display: inline-block;
-}
-
-.radio-input{
-  display: none;
-}
-
-.radio-lable{
-  width: 2rem;
-  margin: 1px;
-  font-size: 0.8rem;
-  border-radius: 3px;
-  background-color: #e5e5e5;
-  text-align: center;
-  display: inline-block;
-  color: gray;
-}
-
-.radio-input:checked+label{
-  display: inline-block;
-  color: black;
-  background-color: #eee;
-  font-weight: bold;
-}
-</style>
 
 <script setup lang='ts'>
 import { ref, onMounted, watch } from 'vue'
@@ -190,3 +112,73 @@ onMounted(() => {
   }, 6000)
 })
 </script>
+
+<style scoped lang="sass">
+*
+  margin: 0
+  padding: 0
+
+#chart-container
+  position: relative
+  height: 50vh
+  min-height: 700px
+  display: block
+  overflow: auto
+
+.token-pair-tip
+  width: 63%
+  display: inline-block
+  vertical-align: middle
+
+.token-pair-tip img
+  width: 1.5rem
+  border: 2px solid #dadada
+  border-radius: 0.7rem
+  display: inline-block
+  vertical-align: middle
+
+.token-pair-tip div
+  margin-left: 5px
+  font-size: 0.9rem
+  font-weight: bold
+  color: #555
+  display: inline-block
+  vertical-align: middle
+
+.radio-buttons-tip
+  width: 37%
+  display: inline-block
+  vertical-align: middle
+  text-align: right
+
+.radio-buttons
+  display: inline-block
+  padding: 2px
+  background-color: #dadada
+  border-radius: 5px
+
+.radio-buttons:hover *
+  cursor: pointer
+
+.radio-button
+  display: inline-block
+
+.radio-input
+  display: none
+
+.radio-lable
+  width: 2rem
+  margin: 1px
+  font-size: 0.8rem
+  border-radius: 3px
+  background-color: #e5e5e5
+  text-align: center
+  display: inline-block
+  color: gray
+
+.radio-input:checked+label
+  display: inline-block
+  color: black
+  background-color: #eee
+  font-weight: bold
+</style>

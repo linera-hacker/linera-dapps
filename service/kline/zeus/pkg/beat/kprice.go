@@ -89,6 +89,7 @@ func checkAndCreateToken(ctx context.Context, address string) (*tokenproto.Token
 	}
 
 	tokenReq, err := GetTokenInfos(address)
+
 	// tokenReq, err := MockGetTokenInfos(address)
 	if tokenReq == nil {
 		return nil, err
@@ -181,7 +182,7 @@ func (st *SamplingKPriceTask) getTokenPairID(ctx context.Context, poolID uint64,
 		return 0, err
 	}
 	if tokenZero == nil {
-		return 0, fmt.Errorf("failed to create token")
+		return 0, fmt.Errorf("failed to create token: %v", tokenZeroAddress)
 	}
 
 	tokenOne, err := checkAndCreateToken(ctx, tokenOneAddress)
@@ -189,7 +190,7 @@ func (st *SamplingKPriceTask) getTokenPairID(ctx context.Context, poolID uint64,
 		return 0, err
 	}
 	if tokenOne == nil {
-		return 0, fmt.Errorf("failed to create token")
+		return 0, fmt.Errorf("failed to create token: %v", tokenOneAddress)
 	}
 
 	tpInfo, err := checkTokenPair(ctx, poolID, tokenZero.ID, tokenOne.ID)
@@ -404,6 +405,10 @@ func GetTokenInfos(address string) (*tokenproto.TokenReq, error) {
 	resp, err := app.GetTokenInfo()
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.Data.Name == "" {
+		return nil, nil
 	}
 
 	site := ""

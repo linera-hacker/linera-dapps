@@ -12,7 +12,7 @@
         <q-space />
         <div class='row'>
           <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-          <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(swapStore.SelectedToken.Balance).toFixed(2) }}</div>
+          <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(outBalance).toFixed(2) }}</div>
           <div class='text-grey-8'>{{ swapStore.SelectedToken.Symbol }}</div>
         </div>
       </div>
@@ -25,8 +25,6 @@
                 <div class='row'>
                   <div class='swap-token-name text-bold'>{{ scope.opt.Symbol }}</div>
                   <q-space />
-                  <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-                  <div>{{ Number(scope.opt.Balance).toFixed(2) }}</div>
                 </div>
                 <div>{{ shortid.shortId(scope.opt.Address, 6) }}</div>
               </div>
@@ -57,7 +55,7 @@
         <q-space />
         <div class='row'>
           <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-          <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(swapStore.SelectedTokenPair.TokenOneBalance).toFixed(2) }}</div>
+          <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(inBalance).toFixed(2) }}</div>
           <div class='text-grey-8'>{{ swapStore.SelectedTokenPair.TokenOneSymbol }}</div>
         </div>
       </div>
@@ -70,8 +68,6 @@
                 <div class='row'>
                   <div class='swap-token-name text-bold'>{{ scope.opt.TokenOneSymbol }}</div>
                   <q-space />
-                  <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-                  <div>{{ Number(scope.opt.TokenOneBalance).toFixed(2) }}</div>
                 </div>
                 <div>{{ shortid.shortId(scope.opt.TokenOneAddress, 6) }}</div>
               </div>
@@ -87,7 +83,7 @@
         <q-input class='swap-amount-input' dense v-model.number='inAmount' reverse-fill-mask input-class='text-right' />
       </div>
     </q-card>
-    <q-btn rounded flat :label='$t("MSG_SWAP")' class='full-width border-red-4 vertical-inner-y-margin vertical-inner-y-margin-bottom' />
+    <q-btn rounded flat :label='$t("MSG_SWAP")' class='full-width border-red-4 vertical-inner-y-margin vertical-inner-y-margin-bottom' @click='SwapAmount' />
   </div>
 </template>
 
@@ -105,34 +101,13 @@ let triggerInAmount = true
 const outAmount = ref(0)
 const inAmount = ref(0)
 
+const outBalance = ref(0)
+const inBalance = ref(0)
+
 const swapStore = useSwapStore()
 const walletStore = useWalletStore()
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
-
-const GetTokenPairs = () => {
-  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
-    swapStore.getTokenPairsByTokenZeroID((error) => {
-      for (const info of swapStore.TokenPairs) {
-        if (error) {
-          continue
-        }
-        walletStore.getBalance(info.TokenOneAddress, v, (error, balance) => {
-          if (error) {
-            return
-          }
-          info.TokenOneBalance = Number(balance)
-        })
-      }
-    })
-  }).catch((e) => {
-    notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
-    })
-  })
-}
 
 const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
   if (swapStore.SelectedToken === null || swapStore.SelectedToken.ID < 0 || _inAmount === 0) {
@@ -169,34 +144,84 @@ const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
   }
 }
 
-// const SwapAmount = () => {
-//   if (swapStore.SelectedToken === null || swapStore.SelectedToken.ID < 0) {
-//     return
-//   }
-//   if (swapStore.SelectedTokenPair === null || swapStore.SelectedTokenPair.ID < 0) {
-//     return
-//   }
-//   if (outAmount.value === null || outAmount.value < 0) {
-//     return
-//   }
+const SwapAmount = () => {
+  if (swapStore.SelectedToken === null || swapStore.SelectedToken.ID < 0) {
+    return
+  }
+  if (swapStore.SelectedTokenPair === null || swapStore.SelectedTokenPair.ID < 0) {
+    return
+  }
+  if (outAmount.value === null || outAmount.value < 0) {
+    return
+  }
 
-//   walletStore.swapAmount(
-//     swapStore.SelectedTokenPair.TokenZeroAddress,
-//     swapStore.SelectedTokenPair.TokenOneAddress,
-//     outAmount.value,
-//     (error, amount) => {
-//       if (error) { inAmount.value = amount }
-//     }
-//   )
-// }
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    walletStore.swapAmount(
+      swapStore.SelectedTokenPair.TokenZeroAddress,
+      swapStore.SelectedTokenPair.TokenOneAddress,
+      userStore.chainId,
+      userStore.account,
+      v,
+      outAmount.value
+    ).then().catch((e) => {
+      notificationStore.pushNotification({
+        Title: 'swap amount',
+        Message: e as string,
+        Description: 'please retry'
+      })
+    })
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'gen account from user',
+      Message: e as string,
+      Description: 'please connect plugin and retry'
+    })
+  })
 
-watch(() => swapStore.SelectedToken, (selected) => {
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    swapStore.getTokenPairsByTokenZeroID((error) => {
+      for (const info of swapStore.TokenPairs) {
+        if (error) {
+          continue
+        }
+        walletStore.getBalance(info.TokenOneAddress, userStore.chainId, v, (error, balance) => {
+          if (error) {
+            return
+          }
+          inBalance.value = Number(balance)
+        })
+      }
+    })
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'gen account from user',
+      Message: e as string,
+      Description: 'please connect plugin and retry'
+    })
+  })
+}
+
+watch(() => swapStore.SelectedToken, (old, selected) => {
   if (selected === null || selected.ID < 0) {
     outAmount.value = 0
     return
   }
-  GetTokenPairs()
+  swapStore.getTokenPairsByTokenZeroID()
   CalSwapInAmount(outAmount.value, undefined)
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    walletStore.getBalance(selected.Address, userStore.chainId, v, (error, balance) => {
+      if (error) {
+        return
+      }
+      outBalance.value = Number(balance)
+    })
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'gen account from user',
+      Message: e as string,
+      Description: 'please connect plugin and retry'
+    })
+  })
 })
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
@@ -205,6 +230,20 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
     return
   }
   CalSwapInAmount(undefined, inAmount.value)
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    walletStore.getBalance(selected.TokenOneAddress, userStore.chainId, v, (error, balance) => {
+      if (error) {
+        return
+      }
+      inBalance.value = Number(balance)
+    })
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'gen account from user',
+      Message: e as string,
+      Description: 'please connect plugin and retry'
+    })
+  })
 })
 
 watch(outAmount, (amount) => {
@@ -239,8 +278,7 @@ const setSpecifyTokenPair = (t0Addr: string, t1Addr: string) => {
     }
   }
 
-  GetTokenPairs()
-
+  swapStore.getTokenPairsByTokenZeroID()
   swapStore.SelectedTokenPair.ID = -1
   for (const item of swapStore.TokenPairs) {
     if (item.TokenOneAddress === t1Addr) {
@@ -254,27 +292,7 @@ onMounted(() => {
     return
   }
   swapStore.IsInitilazed = true
-  swapStore.getTokens((error) => {
-    dbModel.ownerFromPublicKey(userStore.account).then((v) => {
-      for (const info of swapStore.Tokens) {
-        if (error) {
-          continue
-        }
-        walletStore.getBalance(info.Address, v, (error, balance) => {
-          if (error) {
-            return
-          }
-          info.Balance = Number(balance)
-        })
-      }
-    }).catch((e) => {
-      notificationStore.pushNotification({
-        Title: 'gen account from user',
-        Message: e as string,
-        Description: 'please connect plugin and retry'
-      })
-    })
-  })
+  swapStore.getTokens()
 })
 
 </script>

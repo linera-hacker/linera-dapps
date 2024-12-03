@@ -6,6 +6,4 @@
 import { defineAsyncComponent } from 'vue'
 
 const OneMM = defineAsyncComponent(() => import('src/components/bridge/db/OneMM.vue'))
-console.log('just for test!')
-
 </script>

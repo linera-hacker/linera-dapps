@@ -1,18 +1,16 @@
 import { defineStore } from 'pinia'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
-import { CalSwapAmountResponse, GetBalanceResponse, SwapAmountResponse } from './types'
+import { CalSwapAmountResponse, GetBalanceResponse } from './types'
+import { gql } from '@apollo/client'
+import { constants } from 'src/const'
 
 export const useWalletStore = defineStore('useWalletStore', {
-  state: () => ({
-    ServerAddr: 'http://172.16.31.51:31130',
-    ChainID: 'a64ce4eded0d5fed622bf4b6e7a92eaf627ca31a654fa83e63b93406478d46bb',
-    SwapAppID: '5c2b4f09e319eee343b4fbf87909a4d0bda53b8806188179a63edae8c7f77991298371139571e8b133d653159aad8acab2acb430eefd87812ff5db6aaeebeced8eeb552ddc42dc3fce31f25f6f68a5b3c2e72e252a82b163f4f3ca86fd228188010000000000000000000000'
-  }),
+  state: () => ({}),
   actions: {
-    getBalance (erc20AppAddr: string, accountAddr: string, done?: (error: boolean, balance: string) => void) {
-      const url = `${this.ServerAddr}/chains/${this.ChainID}/applications/${erc20AppAddr}`
-      const req = { query: `query{\n  balanceOf(owner:{\n    chain_id: "${this.ChainID}"\n    owner: "User:${accountAddr}"\n  })\n}` }
+    getBalance (erc20AppAddr: string, accountChainID: string, accountAddr: string, done?: (error: boolean, balance: string) => void) {
+      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${erc20AppAddr}`
+      const req = { query: `query{\n  balanceOf(owner:{\n    chain_id: "${accountChainID}"\n    owner: "User:${accountAddr}"\n  })\n}` }
       doActionWithError<unknown, GetBalanceResponse>(
         url,
         req,
@@ -34,7 +32,7 @@ export const useWalletStore = defineStore('useWalletStore', {
       )
     },
     calSwapAmount (tokenZeroAppAddr: string, tokenOneAppAddr: string, outAmount: number, done?: (error: boolean, amount: number) => void) {
-      const url = `${this.ServerAddr}/chains/${this.ChainID}/applications/${this.SwapAppID}`
+      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${constants.swapAppID}`
       const req = { query: `query{\n  calculateSwapAmount(token0:"${tokenZeroAppAddr}",token1:"${tokenOneAppAddr}",amount1:"${outAmount}")\n}` }
       doActionWithError<unknown, CalSwapAmountResponse>(
         url,
@@ -54,39 +52,44 @@ export const useWalletStore = defineStore('useWalletStore', {
         () => { done?.(true, 0) }
       )
     },
-    swapAmount (tokenZeroAddr: string, tokenOneAddr: string, chainID: string, accountAddr: string, outAmount: number, done?: (error: boolean, inAmount: number) => void) {
-      const url = `${this.ServerAddr}/chains/${this.ChainID}/applications/${this.SwapAppID}`
-      const req = {
-        query: `mutation {
+    swapAmount (token0: string, token1: string, accountChainID: string, publicKey: string, accountAddr: string, outAmount: number) {
+      const owner = `"User:${accountAddr}"`
+      const mutate = gql`
+        mutation swap ($token0: String!, $token1: String!, $outAmount: Float!, $chainID: String!, $owner: String!) {
           swap (
-          token0:"${tokenZeroAddr}",
-          token1:"${tokenOneAddr}",
-          amount0In:"${outAmount}"),
-          to:{
-            chain_id: "${chainID}"
-            owner: "User:${accountAddr}"
-          }
-        }`
-      }
-      doActionWithError<unknown, SwapAmountResponse>(
-        url,
-        req,
-        {
-          Error: {
-            Title: 'swap amount',
-            Message: 'failed to swap amount',
-            Description: 'please retry',
-            Popup: true,
-            Type: NotifyType.Error
-          }
-        },
-        (resp) => {
-          done?.(false, resp.data.calculateSwapAmount)
-        },
-        () => {
-          done?.(true, 0)
+            token0: $token0,
+            token1: $token1,
+            amount0In: $outAmount,
+            to:{
+              chain_id: $chainID
+              owner: $owner
+            }
+          )
         }
-      )
+      `
+      return new Promise((resolve, reject) => {
+        window.linera.request({
+          method: 'linera_graphqlMutation',
+          params: {
+            publicKey: publicKey,
+            applicationId: constants.swapAppID,
+            query: {
+              query: mutate.loc?.source?.body,
+              variables: {
+                token0: token0,
+                token1: token1,
+                outAmount: outAmount,
+                chainID: accountChainID,
+                owner: owner
+              }
+            }
+          }
+        }).then((result) => {
+          resolve(result)
+        }).catch((e) => {
+          reject(e)
+        })
+      })
     }
   }
 })

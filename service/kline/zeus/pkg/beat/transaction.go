@@ -47,6 +47,7 @@ func (st *SamplingTransactionTask) Close(ctx context.Context, interval time.Dura
 
 func createTransactions(ctx context.Context, transactionReqs []*transactionproto.TransactionReq) error {
 	for _, req := range transactionReqs {
+		//TODO: will create bulk
 		createH, err := transaction.NewHandler(ctx,
 			transaction.WithPoolID(req.PoolID, true),
 			transaction.WithTransactionID(req.TransactionID, true),
