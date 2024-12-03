@@ -54,7 +54,7 @@ const topList = ref([] as Array<OwnerBalance>)
 const token0 = ref('')
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
-  if (selected === null) {
+  if (!selected) {
     return
   }
   token0.value = selected.TokenZeroAddress

@@ -6,7 +6,7 @@
     <q-separator />
     <q-card flat class='bg-red-1 border-radius-8px popup-padding vertical-inner-y-margin'>
       <div class='row'>
-        <div class='text-bold'>
+        <div class='text-bold text-grey-8'>
           {{ $t('MSG_YOU_ARE_SELLING') }}
         </div>
         <q-space />
@@ -17,27 +17,16 @@
         </div>
       </div>
       <div class='row vertical-card-align swap-token'>
-        <q-select dense filled v-model='swapStore.SelectedToken' :options='swapStore.Tokens' dropdown-icon='bi-chevron-down' class='swap-token-option'>
-          <template #option='scope'>
-            <q-item dense v-bind='scope.itemProps'>
-              <q-img :src='scope.opt.Icon' width='24px' height='24px' />
-              <div class='swap-token-list'>
-                <div class='row'>
-                  <div class='swap-token-name text-bold'>{{ scope.opt.Symbol }}</div>
-                  <q-space />
-                </div>
-                <div>{{ shortid.shortId(scope.opt.Address, 6) }}</div>
-              </div>
-            </q-item>
-          </template>
-          <template #selected>
-            <div class='row'>
-              <q-img :src='swapStore.SelectedToken?.Icon' width='24px' height='24px' />
-              <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedToken?.Symbol }}</div>
-            </div>
-          </template>
-        </q-select>
-        <q-input class='swap-amount-input' dense v-model.number='outAmount' reverse-fill-mask input-class='text-right' />
+        <div>
+          <div class='text-bold'>
+            {{ swapStore.SelectedToken?.Symbol }}
+          </div>
+          <div class='text-grey-8' :title='swapStore.SelectedToken?.Address'>
+            {{ shortId(swapStore.SelectedToken?.Address || '', 8) }}
+          </div>
+        </div>
+        <q-space />
+        <q-input class='swap-amount-input text-grey-8' dense v-model.number='outAmount' reverse-fill-mask input-class='text-right' />
       </div>
     </q-card>
     <div class='row vertical-card-align'>
@@ -49,7 +38,7 @@
     </div>
     <q-card flat class='bg-red-1 border-radius-8px popup-padding vertical-card-align'>
       <div class='row'>
-        <div class='text-bold'>
+        <div class='text-bold text-grey-8'>
           {{ $t('MSG_YOU_ARE_BUYING') }}
         </div>
         <q-space />
@@ -60,26 +49,15 @@
         </div>
       </div>
       <div class='row vertical-card-align swap-token'>
-        <q-select dense filled v-model='swapStore.SelectedTokenPair' :options='swapStore.TokenPairs' dropdown-icon='bi-chevron-down' class='swap-token-option'>
-          <template #option='scope'>
-            <q-item dense v-bind='scope.itemProps'>
-              <q-img :src='scope.opt.TokenOneIcon' width='24px' height='24px' />
-              <div class='swap-token-list'>
-                <div class='row'>
-                  <div class='swap-token-name text-bold'>{{ scope.opt.TokenOneSymbol }}</div>
-                  <q-space />
-                </div>
-                <div>{{ shortid.shortId(scope.opt.TokenOneAddress, 6) }}</div>
-              </div>
-            </q-item>
-          </template>
-          <template #selected>
-            <div class='row'>
-              <q-img :src='swapStore.SelectedToken?.Icon' width='24px' height='24px' />
-              <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
-            </div>
-          </template>
-        </q-select>
+        <div>
+          <div class='text-bold'>
+            {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
+          </div>
+          <div class='text-grey-8' :title='swapStore.SelectedTokenPair?.TokenOneAddress'>
+            {{ shortId(swapStore.SelectedTokenPair?.TokenOneAddress || '', 8) }}
+          </div>
+        </div>
+        <q-space />
         <q-input class='swap-amount-input' dense v-model.number='inAmount' reverse-fill-mask input-class='text-right' />
       </div>
     </q-card>
@@ -90,12 +68,11 @@
 <script setup lang='ts'>
 import { dbModel } from 'src/model'
 import { useNotificationStore } from 'src/mystore/notification'
-import { useSwapStore, Token, TokenPair } from 'src/mystore/swap'
+import { useSwapStore } from 'src/mystore/swap'
 import { useUserStore } from 'src/mystore/user'
 import { useWalletStore } from 'src/mystore/wallet'
-import { shortid } from 'src/utils'
-import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { shortId } from 'src/utils/shortid'
+import { ref, watch } from 'vue'
 
 let triggerOutAmount = true
 let triggerInAmount = true
@@ -185,11 +162,8 @@ watch(() => swapStore.SelectedToken, (selected) => {
     outAmount.value = 0
     return
   }
-  swapStore.getTokenPairsByTokenZeroID((error) => {
-    if (!error) {
-      CalSwapInAmount(outAmount.value, undefined)
-    }
-  })
+
+  CalSwapInAmount(outAmount.value, undefined)
 
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.getBalance(selected.Address, userStore.chainId, v, (error, balance) => {
@@ -208,10 +182,11 @@ watch(() => swapStore.SelectedToken, (selected) => {
 })
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
-  if (selected === null) {
+  if (!selected) {
     inAmount.value = 0
     return
   }
+
   CalSwapInAmount(undefined, inAmount.value)
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.getBalance(selected.TokenOneAddress, userStore.chainId, v, (error, balance) => {
@@ -251,45 +226,6 @@ watch(inAmount, (amount) => {
   triggerInAmount = true
 })
 
-const router = useRouter()
-
-const setSpecifyTokenPair = () => {
-  const t0Addr = router.currentRoute.value.query.token0
-  const t1Addr = router.currentRoute.value.query.token1
-  if (t0Addr === undefined || t1Addr === undefined) {
-    return
-  }
-
-  swapStore.SelectedToken = null
-  for (const item of swapStore.Tokens) {
-    if (item.Address === t0Addr) {
-      swapStore.SelectedToken = item
-      break
-    }
-  }
-
-  swapStore.getTokenPairsByTokenZeroID()
-  swapStore.SelectedTokenPair = null
-  for (const item of swapStore.TokenPairs) {
-    if (item.TokenOneAddress === t1Addr) {
-      swapStore.SelectedTokenPair = item
-    }
-  }
-}
-
-onMounted(() => {
-  if (swapStore.IsInitilazed) {
-    return
-  }
-  swapStore.IsInitilazed = true
-  swapStore.getTokens((error) => {
-    console.log(swapStore.Tokens)
-    if (!error) {
-      setSpecifyTokenPair()
-    }
-  })
-})
-
 </script>
 
 <style scoped lang='sass'>
@@ -302,26 +238,10 @@ onMounted(() => {
   margin-right: 4px
   margin-top: 2px
 
-.swap-token-name
-  line-height: 24px
-
 :deep(.swap-token)
   .q-select
     .q-icon
       font-size: 16px
-
-.swap-token-list
-  min-width: 160px
-
-.swap-token-option
-  width: 160px
-  border-radius: 4px
-  background: $red-2
-
-.swap-token-label
-  margin-left: 6px
-  width: 84px
-  overflow: hidden
 
 .swap-amount-input
   width: calc(100% - 160px)

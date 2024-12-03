@@ -2,11 +2,7 @@
   <div>
     <div style='padding: 5px;width: 100%;'>
       <div class='token-pair-tip'>
-        <img :src='swapStore.SelectedTokenPair?.TokenZeroIcon'>
-        <img :src='swapStore.SelectedTokenPair?.TokenOneIcon'>
-        <div>
-          {{ swapStore.SelectedTokenPair?.TokenZeroSymbol }} / {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
-        </div>
+        <SwapSelect />
       </div>
       <div class='radio-buttons-tip'>
         <div class='radio-buttons'>
@@ -34,6 +30,7 @@ import { useSwapStore } from 'src/mystore/swap'
 import { initEchart, setKPointsToEchart, setStartAndEnd, calculateZoomStart } from './KLineOption'
 import * as echarts from 'echarts/core'
 import { useKLineStore } from 'src/mystore/kline'
+import SwapSelect from './SwapSelect.vue'
 
 const selectedKPType = ref('')
 const swapStore = useSwapStore()
@@ -56,7 +53,7 @@ watch(selectedKPType, (selected) => {
 })
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
-  if (selected === null) {
+  if (!selected) {
     return
   }
   klineStore.SelectedTokenPairID = selected.ID

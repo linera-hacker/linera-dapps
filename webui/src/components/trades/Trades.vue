@@ -2,7 +2,7 @@
   <q-table
     flat
     :columns='(columns as never)'
-    :rows='transactions'
+    :rows='tradesStore.Transactions'
     :rows-per-page-options='[10]'
   />
 </template>
@@ -10,43 +10,41 @@
 <script setup lang='ts'>
 import { watch, onMounted, computed, onBeforeUnmount } from 'vue'
 import { useSwapStore } from 'src/mystore/swap'
-import { Transaction, useKLineStore } from 'src/mystore/kline'
+import { Transaction, useTradesStore } from 'src/mystore/trades'
 import { date } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n({ useScope: 'global' })
 
 const swapStore = useSwapStore()
-const klineStore = useKLineStore()
+const tradesStore = useTradesStore()
 let intervalID: number
 
-const transactions = computed(() => klineStore.Transactions.sort((a, b) => b.Timestamp - a.Timestamp))
-
 watch(() => swapStore.SelectedTokenPair, (selected) => {
-  if (selected === null) {
+  if (!selected) {
     return
   }
-  klineStore.SelectedPoolID = selected.PoolID
+  tradesStore.SelectedPoolID = selected.PoolID
   initKPointsStore()
 })
 
 const initKPointsStore = () => {
-  klineStore.OriginalTxID = 0
-  klineStore.Transactions = []
-  klineStore.ResetTableViewLock = 0
-  klineStore.refreshHistoryTransactions()
+  tradesStore.OriginalTxID = 0
+  tradesStore.Transactions = []
+  tradesStore.ResetTableViewLock = 0
+  tradesStore.refreshHistoryTransactions()
 }
 
 onMounted(() => {
-  if (klineStore.NeedInitTxTable) {
-    klineStore.refreshHistoryTransactions()
-    klineStore.NeedInitTxTable = false
+  if (tradesStore.NeedInitTxTable) {
+    tradesStore.refreshHistoryTransactions()
+    tradesStore.NeedInitTxTable = false
   }
 
   intervalID = window.setInterval(() => {
-    klineStore.refreshNewTransactions()
-    if (klineStore.ResetKLineViewLock + 60000 < new Date().getTime()) {
-      klineStore.ResetKLineViewLock = new Date().getTime()
+    tradesStore.refreshNewTransactions()
+    if (tradesStore.ResetTableViewLock + 60000 < new Date().getTime()) {
+      tradesStore.ResetTableViewLock = new Date().getTime()
     }
   }, 3000)
 })
