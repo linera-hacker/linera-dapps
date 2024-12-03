@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/Geapefurit/kline-back/common/kptype"
-	"github.com/Geapefurit/kline-back/common/utils"
 	"github.com/Geapefurit/kline-back/proto/kline"
 	basetype "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
 	kpriceproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kprice"
@@ -20,7 +19,6 @@ import (
 )
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
-	fmt.Println(poolID, t0Addr, t1Addr)
 	tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 	if err != nil {
 		return nil, err
@@ -33,7 +31,6 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(utils.PrettyStruct(oneDayPrices))
 	txVolumn, err := GetOneDayVolumn(ctx, poolID)
 	if err != nil {
 		return nil, err

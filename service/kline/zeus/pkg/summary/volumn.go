@@ -2,12 +2,10 @@ package summary
 
 import (
 	"context"
-	"fmt"
 	"sort"
 	"time"
 
 	"github.com/Geapefurit/kline-back/common/kptype"
-	"github.com/Geapefurit/kline-back/common/utils"
 	"github.com/Geapefurit/kline-back/proto/kline"
 	basetype "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
 	summaryproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/summary"
@@ -71,9 +69,6 @@ func getVolumnRank(ctx context.Context, start, end uint32, topN int) ([]*summary
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(utils.PrettyStruct(tpH.Conds.PoolIDs))
-	fmt.Println(utils.PrettyStruct(poolIDs))
-	fmt.Println(utils.PrettyStruct(_tokenPairs))
 
 	tokenPairs := make(map[uint64]*tokenpairproto.TokenPair)
 	for _, v := range _tokenPairs {

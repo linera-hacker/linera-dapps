@@ -13,7 +13,7 @@
         <div class='row'>
           <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
           <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(outBalance).toFixed(2) }}</div>
-          <div class='text-grey-8'>{{ swapStore.SelectedToken.Symbol }}</div>
+          <div class='text-grey-8'>{{ swapStore.SelectedToken?.Symbol }}</div>
         </div>
       </div>
       <div class='row vertical-card-align swap-token'>
@@ -32,8 +32,8 @@
           </template>
           <template #selected>
             <div class='row'>
-              <q-img :src='swapStore.SelectedToken.Icon' width='24px' height='24px' />
-              <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedToken.Symbol }}</div>
+              <q-img :src='swapStore.SelectedToken?.Icon' width='24px' height='24px' />
+              <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedToken?.Symbol }}</div>
             </div>
           </template>
         </q-select>
@@ -56,7 +56,7 @@
         <div class='row'>
           <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
           <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(inBalance).toFixed(2) }}</div>
-          <div class='text-grey-8'>{{ swapStore.SelectedTokenPair.TokenOneSymbol }}</div>
+          <div class='text-grey-8'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
         </div>
       </div>
       <div class='row vertical-card-align swap-token'>
@@ -75,8 +75,8 @@
           </template>
           <template #selected>
             <div class='row'>
-              <q-img :src='swapStore.SelectedToken.Icon' width='24px' height='24px' />
-              <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedTokenPair.TokenOneSymbol }}</div>
+              <q-img :src='swapStore.SelectedToken?.Icon' width='24px' height='24px' />
+              <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
             </div>
           </template>
         </q-select>
@@ -90,11 +90,12 @@
 <script setup lang='ts'>
 import { dbModel } from 'src/model'
 import { useNotificationStore } from 'src/mystore/notification'
-import { useSwapStore } from 'src/mystore/swap'
+import { useSwapStore, Token, TokenPair } from 'src/mystore/swap'
 import { useUserStore } from 'src/mystore/user'
 import { useWalletStore } from 'src/mystore/wallet'
 import { shortid } from 'src/utils'
 import { ref, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 
 let triggerOutAmount = true
 let triggerInAmount = true
@@ -110,11 +111,11 @@ const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 
 const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
-  if (swapStore.SelectedToken === null || swapStore.SelectedToken.ID < 0 || _inAmount === 0) {
+  if (swapStore.SelectedToken === null || _inAmount === 0) {
     outAmount.value = 0
     return
   }
-  if (swapStore.SelectedTokenPair === null || swapStore.SelectedTokenPair.ID < 0 || _outAmount === 0) {
+  if (swapStore.SelectedTokenPair === null || _outAmount === 0) {
     inAmount.value = 0
     return
   }
@@ -145,10 +146,10 @@ const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
 }
 
 const SwapAmount = () => {
-  if (swapStore.SelectedToken === null || swapStore.SelectedToken.ID < 0) {
+  if (swapStore.SelectedToken === null) {
     return
   }
-  if (swapStore.SelectedTokenPair === null || swapStore.SelectedTokenPair.ID < 0) {
+  if (swapStore.SelectedTokenPair === null) {
     return
   }
   if (outAmount.value === null || outAmount.value < 0) {
@@ -157,8 +158,8 @@ const SwapAmount = () => {
 
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.swapAmount(
-      swapStore.SelectedTokenPair.TokenZeroAddress,
-      swapStore.SelectedTokenPair.TokenOneAddress,
+      swapStore.SelectedTokenPair?.TokenZeroAddress || '',
+      swapStore.SelectedTokenPair?.TokenOneAddress || '',
       userStore.chainId,
       userStore.account,
       v,
@@ -177,37 +178,19 @@ const SwapAmount = () => {
       Description: 'please connect plugin and retry'
     })
   })
-
-  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
-    swapStore.getTokenPairsByTokenZeroID((error) => {
-      for (const info of swapStore.TokenPairs) {
-        if (error) {
-          continue
-        }
-        walletStore.getBalance(info.TokenOneAddress, userStore.chainId, v, (error, balance) => {
-          if (error) {
-            return
-          }
-          inBalance.value = Number(balance)
-        })
-      }
-    })
-  }).catch((e) => {
-    notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
-    })
-  })
 }
 
-watch(() => swapStore.SelectedToken, (old, selected) => {
-  if (selected === null || selected.ID < 0) {
+watch(() => swapStore.SelectedToken, (selected) => {
+  if (selected === null) {
     outAmount.value = 0
     return
   }
-  swapStore.getTokenPairsByTokenZeroID()
-  CalSwapInAmount(outAmount.value, undefined)
+  swapStore.getTokenPairsByTokenZeroID((error) => {
+    if (!error) {
+      CalSwapInAmount(outAmount.value, undefined)
+    }
+  })
+
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.getBalance(selected.Address, userStore.chainId, v, (error, balance) => {
       if (error) {
@@ -225,7 +208,7 @@ watch(() => swapStore.SelectedToken, (old, selected) => {
 })
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
-  if (selected === null || selected.ID < 0) {
+  if (selected === null) {
     inAmount.value = 0
     return
   }
@@ -268,9 +251,16 @@ watch(inAmount, (amount) => {
   triggerInAmount = true
 })
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const setSpecifyTokenPair = (t0Addr: string, t1Addr: string) => {
-  swapStore.SelectedToken.ID = -1
+const router = useRouter()
+
+const setSpecifyTokenPair = () => {
+  const t0Addr = router.currentRoute.value.query.token0
+  const t1Addr = router.currentRoute.value.query.token1
+  if (t0Addr === undefined || t1Addr === undefined) {
+    return
+  }
+
+  swapStore.SelectedToken = null
   for (const item of swapStore.Tokens) {
     if (item.Address === t0Addr) {
       swapStore.SelectedToken = item
@@ -279,7 +269,7 @@ const setSpecifyTokenPair = (t0Addr: string, t1Addr: string) => {
   }
 
   swapStore.getTokenPairsByTokenZeroID()
-  swapStore.SelectedTokenPair.ID = -1
+  swapStore.SelectedTokenPair = null
   for (const item of swapStore.TokenPairs) {
     if (item.TokenOneAddress === t1Addr) {
       swapStore.SelectedTokenPair = item
@@ -292,7 +282,12 @@ onMounted(() => {
     return
   }
   swapStore.IsInitilazed = true
-  swapStore.getTokens()
+  swapStore.getTokens((error) => {
+    console.log(swapStore.Tokens)
+    if (!error) {
+      setSpecifyTokenPair()
+    }
+  })
 })
 
 </script>

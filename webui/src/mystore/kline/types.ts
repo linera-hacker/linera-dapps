@@ -1,7 +1,8 @@
+import { constants } from 'src/const'
 
 export enum API {
-  GetKPointsForLine = 'http://172.16.31.58:30100/v1/get/kpoints/for/line',
-  GetTransactionsForLine = 'http://172.16.31.58:30100/v1/get/transactions/for/line',
+  GetKPointsForLine = `${constants.klineEndpoint}/v1/get/kpoints/for/line`,
+  GetTransactionsForLine = `${constants.klineEndpoint}/v1/get/transactions/for/line`,
 }
 
 export interface KPoint {

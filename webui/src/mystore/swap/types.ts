@@ -1,9 +1,10 @@
+import { constants } from 'src/const'
 
 export enum API {
-  GetTokens = 'http://172.16.31.58:30100/v1/get/tokens',
-  GetTokenPairs = 'http://172.16.31.58:30100/v1/get/token/pairs',
-  GetBalance = 'http://172.16.31.58:30100/v1/get/tokens',
-  GetKPointTypes = 'http://172.16.31.58:30100/v1/get/kpoint/types',
+  GetTokens = `${constants.klineEndpoint}/v1/get/tokens`,
+  GetTokenPairs = `${constants.klineEndpoint}/v1/get/token/pairs`,
+  GetBalance = `${constants.klineEndpoint}/v1/get/tokens`,
+  GetKPointTypes = `${constants.klineEndpoint}/v1/get/kpoint/types`,
 }
 
 export interface Token {

@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang='ts'>
-import { watch, onMounted, computed } from 'vue'
+import { watch, onMounted, computed, onBeforeUnmount } from 'vue'
 import { useSwapStore } from 'src/mystore/swap'
 import { Transaction, useKLineStore } from 'src/mystore/kline'
 import { date } from 'quasar'
@@ -18,10 +18,14 @@ const { t } = useI18n({ useScope: 'global' })
 
 const swapStore = useSwapStore()
 const klineStore = useKLineStore()
+let intervalID: number
 
 const transactions = computed(() => klineStore.Transactions.sort((a, b) => b.Timestamp - a.Timestamp))
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
+  if (selected === null) {
+    return
+  }
   klineStore.SelectedPoolID = selected.PoolID
   initKPointsStore()
 })
@@ -36,14 +40,19 @@ const initKPointsStore = () => {
 onMounted(() => {
   if (klineStore.NeedInitTxTable) {
     klineStore.refreshHistoryTransactions()
-    setInterval(() => {
-      klineStore.refreshNewTransactions()
-      if (klineStore.ResetKLineViewLock + 60000 < new Date().getTime()) {
-        klineStore.ResetKLineViewLock = new Date().getTime()
-      }
-    }, 3000)
     klineStore.NeedInitTxTable = false
   }
+
+  intervalID = window.setInterval(() => {
+    klineStore.refreshNewTransactions()
+    if (klineStore.ResetKLineViewLock + 60000 < new Date().getTime()) {
+      klineStore.ResetKLineViewLock = new Date().getTime()
+    }
+  }, 3000)
+})
+
+onBeforeUnmount(() => {
+  window.clearInterval(intervalID)
 })
 
 const columns = computed(() => [

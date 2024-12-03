@@ -2,10 +2,10 @@
   <div>
     <div style='padding: 5px;width: 100%;'>
       <div class='token-pair-tip'>
-        <img :src='swapStore.SelectedTokenPair.TokenZeroIcon'>
-        <img :src='swapStore.SelectedTokenPair.TokenOneIcon'>
+        <img :src='swapStore.SelectedTokenPair?.TokenZeroIcon'>
+        <img :src='swapStore.SelectedTokenPair?.TokenOneIcon'>
         <div>
-          {{ swapStore.SelectedTokenPair.TokenZeroSymbol }} / {{ swapStore.SelectedTokenPair.TokenOneSymbol }}
+          {{ swapStore.SelectedTokenPair?.TokenZeroSymbol }} / {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
         </div>
       </div>
       <div class='radio-buttons-tip'>
@@ -29,7 +29,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useSwapStore } from 'src/mystore/swap'
 import { initEchart, setKPointsToEchart, setStartAndEnd, calculateZoomStart } from './KLineOption'
 import * as echarts from 'echarts/core'
@@ -38,13 +38,16 @@ import { useKLineStore } from 'src/mystore/kline'
 const selectedKPType = ref('')
 const swapStore = useSwapStore()
 const klineStore = useKLineStore()
-let myChart: echarts.ECharts
+swapStore.getKPointTypes()
 
-watch(() => swapStore.KPointTypes, (selected) => {
-  if (selected === null || selected.length === 0) {
+let myChart: echarts.ECharts
+let intervalID: number
+
+watch(() => swapStore.KPointTypes, (items) => {
+  if (items === null || items.length === 0) {
     return
   }
-  selectedKPType.value = selected[0].KPointType
+  selectedKPType.value = items[0].KPointType
 })
 
 watch(selectedKPType, (selected) => {
@@ -53,6 +56,9 @@ watch(selectedKPType, (selected) => {
 })
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
+  if (selected === null) {
+    return
+  }
   klineStore.SelectedTokenPairID = selected.ID
   initKPointsStore()
 })
@@ -95,22 +101,27 @@ onMounted(() => {
     klineStore.ResetKLineViewLock = new Date().getTime()
   })
 
+  // update kline
+  intervalID = window.setInterval(() => {
+    klineStore.refreshNewKPoints()
+    if (klineStore.ResetKLineViewLock + 60000 < new Date().getTime()) {
+      klineStore.ResetKLineViewLock = new Date().getTime()
+    }
+  }, 6000)
+
   if (!klineStore.NeedInitKLine) {
     setKPointsToEchart(myChart, klineStore.EchartPoinsData)
     setStartAndEnd(myChart, calculateZoomStart(klineStore.EchartPoinsData.CategoryItems.length), 100)
     return
   }
   klineStore.NeedInitKLine = false
-
-  swapStore.getKPointTypes()
-  // update kline
-  setInterval(() => {
-    klineStore.refreshNewKPoints()
-    if (klineStore.ResetKLineViewLock + 60000 < new Date().getTime()) {
-      klineStore.ResetKLineViewLock = new Date().getTime()
-    }
-  }, 6000)
 })
+
+onBeforeUnmount(() => {
+  myChart.dispose()
+  if (intervalID) window.clearInterval(intervalID)
+})
+
 </script>
 
 <style scoped lang="sass">
