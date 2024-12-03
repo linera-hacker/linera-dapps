@@ -52,18 +52,16 @@ export const useWalletStore = defineStore('useWalletStore', {
         () => { done?.(true, 0) }
       )
     },
-    swapAmount (token0: string, token1: string, accountChainID: string, publicKey: string, accountAddr: string, outAmount: number) {
-      const owner = `"User:${accountAddr}"`
+    swapAmount (token0: string, token1: string, publicKey: string, outAmount: number) {
       const mutate = gql`
-        mutation swap ($token0: String!, $token1: String!, $outAmount: Float!, $chainID: String!, $owner: String!) {
+        mutation swap ($token0: String!, $token1: String!, $amount0In: String!, $amount1In: String!, $amount0OutMin: String!, $amount1OutMin: String!) {
           swap (
             token0: $token0,
             token1: $token1,
-            amount0In: $outAmount,
-            to:{
-              chain_id: $chainID
-              owner: $owner
-            }
+            amount0In: $amount0In,
+            amount1In: $amount1In,
+            amount0OutMin: $amount0OutMin,
+            amount1OutMin: $amount1OutMin
           )
         }
       `
@@ -78,9 +76,10 @@ export const useWalletStore = defineStore('useWalletStore', {
               variables: {
                 token0: token0,
                 token1: token1,
-                outAmount: outAmount,
-                chainID: accountChainID,
-                owner: owner
+                amount0In: outAmount.toString(),
+                amount1In: '0',
+                amount0OutMin: '0',
+                amount1OutMin: '0'
               }
             }
           }

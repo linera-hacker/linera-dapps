@@ -133,13 +133,11 @@ const SwapAmount = () => {
     return
   }
 
-  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+  dbModel.ownerFromPublicKey(userStore.account).then(() => {
     walletStore.swapAmount(
       swapStore.SelectedTokenPair?.TokenZeroAddress || '',
       swapStore.SelectedTokenPair?.TokenOneAddress || '',
-      userStore.chainId,
       userStore.account,
-      v,
       outAmount.value
     ).then().catch((e) => {
       notificationStore.pushNotification({
