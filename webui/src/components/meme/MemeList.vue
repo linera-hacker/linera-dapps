@@ -1,6 +1,6 @@
 <template>
   <q-page>
-    <q-infinite-scroll @load='onLoad' :offset='300'>
+    <q-infinite-scroll @load='onLoad' :offset='300' :style='{padding: "0 8px"}'>
       <div class='row'>
         <div v-for='item in memeAppInfos' :key='item.appID' class='col-xs-12 col-sm-6 col-md-4'>
           <MemeCard :meme-info='item' />
