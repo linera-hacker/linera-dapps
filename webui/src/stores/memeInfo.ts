@@ -78,6 +78,13 @@ export interface MemeAppInfoDisplay {
   ticker: string
   initialSupply: string
   mintable: boolean
+  lastTxAt: number
+  lastTxZeroAmount: string
+  lastTxOneAmount: string
+  oneDayZeroAmountVolumn: string
+  oneDayOneAmountVolumn: string
+  nowPrice: string
+  oneDayIncresePercent: string
 }
 
 export interface ChainOwner {

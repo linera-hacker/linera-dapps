@@ -29,8 +29,12 @@ import { graphqlResult } from 'src/utils'
 import { getAppClientOptions } from 'src/apollo'
 import { provideApolloClient, useQuery } from '@vue/apollo-composable'
 import { Pool } from 'src/stores/pool'
+import { LastTranscation, useUserStore, PoolTokenCond } from 'src/mystore/user'
+import { wlineraAppID } from 'src/const/const'
 
 import MemeCard from './MemeCard.vue'
+
+const userStore = useUserStore()
 
 const swapChainID = ref(constants.constants.swapCreationChainID)
 const swapAppID = ref(constants.constants.swapAppID)
@@ -49,6 +53,7 @@ const appIDsMap = ref<Map<string, string>>(new Map())
 const memeAppInfos = ref([] as MemeAppInfoDisplay[])
 const lastCreatedAt = ref(0)
 const curPageSize = ref(limit.value)
+const loadTx = ref(true)
 
 const getPools = async (url: string): Promise<Array<Pool>> => {
   const appOptions = /* await */ getAppClientOptions(url)
@@ -143,10 +148,24 @@ const getApplicationInfos = async (url: string) => {
         initialSupply: parsedSpec.initial_supply,
         mintable: parsedSpec.mintable
       } as MemeAppInfoDisplay
+      if (apps[i].application_id === wlineraAppID) {
+        meme.lastTxAt = 0
+        meme.lastTxZeroAmount = '0'
+        meme.lastTxOneAmount = '0'
+        meme.oneDayZeroAmountVolumn = '0'
+        meme.oneDayOneAmountVolumn = '0'
+        meme.nowPrice = '0'
+        meme.oneDayIncresePercent = '0'
+      }
       memeAppInfos.value.push(meme)
       if (apps[i].created_at > lastCreatedAt.value) {
         lastCreatedAt.value = apps[i].created_at
       }
+    }
+
+    if (loadTx.value) {
+      loadTxData()
+      loadTx.value = false
     }
     if (memeAppInfos.value.length >= curPageSize.value) {
       runningInterval.value = false
@@ -192,6 +211,7 @@ const onHiding = () => {
 const onLoad = (index, done) => {
   onLoading()
   setTimeout(() => {
+    loadTx.value = true
     onGetAppInfos()
     onHiding()
     done()
@@ -205,10 +225,53 @@ const useIntervalLoadData = () => {
   onGetAppInfos()
 }
 
-const interval = setInterval(useIntervalLoadData, 20 * 1000)
+const loadTxData = () => {
+  let poolConds = [] as Array<PoolTokenCond>
+  for (let i = 0; i < memeAppInfos.value.length; i++) {
+    if (memeAppInfos.value[i].appID === wlineraAppID) {
+      continue
+    }
+    const poolTokenCond = {
+      PoolID: Number(memeAppInfos.value[i].poolID),
+      TokenZeroAddress: memeAppInfos.value[i].appID,
+      TokenOneAddress: wlineraAppID,
+    } as PoolTokenCond
+    poolConds.push(poolTokenCond)
+  }
+  userStore.getLastTranscations({
+    PoolTokenConds: poolConds
+  }, (error: boolean, rows: LastTranscation[]) => {
+    if (error) {
+      console.log('error: ', error)
+      return
+    }
+    if (rows) {
+      let lastTxMap = new Map<string, LastTranscation>()
+      for (let i = 0 ; i < rows.length; i++) {
+        lastTxMap.set(rows[i].TokenZeroAddress, rows[i])
+      }
+      for (let i = 0; i < memeAppInfos.value.length; i++) {
+        const lastTx = lastTxMap.get(memeAppInfos.value[i].appID)
+        if (lastTx !== null && lastTx !== undefined) {
+          memeAppInfos.value[i].lastTxAt = lastTx.LastTxAt
+          memeAppInfos.value[i].lastTxZeroAmount = lastTx.LastTxZeroAmount
+          memeAppInfos.value[i].lastTxOneAmount = lastTx.LastTxOneAmount
+          memeAppInfos.value[i].oneDayZeroAmountVolumn = lastTx.OneDayZeroAmountVolumn
+          memeAppInfos.value[i].oneDayOneAmountVolumn = lastTx.OneDayOneAmountVolumn
+          memeAppInfos.value[i].nowPrice = lastTx.NowPrice
+          memeAppInfos.value[i].oneDayIncresePercent = lastTx.OneDayIncresePercent
+        }
+      }
+    }
+  })
+}
+
+const interval = setInterval(useIntervalLoadData, 15 * 1000)
+const txInterval = setInterval(loadTxData, 5 * 1000)
 
 onBeforeUnmount(() => {
   clearInterval(interval)
+  clearInterval(txInterval)
 })
 
 </script>

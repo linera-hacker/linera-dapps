@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { API, LastTranscation, GetLastTranscationRequest, GetLastTranscationResponse, ExistTokenRequest, ExistTokenResponse } from './types'
+import { API, LastTranscation, GetLastTranscationRequest, GetLastTranscationResponse, GetLastTranscationsRequest, GetLastTranscationsResponse, ExistTokenRequest, ExistTokenResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
 
@@ -30,6 +30,26 @@ export const useUserStore = defineStore('user', {
           done?.(false, resp.Info)
         }, () => {
           done?.(true, {} as LastTranscation)
+        }
+      )
+    },
+    getLastTranscations (req: GetLastTranscationsRequest, done?: (errors: boolean, rows: LastTranscation[]) => void) {
+      doActionWithError<unknown, GetLastTranscationsResponse>(
+        API.GetLastTranscations,
+        req,
+        {
+          Error: {
+            Title: 'get lastTranscations',
+            Message: 'failed to get lastTranscations',
+            Description: 'please retry',
+            Popup: true,
+            Type: NotifyType.Error
+          }
+        },
+        (resp: GetLastTranscationsResponse): void => {
+          done?.(false, resp.Infos)
+        }, () => {
+          done?.(true, [])
         }
       )
     },

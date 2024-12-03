@@ -25,9 +25,9 @@
         src='' width='15px' height='15px'
         class='cursor-pointer horizontal-inner-x-margin-right'
       />
-      <div>{{ truncatedString(item.owner.chain_id) }}</div>
+      <div>{{ shortId(item.owner.chain_id, 10) }}</div>
       <q-space />
-      <div>{{ item.balance }} WLINERA</div>
+      <div>{{ Number(item.balance).toFixed(2) }} WLINERA</div>
     </div>
   </div>
 </template>
@@ -45,6 +45,7 @@ import { trophyNo1 } from 'src/assets'
 import { trophyNo2 } from 'src/assets'
 import { trophyNo3 } from 'src/assets'
 import { useSwapStore } from 'src/mystore/swap'
+import { shortId } from 'src/utils/shortid'
 
 const router = useRouter()
 const swapStore = useSwapStore()
@@ -94,14 +95,6 @@ const getBalanceTopList = async (limit: number) => {
     const ownerBalances = graphqlResult.data(res, 'balanceTopList') as Array<OwnerBalance>
     topList.value = ownerBalances
   })
-}
-
-const truncatedString = (longStr: string) => {
-  const maxLength = 16;
-  if (longStr.length > maxLength) {
-    return longStr.substring(0, maxLength) + '...'
-  }
-  return longStr
 }
 
 </script>

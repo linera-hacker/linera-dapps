@@ -283,6 +283,9 @@ const onAuthorizeWlineraToSwap = async () => {
 
   const appID = wlineraAppID.value
   const amount = wlineraApprove.value
+  if (Number(wlineraApprove.value) < Number(initPoolLiquidity.value.amount1Initial)) {
+    wlineraApprove.value = initPoolLiquidity.value.amount1Initial
+  }
   const chainId = swapCreationChainID.value
   const owner = 'Application:' + swapAppID.value
 
@@ -339,6 +342,9 @@ const onMintWlinera = async () => {
 
   const appID = wlineraAppID.value
   const amount = wlineraMint.value
+  if (Number(wlineraMint.value) < Number(initPoolLiquidity.value.amount1Initial)) {
+    wlineraMint.value = initPoolLiquidity.value.amount1Initial
+  }
 
   mint(appID, amount)
     .then(async () => {

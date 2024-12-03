@@ -17,16 +17,16 @@
         <q-item-label>
           <div class='vertical-inner-y-margin'>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Last Transaction</span> {{ timeAgo(lastTransaction.LastTxAt) }}, {{ lastTransaction.LastTxOneAmount }} WTLINERA
+              <span class='label text-grey-8'>Last Transaction</span> {{ timeAgo(memeInfo.lastTxAt) }}, {{ memeInfo.lastTxOneAmount }} WTLINERA
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Last 24H Volume</span> {{ lastTransaction.OneDayOneAmountVolumn }} WTLINERA
+              <span class='label text-grey-8'>Last 24H Volume</span> {{ memeInfo.oneDayOneAmountVolumn }} WTLINERA
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>{{ memeInfo.ticker }}/WTLINERA</span> {{ lastTransaction.NowPrice }} WLINERA <span :class='Number(lastTransaction.OneDayIncresePercent) < 0 ? "change text-red" : "change text-green"'>{{ Number(lastTransaction.OneDayIncresePercent) < 0 ? "" : "+" }}{{ lastTransaction.OneDayIncresePercent }}%</span>
+              <span class='label text-grey-8'>{{ memeInfo.ticker }}/WTLINERA</span> {{ memeInfo.nowPrice }} WLINERA <span :class='Number(memeInfo.oneDayIncresePercent) < 0 ? "change text-red" : "change text-green"'>{{ Number(memeInfo.oneDayIncresePercent) < 0 ? "" : "+" }}{{ memeInfo.oneDayIncresePercent }}%</span>
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Market Capacity</span> {{ Number(memeInfo.initialSupply) * Number(lastTransaction.NowPrice) }} WTLINERA
+              <span class='label text-grey-8'>Market Capacity</span> {{ Number(memeInfo.initialSupply) * Number(memeInfo.nowPrice) }} WTLINERA
             </div>
           </div>
         </q-item-label>
@@ -65,14 +65,11 @@
 </template>
 
 <script setup lang='ts'>
-import { toRef, ref, onBeforeUnmount, onMounted } from 'vue'
+import { toRef, ref, watch } from 'vue'
 import { MemeAppInfoDisplay } from 'src/stores/memeInfo'
 import { discordLogo, githubLogo, internetLogo, telegramLogo, twitterLogo } from 'src/assets'
 import { useRouter } from 'vue-router'
 import { wlineraAppID } from 'src/const/const'
-import { LastTranscation, useUserStore } from 'src/mystore/user'
-
-const userStore = useUserStore()
 
 interface Props {
   memeInfo: MemeAppInfoDisplay
@@ -102,8 +99,6 @@ const processBase64Img = (input: string): string => {
   return input.replace(/ /g, '+')
 }
 
-// get last transaction
-const lastTransaction = ref({} as LastTranscation)
 
 const timeAgo = (timestamp: number): string => {
   if (timestamp === 0) {
@@ -126,51 +121,18 @@ const timeAgo = (timestamp: number): string => {
   }
 }
 
-const getNewTxInfo = () => {
-  newTx.value = false
-  if (memeInfo.value.appID === wlineraAppID) {
-    lastTransaction.value = {
-      PoolID: 1,
-      TokenZeroAddress: '0',
-      TokenOneAddress: '0',
-      LastTxAt: 0,
-      LastTxZeroAmount: '0',
-      LastTxOneAmount: '0',
-      OneDayZeroAmountVolumn: '0',
-      OneDayOneAmountVolumn: '0',
-      NowPrice: '0',
-      OneDayIncresePercent: '0'
-    } as LastTranscation
-    return
-  }
-  userStore.getLastTranscation({
-    PoolID: Number(memeInfo.value.poolID),
-    TokenZeroAddress: memeInfo.value.appID,
-    TokenOneAddress: wlineraAppID,
-  }, (error: boolean, row: LastTranscation) => {
-    if (error) {
-      console.log('error: ', error)
-      return
-    }
-    if (row) {
-      if (lastTransaction.value.LastTxAt == undefined || row.LastTxAt !== lastTransaction.value.LastTxAt) {
-        lastTransaction.value = row
-        newTx.value = true
-      }
-    }
-  })
+const sleep = async (ms: number): Promise<void> => {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-const interval = setInterval(getNewTxInfo, 15 * 1000)
-
-onMounted(() => {
-  getNewTxInfo()
-})
-
-onBeforeUnmount(() => {
-  clearInterval(interval)
-})
-
+watch(
+  () => memeInfo.value.lastTxAt,
+  async () => {
+    newTx.value = true
+    await sleep(1000)
+    newTx.value = false
+  }
+)
 
 </script>
 
