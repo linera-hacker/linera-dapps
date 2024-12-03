@@ -874,16 +874,15 @@ pub async fn calculate_swap_amount(
     }
     let (price_0_cumulative, price_1_cumulative) =
         pool.calculate_price_cumulative_pair(time_elapsed);
-    let (price_0_cumulative, _price_1_cumulative) = if exchanged {
+    let (_price_0_cumulative, price_1_cumulative) = if exchanged {
         (price_1_cumulative, price_0_cumulative)
     } else {
         (price_0_cumulative, price_1_cumulative)
     };
-    let amount_1_per_amount_0: Amount = price_0_cumulative
-        .sub(pool.price_0_cumulative)
+    let amount_0: Amount = price_1_cumulative
+        .sub(pool.price_1_cumulative)
+        .mul(amount_1.into())
         .div(time_elapsed.into())
         .into();
-    Ok(Amount::from_attos(
-        amount_1.saturating_div(amount_1_per_amount_0),
-    ))
+    Ok(amount_0)
 }
