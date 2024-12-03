@@ -6,8 +6,8 @@ import { NotifyType } from '../notification'
 export const useSwapStore = defineStore('useSwapStore', {
   state: () => ({
     IsInitilazed: false,
-    SelectedToken: { ID: -1 } as Token,
-    SelectedTokenPair: { ID: -1 } as TokenPair,
+    SelectedToken: {} as Token | null,
+    SelectedTokenPair: {} as TokenPair | null,
     Tokens: [] as Token[],
     TokenPairs: [] as TokenPair[],
     KPointTypes: [] as KPointTypeInfo[]
@@ -28,12 +28,9 @@ export const useSwapStore = defineStore('useSwapStore', {
         },
         (resp: GetTokensResponse): void => {
           resp.Infos.sort()
-          resp.Infos.forEach((info) => {
-            info.Balance = 0
-          })
           this.Tokens = resp.Infos
           this.SelectedToken = resp.Infos[0]
-          this.SelectedTokenPair.ID = -1
+          this.SelectedTokenPair = null
           done?.(false, resp.Infos)
         }, () => {
           done?.(true, [])
@@ -41,7 +38,7 @@ export const useSwapStore = defineStore('useSwapStore', {
       )
     },
     getTokenPairsByTokenZeroID (done?: (error: boolean, rows: TokenPair[]) => void) {
-      if (this.SelectedToken === null) {
+      if (this.SelectedToken === null || this.SelectedToken.ID < 0) {
         return
       }
       doActionWithError<unknown, GetTokenPairsResponse>(
@@ -58,12 +55,9 @@ export const useSwapStore = defineStore('useSwapStore', {
         },
         (resp: GetTokenPairsResponse): void => {
           resp.Infos.sort()
-          resp.Infos.forEach((info) => {
-            info.TokenOneBalance = 0
-          })
           this.TokenPairs = resp.Infos
           if (resp.Infos.length === 0) {
-            this.SelectedTokenPair = { ID: -1 } as TokenPair
+            this.SelectedTokenPair = null
           } else {
             this.SelectedTokenPair = resp.Infos[0]
           }

@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Geapefurit/kline-back/common/utils"
 	"github.com/Geapefurit/kline-back/proto/kline"
 	"github.com/Geapefurit/kline-back/zeus/pkg/db"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -89,8 +88,6 @@ func queryTP(t *testing.T) {
 	assert.Nil(t, err)
 
 	assert.Equal(t, infos[0], info)
-	fmt.Println(utils.PrettyStruct(tokenPTReq))
-	fmt.Println(utils.PrettyStruct(tokenPTRet))
 }
 
 func updateTP(t *testing.T) {

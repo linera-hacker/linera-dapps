@@ -1,7 +1,7 @@
+import { constants } from 'src/const'
 
 export enum API {
-  GetKPointsForLine = 'http://172.16.31.58:30100/v1/get/kpoints/for/line',
-  GetTransactionsForLine = 'http://172.16.31.58:30100/v1/get/transactions/for/line',
+  GetKPointsForLine = `${constants.klineEndpoint}/v1/get/kpoints/for/line`,
 }
 
 export interface KPoint {
@@ -22,27 +22,5 @@ export interface GetKPointsForLineResponse {
   Offset: number;
   OriginalTime: number;
   TokenPairID: number;
-  Total: number;
-}
-
-export interface Transaction {
-  ID: number;
-  PoolID: number;
-  TransactionID: number;
-  TransactionType: string;
-  Owner: string;
-  AmountZeroIn: number;
-  AmountOneIn: number;
-  AmountZeroOut: number;
-  AmountOneOut: number;
-  Timestamp: number;
-}
-
-export interface GetTransactionsForLineResponse {
-  OriginalTxID: number;
-  PoolID: number;
-  Transactions: Transaction[];
-  Limit: number;
-  Offset: number;
   Total: number;
 }

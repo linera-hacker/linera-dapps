@@ -130,17 +130,17 @@ const getNewTxInfo = () => {
   newTx.value = false
   if (memeInfo.value.appID === wlineraAppID) {
     lastTransaction.value = {
-        PoolID: 1,
-        TokenZeroAddress: '0',
-        TokenOneAddress: '0',
-        LastTxAt: 0,
-        LastTxZeroAmount: '0',
-        LastTxOneAmount: '0',
-        OneDayZeroAmountVolumn: '0',
-        OneDayOneAmountVolumn: '0',
-        NowPrice: '0',
-        OneDayIncresePercent: '0'
-      } as LastTranscation
+      PoolID: 1,
+      TokenZeroAddress: '0',
+      TokenOneAddress: '0',
+      LastTxAt: 0,
+      LastTxZeroAmount: '0',
+      LastTxOneAmount: '0',
+      OneDayZeroAmountVolumn: '0',
+      OneDayOneAmountVolumn: '0',
+      NowPrice: '0',
+      OneDayIncresePercent: '0'
+    } as LastTranscation
     return
   }
   userStore.getLastTranscation({
