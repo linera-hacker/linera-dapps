@@ -400,7 +400,7 @@ impl ApplicationContract {
 
         let mut from_owner: Option<Owner> = None;
         if chain_balance < cur_amount {
-            from_owner = match chain_owner.owner {
+            from_owner = match origin.owner {
                 Some(AccountOwner::User(owner)) => Some(owner),
                 _ => None,
             };
