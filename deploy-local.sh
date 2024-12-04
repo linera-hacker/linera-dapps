@@ -276,6 +276,7 @@ echo "SWAP_APPID=$swap_appid" >> $PROJECT_ROOT/.local-defi-materials
 echo "SWAP_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30092" >> $PROJECT_ROOT/.local-defi-materials
 
 swap_creation_chain=$chain
+swap_creation_owner=$owner
 
 HTTP_HOST="http://$WALLET_13_PUBLIC_IPORT"
 chain=`linera --with-wallet 13 wallet show | grep "Public Key" | awk '{print $2}'`
@@ -306,6 +307,7 @@ echo "AMS_APPID=$ams_appid" >> $PROJECT_ROOT/.local-defi-materials
 echo "AMS_WORKAROUND_CREATION_CHAIN_RPC_ENDPOINT=http://$LOCAL_IP:30094" >> $PROJECT_ROOT/.local-defi-materials
 
 ams_creation_chain=$chain
+ams_creation_owner=$owner
 
 ####
 ## We should
@@ -552,12 +554,26 @@ echo -e "query {\n\
 
 print $'\U01F4AB' $LIGHTGREEN " AMS Application: $ams_appid"
 print $'\U01F4AB' $LIGHTGREEN " AMS Creation Chain: $ams_creation_chain"
+print $'\U01F4AB' $LIGHTGREEN " AMS Creation Owner: $ams_creation_owner"
 print $'\U01F4AB' $LIGHTGREEN " Swap Application: $swap_appid"
 print $'\U01F4AB' $LIGHTGREEN " Swap Creation Chain: $swap_creation_chain"
+print $'\U01F4AB' $LIGHTGREEN " Swap Creation Owner: $swap_creation_owner"
+print $'\U01F4AB' $LIGHTGREEN " ERC20 Bytecode: $erc20_2_bid"
 print $'\U01F4AB' $LIGHTGREEN " WLINERA Application: $erc20_2_appid"
 print $'\U01F4AB' $LIGHTGREEN " WLINERA Creation Chain: $wlinera_creation_chain"
 print $'\U01F4AB' $LIGHTGREEN " TLA Application: $erc20_1_appid"
 print $'\U01F4AB' $LIGHTGREEN " TLA Creation Chain: $erc20_1_creation_chain"
+
+sed -i "s/erc20BID =.*/erc20BID = '$erc20_2_bid'/g" webui/src/const/const.ts
+sed -i "s/swapCreationChainID =.*/swapCreationChainID = '$swap_creation_chain'/g" webui/src/const/const.ts
+sed -i "s/swapCreationOwner =.*/swapCreationOwner = '$swap_creation_owner'/g" webui/src/const/const.ts
+sed -i "s/swapAppID =.*/swapAppID = '$swap_appid'/g" webui/src/const/const.ts
+sed -i "s/wlineraAppID =.*/wlineraAppID = '$erc20_2_appid'/g" webui/src/const/const.ts
+sed -i "s/amsCreationChainID =.*/amsCreationChainID = '$ams_creation_chain'/g" webui/src/const/const.ts
+sed -i "s/amsAppID =.*/amsAppID = '$ams_appid'/g" webui/src/const/const.ts
+sed -i "s/swapEndPoint =.*/amsAppID = '$WALLET_12_PUBLIC_IPORT'/g" webui/src/const/const.ts
+sed -i "s/amsEndPoint =.*/amsEndPoint = '$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
+sed -i "s/klineEndpoint =.*/klineEndpoint = 'http://$LOCAL_IP:30100'/g" webui/src/const/const.ts
 
 trap cleanup INT
 read -p "  Press any key to exit"
