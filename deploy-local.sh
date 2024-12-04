@@ -576,6 +576,10 @@ sed -i "s/swapEndPoint =.*/amsAppID = '$WALLET_12_PUBLIC_IPORT'/g" webui/src/con
 sed -i "s/amsEndPoint =.*/amsEndPoint = '$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
 sed -i "s/klineEndpoint =.*/klineEndpoint = 'http:\/\/$LOCAL_IP:30100'/g" webui/src/const/const.ts
 
+sed -i "s/server-addr=.*/server-addr='$WALLET_12_PUBLIC_IPORT'/g" service/kline/config/config.toml
+sed -i "s/chain-id=.*/chain-id='$swap_creation_chain'/g" service/kline/config/config.toml
+sed -i "s/app-id=.*/app-id='$swap_appid'/g" service/kline/config/config.toml
+
 trap cleanup INT
 read -p "  Press any key to exit"
 print $'\U01f499' $LIGHTGREEN " Exit ..."
