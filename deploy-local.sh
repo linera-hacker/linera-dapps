@@ -81,6 +81,7 @@ case $NETWORK_ID in
     WALLET_11_PUBLIC_IPORT='172.16.31.42:30091'
     WALLET_12_PUBLIC_IPORT='172.16.31.42:30092'
     WALLET_13_PUBLIC_IPORT='172.16.31.42:30093'
+    WALLET_14_PUBLIC_IPORT='172.16.31.42:30094'
     LOCAL_IP='172.16.31.42'
     ;;
 esac
@@ -573,7 +574,7 @@ sed -i "s/amsCreationChainID =.*/amsCreationChainID = '$ams_creation_chain'/g" w
 sed -i "s/amsAppID =.*/amsAppID = '$ams_appid'/g" webui/src/const/const.ts
 sed -i "s/swapEndPoint =.*/amsAppID = '$WALLET_12_PUBLIC_IPORT'/g" webui/src/const/const.ts
 sed -i "s/amsEndPoint =.*/amsEndPoint = '$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
-sed -i "s/klineEndpoint =.*/klineEndpoint = 'http://$LOCAL_IP:30100'/g" webui/src/const/const.ts
+sed -i "s/klineEndpoint =.*/klineEndpoint = 'http:\/\/$LOCAL_IP:30100'/g" webui/src/const/const.ts
 
 trap cleanup INT
 read -p "  Press any key to exit"
