@@ -572,11 +572,11 @@ sed -i "s/swapAppID =.*/swapAppID = '$swap_appid'/g" webui/src/const/const.ts
 sed -i "s/wlineraAppID =.*/wlineraAppID = '$erc20_2_appid'/g" webui/src/const/const.ts
 sed -i "s/amsCreationChainID =.*/amsCreationChainID = '$ams_creation_chain'/g" webui/src/const/const.ts
 sed -i "s/amsAppID =.*/amsAppID = '$ams_appid'/g" webui/src/const/const.ts
-sed -i "s/swapEndPoint =.*/amsAppID = '$WALLET_12_PUBLIC_IPORT'/g" webui/src/const/const.ts
-sed -i "s/amsEndPoint =.*/amsEndPoint = '$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
+sed -i "s/swapEndPoint =.*/swapEndPoint = 'http:\/\/$WALLET_12_PUBLIC_IPORT'/g" webui/src/const/const.ts
+sed -i "s/amsEndPoint =.*/amsEndPoint = 'http:\/\/$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
 sed -i "s/klineEndpoint =.*/klineEndpoint = 'http:\/\/$LOCAL_IP:30100'/g" webui/src/const/const.ts
 
-sed -i "s/server-addr=.*/server-addr='$WALLET_12_PUBLIC_IPORT'/g" service/kline/config/config.toml
+sed -i "s/server-addr=.*/server-addr='http:\/\/$WALLET_12_PUBLIC_IPORT'/g" service/kline/config/config.toml
 sed -i "s/chain-id=.*/chain-id='$swap_creation_chain'/g" service/kline/config/config.toml
 sed -i "s/app-id=.*/app-id='$swap_appid'/g" service/kline/config/config.toml
 
