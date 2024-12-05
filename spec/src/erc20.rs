@@ -29,6 +29,7 @@ pub struct InstantiationArgument {
     pub fixed_currency: Option<bool>,
     pub fee_percent: Option<Amount>,
     pub ams_application_id: Option<ApplicationId>,
+    pub blob_gateway_application_id: Option<ApplicationId>,
 }
 
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]

@@ -2,10 +2,12 @@
 
 mod state;
 
+use std::str::FromStr;
+
 use linera_sdk::{
     base::{
         Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Owner,
-        WithContractAbi,
+        WithContractAbi, CryptoHash
     },
     views::{RootView, View},
     Contract, ContractRuntime,
@@ -25,6 +27,7 @@ use spec::{
         abi::{SwapApplicationAbi, SwapOperation, SwapResponse},
         router::{RouterOperation, RouterResponse},
     },
+    blob_gateway::{BlobGatewayApplicationAbi, BlobOperation, BlobDataType}
 };
 
 pub struct ApplicationContract {
@@ -70,9 +73,17 @@ impl Contract for ApplicationContract {
             .await
             .expect("Invalid metadata");
 
+        let logo_hash = CryptoHash::from_str(token_metadata.logo.as_str()).expect("Invalid logo hash");
+        match argument.blob_gateway_application_id {
+            Some(application_id) => {
+                self.register_blob_gateway(application_id, logo_hash);
+            }
+            _ => {}
+        }
+
         match argument.ams_application_id {
             Some(application_id) => {
-                self.register_ams(application_id, argument, token_metadata);
+                self.register_ams(application_id, argument.clone(), token_metadata.clone());
             }
             _ => {}
         }
@@ -190,6 +201,22 @@ impl ApplicationContract {
                 )),
             },
         }
+    }
+
+    fn register_blob_gateway(
+        &mut self,
+        blob_gateway_application_id: ApplicationId,
+        blob_hash: CryptoHash,
+    ) {
+        let call = BlobOperation::Register {
+            data_type: BlobDataType::Image,
+            blob_hash: blob_hash,
+        };
+        self.runtime.call_application(
+            true,
+            blob_gateway_application_id.with_abi::<BlobGatewayApplicationAbi>(),
+            &call,
+        );
     }
 
     fn register_ams(

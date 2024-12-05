@@ -27,6 +27,11 @@ options="N:n:"
 NETWORK_ID=1
 NETWORK_TYPE=devnet
 
+blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03"
+blob_gateway_app_id="83b864f4c466e9458aa7b217f1b66c71669d61bb241831f0878624a6fd0e090f011562c1d23c92afd5f9ee71148a1551d03d7381913acfb9dad437209d03438f1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
+
+app_logo_path='./assets/HackerLogoDark.svg'
+
 while getopts $options opt; do
   case ${opt} in
     N) NETWORK_TYPE=${OPTARG} ;;
@@ -50,6 +55,7 @@ case $NETWORK_ID in
     WALLET_12_PUBLIC_IPORT='210.209.69.38:23103'
     WALLET_13_PUBLIC_IPORT='210.209.69.38:23105'
     WALLET_14_PUBLIC_IPORT='210.209.69.38:23106'
+    BLOB_GATEWAY_PUBLIC_IPORT='210.209.69.38:23107'
     LOCAL_IP='172.21.132.203'
     ;;
   2)
@@ -58,6 +64,7 @@ case $NETWORK_ID in
     WALLET_12_PUBLIC_IPORT='172.16.31.73:40112'
     WALLET_13_PUBLIC_IPORT='172.16.31.73:40113'
     WALLET_14_PUBLIC_IPORT='172.16.31.73:40114'
+    BLOB_GATEWAY_PUBLIC_IPORT='172.16.31.73:23105'
     LOCAL_IP='172.16.31.73'
     ;;
   3)
@@ -66,6 +73,7 @@ case $NETWORK_ID in
     WALLET_12_PUBLIC_IPORT='localhost:30092'
     WALLET_13_PUBLIC_IPORT='localhost:30093'
     WALLET_14_PUBLIC_IPORT='localhost:30094'
+    BLOB_GATEWAY_PUBLIC_IPORT='localhost:9081'
     LOCAL_IP='localhost'
     ;;
   4)
@@ -74,6 +82,7 @@ case $NETWORK_ID in
     WALLET_12_PUBLIC_IPORT='172.16.31.73:30092'
     WALLET_13_PUBLIC_IPORT='172.16.31.73:30093'
     WALLET_14_PUBLIC_IPORT='172.16.31.73:30094'
+    BLOB_GATEWAY_PUBLIC_IPORT='172.16.31.73:9081'
     LOCAL_IP='172.16.31.73'
     ;;
   5)
@@ -82,6 +91,7 @@ case $NETWORK_ID in
     WALLET_12_PUBLIC_IPORT='172.16.31.42:30092'
     WALLET_13_PUBLIC_IPORT='172.16.31.42:30093'
     WALLET_14_PUBLIC_IPORT='172.16.31.42:30094'
+    BLOB_GATEWAY_PUBLIC_IPORT='172.16.31.42:9081'
     LOCAL_IP='172.16.31.42'
     ;;
 esac
@@ -148,6 +158,17 @@ linera --with-wallet 11 request-application $ams_appid
 linera --with-wallet 12 request-application $ams_appid
 linera --with-wallet 13 request-application $ams_appid
 
+logo_blob_hash=`linera --with-wallet 10 publish-data-blob $app_logo_path`
+sleep 2
+
+echo -e "    Blog Hash: $BLUE$logo_blob_hash$NC"
+
+echo -e "    Blog Gateway Application ID: $BLUE$blob_gateway_app_id$NC"
+linera --with-wallet 10 request-application $blob_gateway_app_id
+linera --with-wallet 11 request-application $blob_gateway_app_id
+linera --with-wallet 12 request-application $blob_gateway_app_id
+linera --with-wallet 13 request-application $blob_gateway_app_id
+
 sleep 3
 
 function run_service_timeout() {
@@ -170,8 +191,8 @@ sleep 5
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
-    --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0","ams_application_id":"'$ams_appid'"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000.","{\"chain_id\":\"'$wallet_10_default_chain'\",\"owner\":\"User:'$wallet_10_owner'\"}":"5000000."}, "token_metadata":{"logo":"data:image/png;base64,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","twitter":"https://x.com/home2","telegram":"https://t.me/mysite2","discord":"https://discord.com/invite/mysite2","website":"https://mysite2.com","github":"https://github.com/mysite2","description":"mysite2 description","mintable":true}}' \
+    --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000.","{\"chain_id\":\"'$wallet_10_default_chain'\",\"owner\":\"User:'$wallet_10_owner'\"}":"5000000."}, "token_metadata":{"logo":"'$logo_blob_hash'","twitter":"https://x.com/home2","telegram":"https://t.me/mysite2","discord":"https://discord.com/invite/mysite2","website":"https://mysite2.com","github":"https://github.com/mysite2","description":"mysite2 description","mintable":true}}' \
     `
 print $'\U01f499' $LIGHTGREEN " WLINERA application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
@@ -189,8 +210,8 @@ echo -e "    Application ID: $BLUE$swap_appid$NC"
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
-    --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0","ams_application_id":"'$ams_appid'"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'", "token_metadata":{"logo":"data:image/png;base64,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","twitter":"https://x.com/mysite","telegram":"https://t.me/mysite","discord":"https://discord.com/invite/mysite","website":"https://mysite.com","github":"https://github.com/mysite","description":"mysite description","mintable":true}}' \
+    --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'", "token_metadata":{"logo":"'$logo_blob_hash'","twitter":"https://x.com/mysite","telegram":"https://t.me/mysite","discord":"https://discord.com/invite/mysite","website":"https://mysite.com","github":"https://github.com/mysite","description":"mysite description","mintable":true}}' \
     `
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
@@ -575,6 +596,9 @@ sed -i "s/amsAppID =.*/amsAppID = '$ams_appid'/g" webui/src/const/const.ts
 sed -i "s/swapEndPoint =.*/swapEndPoint = 'http:\/\/$WALLET_12_PUBLIC_IPORT'/g" webui/src/const/const.ts
 sed -i "s/amsEndPoint =.*/amsEndPoint = 'http:\/\/$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
 sed -i "s/klineEndpoint =.*/klineEndpoint = 'http:\/\/$LOCAL_IP:30100'/g" webui/src/const/const.ts
+sed -i "s/blobGatewayEndpoint =.*/blobGatewayEndpoint = 'http:\/\/$BLOB_GATEWAY_PUBLIC_IPORT'/g" webui/src/const/const.ts
+sed -i "s/blobGatewayCreationChainID =.*/blobGatewayCreationChainID = '$blob_gateway_creation_chain_id'/g" webui/src/const/const.ts
+sed -i "s/blobGatewayAppID =.*/blobGatewayAppID = '$blob_gateway_app_id'/g" webui/src/const/const.ts
 
 sed -i "s/server-addr=.*/server-addr='http:\/\/$WALLET_12_PUBLIC_IPORT'/g" service/kline/config/config.toml
 sed -i "s/chain-id=.*/chain-id='$swap_creation_chain'/g" service/kline/config/config.toml
