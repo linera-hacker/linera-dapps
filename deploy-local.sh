@@ -580,6 +580,13 @@ sed -i "s/server-addr=.*/server-addr='http:\/\/$WALLET_12_PUBLIC_IPORT'/g" servi
 sed -i "s/chain-id=.*/chain-id='$swap_creation_chain'/g" service/kline/config/config.toml
 sed -i "s/app-id=.*/app-id='$swap_appid'/g" service/kline/config/config.toml
 
+sed -i "s/defaultSwapAppId = .*/defaultSwapAppId = '$swap_appid'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultSwapCreatorChain = .*/defaultSwapCreatorChain = '$swap_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultWLineraAppId = .*/defaultWLineraAppId = '$erc20_2_appid'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultWLineraCreatorChain = .*/defaultWLineraCreatorChain = '$wlinera_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultAMSAppId = .*/defaultAMSAppId = '$ams_appid'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultAMSCreatorChain = .*/defaultAMSCreatorChain = '$ams_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
+
 trap cleanup INT
 read -p "  Press any key to exit"
 print $'\U01f499' $LIGHTGREEN " Exit ..."
