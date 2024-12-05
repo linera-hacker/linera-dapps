@@ -2,7 +2,7 @@
   <q-card flat :class='newTx ? "meme-card cursor-pointer shake" : "meme-card cursor-pointer"' @click='onSwap(memeInfo.appID)'>
     <q-item>
       <div class='horizontal-inner-x-margin-right vertical-card-align' avatar>
-        <q-img :src='processBase64Img(memeInfo.logo)' width='128px' />
+        <q-img :src='processImg(memeInfo.logo)' width='128px' />
       </div>
 
       <div>
@@ -69,7 +69,7 @@ import { toRef, ref, watch } from 'vue'
 import { MemeAppInfoDisplay } from 'src/stores/memeInfo'
 import { discordLogo, githubLogo, internetLogo, telegramLogo, twitterLogo } from 'src/assets'
 import { useRouter } from 'vue-router'
-import { wlineraAppID } from 'src/const/const'
+import { wlineraAppID, blobImagePath } from 'src/const/const'
 
 interface Props {
   memeInfo: MemeAppInfoDisplay
@@ -95,10 +95,9 @@ const goLink = (url: string, event: MouseEvent) => {
   window.open(url, '_blank')
 }
 
-const processBase64Img = (input: string): string => {
-  return input.replace(/ /g, '+')
+const processImg = (image_hash: string): string => {
+  return blobImagePath + image_hash
 }
-
 
 const timeAgo = (timestamp: number): string => {
   if (timestamp === 0) {

@@ -8,8 +8,8 @@
       @drop.prevent='onFileDrop'
       @click='$refs.fileInput.click()'
     >
-      <div v-if='memeInfo.logo' class='image-preview'>
-        <q-img :src='memeInfo.logo' fit='scale-down' width='360px' height='100%' />
+      <div v-if='imageUrl' class='image-preview'>
+        <q-img :src='imageUrl' fit='scale-down' width='360px' height='100%' />
       </div>
       <q-item-label v-else class='text-h6 text-grey-6'>
         <q-icon name='bi-image' size='32px' />
@@ -114,6 +114,8 @@ const onCheckSymbol = async () => {
 
 const MAXSIZE = 4 * 1024 * 1024
 const errorMessage = ref('')
+let logoByteArray = {} as number[]
+const imageUrl = ref('')
 const onFileDrop = (event: DragEvent): void => {
   const files = event.dataTransfer?.files
   const file = files?.[0]
@@ -128,14 +130,23 @@ const onFileDrop = (event: DragEvent): void => {
     const reader = new FileReader()
     reader.onload = (e: ProgressEvent<FileReader>): void => {
       if (e.target) {
-        memeInfo.value.logo = e.target.result as string
+        const arrayBuffer = e.target.result as ArrayBuffer
+        const blob = new Blob([arrayBuffer], { type: file.type })
+        const url = URL.createObjectURL(blob)
+        imageUrl.value = url
+
+        if (arrayBuffer instanceof ArrayBuffer) {
+          const byteArray = new Uint8Array(arrayBuffer)
+          logoByteArray = Array.from(byteArray)
+        }
       }
     }
-    reader.readAsDataURL(file)
+    reader.readAsArrayBuffer(file)
   }
 }
 
 const onFileChange = (event: Event): void => {
+  console.log('logoByteArray: ', logoByteArray)
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
@@ -149,11 +160,55 @@ const onFileChange = (event: Event): void => {
     const reader = new FileReader()
     reader.onload = (e: ProgressEvent<FileReader>): void => {
       if (e.target) {
-        memeInfo.value.logo = e.target.result as string
+        const arrayBuffer = e.target.result as ArrayBuffer
+        const blob = new Blob([arrayBuffer], { type: file.type })
+        const url = URL.createObjectURL(blob)
+        imageUrl.value = url
+
+        if (arrayBuffer instanceof ArrayBuffer) {
+          const byteArray = new Uint8Array(arrayBuffer)
+          logoByteArray = Array.from(byteArray)
+        }
       }
     }
-    reader.readAsDataURL(file)
+    reader.readAsArrayBuffer(file)
   }
+}
+
+const publishDataBlob = (): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    window.linera.request({
+      method: 'linera_graphqlPublishDataBlob',
+      params: {
+        query: {
+          variables: {
+            chainId: chainId.value,
+            bytes: logoByteArray
+          }
+        },
+        operationName: 'publishDataBlob'
+      },
+    }).then((result) => {
+      console.log('result: ', result)
+      const blobHash = graphqlResult.keyValue(result, 'blobHash') as string
+      console.log('blobHash: ', blobHash)
+      memeInfo.value.logo = blobHash
+      resolve(result)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+} 
+
+const onPublishDataBlob = async () => {
+  publishDataBlob()
+    .then(() => {
+      setTimeout(onCreateMemeToken, 100)
+    })
+    .catch((e) => {
+      throw e
+    })
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -221,7 +276,7 @@ const getApplicationExistBySymbol = async (appID: string, symbol: string): Promi
 const validateParams = (): boolean => {
   nameError.value = !memeInfo.value.name?.length
   tickerError.value = !memeInfo.value.symbol?.length
-  imageError.value = !memeInfo.value.logo?.length
+  imageError.value = !imageUrl.value?.length
   return !(nameError.value || tickerError.value || imageError.value)
 }
 
@@ -267,7 +322,8 @@ const createApplication = async (): Promise<any> => {
     initial_currency: '0.00001',
     fixed_currency: false,
     fee_percent: '0',
-    ams_application_id: constants.constants.amsAppID
+    ams_application_id: constants.constants.amsAppID,
+    blob_gateway_application_id: constants.constants.blobGatewayAppID
   } as InstantiationArgument
   const applicationParameters = {
     initial_balances: new Map([
@@ -359,6 +415,17 @@ const onCreateMemeTokenClick = async () => {
     throw error
   }
 
+  requestApplication(blobGatewayAppID.value)
+    .then(() => {
+      setTimeout(onPublishDataBlob, 100)
+    })
+    .catch((e) => {
+      console.log(e)
+      throw e
+    })
+}
+
+const onCreateMemeToken = async () => {
   emit('creating')
 
   getApplicationIds().then((_applicationIds) => {
@@ -372,6 +439,52 @@ const onCreateMemeTokenClick = async () => {
       })
   }).catch((e) => {
     emit('error', `Failed get applicationIds: ${e}`)
+  })
+}
+
+const applicationCreatorChainId = (id: string) => {
+  const firstPartLength = 128
+  const middlePartLength = 64
+  const lastPartLength = 24
+  const totalLength = firstPartLength + middlePartLength + lastPartLength
+  if (id.length !== totalLength) {
+    throw new Error('Invalid ID length')
+  }
+
+  const middlePart = id.slice(firstPartLength, firstPartLength + middlePartLength)
+  return middlePart
+}
+
+const blobGatewayAppID = ref(constants.constants.blobGatewayAppID)
+
+const requestApplication = async (appID: string) => {
+  const publicKey = account.value
+  const creatorChainId = applicationCreatorChainId(appID)
+  const query = gql`
+    mutation requestApplication ($chainId: String!, $applicationId: String!, $targetChainId: String!) {
+      requestApplication(chainId: $chainId, applicationId: $applicationId, targetChainId: $targetChainId)
+    }`
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    window.linera.request({
+      method: 'linera_graphqlMutation',
+      params: {
+        publicKey: publicKey,
+        query: {
+          query: query.loc?.source?.body,
+          variables: {
+            chainId: chainId.value,
+            applicationId: appID,
+            targetChainId: creatorChainId
+          },
+          operationName: 'requestApplication'
+        }
+      }
+    }).then((result) => {
+      resolve(result)
+    }).catch((e) => {
+      reject(e)
+    })
   })
 }
 

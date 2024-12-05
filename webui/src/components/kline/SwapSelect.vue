@@ -3,7 +3,7 @@
     <q-select dense v-model='swapStore.SelectedToken' :options='swapStore.Tokens' dropdown-icon='bi-chevron-down' class='swap-token-option'>
       <template #option='scope'>
         <q-item dense v-bind='scope.itemProps'>
-          <q-img :src='scope.opt.Icon' width='24px' height='24px' />
+          <q-img :src='processImg(scope.opt.Icon)' width='24px' height='24px' />
           <div class='swap-token-list'>
             <div class='row'>
               <div class='swap-token-name text-bold'>{{ scope.opt.Symbol }}</div>
@@ -15,7 +15,7 @@
       </template>
       <template #selected>
         <div class='row'>
-          <q-img :src='swapStore.SelectedToken?.Icon' width='24px' height='24px' />
+          <q-img :src='processImg(swapStore.SelectedToken?.Icon)' width='24px' height='24px' />
           <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedToken?.Symbol }}</div>
         </div>
       </template>
@@ -26,7 +26,7 @@
     <q-select dense v-model='swapStore.SelectedTokenPair' :options='swapStore.TokenPairs' dropdown-icon='bi-chevron-down' class='swap-token-option'>
       <template #option='scope'>
         <q-item dense v-bind='scope.itemProps'>
-          <q-img :src='scope.opt.TokenOneIcon' width='24px' height='24px' />
+          <q-img :src='processImg(scope.opt.TokenOneIcon)' width='24px' height='24px' />
           <div class='swap-token-list'>
             <div class='row'>
               <div class='swap-token-name text-bold'>{{ scope.opt.TokenOneSymbol }}</div>
@@ -38,7 +38,7 @@
       </template>
       <template #selected>
         <div class='row'>
-          <q-img :src='swapStore.SelectedToken?.Icon' width='24px' height='24px' />
+          <q-img :src='processImg(swapStore.SelectedTokenPair?.TokenOneIcon)' width='24px' height='24px' />
           <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
         </div>
       </template>
@@ -51,10 +51,18 @@ import { useSwapStore } from 'src/mystore/swap'
 import { shortid } from 'src/utils'
 import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { blobImagePath } from 'src/const/const'
 
 const swapStore = useSwapStore()
 
 const router = useRouter()
+
+const processImg = (image_hash: string | undefined): string => {
+  if (image_hash === undefined) {
+    return ""
+  }
+  return blobImagePath + image_hash
+}
 
 const setSpecifyTokenPair = () => {
   const t0Addr = router.currentRoute.value.query.token0

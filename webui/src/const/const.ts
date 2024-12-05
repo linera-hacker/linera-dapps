@@ -9,3 +9,7 @@ export const amsCreationChainID = '72da713f3122fa3f0451ce959f3af3f92fc8f7100f10e
 export const amsAppID = '7f09d2673d323c0e0e6fef01e77fdfaacafca5baefe29050cfdc5af6bd238b87170f8d0a9ffa8d521093767c7dd67d2d422275dabc80058bbdefe0bd74f9f8f69d75ad0766c7d5fee02c8a84700411828eb56cc27e0018fbab8916e9d836a827010000000000000000000000'
 export const amsEndPoint = 'http://172.16.31.42:30094'
 export const klineEndpoint = 'http://172.16.31.58:30100'
+export const blobGatewayEndpoint = 'http://172.16.31.42:9081'
+export const blobGatewayCreationChainID = '1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03'
+export const blobGatewayAppID = '83b864f4c466e9458aa7b217f1b66c71669d61bb241831f0878624a6fd0e090f011562c1d23c92afd5f9ee71148a1551d03d7381913acfb9dad437209d03438f1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000'
+export const blobImagePath = blobGatewayEndpoint + '/chains/' + blobGatewayCreationChainID + '/applications/' + blobGatewayAppID + '/image/'
