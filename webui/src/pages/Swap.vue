@@ -12,6 +12,9 @@
       <div class='swap bg-white swap-padding'>
         <Swap />
       </div>
+      <div class='swap bg-white swap-padding'>
+        <AddLiquidity />
+      </div>
       <div class='swap bg-white vertical-card-align bulletin-padding'>
         <VolumeBulletin />
       </div>
@@ -31,6 +34,7 @@ import HolderBulletin from 'src/components/bulletin/Holder.vue'
 const KLine = defineAsyncComponent(() => import('src/components/kline/KLine.vue'))
 const Swap = defineAsyncComponent(() => import('src/components/swap/Swap.vue'))
 const Trades = defineAsyncComponent(() => import('src/components/trades/Trades.vue'))
+const AddLiquidity = defineAsyncComponent(() => import('src/components/liquidity/AddLiquidity.vue'))
 </script>
 
 <style scoped lang='sass'>
