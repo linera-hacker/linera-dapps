@@ -14,6 +14,7 @@
       <q-tab name='swap' label='swap' />
     </q-tabs>
     <q-btn flat label='create meme token' class='text-red-6 border-red-4' rounded @click='onCreateMemeTokenClick' />
+    <q-btn flat label='blob' class='text-red-6 border-red-4' rounded @click='onBlobList' />
     <ConnectWallet />
   </div>
 </template>
@@ -41,6 +42,10 @@ const selectedIcon = computed(() => tab.value === 'meme' ? meme : swap)
 
 const onCreateMemeTokenClick = () => {
   void router.push({ path: '/create/meme' })
+}
+
+const onBlobList = () => {
+  void router.push({ path: '/blob' })
 }
 
 </script>

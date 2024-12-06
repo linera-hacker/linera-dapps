@@ -108,3 +108,12 @@ export interface ChainApp {
   id: string
   link: string
 }
+
+export interface BlobInfo {
+  id: number
+  blobHash: string
+  dataType: string
+  createdAt: number
+  creator: string
+  thumbnail: string
+}
