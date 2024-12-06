@@ -38,6 +38,13 @@ const routes: RouteRecordRaw[] = [
         meta: {
           NeedLogined: false
         }
+      },
+      {
+        path: '/blob',
+        component: () => import('pages/BlobList.vue'),
+        meta: {
+          NeedLogined: false
+        }
       }
     ]
   },

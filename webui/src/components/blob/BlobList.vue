@@ -1,0 +1,168 @@
+<template>
+  <q-page class='flex flex-center'>
+    <div class="q-pa-md">
+      <q-table
+        :rows='rows'
+        :columns='columns'
+        row-key='id'
+        :pagination='initialPagination'
+      >
+        <template v-slot:body-cell-thumbnail='props'>
+          <q-td :props='props'>
+            <q-img
+              :src='props.row.thumbnail'
+              :alt='props.row.blobHash'
+              style='max-width: 50px; max-height: 50px;'
+              contain
+            />
+          </q-td>
+        </template>
+      </q-table>
+    </div>
+  </q-page>
+</template>
+
+<script setup lang='ts'>
+import { onMounted, ref, computed } from 'vue'
+import { BlobInfo } from 'src/stores/memeInfo'
+import { ApolloClient } from '@apollo/client/core'
+import gql from 'graphql-tag'
+import { graphqlResult } from 'src/utils'
+import { getAppClientOptions } from 'src/apollo'
+import { provideApolloClient, useQuery } from '@vue/apollo-composable'
+import { blobImagePath, blobGatewayEndpoint, blobGatewayCreationChainID, blobGatewayAppID, wlineraAppID } from 'src/const/const'
+import { useI18n } from 'vue-i18n'
+// eslint-disable-next-line @typescript-eslint/unbound-method
+const { t } = useI18n({ useScope: 'global' })
+
+const blobList = ref([] as Array<BlobInfo>)
+const rows = computed(() => blobList.value)
+const limit = ref(5)
+const blob_id = ref(0);
+
+const loading = ref(false)
+const lastCreatedAt = ref(0)
+
+const initialPagination = ref({
+  sortBy: 'desc',
+  descending: false,
+  page: 1,
+  rowsPerPage: 5
+})
+
+const onGetBlobLists = () => {
+  const url = blobGatewayEndpoint + '/chains/' + blobGatewayCreationChainID + '/applications/' + blobGatewayAppID + ''
+  getBlobLists(url)
+}
+
+
+const getBlobLists = async (url: string) => {
+  const appOptions = /* await */ getAppClientOptions(url)
+  const appApolloClient = new ApolloClient(appOptions)
+  const { /* result, refetch, fetchMore, */ onResult /*, onError */ } = provideApolloClient(appApolloClient)(() => useQuery(gql`
+    query list($createdAfter: Int!,$limit: Int!){
+      list(createdAfter: $createdAfter, limit: $limit){
+        blobHash
+        dataType
+        createdAt
+        creator
+      }
+    }
+  `, {
+    createdAfter: lastCreatedAt,
+    limit: limit.value
+  }, {
+    fetchPolicy: 'network-only'
+  }))
+
+  onResult((res) => {
+    if (res.loading) return
+    const apps = graphqlResult.data(res, 'list') as Array<BlobInfo>
+    for (let i = 0; i < apps.length; i++) {
+      const blob = {
+        id: blob_id.value,
+        blobHash: apps[i].blobHash,
+        dataType: apps[i].dataType,
+        createdAt: apps[i].createdAt,
+        creator: apps[i].creator,
+        thumbnail: apps[i].dataType === "IMAGE" ? blobImagePath + apps[i].blobHash: ""
+      } as BlobInfo
+      blob_id.value += 1
+      blobList.value.push(blob)
+      if (lastCreatedAt.value < blob.createdAt) {
+        lastCreatedAt.value = blob.createdAt
+      }
+    }
+    loading.value = false
+  })
+}
+
+onMounted(async () => {
+  await Promise.resolve()
+  onGetBlobLists()
+})
+
+const timeAgo = (timestamp: number): string => {
+  if (timestamp === 0) {
+    return 'No recent transactions'
+  }
+  const now = Date.now()
+  const seconds = Math.floor((now / 1000) - (timestamp / 1000000))
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  if (seconds < 60) {
+      return seconds === 1 ? '1 second ago' : `${seconds} seconds ago`;
+  } else if (minutes < 60) {
+      return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
+  } else if (hours < 24) {
+      return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+  } else {
+      return days === 1 ? '1 day ago' : `${days} days ago`;
+  }
+}
+
+const columns = computed(() => [
+  {
+    name: 'ID',
+    label: t('MSG_ID'),
+    sortable: true,
+    field: (row: BlobInfo) => row.id
+  },
+  {
+    name: 'blobHash',
+    label: t('MSG_BLOBHASH'),
+    sortable: true,
+    field: (row: BlobInfo) => row.blobHash
+  },
+  {
+    name: 'dataType',
+    label: t('MSG_DATATYPE'),
+    sortable: true,
+    field: (row: BlobInfo) => row.dataType
+  },
+  {
+    name: 'creator',
+    label: t('MSG_CREATOR'),
+    sortable: true,
+    field: (row: BlobInfo) => row.creator
+  },
+  {
+    name: 'createdAt',
+    label: t('MSG_CREATED_AT'),
+    sortable: true,
+    field: (row: BlobInfo) => timeAgo(row.createdAt)
+  },
+  {
+    name: 'thumbnail',
+    label: t('MSG_THUMBNAIL'),
+    sortable: true,
+    field: (row: BlobInfo) => row.thumbnail
+  }
+])
+
+</script>
+
+<style lang='sass' scoped>
+</style>
