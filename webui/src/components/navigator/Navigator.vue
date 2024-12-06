@@ -12,9 +12,12 @@
     >
       <q-tab name='meme' label='meme' />
       <q-tab name='swap' label='swap' />
+      <q-tab name='blob' label='blob' />
     </q-tabs>
-    <q-btn flat label='create meme token' class='text-red-6 border-red-4' rounded @click='onCreateMemeTokenClick' />
-    <q-btn flat label='blob' class='text-red-6 border-red-4' rounded @click='onBlobList' />
+    <q-btn
+      flat label='create meme token' class='text-red-6 border-red-4' rounded
+      @click='onCreateMemeTokenClick'
+    />
     <ConnectWallet />
   </div>
 </template>
@@ -33,7 +36,7 @@ const router = useRouter()
 const path = computed(() => route.path)
 
 const tab = computed({
-  get: () => path.value.includes('meme') ? 'meme' : 'swap',
+  get: () => path.value.includes('meme') ? 'meme' : path.value.includes('swap') ? 'swap' : 'blob',
   set: (v) => {
     void router.push({ path: '/' + v })
   }
@@ -42,10 +45,6 @@ const selectedIcon = computed(() => tab.value === 'meme' ? meme : swap)
 
 const onCreateMemeTokenClick = () => {
   void router.push({ path: '/create/meme' })
-}
-
-const onBlobList = () => {
-  void router.push({ path: '/blob' })
 }
 
 </script>

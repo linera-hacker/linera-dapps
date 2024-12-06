@@ -78,11 +78,10 @@
 import { computed, onMounted } from 'vue'
 import { Cookies } from 'quasar'
 import { useUserStore } from 'src/mystore/user'
-import { shortid } from 'src/utils'
+import { shortid, graphqlResult } from 'src/utils'
 import { Web3 } from 'web3'
 import { addressIcon, microchainIcon, copyIcon } from 'src/assets'
 import { gql } from '@apollo/client'
-import { graphqlResult } from 'src/utils'
 
 const user = useUserStore()
 const account = computed(() => user.account?.trim())
@@ -114,7 +113,7 @@ const onConnectClick = async () => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const web3 = new Web3(window.linera)
   await web3.eth.requestAccounts()
-  await getBalances()
+  getBalances()
 }
 
 const onLogoutClick = () => {
@@ -139,8 +138,7 @@ onMounted(() => {
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const getBalances = async () => {
-  console.log('--getBalances')
+const getBalances = () => {
   const publicKey = account.value
   const query = gql`
     query getBalances ($chainIds: [String!], $publicKeys: [String!], $chainId: String!, $publicKey: String!){

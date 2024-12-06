@@ -38,9 +38,11 @@ export const useTradesStore = defineStore('useTradesStore', {
           if (this.OriginalTxID === 0) {
             this.OriginalTxID = resp.OriginalTxID
           }
-          this._refreshTableTransactions(resp.Transactions, true)
-          if (this.Transactions.length > this.MaxTransactions) {
-            this.Transactions.splice(0, this.Transactions.length - this.MaxTransactions)
+          if (resp.Transactions.length) {
+            this._refreshTableTransactions(resp.Transactions, true)
+            if (this.Transactions.length > this.MaxTransactions) {
+              this.Transactions.splice(0, this.Transactions.length - this.MaxTransactions)
+            }
           }
 
           done?.(false, resp.Transactions)

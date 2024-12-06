@@ -101,7 +101,7 @@ const onGetAppPools = async () => {
     })
 }
 
-const getApplicationInfos = async (url: string) => {
+const getApplicationInfos = (url: string) => {
   const appOptions = /* await */ getAppClientOptions(url)
   const appApolloClient = new ApolloClient(appOptions)
   const { /* result, refetch, fetchMore, */ onResult /*, onError */ } = provideApolloClient(appApolloClient)(() => useQuery(gql`
@@ -120,8 +120,7 @@ const getApplicationInfos = async (url: string) => {
     const apps = graphqlResult.data(res, 'applications') as Array<MemeAppRespInfo>
     for (let i = 0; i < apps.length; i++) {
       const poolId = appPoolIDsMap.value.get(apps[i].application_id)
-      if (poolId === undefined || poolId === null || poolId === "") {
-        console.log(apps[i].application_id + ' not in pools')
+      if (poolId === undefined || poolId === null || poolId === '') {
         continue
       }
       const checkExist = appIDsMap.value.get(apps[i].application_id)
@@ -130,7 +129,7 @@ const getApplicationInfos = async (url: string) => {
         continue
       }
       appIDsMap.value.set(apps[i].application_id, apps[i].application_id)
-      const parsedSpec: MemeAppInfoSpec = JSON.parse(apps[i].spec);
+      const parsedSpec: MemeAppInfoSpec = JSON.parse(apps[i].spec) as MemeAppInfoSpec
       const meme = {
         poolID: poolId,
         appID: apps[i].application_id,
@@ -170,8 +169,8 @@ const getApplicationInfos = async (url: string) => {
     if (memeAppInfos.value.length >= curPageSize.value) {
       runningInterval.value = false
       curPageSize.value += limit.value
-      return    
-    } 
+      return
+    }
     runningInterval.value = true
   })
 }
@@ -183,8 +182,8 @@ const sleep = async (ms: number): Promise<void> => {
 const onGetAppInfos = async () => {
   await onGetAppPools()
   await sleep(1000)
-  await getApplicationInfos(amsService.value)
-} 
+  getApplicationInfos(amsService.value)
+}
 
 onMounted(async () => {
   await Promise.resolve()
@@ -208,11 +207,11 @@ const onHiding = () => {
   loading.value = false
 }
 
-const onLoad = (index, done) => {
+const onLoad = (index, done: () => void) => {
   onLoading()
   setTimeout(() => {
     loadTx.value = true
-    onGetAppInfos()
+    void onGetAppInfos()
     onHiding()
     done()
   }, 2000)
@@ -222,11 +221,11 @@ const runningInterval = ref(true)
 
 const useIntervalLoadData = () => {
   if (!runningInterval.value) return
-  onGetAppInfos()
+  void onGetAppInfos()
 }
 
 const loadTxData = () => {
-  let poolConds = [] as Array<PoolTokenCond>
+  const poolConds = [] as Array<PoolTokenCond>
   for (let i = 0; i < memeAppInfos.value.length; i++) {
     if (memeAppInfos.value[i].appID === wlineraAppID) {
       continue
@@ -234,7 +233,7 @@ const loadTxData = () => {
     const poolTokenCond = {
       PoolID: Number(memeAppInfos.value[i].poolID),
       TokenZeroAddress: memeAppInfos.value[i].appID,
-      TokenOneAddress: wlineraAppID,
+      TokenOneAddress: wlineraAppID
     } as PoolTokenCond
     poolConds.push(poolTokenCond)
   }
@@ -246,8 +245,8 @@ const loadTxData = () => {
       return
     }
     if (rows) {
-      let lastTxMap = new Map<string, LastTranscation>()
-      for (let i = 0 ; i < rows.length; i++) {
+      const lastTxMap = new Map<string, LastTranscation>()
+      for (let i = 0; i < rows.length; i++) {
         lastTxMap.set(rows[i].TokenZeroAddress, rows[i])
       }
       for (let i = 0; i < memeAppInfos.value.length; i++) {

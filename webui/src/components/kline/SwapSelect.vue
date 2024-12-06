@@ -1,12 +1,17 @@
 <template>
   <div class='bg-white vertical-card-padding'>
-    <q-select dense v-model='swapStore.SelectedToken' :options='swapStore.Tokens' dropdown-icon='bi-chevron-down' class='swap-token-option'>
+    <q-select
+      dense v-model='swapStore.SelectedToken' :options='swapStore.Tokens' hide-dropdown-icon
+      class='swap-token-option'
+    >
       <template #option='scope'>
         <q-item dense v-bind='scope.itemProps'>
-          <q-img :src='processImg(scope.opt.Icon)' width='24px' height='24px' />
-          <div class='swap-token-list'>
+          <q-img :src='processImg(scope.opt.Icon)' width='24px' height='24px' fit='contain' />
+          <div class='swap-token-list horizontal-inner-x-margin-left'>
             <div class='row'>
-              <div class='swap-token-name text-bold'>{{ scope.opt.Symbol }}</div>
+              <div class='swap-token-name text-bold'>
+                {{ scope.opt.Symbol }}
+              </div>
               <q-space />
             </div>
             <div>{{ shortid.shortId(scope.opt.Name, 10) }}</div>
@@ -15,21 +20,28 @@
       </template>
       <template #selected>
         <div class='row'>
-          <q-img :src='processImg(swapStore.SelectedToken?.Icon)' width='24px' height='24px' />
-          <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedToken?.Symbol }}</div>
+          <q-img :src='processImg(swapStore.SelectedToken?.Icon)' width='24px' height='24px' fit='contain' />
+          <div class='swap-token-name text-bold swap-token-label flex items-center justify-center'>
+            {{ swapStore.SelectedToken?.Symbol }}
+          </div>
         </div>
       </template>
     </q-select>
     <div class='separator'>
       /
     </div>
-    <q-select dense v-model='swapStore.SelectedTokenPair' :options='swapStore.TokenPairs' dropdown-icon='bi-chevron-down' class='swap-token-option'>
+    <q-select
+      dense v-model='swapStore.SelectedTokenPair' :options='swapStore.TokenPairs' hide-dropdown-icon
+      class='swap-token-option'
+    >
       <template #option='scope'>
         <q-item dense v-bind='scope.itemProps'>
-          <q-img :src='processImg(scope.opt.TokenOneIcon)' width='24px' height='24px' />
-          <div class='swap-token-list'>
+          <q-img :src='processImg(scope.opt.TokenOneIcon)' width='24px' height='24px' fit='contain' />
+          <div class='swap-token-list horizontal-inner-x-margin-left'>
             <div class='row'>
-              <div class='swap-token-name text-bold'>{{ scope.opt.TokenOneSymbol }}</div>
+              <div class='swap-token-name text-bold'>
+                {{ scope.opt.TokenOneSymbol }}
+              </div>
               <q-space />
             </div>
             <div>{{ shortid.shortId(scope.opt.TokenOneName, 10) }}</div>
@@ -38,8 +50,10 @@
       </template>
       <template #selected>
         <div class='row'>
-          <q-img :src='processImg(swapStore.SelectedTokenPair?.TokenOneIcon)' width='24px' height='24px' />
-          <div class='swap-token-name text-bold swap-token-label'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
+          <q-img :src='processImg(swapStore.SelectedTokenPair?.TokenOneIcon)' width='24px' height='24px' fit='contain' />
+          <div class='swap-token-name text-bold swap-token-label flex items-center justify-center'>
+            {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
+          </div>
         </div>
       </template>
     </q-select>
@@ -57,11 +71,11 @@ const swapStore = useSwapStore()
 
 const router = useRouter()
 
-const processImg = (image_hash: string | undefined): string => {
-  if (image_hash === undefined) {
-    return ""
+const processImg = (imageHash: string | undefined): string => {
+  if (imageHash === undefined) {
+    return ''
   }
-  return blobImagePath + image_hash
+  return blobImagePath + imageHash
 }
 
 const setSpecifyTokenPair = () => {
@@ -112,7 +126,7 @@ onMounted(() => {
 
 <style scoped lang='sass'>
 .swap-token-name
-  line-height: 24px
+  line-height: 26px
 
 :deep(.swap-token)
   .q-select
@@ -124,7 +138,7 @@ onMounted(() => {
   border-radius: 4px
 
 .swap-token-label
-  margin-left: 3px
+  margin-left: 8px
   overflow: hidden
 
 .separator

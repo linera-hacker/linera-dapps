@@ -11,9 +11,13 @@
         </div>
         <q-space />
         <div class='row'>
-          <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-          <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(outBalance).toFixed(2) }}</div>
-          <div class='text-grey-8'>{{ swapStore.SelectedToken?.Symbol }}</div>
+          <q-icon name='bi-wallet-fill' class='text-grey-8 swap-amount-icon' size='16px' />
+          <div class='swap-amount-label text-grey-9 text-bold'>
+            {{ Number(outBalance).toFixed(2) }}
+          </div>
+          <div class='text-grey-8'>
+            {{ swapStore.SelectedToken?.Symbol }}
+          </div>
         </div>
       </div>
       <div class='row vertical-card-align swap-token'>
@@ -26,7 +30,10 @@
           </div>
         </div>
         <q-space />
-        <q-input class='swap-amount-input text-grey-8' dense v-model.number='outAmount' reverse-fill-mask input-class='text-right' />
+        <q-input
+          class='swap-amount-input text-grey-8' dense v-model.number='outAmount' reverse-fill-mask
+          input-class='text-right'
+        />
       </div>
     </q-card>
     <div class='row vertical-card-align'>
@@ -43,9 +50,13 @@
         </div>
         <q-space />
         <div class='row'>
-          <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-          <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(inBalance).toFixed(2) }}</div>
-          <div class='text-grey-8'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
+          <q-icon name='bi-wallet-fill' class='text-grey-8 swap-amount-icon' size='16px' />
+          <div class='swap-amount-label text-grey-9 text-bold'>
+            {{ Number(inBalance).toFixed(2) }}
+          </div>
+          <div class='text-grey-8'>
+            {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
+          </div>
         </div>
       </div>
       <div class='row vertical-card-align swap-token'>
@@ -58,10 +69,16 @@
           </div>
         </div>
         <q-space />
-        <q-input class='swap-amount-input' dense v-model.number='inAmount' reverse-fill-mask input-class='text-right' />
+        <q-input
+          class='swap-amount-input' dense v-model.number='inAmount' reverse-fill-mask
+          input-class='text-right'
+        />
       </div>
     </q-card>
-    <q-btn rounded flat :label='$t("MSG_SWAP")' class='full-width border-red-4 vertical-inner-y-margin vertical-inner-y-margin-bottom' @click='SwapAmount' />
+    <q-btn
+      rounded flat :label='$t("MSG_SWAP")' class='full-width border-red-4 vertical-inner-y-margin vertical-inner-y-margin-bottom'
+      @click='SwapAmount'
+    />
   </div>
 </template>
 
@@ -88,19 +105,19 @@ const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 
 const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
-  if (swapStore.SelectedToken === null || _inAmount === 0) {
+  if (!swapStore.SelectedToken || _inAmount === 0) {
     outAmount.value = 0
     return
   }
-  if (swapStore.SelectedTokenPair === null || _outAmount === 0) {
+  if (!swapStore.SelectedTokenPair || _outAmount === 0) {
     inAmount.value = 0
     return
   }
 
   if (_outAmount !== undefined) {
     walletStore.calSwapAmount(
-      swapStore.SelectedTokenPair.TokenZeroAddress,
       swapStore.SelectedTokenPair.TokenOneAddress,
+      swapStore.SelectedTokenPair.TokenZeroAddress,
       outAmount.value,
       (_, amount) => {
         triggerInAmount = false
@@ -111,8 +128,8 @@ const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
 
   if (_inAmount !== undefined) {
     walletStore.calSwapAmount(
-      swapStore.SelectedTokenPair.TokenOneAddress,
       swapStore.SelectedTokenPair.TokenZeroAddress,
+      swapStore.SelectedTokenPair.TokenOneAddress,
       inAmount.value,
       (_, amount) => {
         triggerOutAmount = false
