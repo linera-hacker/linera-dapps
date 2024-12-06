@@ -1,126 +1,91 @@
 import { defineStore } from 'pinia'
+import { API, Token, GetTokensResponse, TokenPair, GetTokenPairsResponse, KPointTypeInfo, GetKPointTypesResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
-import { CalSwapAmountResponse, GetBalanceResponse } from './types'
-import { gql } from '@apollo/client'
-import { constants } from 'src/const'
 
-export const useWalletStore = defineStore('useWalletStore', {
-  state: () => ({}),
+export const useSwapStore = defineStore('useSwapStore', {
+  state: () => ({
+    IsInitilazed: false,
+    SelectedToken: {} as Token | null,
+    SelectedTokenPair: {} as TokenPair | null,
+    Tokens: [] as Token[],
+    TokenPairs: [] as TokenPair[],
+    KPointTypes: [] as KPointTypeInfo[]
+  }),
   actions: {
-    getBalance (erc20AppAddr: string, accountChainID: string, accountAddr: string, done?: (error: boolean, balance: string) => void) {
-      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${erc20AppAddr}`
-      const req = { query: `query{\n  balanceOf(owner:{\n    chain_id: "${accountChainID}"\n    owner: "User:${accountAddr}"\n  })\n}` }
-      doActionWithError<unknown, GetBalanceResponse>(
-        url,
-        req,
+    getTokens (done?: (error: boolean, rows: Token[]) => void) {
+      doActionWithError<unknown, GetTokensResponse>(
+        API.GetTokens,
+        {},
         {
           Error: {
-            Title: 'get balance',
-            Message: 'failed to get balance',
+            Title: 'get tokens',
+            Message: 'failed to get tokens',
             Description: 'please retry',
             Popup: true,
             Type: NotifyType.Error
           }
         },
-        (resp: GetBalanceResponse): void => {
-          done?.(false, resp.data.balanceOf)
-        },
-        () => {
-          done?.(true, '0')
+        (resp: GetTokensResponse): void => {
+          resp.Infos.sort()
+          this.Tokens = resp.Infos
+          this.SelectedToken = resp.Infos[0]
+          this.SelectedTokenPair = null
+          done?.(false, resp.Infos)
+        }, () => {
+          done?.(true, [])
         }
       )
     },
-    calSwapAmount (tokenZeroAppAddr: string, tokenOneAppAddr: string, outAmount: number, done?: (error: boolean, amount: number) => void) {
-      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${constants.swapAppID}`
-      const req = { query: `query{\n  calculateSwapAmount(token0:"${tokenZeroAppAddr}",token1:"${tokenOneAppAddr}",amount1:"${outAmount}")\n}` }
-      doActionWithError<unknown, CalSwapAmountResponse>(
-        url,
-        req,
+    getTokenPairsByTokenZeroID (done?: (error: boolean, rows: TokenPair[]) => void) {
+      if (this.SelectedToken === null || this.SelectedToken.ID < 0) {
+        return
+      }
+      doActionWithError<unknown, GetTokenPairsResponse>(
+        API.GetTokenPairs,
+        { Conds: { TokenZeroID: { Op: 'eq', Value: this.SelectedToken.ID } } },
         {
           Error: {
-            Title: 'calculate swap amount',
-            Message: 'failed to calculate swap amount',
+            Title: 'get token pairs',
+            Message: 'failed to get token pairs',
             Description: 'please retry',
             Popup: true,
             Type: NotifyType.Error
           }
         },
-        (resp: CalSwapAmountResponse): void => {
-          done?.(false, resp.data.calculateSwapAmount)
-        },
-        () => { done?.(true, 0) }
+        (resp: GetTokenPairsResponse): void => {
+          resp.Infos.sort()
+          this.TokenPairs = resp.Infos
+          if (resp.Infos.length === 0) {
+            this.SelectedTokenPair = null
+          } else {
+            this.SelectedTokenPair = resp.Infos[0]
+          }
+          done?.(false, resp.Infos)
+        }, () => {
+          done?.(true, [])
+        }
       )
     },
-    swapAmount (token0: string, token1: string, publicKey: string, outAmount: number) {
-      const mutate = gql`
-        mutation swap ($token0: String!, $token1: String!, $amount0In: String!, $amount1In: String!, $amount0OutMin: String!, $amount1OutMin: String!) {
-          swap (
-            token0: $token0,
-            token1: $token1,
-            amount0In: $amount0In,
-            amount1In: $amount1In,
-            amount0OutMin: $amount0OutMin,
-            amount1OutMin: $amount1OutMin
-          )
-        }
-      `
-      return new Promise((resolve, reject) => {
-        window.linera.request({
-          method: 'linera_graphqlMutation',
-          params: {
-            publicKey: publicKey,
-            applicationId: constants.swapAppID,
-            query: {
-              query: mutate.loc?.source?.body,
-              variables: {
-                token0: token0,
-                token1: token1,
-                amount0In: outAmount.toString(),
-                amount1In: '0',
-                amount0OutMin: '0',
-                amount1OutMin: '0'
-              }
-            }
+    getKPointTypes (done?: (error: boolean, infos: KPointTypeInfo[]) => void) {
+      doActionWithError<unknown, GetKPointTypesResponse>(
+        API.GetKPointTypes,
+        {},
+        {
+          Error: {
+            Title: 'get kpoint types',
+            Message: 'failed to get kpoint types',
+            Description: 'please retry',
+            Popup: true,
+            Type: NotifyType.Error
           }
-        }).then((result) => {
-          resolve(result)
-        }).catch((e) => {
-          reject(e)
-        })
-      })
-    },
-    addLiquidity (token0: string, token1: string, publicKey: string, token0Amount: number, token1Amount: number) {
-      const mutate = gql`
-        mutation addLiquidity ($token0: String!, $token1: String!, $amount0Desired: String!, $amount1Desired: String!, $amount0Min: String!, $amount1Min: String!, $deadline: Timestamp!) {
-          addLiquidity(token0: $token0, token1: $token1, amount0Desired: $amount0Desired, amount1Desired: $amount1Desired, amount0Min: $amount0Min, amount1Min: $amount1Min, deadline: $deadline)
-        }
-      `
-      return new Promise((resolve, reject) => {
-        window.linera.request({
-          method: 'linera_graphqlMutation',
-          params: {
-            publicKey: publicKey,
-            applicationId: constants.swapAppID,
-            query: {
-              query: mutate.loc?.source?.body,
-              variables: {
-                token0: token0,
-                token1: token1,
-                amount0Desired: token0Amount.toString(),
-                amount1Desired: token1Amount.toString(),
-                amount0Min: '0',
-                amount1Min: '0',
-                deadline: 0
-              }
-            }
-          }
-        }).then((result) => {
-          resolve(result)
-        }).catch((e) => {
-          reject(e)
-        })
-      })
+        },
+        (resp) => {
+          this.KPointTypes = resp.Infos
+          done?.(false, resp.Infos)
+        },
+        () => { done?.(true, []) }
+      )
     }
   }
 })

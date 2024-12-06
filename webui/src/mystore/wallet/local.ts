@@ -89,6 +89,38 @@ export const useWalletStore = defineStore('useWalletStore', {
           reject(e)
         })
       })
+    },
+    addLiquidity (token0: string, token1: string, publicKey: string, token0Amount: number, token1Amount: number) {
+      const mutate = gql`
+        mutation addLiquidity ($token0: String!, $token1: String!, $amount0Desired: String!, $amount1Desired: String!, $amount0Min: String!, $amount1Min: String!, $deadline: Timestamp!) {
+          addLiquidity(token0: $token0, token1: $token1, amount0Desired: $amount0Desired, amount1Desired: $amount1Desired, amount0Min: $amount0Min, amount1Min: $amount1Min, deadline: $deadline)
+        }
+      `
+      return new Promise((resolve, reject) => {
+        window.linera.request({
+          method: 'linera_graphqlMutation',
+          params: {
+            publicKey: publicKey,
+            applicationId: constants.swapAppID,
+            query: {
+              query: mutate.loc?.source?.body,
+              variables: {
+                token0: token0,
+                token1: token1,
+                amount0Desired: token0Amount.toString(),
+                amount1Desired: token1Amount.toString(),
+                amount0Min: '0',
+                amount1Min: '0',
+                deadline: 0
+              }
+            }
+          }
+        }).then((result) => {
+          resolve(result)
+        }).catch((e) => {
+          reject(e)
+        })
+      })
     }
   }
 })
