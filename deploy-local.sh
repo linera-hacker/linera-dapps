@@ -30,7 +30,7 @@ NETWORK_TYPE=devnet
 blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03"
 blob_gateway_app_id="83b864f4c466e9458aa7b217f1b66c71669d61bb241831f0878624a6fd0e090f011562c1d23c92afd5f9ee71148a1551d03d7381913acfb9dad437209d03438f1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
 
-app_logo_path='./assets/HackerLogoDark.svg'
+app_logo_path='./assets/HackerLogoDark.png'
 
 while getopts $options opt; do
   case ${opt} in
