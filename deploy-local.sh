@@ -27,8 +27,8 @@ options="N:n:"
 NETWORK_ID=1
 NETWORK_TYPE=devnet
 
-blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03"
-blob_gateway_app_id="83b864f4c466e9458aa7b217f1b66c71669d61bb241831f0878624a6fd0e090f011562c1d23c92afd5f9ee71148a1551d03d7381913acfb9dad437209d03438f1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
+blob_gateway_creation_chain_id="ce7495598b56c8adf51fdaedf8fcfbd94c1cfb0673ebf9e1f3dedd8d3f855b54e8cad1ed3c9e2147167298aea4dbbe0c6544c7b6d078409cbaf97da14a1b6ac1"
+blob_gateway_app_id="ce7495598b56c8adf51fdaedf8fcfbd94c1cfb0673ebf9e1f3dedd8d3f855b54e8cad1ed3c9e2147167298aea4dbbe0c6544c7b6d078409cbaf97da14a1b6ac11db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
 
 app_logo_path='./assets/HackerLogoDark.png'
 
@@ -610,6 +610,8 @@ sed -i "s/defaultWLineraAppId = .*/defaultWLineraAppId = '$erc20_2_appid'/g" ../
 sed -i "s/defaultWLineraCreatorChain = .*/defaultWLineraCreatorChain = '$wlinera_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
 sed -i "s/defaultAMSAppId = .*/defaultAMSAppId = '$ams_appid'/g" ../linera-wallet/src/model/db/model.ts
 sed -i "s/defaultAMSCreatorChain = .*/defaultAMSCreatorChain = '$ams_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultBlobGatewayAppId = .*/defaultBlobGatewayAppId = '$blob_gateway_app_id'/g" ../linera-wallet/src/model/db/model.ts
+sed -i "s/defaultBlobGatewayCreatorChain = .*/defaultBlobGatewayCreatorChain = '$blob_gateway_creation_chain_id'/g" ../linera-wallet/src/model/db/model.ts
 
 trap cleanup INT
 read -p "  Press any key to exit"
