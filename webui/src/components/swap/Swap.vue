@@ -90,11 +90,13 @@ import { useNotificationStore } from 'src/mystore/notification'
 import { useSwapStore } from 'src/mystore/swap'
 import { useUserStore } from 'src/mystore/user'
 import { useWalletStore } from 'src/mystore/wallet'
+import { graphqlResult } from 'src/utils'
 import { shortId } from 'src/utils/shortid'
 import { ref, watch } from 'vue'
 
-let triggerOutAmount = true
-let triggerInAmount = true
+const triggerOutAmount = ref(true)
+const triggerInAmount = ref(true)
+
 const outAmount = ref(0)
 const inAmount = ref(0)
 
@@ -122,7 +124,7 @@ const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
       swapStore.SelectedTokenPair.TokenZeroAddress,
       outAmount.value,
       (_, amount) => {
-        triggerInAmount = false
+        triggerInAmount.value = false
         inAmount.value = amount
       }
     )
@@ -134,7 +136,7 @@ const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
       swapStore.SelectedTokenPair.TokenOneAddress,
       inAmount.value,
       (_, amount) => {
-        triggerOutAmount = false
+        triggerOutAmount.value = false
         outAmount.value = amount
       }
     )
@@ -178,7 +180,99 @@ const approveToSwap = async (appID: string, publicKey: string, amount: string): 
   })
 }
 
-const SwapAmount = () => {
+const chainApplications = async (): Promise<string[]> => {
+  const applications = gql`
+    query applications($chainId: String!) {
+      applications(chainId: $chainId) {
+        id
+      }
+    }
+  `
+
+  try {
+    const res = await window.linera?.request({
+      method: 'linera_graphqlQuery',
+      params: {
+        publicKey: userStore.account,
+        query: {
+          query: applications.loc?.source?.body,
+          variables: {
+            chainId: userStore.chainId
+          }
+        }
+      }
+    })
+    return ((graphqlResult.keyValue(res, 'applications') || []) as Record<string, string>[]).map((el) => el.id)
+  } catch (e) {
+    console.log('Failed query applications', e)
+    return Promise.reject('Failed query applications')
+  }
+}
+
+const applicationCreatorChainId = (id: string) => {
+  const firstPartLength = 128
+  const middlePartLength = 64
+  const lastPartLength = 24
+  const totalLength = firstPartLength + middlePartLength + lastPartLength
+  if (id.length !== totalLength) {
+    throw new Error('Invalid ID length')
+  }
+
+  const middlePart = id.slice(firstPartLength, firstPartLength + middlePartLength)
+  return middlePart
+}
+
+const requestApplication = async (appID: string) => {
+  const publicKey = userStore.account
+  const creatorChainId = applicationCreatorChainId(appID)
+  const query = gql`
+    mutation requestApplication ($chainId: String!, $applicationId: String!, $targetChainId: String!) {
+      requestApplication(chainId: $chainId, applicationId: $applicationId, targetChainId: $targetChainId)
+    }`
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    window.linera.request({
+      method: 'linera_graphqlMutation',
+      params: {
+        publicKey: publicKey,
+        query: {
+          query: query.loc?.source?.body,
+          variables: {
+            chainId: userStore.chainId,
+            applicationId: appID,
+            targetChainId: creatorChainId
+          },
+          operationName: 'requestApplication'
+        }
+      }
+    }).then((result) => {
+      resolve(result)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+}
+
+const waitChainApplications = async (_applicationIds: string[], timeoutSeconds: number) => {
+  const applicationIds = await chainApplications()
+  for (const applicationId of _applicationIds) {
+    if (!applicationIds.includes(applicationId)) {
+      if (timeoutSeconds <= 0) return Promise.reject('Failed request application')
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          waitChainApplications(_applicationIds, timeoutSeconds - 1).then(() => {
+            resolve(undefined)
+          }).catch((e) => {
+            reject(e)
+          })
+        }, 1000)
+      })
+    }
+  }
+  return Promise.resolve(undefined)
+}
+
+const SwapAmount = async () => {
   if (!swapStore.SelectedToken) {
     return
   }
@@ -186,6 +280,20 @@ const SwapAmount = () => {
     return
   }
   if (!outAmount.value || outAmount.value < 0) {
+    return
+  }
+
+  const applicationIds = await chainApplications()
+  if (!applicationIds.includes(swapStore.SelectedTokenPair?.TokenZeroAddress)) {
+    await requestApplication(swapStore.SelectedTokenPair?.TokenZeroAddress)
+  }
+  if (!applicationIds.includes(swapStore.SelectedTokenPair?.TokenOneAddress)) {
+    await requestApplication(swapStore.SelectedTokenPair?.TokenOneAddress)
+  }
+  try {
+    await waitChainApplications([swapStore.SelectedTokenPair?.TokenZeroAddress, swapStore.SelectedTokenPair?.TokenOneAddress], 10)
+  } catch (e) {
+    console.log('Failed wait applications', e)
     return
   }
 
@@ -271,10 +379,10 @@ watch(outAmount, (amount) => {
     inAmount.value = 0
     return
   }
-  if (triggerOutAmount) {
+  if (triggerOutAmount.value) {
     CalSwapInAmount(amount, undefined)
   }
-  triggerOutAmount = true
+  triggerOutAmount.value = true
 })
 
 watch(inAmount, (amount) => {
@@ -282,10 +390,10 @@ watch(inAmount, (amount) => {
     outAmount.value = 0
     return
   }
-  if (triggerInAmount) {
+  if (triggerInAmount.value) {
     CalSwapInAmount(undefined, amount)
   }
-  triggerInAmount = true
+  triggerInAmount.value = true
 })
 
 </script>

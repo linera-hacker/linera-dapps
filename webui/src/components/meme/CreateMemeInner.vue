@@ -367,7 +367,7 @@ const createApplication = async (): Promise<any> => {
       [
         JSON.stringify({
           chain_id: constants.constants.swapCreationChainID,
-          owner: 'User:' + constants.constants.swapCreationOwner
+          owner: 'Application:' + constants.constants.swapAppID
         } as ChainAccount),
         '5000000.'
       ]
