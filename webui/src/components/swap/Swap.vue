@@ -83,6 +83,8 @@
 </template>
 
 <script setup lang='ts'>
+import { gql } from '@apollo/client'
+import { constants } from 'src/const'
 import { dbModel } from 'src/model'
 import { useNotificationStore } from 'src/mystore/notification'
 import { useSwapStore } from 'src/mystore/swap'
@@ -139,18 +141,59 @@ const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
   }
 }
 
+const swapCreationChainID = ref(constants.swapCreationChainID)
+const swapAppID = ref(constants.swapAppID)
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const approveToSwap = async (appID: string, publicKey: string, amount: string): Promise<any> => {
+  const chainId = swapCreationChainID.value
+  const owner = 'Application:' + swapAppID.value
+
+  const query = gql`
+    mutation approve($chainId: String!, $owner: String!, $amount: String!) {
+      approve(spender: {chain_id: $chainId, owner: $owner}, value: $amount)
+    }`
+  return new Promise((resolve, reject) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    window.linera.request({
+      method: 'linera_graphqlMutation',
+      params: {
+        applicationId: appID,
+        publicKey: publicKey,
+        query: {
+          query: query.loc?.source?.body,
+          variables: {
+            chainId,
+            owner,
+            amount
+          },
+          operationName: 'approve'
+        }
+      }
+    }).then((result) => {
+      resolve(result)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+}
+
 const SwapAmount = () => {
-  if (swapStore.SelectedToken === null) {
+  if (!swapStore.SelectedToken) {
     return
   }
-  if (swapStore.SelectedTokenPair === null) {
+  if (!swapStore.SelectedTokenPair) {
     return
   }
-  if (outAmount.value === null || outAmount.value < 0) {
+  if (!outAmount.value || outAmount.value < 0) {
     return
   }
 
-  dbModel.ownerFromPublicKey(userStore.account).then(() => {
+  approveToSwap(
+    swapStore.SelectedTokenPair?.TokenZeroAddress,
+    userStore.account,
+    outAmount.value.toString()
+  ).then(() => {
     walletStore.swapAmount(
       swapStore.SelectedTokenPair?.TokenZeroAddress || '',
       swapStore.SelectedTokenPair?.TokenOneAddress || '',
