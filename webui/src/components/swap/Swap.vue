@@ -272,6 +272,58 @@ const waitChainApplications = async (_applicationIds: string[], timeoutSeconds: 
   return Promise.resolve(undefined)
 }
 
+const applicationSubscribed = async (applicationId: string) => {
+  const subscribedCreatorChain = gql`
+    query subscribedCreatorChain {
+      subscribedCreatorChain
+    }
+  `
+
+  try {
+    const res = await window.linera?.request({
+      method: 'linera_graphqlQuery',
+      params: {
+        publicKey: userStore.account,
+        applicationId,
+        query: {
+          query: subscribedCreatorChain.loc?.source?.body,
+          variables: {}
+        }
+      }
+    })
+    return graphqlResult.keyValue(res, 'subscribedCreatorChain') || false
+  } catch (e) {
+    console.log('Failed query subscribed application', e)
+    return Promise.reject('Failed query subscribed application')
+  }
+}
+
+const subscribeApplicationCreatorChain = async (applicationId: string) => {
+  const subscribeCreatorChain = gql`
+    mutation subscribeCreatorChain {
+      subscribeCreatorChain
+    }
+  `
+
+  try {
+    const res = await window.linera?.request({
+      method: 'linera_graphqlMutation',
+      params: {
+        publicKey: userStore.account,
+        applicationId,
+        query: {
+          query: subscribeCreatorChain.loc?.source?.body,
+          variables: {}
+        }
+      }
+    })
+    return graphqlResult.keyValue(res, 'subscribeCreatorChain')
+  } catch (e) {
+    console.log('Failed subscribe application', e)
+    return Promise.reject('Failed subscribe application')
+  }
+}
+
 const SwapAmount = async () => {
   if (!swapStore.SelectedToken) {
     return
@@ -295,6 +347,12 @@ const SwapAmount = async () => {
   } catch (e) {
     console.log('Failed wait applications', e)
     return
+  }
+  if (!await applicationSubscribed(swapStore.SelectedTokenPair?.TokenZeroAddress)) {
+    await subscribeApplicationCreatorChain(swapStore.SelectedTokenPair?.TokenZeroAddress)
+  }
+  if (!await applicationSubscribed(swapStore.SelectedTokenPair?.TokenOneAddress)) {
+    await subscribeApplicationCreatorChain(swapStore.SelectedTokenPair?.TokenOneAddress)
   }
 
   approveToSwap(
