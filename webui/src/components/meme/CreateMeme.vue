@@ -103,11 +103,18 @@
         <div class='row' :style='{lineHeight: "48px"}'>
           <q-space />
           <q-icon :name='createError ? "bi-exclamation-circle" : "bi-check-circle"' :color='createError ? "orange-6" : "green-6"' size='48px' class='horizontal-inner-x-margin-right' />
-          <div class='text-bold text-grey-9' :style='{fontSize: "20px"}'>{{ createError ? $t('MSG_CREATE_ERROR') : $t('MSG_CREATE_SUCCESSFUL') }}</div>
+          <div class='text-bold text-grey-9' :style='{fontSize: "20px"}'>
+            {{ createError ? $t('MSG_CREATE_ERROR') : $t('MSG_CREATE_SUCCESSFUL') }}
+          </div>
           <q-space />
         </div>
-        <div class='word-break-all vertical-section-y-margin'>{{ createMessage }}</div>
-        <q-btn rounded flat class='border-red-4 full-width vertical-section-y-margin' :label='$t("MSG_CONTINUE")' @click='onContinueClick' />
+        <div class='word-break-all vertical-section-y-margin'>
+          {{ createMessage }}
+        </div>
+        <q-btn
+          rounded flat class='border-red-4 full-width vertical-section-y-margin' :label='$t("MSG_CONTINUE")'
+          @click='onContinueClick'
+        />
       </div>
     </q-card>
   </q-dialog>
@@ -272,26 +279,26 @@ const onCreateLiquidityPool = async () => {
     })
 }
 
-const onAuthorizeWlineraToSwap = async () => {
+const onAuthorizeWlineraToSwap = () => {
   step.value += 1
   loadingLabel.value = t('MSG_AUTHORIZING_WLINERA_TO_SWAP')
 
   if (initPoolLiquidity.value.amount0Initial === '0' && initPoolLiquidity.value.amount1Initial === '0') {
-    setTimeout(onCreateLiquidityPool, 100)
+    setTimeout(() => void onCreateLiquidityPool(), 100)
     return
   }
 
   const appID = wlineraAppID.value
-  const amount = wlineraApprove.value
   if (Number(wlineraApprove.value) < Number(initPoolLiquidity.value.amount1Initial)) {
     wlineraApprove.value = initPoolLiquidity.value.amount1Initial
   }
   const chainId = swapCreationChainID.value
   const owner = 'Application:' + swapAppID.value
+  const amount = wlineraApprove.value
 
   approve(appID, amount, chainId, owner)
-    .then(async () => {
-      setTimeout(onCreateLiquidityPool, 100)
+    .then(() => {
+      setTimeout(() => void onCreateLiquidityPool(), 100)
     })
     .catch((e) => {
       creating.value = false
@@ -331,24 +338,24 @@ const mint = async (appID: string, amount: string): Promise<any> => {
   })
 }
 
-const onMintWlinera = async () => {
+const onMintWlinera = () => {
   step.value += 1
   loadingLabel.value = t('MSG_MINTING_WLINERA')
 
   if (initPoolLiquidity.value.amount0Initial === '0' && initPoolLiquidity.value.amount1Initial === '0') {
-    setTimeout(onAuthorizeWlineraToSwap, 100)
+    setTimeout(() => void onAuthorizeWlineraToSwap(), 100)
     return
   }
 
   const appID = wlineraAppID.value
-  const amount = wlineraMint.value
   if (Number(wlineraMint.value) < Number(initPoolLiquidity.value.amount1Initial)) {
     wlineraMint.value = initPoolLiquidity.value.amount1Initial
   }
+  const amount = wlineraMint.value
 
   mint(appID, amount)
-    .then(async () => {
-      setTimeout(onAuthorizeWlineraToSwap, 100)
+    .then(() => {
+      setTimeout(() => void onAuthorizeWlineraToSwap(), 100)
     })
     .catch((e) => {
       creating.value = false
@@ -389,8 +396,8 @@ const approve = async (appID: string, amount: string, chainId: string, owner: st
   })
 }
 
-const onAuthorizeInitialBalanceToSwap = async () => {
-  step.value +=  1
+const onAuthorizeInitialBalanceToSwap = () => {
+  step.value += 1
   loadingLabel.value = t('MSG_AUTHORIZING_INITIAL_BALANCE_TO_SWAP')
 
   const appID = applicationId.value
@@ -400,7 +407,7 @@ const onAuthorizeInitialBalanceToSwap = async () => {
 
   approve(appID, amount, chainId, owner)
     .then(() => {
-      setTimeout(onMintWlinera, 100)
+      setTimeout(() => void onMintWlinera(), 100)
     })
     .catch((e) => {
       creating.value = false
@@ -437,13 +444,13 @@ const subscribeCreatorChain = (appID: string): Promise<any> => {
   })
 }
 
-const onSubscribeSwapCreatorChain = async () => {
+const onSubscribeSwapCreatorChain = () => {
   step.value += 1
   loadingLabel.value = t('MSG_SUBSCRIBING_SWAP_CREATOR_CHAIN')
 
   subscribeCreatorChain(swapAppID.value)
     .then(() => {
-      setTimeout(onAuthorizeInitialBalanceToSwap, 100)
+      setTimeout(() => void onAuthorizeInitialBalanceToSwap(), 100)
     })
     .catch((e) => {
       creating.value = false
@@ -452,7 +459,7 @@ const onSubscribeSwapCreatorChain = async () => {
     })
 }
 
-const onSubscribeWlineraCreatorChain = async () => {
+const onSubscribeWlineraCreatorChain = () => {
   step.value += 1
   loadingLabel.value = t('MSG_SUBSCRIBING_WLINERA_CREATOR_CHAIN')
 
@@ -479,18 +486,18 @@ const requestApplicationWithUrl = async (url: string, chainId: string, applicati
 
   return new Promise((resolve, reject) => {
     mutate({
-        chainId: chainId,
-        applicationId: applicationId,
-        targetChainId: targetChainId
-      }).then((result) => {
-        resolve(result)
-      }).catch((e) => {
-        reject(e)
-      })
+      chainId: chainId,
+      applicationId: applicationId,
+      targetChainId: targetChainId
+    }).then((result) => {
+      resolve(result)
+    }).catch((e) => {
+      reject(e)
+    })
   })
 }
 
-const onRequestCreatedApplicationToSwapChain = async () => {
+const onRequestCreatedApplicationToSwapChain = () => {
   step.value += 1
   loadingLabel.value = t('MSG_REQUESTING_CREATED_APPLICATION_TO_SWAP_CHAIN')
 
@@ -509,7 +516,7 @@ const onRequestCreatedApplicationToSwapChain = async () => {
     })
 }
 
-const onRequestSwap = async () => {
+const onRequestSwap = () => {
   step.value += 1
   loadingLabel.value = t('MSG_REQUESTING_SWAP')
 

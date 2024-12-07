@@ -22,7 +22,9 @@
         @change='onFileChange'
         style='display: none;'
       >
-      <div v-if='imageError' class='error-message'>{{ errorMessage }}</div>
+      <div v-if='imageError' class='error-message'>
+        {{ errorMessage }}
+      </div>
     </div>
     <q-input v-model='memeInfo.description' type='textarea' filled :label='$t("MSG_DESCRIPTION")' />
     <div class='vertical-inner-y-margin'>
@@ -42,18 +44,45 @@
         <q-input v-model='memeInfo.telegram' :label='$t("MSG_TELEGRAM") + " (" + $t("MSG_OPTIONAL") + ")"' />
         <q-input v-model='memeInfo.discord' :label='$t("MSG_DISCORD") + " (" + $t("MSG_OPTIONAL") + ")"' />
         <q-input v-model='memeInfo.github' :label='$t("MSG_GITHUB") + " (" + $t("MSG_OPTIONAL") + ")"' />
-        <q-input v-model='memeInfo.initialSupply' type='number' :label='$t("MSG_INITIAL_SUPPLY")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
-        <q-input v-model='memeInfo.decimals' type='number' :label='$t("MSG_DECIMALS")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
-        <q-input v-model='memeInfo.initialCurrency' type='number' :label='$t("MSG_INITIAL_CURRENCY")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
-        <q-input v-model='memeInfo.feePercent' type='number' :label='$t("MSG_FEE_PERCENT")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
+        <q-input
+          v-model='memeInfo.initialSupply' type='number' :label='$t("MSG_INITIAL_SUPPLY")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
+        <q-input
+          v-model='memeInfo.decimals' type='number' :label='$t("MSG_DECIMALS")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
+        <q-input
+          v-model='memeInfo.initialCurrency' type='number' :label='$t("MSG_INITIAL_CURRENCY")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
+        <q-input
+          v-model='memeInfo.feePercent' type='number' :label='$t("MSG_FEE_PERCENT")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
         <q-toggle v-model='memeInfo.fixedCurrency' :label='$t("MSG_FIXED_CURRENCY_WITH_CAPTION")' />
-        <q-input v-model='initPoolLiquidity.amount0Initial' type='number' :label='$t("MSG_AMOUNT_0_INITIAL")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
-        <q-input v-model='initPoolLiquidity.amount1Initial' type='number' :label='$t("MSG_AMOUNT_1_INITIAL")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
-        <q-input v-model='initPoolLiquidity.amount0Virtual' type='number' :label='$t("MSG_AMOUNT_0_VIRTUAL")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
-        <q-input v-model='initPoolLiquidity.amount1Virtual' type='number' :label='$t("MSG_AMOUNT_1_VIRTUAL")' :rules='[val => !!val || "Field is required"]' hide-bottom-space />
+        <q-input
+          v-model='initPoolLiquidity.amount0Initial' type='number' :label='$t("MSG_AMOUNT_0_INITIAL")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
+        <q-input
+          v-model='initPoolLiquidity.amount1Initial' type='number' :label='$t("MSG_AMOUNT_1_INITIAL")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
+        <q-input
+          v-model='initPoolLiquidity.amount0Virtual' type='number' :label='$t("MSG_AMOUNT_0_VIRTUAL")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
+        <q-input
+          v-model='initPoolLiquidity.amount1Virtual' type='number' :label='$t("MSG_AMOUNT_1_VIRTUAL")' :rules='[val => !!val || "Field is required"]'
+          hide-bottom-space
+        />
       </q-card>
     </q-expansion-item>
-    <q-btn rounded flat class='border-red-4 full-width vertical-section-y-margin' :label='$t("MSG_CREATE_MEME_TOKEN")' @click='onCreateMemeTokenClick' />
+    <q-btn
+      rounded flat class='border-red-4 full-width vertical-section-y-margin' :label='$t("MSG_CREATE_MEME_TOKEN")'
+      @click='onCreateMemeTokenClick'
+    />
   </div>
 </template>
 <script setup lang='ts'>
@@ -188,23 +217,23 @@ const publishDataBlob = (): Promise<any> => {
           }
         },
         operationName: 'publishDataBlob'
-      },
+      }
     }).then((result) => {
-      console.log('result: ', result)
       const blobHash = graphqlResult.keyValue(result, 'blobHash') as string
-      console.log('blobHash: ', blobHash)
       memeInfo.value.logo = blobHash
       resolve(result)
     }).catch((e) => {
       reject(e)
     })
   })
-} 
+}
 
 const onPublishDataBlob = async () => {
   publishDataBlob()
     .then(() => {
-      setTimeout(onCreateMemeToken, 100)
+      setTimeout(() => {
+        void onCreateMemeToken()
+      }, 100)
     })
     .catch((e) => {
       throw e
@@ -281,16 +310,21 @@ const validateParams = (): boolean => {
 }
 
 interface InstantiationArgument {
+  // eslint-disable-next-line camelcase
   initial_supply: string
   name: string
   symbol: string
   decimals: number
+  // eslint-disable-next-line camelcase
   initial_currency: string
+  // eslint-disable-next-line camelcase
   fixed_currency: boolean
+  // eslint-disable-next-line camelcase
   fee_percent: string
 }
 
 interface ChainAccount {
+  // eslint-disable-next-line camelcase
   chain_id: string
   owner: string
 }
@@ -307,8 +341,11 @@ interface TokenMetadata {
 }
 
 interface ApplicationParameters {
+  // eslint-disable-next-line camelcase
   initial_balances: Map<string, string>
+  // eslint-disable-next-line camelcase
   swap_application_id: string
+  // eslint-disable-next-line camelcase
   token_metadata: TokenMetadata
 }
 
@@ -366,8 +403,10 @@ const createApplication = async (): Promise<any> => {
             bytecodeId: constants.constants.erc20BID,
             parameters: JSON.stringify(applicationParameters, (key, value) => {
               if (value instanceof Map) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-return
                 return Object.fromEntries(value)
               }
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-return
               return value
             }),
             instantiationArgument: JSON.stringify(instantiationArgument),
@@ -402,6 +441,7 @@ const getCreatedApplicationId = (retries: number) => {
     }
     emit('created', _applicationIds.filter((el) => !applicationIds.value.includes(el)).join(','))
   }).catch((e) => {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     emit('error', `Failed get applicationIds: ${e}`)
   })
 }
@@ -417,7 +457,9 @@ const onCreateMemeTokenClick = async () => {
 
   requestApplication(blobGatewayAppID.value)
     .then(() => {
-      setTimeout(onPublishDataBlob, 100)
+      setTimeout(() => {
+        void onPublishDataBlob()
+      }, 100)
     })
     .catch((e) => {
       console.log(e)
@@ -425,7 +467,7 @@ const onCreateMemeTokenClick = async () => {
     })
 }
 
-const onCreateMemeToken = async () => {
+const onCreateMemeToken = () => {
   emit('creating')
 
   getApplicationIds().then((_applicationIds) => {
@@ -435,9 +477,11 @@ const onCreateMemeToken = async () => {
         emit('initPoolLiquidity', initPoolLiquidity.value)
         setTimeout(() => getCreatedApplicationId(0), 1000)
       }).catch((e) => {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
         emit('error', `Failed create application: ${e}`)
       })
   }).catch((e) => {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     emit('error', `Failed get applicationIds: ${e}`)
   })
 }
@@ -528,5 +572,5 @@ const requestApplication = async (appID: string) => {
 .error-message
   color: red
   margin-top: 10px
-  
+
 </style>
