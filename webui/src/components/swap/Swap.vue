@@ -245,6 +245,10 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
     return
   }
 
+  if (!userStore.account) {
+    return
+  }
+
   CalSwapInAmount(undefined, inAmount.value)
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.getBalance(selected.TokenOneAddress, userStore.chainId, v, (error, balance) => {

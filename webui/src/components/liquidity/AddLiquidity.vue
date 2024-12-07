@@ -1,8 +1,8 @@
 <template>
   <q-expansion-item
     expand-separator
-    icon="assessment"
-    label="Add Liquidity"
+    icon='assessment'
+    label='Add Liquidity'
   >
     <div class='bg-white vertical-card-padding'>
       <q-separator />
@@ -11,8 +11,12 @@
           <q-space />
           <div class='row'>
             <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-            <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(outBalance).toFixed(2) }}</div>
-            <div class='text-grey-8'>{{ swapStore.SelectedToken?.Symbol }}</div>
+            <div class='swap-amount-label text-grey-9 text-bold'>
+              {{ Number(outBalance).toFixed(2) }}
+            </div>
+            <div class='text-grey-8'>
+              {{ swapStore.SelectedToken?.Symbol }}
+            </div>
           </div>
         </div>
         <div class='row vertical-card-align swap-token'>
@@ -25,7 +29,10 @@
             </div>
           </div>
           <q-space />
-          <q-input class='swap-amount-input text-grey-8' dense v-model.number='tokenZeroAmount' reverse-fill-mask input-class='text-right' />
+          <q-input
+            class='swap-amount-input text-grey-8' dense v-model.number='tokenZeroAmount' reverse-fill-mask
+            input-class='text-right'
+          />
         </div>
       </q-card>
       <div class='row vertical-card-align'>
@@ -40,8 +47,12 @@
           <q-space />
           <div class='row'>
             <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
-            <div class='swap-amount-label text-grey-9 text-bold'>{{ Number(inBalance).toFixed(2) }}</div>
-            <div class='text-grey-8'>{{ swapStore.SelectedTokenPair?.TokenOneSymbol }}</div>
+            <div class='swap-amount-label text-grey-9 text-bold'>
+              {{ Number(inBalance).toFixed(2) }}
+            </div>
+            <div class='text-grey-8'>
+              {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
+            </div>
           </div>
         </div>
         <div class='row vertical-card-align swap-token'>
@@ -54,10 +65,16 @@
             </div>
           </div>
           <q-space />
-          <q-input class='swap-amount-input' dense v-model.number='tokenOneAmount' reverse-fill-mask input-class='text-right' />
+          <q-input
+            class='swap-amount-input' dense v-model.number='tokenOneAmount' reverse-fill-mask
+            input-class='text-right'
+          />
         </div>
       </q-card>
-      <q-btn rounded flat :label='$t("MSG_ADD_LIQUIDITY")' class='full-width border-red-4 vertical-inner-y-margin vertical-inner-y-margin-bottom' @click='onAddLiquidity' />
+      <q-btn
+        rounded flat :label='$t("MSG_ADD_LIQUIDITY")' class='full-width border-red-4 vertical-inner-y-margin vertical-inner-y-margin-bottom'
+        @click='onAddLiquidity'
+      />
     </div>
   </q-expansion-item>
 </template>
@@ -71,8 +88,9 @@ import { useWalletStore } from 'src/mystore/wallet'
 import { shortId } from 'src/utils/shortid'
 import { ref, watch } from 'vue'
 
-let triggerOutAmount = true
-let triggerInAmount = true
+const triggerOutAmount = ref(true)
+const triggerInAmount = ref(true)
+
 const tokenZeroAmount = ref(0)
 const tokenOneAmount = ref(0)
 
@@ -148,6 +166,10 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
     return
   }
 
+  if (!userStore.account) {
+    return
+  }
+
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.getBalance(selected.TokenOneAddress, userStore.chainId, v, (error, balance) => {
       if (error) {
@@ -169,7 +191,7 @@ watch(tokenZeroAmount, (amount) => {
     tokenOneAmount.value = 0
     return
   }
-  triggerOutAmount = true
+  triggerOutAmount.value = true
 })
 
 watch(tokenOneAmount, (amount) => {
@@ -177,7 +199,7 @@ watch(tokenOneAmount, (amount) => {
     tokenZeroAmount.value = 0
     return
   }
-  triggerInAmount = true
+  triggerInAmount.value = true
 })
 
 </script>

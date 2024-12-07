@@ -204,7 +204,7 @@ const onFileChange = (event: Event): void => {
   }
 }
 
-const publishDataBlob = (): Promise<any> => {
+const publishDataBlob = (): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     window.linera.request({
@@ -228,7 +228,7 @@ const publishDataBlob = (): Promise<any> => {
   })
 }
 
-const onPublishDataBlob = async () => {
+const onPublishDataBlob = () => {
   publishDataBlob()
     .then(() => {
       setTimeout(() => {
@@ -423,6 +423,7 @@ const createApplication = async (): Promise<any> => {
   })
 }
 
+// eslint-disable-next-line no-undef
 const emit = defineEmits<{(ev: 'created', applicationId: string): void,
   (ev: 'creating'): void,
   (ev: 'error', error: string),

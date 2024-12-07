@@ -41,9 +41,7 @@ import { graphqlResult } from 'src/utils'
 import { getAppClientOptions } from 'src/apollo'
 import { provideApolloClient, useQuery } from '@vue/apollo-composable'
 import { OwnerBalance } from 'src/stores/memeInfo'
-import { trophyNo1 } from 'src/assets'
-import { trophyNo2 } from 'src/assets'
-import { trophyNo3 } from 'src/assets'
+import { trophyNo1, trophyNo2, trophyNo3 } from 'src/assets'
 import { useSwapStore } from 'src/mystore/swap'
 import { shortId } from 'src/utils/shortid'
 
@@ -59,20 +57,20 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
     return
   }
   token0.value = selected.TokenZeroAddress
-  getBalanceTopList(10)
+  void getBalanceTopList(10)
 })
 
 onMounted(() => {
   if (router.currentRoute.value.query.token0 != null) {
     token0.value = router.currentRoute.value.query.token0 as string
-    getBalanceTopList(10)
+    void getBalanceTopList(10)
   }
 })
 
 const swapChainID = ref(constants.constants.swapCreationChainID)
 const swapEndPoint = ref(constants.constants.swapEndPoint)
 
-const getBalanceTopList = async (limit: number) => {
+const getBalanceTopList = (limit: number) => {
   const url = swapEndPoint.value + '/chains/' + swapChainID.value + '/applications/' + token0.value
   const appOptions = /* await */ getAppClientOptions(url)
   const appApolloClient = new ApolloClient(appOptions)
@@ -85,7 +83,7 @@ const getBalanceTopList = async (limit: number) => {
     }
   `, {
     chainId: swapChainID.value,
-    limit: limit,
+    limit: limit
   }, {
     fetchPolicy: 'network-only'
   }))
@@ -93,7 +91,7 @@ const getBalanceTopList = async (limit: number) => {
   onResult((res) => {
     if (res.loading) return
     const ownerBalances = graphqlResult.data(res, 'balanceTopList') as Array<OwnerBalance>
-    topList.value = ownerBalances
+    topList.value = ownerBalances || []
   })
 }
 
