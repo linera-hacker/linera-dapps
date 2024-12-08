@@ -7,7 +7,9 @@
 
       <div>
         <q-item-label class='text-h6'>
-          <q-badge color='green-6'>{{ memeInfo.ticker }}</q-badge> {{ memeInfo.appName }}
+          <q-badge color='green-6'>
+            {{ memeInfo.ticker }}
+          </q-badge> {{ memeInfo.appName }}
         </q-item-label>
         <q-item-label>
           <div class='vertical-inner-y-margin'>
@@ -95,8 +97,8 @@ const goLink = (url: string, event: MouseEvent) => {
   window.open(url, '_blank')
 }
 
-const processImg = (image_hash: string): string => {
-  return blobImagePath + image_hash
+const processImg = (imageHash: string): string => {
+  return blobImagePath + imageHash
 }
 
 const timeAgo = (timestamp: number): string => {
@@ -110,13 +112,13 @@ const timeAgo = (timestamp: number): string => {
   const days = Math.floor(hours / 24)
 
   if (seconds < 60) {
-      return seconds === 1 ? '1 second ago' : `${seconds} seconds ago`;
+    return seconds === 1 ? '1 second ago' : `${seconds} seconds ago`
   } else if (minutes < 60) {
-      return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`;
+    return minutes === 1 ? '1 minute ago' : `${minutes} minutes ago`
   } else if (hours < 24) {
-      return hours === 1 ? '1 hour ago' : `${hours} hours ago`;
+    return hours === 1 ? '1 hour ago' : `${hours} hours ago`
   } else {
-      return days === 1 ? '1 day ago' : `${days} days ago`;
+    return days === 1 ? '1 day ago' : `${days} days ago`
   }
 }
 

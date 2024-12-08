@@ -125,7 +125,6 @@ const getApplicationInfos = (url: string) => {
       }
       const checkExist = appIDsMap.value.get(apps[i].application_id)
       if (checkExist) {
-        console.log(apps[i].application_id + ' exist')
         continue
       }
       appIDsMap.value.set(apps[i].application_id, apps[i].application_id)
@@ -153,7 +152,7 @@ const getApplicationInfos = (url: string) => {
         meme.lastTxOneAmount = '0'
         meme.oneDayZeroAmountVolumn = '0'
         meme.oneDayOneAmountVolumn = '0'
-        meme.nowPrice = '0'
+        meme.nowPrice = '1'
         meme.oneDayIncresePercent = '0'
       }
       memeAppInfos.value.push(meme)
@@ -241,7 +240,6 @@ const loadTxData = () => {
     PoolTokenConds: poolConds
   }, (error: boolean, rows: LastTranscation[]) => {
     if (error) {
-      console.log('error: ', error)
       return
     }
     if (rows) {
