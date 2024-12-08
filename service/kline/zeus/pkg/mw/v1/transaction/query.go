@@ -288,7 +288,7 @@ func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionpro
 		return nil, 0, err
 	}
 	if tx == nil {
-		return nil, 0, fmt.Errorf("cannot get last transaction")
+		return nil, 0, nil
 	}
 
 	if h.OriginalTxID == nil || *h.OriginalTxID == 0 {

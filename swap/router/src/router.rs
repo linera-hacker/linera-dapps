@@ -879,8 +879,13 @@ pub async fn calculate_swap_amount(
     } else {
         (price_0_cumulative, price_1_cumulative)
     };
+    let pool_price_1_cumulative = if exchanged {
+        pool.price_0_cumulative
+    } else {
+        pool.price_1_cumulative
+    };
     let amount_0: Amount = price_1_cumulative
-        .sub(pool.price_1_cumulative)
+        .sub(pool_price_1_cumulative)
         .mul(amount_1.into())
         .div(time_elapsed.into())
         .into();
