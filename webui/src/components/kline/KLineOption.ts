@@ -86,7 +86,7 @@ const option: EChartsOption = {
   legend: {
     bottom: 2,
     left: 'center',
-    data: ['Dow-Jones index', 'MA5', 'MA10', 'MA20', 'MA30']
+    data: ['Index', 'MA5', 'MA10', 'MA20', 'MA30']
   },
   tooltip: {
     trigger: 'axis',
@@ -193,7 +193,7 @@ const option: EChartsOption = {
   ],
   series: [
     {
-      name: 'Dow-Jones index',
+      name: 'Index',
       type: 'candlestick',
       // data: data.values,
       itemStyle: {
