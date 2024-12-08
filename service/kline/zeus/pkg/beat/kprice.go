@@ -302,12 +302,12 @@ func GetKPriceDatas() []*KPriceData {
 	kpDataList := []*KPriceData{}
 
 	for _, tpReverves := range resp.Data.TokenPairReserves {
-		price0, err := calPrice(tpReverves.Reserve0, tpReverves.Reserve1)
+		price1, err := calPrice(tpReverves.Reserve0, tpReverves.Reserve1)
 		if err != nil {
 			logger.Sugar().Error(err)
 			continue
 		}
-		price1, err := calPrice(tpReverves.Reserve1, tpReverves.Reserve0)
+		price0, err := calPrice(tpReverves.Reserve1, tpReverves.Reserve0)
 		if err != nil {
 			logger.Sugar().Error(err)
 			continue
