@@ -1,31 +1,31 @@
 <template>
   <div>
     <div>
-      <strong>24 Hour Volume bulletin</strong>
+      <strong>24 Hour Volume leaderboard</strong>
     </div>
     <q-separator />
     <div v-for='(info, idx) in bulletinStore.TokenVolumns' :key='idx' class='row decorate-dashed-border-bottom vertical-inner-y-margin'>
       <q-img
-        v-if='idx===0'
+        v-if='idx === 0'
         :src='trophyNo1' width='15px' height='15px'
         class='cursor-pointer horizontal-inner-x-margin-right'
       />
       <q-img
-        v-if='idx===1'
+        v-if='idx === 1'
         :src='trophyNo2' width='15px' height='15px'
         class='cursor-pointer horizontal-inner-x-margin-right'
       />
       <q-img
-        v-if='idx===2'
+        v-if='idx === 2'
         :src='trophyNo3' width='15px' height='15px'
         class='cursor-pointer horizontal-inner-x-margin-right'
       />
       <q-img
-        v-if='idx>2'
+        v-if='idx > 2'
         src='' width='15px' height='15px'
         class='cursor-pointer horizontal-inner-x-margin-right'
       />
-      <div :title='info.Address'>{{ shortId(info.Address,10) }}</div>
+      <div>{{ shortId(info.Address,8) }}</div>
       <q-space />
       <div>{{ Number(info.Amount).toFixed(2) }} WLINERA</div>
     </div>

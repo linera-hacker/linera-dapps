@@ -1,8 +1,5 @@
 <template>
-  <div class='bg-white vertical-card-padding'>
-    <div>
-      <strong>Swap</strong>
-    </div>
+  <div class='bg-white'>
     <q-separator />
     <q-card flat class='bg-red-1 border-radius-8px popup-padding vertical-inner-y-margin'>
       <div class='row'>

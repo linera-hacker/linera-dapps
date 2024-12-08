@@ -76,7 +76,7 @@ const columns = computed(() => [
     name: 'Amount',
     label: t('MSG_AMOUNT'),
     align: 'center',
-    field: (row: Transaction) => row.AmountZeroIn > 0 ? row.AmountZeroIn : row.AmountOneIn
+    field: (row: Transaction) => row.AmountZeroOut > 0 ? row.AmountZeroOut : row.AmountOneOut
   },
   {
     name: 'Date',

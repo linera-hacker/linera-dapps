@@ -8,13 +8,25 @@
         <Trades />
       </div>
     </div>
-    <div>
-      <div class='swap bg-white swap-padding'>
-        <Swap />
-      </div>
-      <div class='swap bg-white swap-padding'>
-        <AddLiquidity />
-      </div>
+    <q-space />
+    <div class='vertical-card-padding'>
+      <q-tabs v-model='tab' dense>
+        <q-tab name='swap' label='Swap' />
+        <q-tab name='addLiquidity' label='Add Liquidity' />
+        <q-tab name='removeLiquidity' label='Remove Liquidity' />
+      </q-tabs>
+      <q-separator />
+      <q-tab-panels v-model='tab' animated>
+        <q-tab-panel name='swap'>
+          <Swap />
+        </q-tab-panel>
+        <q-tab-panel name='addLiquidity'>
+          <AddLiquidity />
+        </q-tab-panel>
+        <q-tab-panel name='removeLiquidity'>
+          <RemoveLiquidity />
+        </q-tab-panel>
+      </q-tab-panels>
       <div class='swap bg-white vertical-card-align bulletin-padding'>
         <VolumeBulletin />
       </div>
@@ -26,15 +38,19 @@
 </template>
 
 <script setup lang='ts'>
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, ref } from 'vue'
 
 import VolumeBulletin from 'src/components/bulletin/Volume.vue'
 import HolderBulletin from 'src/components/bulletin/Holder.vue'
+import RemoveLiquidity from 'src/components/liquidity/RemoveLiquidity.vue'
 
 const KLine = defineAsyncComponent(() => import('src/components/kline/KLine.vue'))
 const Swap = defineAsyncComponent(() => import('src/components/swap/Swap.vue'))
 const Trades = defineAsyncComponent(() => import('src/components/trades/Trades.vue'))
 const AddLiquidity = defineAsyncComponent(() => import('src/components/liquidity/AddLiquidity.vue'))
+
+const tab = ref('swap')
+
 </script>
 
 <style scoped lang='sass'>
