@@ -67,7 +67,7 @@ func (task *SamplingKPointTask) createInitialKPoint(ctx context.Context) error {
 	startTime := earlistKPs[0].Timestamp - earlistKPs[0].Timestamp%task.interval
 	endTime := startTime + task.interval
 
-	if endTime > latestKPs[0].Timestamp {
+	if endTime+updateGraceTime > latestKPs[0].Timestamp {
 		return nil
 	}
 
