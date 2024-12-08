@@ -38,7 +38,7 @@ const { t } = useI18n({ useScope: 'global' })
 
 const blobList = ref([] as Array<BlobInfo>)
 const rows = computed(() => blobList.value)
-const limit = ref(5)
+const limit = ref(10)
 const blobId = ref(0)
 
 const loading = ref(false)
