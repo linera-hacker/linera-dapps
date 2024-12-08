@@ -391,7 +391,7 @@ const SwapAmount = async () => {
 }
 
 watch(() => swapStore.SelectedToken, (selected) => {
-  if (selected === null) {
+  if (!selected || !userStore.account) {
     outAmount.value = 0
     return
   }

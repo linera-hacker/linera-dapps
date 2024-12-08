@@ -110,9 +110,15 @@ const onConnectClick = async () => {
     return window.open('https://github.com/respeer-ai/linera-wallet.git')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-  const web3 = new Web3(window.linera)
-  await web3.eth.requestAccounts()
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    const web3 = new Web3(window.linera)
+    await web3.eth.requestAccounts()
+  } catch (e) {
+    // DO NOTHING
+  }
+
+  getProviderState()
   getBalances()
 }
 
