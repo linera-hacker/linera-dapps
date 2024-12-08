@@ -11,9 +11,10 @@
       <div class='q-gutter-md row justify-center'>
         <q-spinner-ball
           color='red'
-          size='5.5em'
+          size='2em'
           v-if='loading'
         />
+        <div v-else :style='{height: "2em"}' />
       </div>
     </div>
   </q-page>

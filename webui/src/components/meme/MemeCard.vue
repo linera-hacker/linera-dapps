@@ -19,16 +19,16 @@
         <q-item-label>
           <div class='vertical-inner-y-margin'>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Last Transaction</span> {{ timeAgo(memeInfo.lastTxAt) }}, {{ memeInfo.lastTxOneAmount }} WTLINERA
+              <span class='label text-grey-8'>Last Transaction</span> {{ timeAgo(memeInfo.lastTxAt) }}, {{ Number(memeInfo.lastTxOneAmount).toFixed(2) }} WTLINERA
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Last 24H Volume</span> {{ memeInfo.oneDayOneAmountVolumn }} WTLINERA
+              <span class='label text-grey-8'>Last 24H Volume</span> {{ Number(memeInfo.oneDayOneAmountVolumn).toFixed(6) }} WTLINERA
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>{{ memeInfo.ticker }}/WTLINERA</span> {{ memeInfo.nowPrice }} WLINERA <span :class='Number(memeInfo.oneDayIncresePercent) < 0 ? "change text-red" : "change text-green"'>{{ Number(memeInfo.oneDayIncresePercent) < 0 ? "" : "+" }}{{ memeInfo.oneDayIncresePercent }}%</span>
+              <span class='label text-grey-8'>{{ memeInfo.ticker }}/WTLINERA</span> {{ Number(memeInfo.nowPrice).toFixed(6) }} WLINERA <span :class='Number(memeInfo.oneDayIncresePercent) < 0 ? "change text-red" : "change text-green"'>{{ Number(memeInfo.oneDayIncresePercent) >= 0 ? "+" : "" }}{{ Number(memeInfo.oneDayIncresePercent).toFixed(2) }}%</span>
             </div>
             <div class='row meme-info'>
-              <span class='label text-grey-8'>Market Capacity</span> {{ Number(memeInfo.initialSupply) * Number(memeInfo.nowPrice) }} WTLINERA
+              <span class='label text-grey-8'>Market Capacity</span> {{ (Number(memeInfo.initialSupply) * Number(memeInfo.nowPrice)).toFixed(6) }} WTLINERA
             </div>
           </div>
         </q-item-label>
