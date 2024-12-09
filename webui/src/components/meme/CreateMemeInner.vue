@@ -565,8 +565,9 @@ const requestApplication = async (appID: string) => {
   align-items: center
 
 .image-preview .q-img
+  height: 170px
   max-width: 100%
-  max-height: 200px
+  max-height: 170px
   object-fit: contain
 
 :deep(.q-item, .q-item--dense)

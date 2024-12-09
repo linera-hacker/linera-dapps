@@ -8,7 +8,7 @@
             {{ swapStore.SelectedToken?.Symbol }}
           </div>
           <div class='text-grey-8' :title='swapStore.SelectedToken?.Address'>
-            {{ shortId(swapStore.SelectedToken?.Address || '', 8) }}
+            {{ shortId(swapStore.SelectedToken?.Address || '', 5) }}
           </div>
         </div>
         <q-space />
@@ -26,6 +26,7 @@
         <q-input
           class='swap-amount-input text-grey-8' dense v-model.number='tokenZeroAmount' reverse-fill-mask
           input-class='text-right'
+          :error='tokenZeroAmountError'
         />
       </div>
     </q-card>
@@ -43,7 +44,7 @@
             {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
           </div>
           <div class='text-grey-8' :title='swapStore.SelectedTokenPair?.TokenOneAddress'>
-            {{ shortId(swapStore.SelectedTokenPair?.TokenOneAddress || '', 8) }}
+            {{ shortId(swapStore.SelectedTokenPair?.TokenOneAddress || '', 5) }}
           </div>
         </div>
         <q-space />
@@ -61,6 +62,7 @@
         <q-input
           class='swap-amount-input' dense v-model.number='tokenOneAmount' reverse-fill-mask
           input-class='text-right'
+          :error='tokenOneAmountError'
         />
       </div>
     </q-card>
@@ -90,6 +92,9 @@ const triggerInAmount = ref(true)
 const tokenZeroAmount = ref(0)
 const tokenOneAmount = ref(0)
 
+const tokenZeroAmountError = ref(false)
+const tokenOneAmountError = ref(false)
+
 const outBalance = ref(0)
 const inBalance = ref(0)
 
@@ -103,6 +108,12 @@ const swapAppID = ref(constants.swapAppID)
 
 const subscriptionId = ref(undefined as unknown as string)
 const block = useBlockStore()
+
+const validateAmount = (): boolean => {
+  tokenZeroAmountError.value = tokenZeroAmount.value > outBalance.value
+  tokenOneAmountError.value = tokenOneAmount.value > inBalance.value
+  return !(tokenZeroAmountError.value || tokenOneAmountError.value)
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const approveToSwap = async (appID: string, publicKey: string, amount: string): Promise<any> => {
@@ -295,6 +306,7 @@ const onAddLiquidity = async () => {
   if (!tokenOneAmount.value || tokenOneAmount.value < 0) {
     return
   }
+  if (!validateAmount()) return
 
   const applicationIds = await chainApplications()
   if (!applicationIds.includes(swapStore.SelectedTokenPair?.TokenZeroAddress)) {
@@ -343,7 +355,8 @@ const onAddLiquidity = async () => {
 }
 
 watch(() => swapStore.SelectedToken, (selected) => {
-  if (selected === null) {
+  if (!selected) {
+    swapStore.SelectedTokenPair = null
     tokenZeroAmount.value = 0
     return
   }
@@ -395,6 +408,7 @@ watch(tokenZeroAmount, (amount) => {
     tokenOneAmount.value = 0
     return
   }
+  if (!validateAmount()) return
   triggerOutAmount.value = true
 })
 
@@ -403,6 +417,7 @@ watch(tokenOneAmount, (amount) => {
     tokenZeroAmount.value = 0
     return
   }
+  if (!validateAmount()) return
   triggerInAmount.value = true
 })
 
@@ -425,6 +440,7 @@ const refreshBalance = () => {
           return
         }
         outBalance.value = Number(balance)
+        validateAmount()
       })
     }
     if (swapStore.SelectedTokenPair !== null) {
@@ -433,6 +449,7 @@ const refreshBalance = () => {
           return
         }
         inBalance.value = Number(balance)
+        validateAmount()
       })
     }
   }).catch((e) => {
@@ -443,6 +460,10 @@ const refreshBalance = () => {
     })
   })
 }
+
+watch(() => block.blockHeight, () => {
+  refreshBalance()
+})
 
 onMounted(() => {
   refreshBalance()
