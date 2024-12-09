@@ -81,8 +81,8 @@ const processImg = (imageHash: string | undefined): string => {
 }
 
 watch(() => swapStore.SelectedToken, () => {
+  swapStore.SelectedTokenPair = null
   if (!swapStore.SelectedToken) {
-    swapStore.SelectedTokenPair = null
     return
   }
   swapStore.getTokenPairsByTokenZeroID((error) => {
@@ -107,7 +107,7 @@ watch(() => swapStore.SelectedToken, () => {
   })
 })
 
-onMounted(() => {
+const refreshTokens = () => {
   swapStore.getTokens((error) => {
     if (!error) {
       if (swapStore.Tokens.length === 0) {
@@ -128,6 +128,10 @@ onMounted(() => {
       }
     }
   })
+}
+
+onMounted(() => {
+  refreshTokens()
 })
 
 </script>
