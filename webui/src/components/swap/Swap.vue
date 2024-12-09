@@ -23,13 +23,14 @@
             {{ swapStore.SelectedToken?.Symbol }}
           </div>
           <div class='text-grey-8' :title='swapStore.SelectedToken?.Address'>
-            {{ shortId(swapStore.SelectedToken?.Address || '', 8) }}
+            {{ shortId(swapStore.SelectedToken?.Address || '', 5) }}
           </div>
         </div>
         <q-space />
         <q-input
           class='swap-amount-input text-grey-8' dense v-model.number='outAmount' reverse-fill-mask
           input-class='text-right'
+          :error='outAmountError'
         />
       </div>
     </q-card>
@@ -62,7 +63,7 @@
             {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
           </div>
           <div class='text-grey-8' :title='swapStore.SelectedTokenPair?.TokenOneAddress'>
-            {{ shortId(swapStore.SelectedTokenPair?.TokenOneAddress || '', 8) }}
+            {{ shortId(swapStore.SelectedTokenPair?.TokenOneAddress || '', 5) }}
           </div>
         </div>
         <q-space />
@@ -97,6 +98,8 @@ const triggerInAmount = ref(true)
 
 const outAmount = ref(0)
 const inAmount = ref(0)
+
+const outAmountError = ref(false)
 
 const outBalance = ref(0)
 const inBalance = ref(0)
@@ -331,6 +334,11 @@ const delay = async (milliSeconds: number) => {
   })
 }
 
+const validateAmount = (): boolean => {
+  outAmountError.value = outAmount.value > outBalance.value
+  return !outAmountError.value
+}
+
 const SwapAmount = async () => {
   if (!swapStore.SelectedToken) {
     return
@@ -341,6 +349,7 @@ const SwapAmount = async () => {
   if (!outAmount.value || outAmount.value < 0) {
     return
   }
+  if (!validateAmount()) return
 
   const applicationIds = await chainApplications()
   if (!applicationIds.includes(swapStore.SelectedTokenPair?.TokenZeroAddress)) {
@@ -454,6 +463,11 @@ watch(outAmount, (amount) => {
   if (triggerOutAmount.value) {
     CalSwapInAmount(amount, undefined)
   }
+  outAmountError.value = false
+  if (amount > outBalance.value) {
+    outAmountError.value = true
+    return
+  }
   triggerOutAmount.value = true
 })
 
@@ -487,6 +501,7 @@ const refreshBalance = () => {
           return
         }
         outBalance.value = Number(balance)
+        validateAmount()
       })
     }
     if (swapStore.SelectedTokenPair !== null) {
