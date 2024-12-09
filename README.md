@@ -5,6 +5,8 @@
 - [X] Linera ERC20 fungible token web app
 - [x] Linera dex
 - [X] Linera dex web app
+- [X] Linera blob gateway application
+- [X] Linera blob list we app
 
 ## How to run
 ### Note
