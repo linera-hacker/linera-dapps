@@ -70,6 +70,8 @@ import { blobImagePath } from 'src/const/const'
 const swapStore = useSwapStore()
 
 const router = useRouter()
+const t0Addr = router.currentRoute.value.query.token0
+const t1Addr = router.currentRoute.value.query.token1
 
 const processImg = (imageHash: string | undefined): string => {
   if (imageHash === undefined) {
@@ -78,29 +80,43 @@ const processImg = (imageHash: string | undefined): string => {
   return blobImagePath + imageHash
 }
 
-const setSpecifyTokenPair = () => {
-  const t0Addr = router.currentRoute.value.query.token0
-  const t1Addr = router.currentRoute.value.query.token1
-  if (t0Addr === undefined || t1Addr === undefined) {
+watch(() => swapStore.Tokens, () => {
+  if (swapStore.Tokens.length === 0) {
+    swapStore.SelectedToken = null
     return
   }
-
-  swapStore.SelectedToken = null
-  for (const item of swapStore.Tokens) {
-    if (item.Address === t0Addr) {
-      swapStore.SelectedToken = item
-      break
+  if (t0Addr) {
+    for (const info of swapStore.Tokens) {
+      if (t0Addr && t0Addr === info.Address) {
+        swapStore.SelectedToken = info
+        return
+      }
     }
   }
 
-  swapStore.getTokenPairsByTokenZeroID()
-  swapStore.SelectedTokenPair = null
-  for (const item of swapStore.TokenPairs) {
-    if (item.TokenOneAddress === t1Addr) {
-      swapStore.SelectedTokenPair = { ...item }
+  if (!swapStore.SelectedToken) {
+    swapStore.SelectedToken = swapStore.Tokens[0]
+  }
+})
+
+watch(() => swapStore.TokenPairs, () => {
+  if (swapStore.TokenPairs.length === 0) {
+    swapStore.SelectedTokenPair = null
+    return
+  }
+  if (t1Addr) {
+    for (const info of swapStore.TokenPairs) {
+      if (t1Addr && t1Addr === info.TokenOneAddress) {
+        swapStore.SelectedTokenPair = info
+        return
+      }
     }
   }
-}
+
+  if (!swapStore.SelectedTokenPair) {
+    swapStore.SelectedTokenPair = swapStore.TokenPairs[0]
+  }
+})
 
 watch(() => swapStore.SelectedToken, () => {
   if (!swapStore.SelectedToken) {
@@ -111,16 +127,7 @@ watch(() => swapStore.SelectedToken, () => {
 })
 
 onMounted(() => {
-  if (swapStore.IsInitilazed) {
-    setSpecifyTokenPair()
-    return
-  }
-  swapStore.IsInitilazed = true
-  swapStore.getTokens((error) => {
-    if (!error) {
-      setSpecifyTokenPair()
-    }
-  })
+  swapStore.getTokens()
 })
 
 </script>

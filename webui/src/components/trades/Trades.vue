@@ -22,9 +22,11 @@ let intervalID: number
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
   if (!selected) {
-    return
+    tradesStore.SelectedPoolID = null
+  } else {
+    tradesStore.SelectedPoolID = selected.PoolID
   }
-  tradesStore.SelectedPoolID = selected.PoolID
+
   initKPointsStore()
 })
 
