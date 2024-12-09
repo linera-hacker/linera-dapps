@@ -54,6 +54,8 @@ const token0 = ref('')
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
   if (!selected) {
+    token0.value = ''
+    topList.value = []
     return
   }
   token0.value = selected.TokenZeroAddress

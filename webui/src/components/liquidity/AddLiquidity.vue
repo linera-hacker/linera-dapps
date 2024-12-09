@@ -343,7 +343,8 @@ const onAddLiquidity = async () => {
 }
 
 watch(() => swapStore.SelectedToken, (selected) => {
-  if (selected === null) {
+  if (!selected) {
+    swapStore.SelectedTokenPair = null
     tokenZeroAmount.value = 0
     return
   }

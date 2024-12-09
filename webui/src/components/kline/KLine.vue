@@ -54,9 +54,10 @@ watch(selectedKPType, (selected) => {
 
 watch(() => swapStore.SelectedTokenPair, (selected) => {
   if (!selected) {
-    return
+    klineStore.SelectedTokenPairID = null
+  } else {
+    klineStore.SelectedTokenPairID = selected.ID
   }
-  klineStore.SelectedTokenPairID = selected.ID
   initKPointsStore()
 })
 
