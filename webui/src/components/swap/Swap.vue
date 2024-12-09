@@ -89,7 +89,8 @@ import { useUserStore } from 'src/mystore/user'
 import { useWalletStore } from 'src/mystore/wallet'
 import { graphqlResult } from 'src/utils'
 import { shortId } from 'src/utils/shortid'
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
+import { useBlockStore } from 'src/stores/block'
 
 const triggerOutAmount = ref(true)
 const triggerInAmount = ref(true)
@@ -104,6 +105,9 @@ const swapStore = useSwapStore()
 const walletStore = useWalletStore()
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
+
+const subscriptionId = ref(undefined as unknown as string)
+const block = useBlockStore()
 
 const CalSwapInAmount = (_outAmount?: number, _inAmount?: number) => {
   if (!swapStore.SelectedToken || _inAmount === 0) {
@@ -462,6 +466,70 @@ watch(inAmount, (amount) => {
     CalSwapInAmount(undefined, amount)
   }
   triggerInAmount.value = true
+})
+
+const subscriptionHandler = (msg: unknown) => {
+  const data = (graphqlResult.keyValue(msg, 'data') || []) as Record<string, Record<string, Record<string, Record<string, Record<string, unknown>>>>>
+  if (data.result.notifications.reason.NewBlock) {
+    const blockChainId = data.result.notifications.chain_id.toString()
+    if (blockChainId === userStore.chainId) {
+      block.blockHeight = data.result.notifications.reason.NewBlock.height as number
+      block.blockHash = data.result.notifications.reason.NewBlock.hash as string
+    }
+  }
+}
+
+const refreshBalance = () => {
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    if (swapStore.SelectedToken !== null) {
+      walletStore.getBalance(swapStore.SelectedToken.Address, userStore.chainId, v, (error, balance) => {
+        if (error) {
+          return
+        }
+        outBalance.value = Number(balance)
+      })
+    }
+    if (swapStore.SelectedTokenPair !== null) {
+      walletStore.getBalance(swapStore.SelectedTokenPair.TokenOneAddress, userStore.chainId, v, (error, balance) => {
+        if (error) {
+          return
+        }
+        inBalance.value = Number(balance)
+      })
+    }
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'gen account from user',
+      Message: e as string,
+      Description: 'please connect plugin and retry'
+    })
+  })
+}
+
+watch(() => block.blockHeight, () => {
+  refreshBalance()
+})
+
+onMounted(() => {
+  refreshBalance()
+  if (subscriptionId.value) return
+  window.linera?.request({
+    method: 'linera_subscribe'
+  }).then((_subscriptionId) => {
+    subscriptionId.value = _subscriptionId as string
+    window.linera.on('message', subscriptionHandler)
+  }).catch((e) => {
+    console.log('Fail subscribe', e)
+  })
+})
+
+onUnmounted(() => {
+  if (!subscriptionId.value) return
+  void window.linera?.request({
+    method: 'linera_unsubscribe',
+    params: [subscriptionId.value]
+  })
+  subscriptionId.value = undefined as unknown as string
 })
 
 </script>

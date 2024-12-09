@@ -129,16 +129,18 @@ const memeInfo = ref({
 const onCheckSymbol = async () => {
   const appID = constants.constants.amsAppID
   const symbol = memeInfo.value.symbol
-  await getApplicationExistBySymbol(appID, symbol)
-    .then((exist) => {
-      if (exist) {
-        throw new Error('Invalid same symbol')
-      }
-    })
-    .catch((error) => {
-      console.log('getApplicationSymbol error: ', error)
-      throw error
-    })
+  return new Promise((resolve, reject) => {
+    getApplicationExistBySymbol(appID, symbol)
+      .then((exist) => {
+        if (exist) {
+          return reject(new Error('Invalid same symbol'))
+        }
+        resolve(undefined)
+      })
+      .catch((e) => {
+        reject(e)
+      })
+  })
 }
 
 const MAXSIZE = 4 * 1024 * 1024
@@ -175,7 +177,6 @@ const onFileDrop = (event: DragEvent): void => {
 }
 
 const onFileChange = (event: Event): void => {
-  console.log('logoByteArray: ', logoByteArray)
   const target = event.target as HTMLInputElement
   const file = target.files?.[0]
   if (file) {
@@ -453,7 +454,8 @@ const onCreateMemeTokenClick = async () => {
     await onCheckSymbol()
   } catch (error) {
     tickerError.value = true
-    throw error
+    console.log('Ticker exists')
+    return
   }
 
   requestApplication(blobGatewayAppID.value)
