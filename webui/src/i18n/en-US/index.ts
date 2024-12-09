@@ -37,5 +37,8 @@ export default {
   MSG_CREATE_MEME_APPLICATION: 'Create meme application',
   MSG_YOU_ARE_SELLING: "You're Selling",
   MSG_YOU_ARE_BUYING: "You're Buying",
-  MSG_SWAP: 'Swap'
+  MSG_SWAP: 'Swap',
+  MSG_LIQUIDITY: 'Liquidity',
+  MSG_ADD_LIQUIDITY: 'Add_Liquidity',
+  MSG_REMOVE_LIQUIDITY: 'Remove_Liquidity'
 }

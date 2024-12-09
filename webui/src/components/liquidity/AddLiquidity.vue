@@ -86,9 +86,6 @@ import { shortId } from 'src/utils/shortid'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useBlockStore } from 'src/stores/block'
 
-const triggerOutAmount = ref(true)
-const triggerInAmount = ref(true)
-
 const tokenZeroAmount = ref(0)
 const tokenOneAmount = ref(0)
 
@@ -405,20 +402,18 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
 
 watch(tokenZeroAmount, (amount) => {
   if (amount === null || amount < 0) {
-    tokenOneAmount.value = 0
-    return
-  }
-  if (!validateAmount()) return
-  triggerOutAmount.value = true
-})
-
-watch(tokenOneAmount, (amount) => {
-  if (amount === null || amount < 0) {
     tokenZeroAmount.value = 0
     return
   }
   if (!validateAmount()) return
-  triggerInAmount.value = true
+})
+
+watch(tokenOneAmount, (amount) => {
+  if (amount === null || amount < 0) {
+    tokenOneAmount.value = 0
+    return
+  }
+  if (!validateAmount()) return
 })
 
 const subscriptionHandler = (msg: unknown) => {
