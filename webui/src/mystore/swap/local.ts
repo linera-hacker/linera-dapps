@@ -29,7 +29,9 @@ export const useSwapStore = defineStore('useSwapStore', {
         (resp: GetTokensResponse): void => {
           resp.Infos.sort()
           this.Tokens = resp.Infos
-          this.SelectedToken = resp.Infos[0]
+          for (const info of resp.Infos) {
+            this.SelectedToken = info
+          }
           this.SelectedTokenPair = null
           done?.(false, resp.Infos)
         }, () => {
@@ -38,7 +40,7 @@ export const useSwapStore = defineStore('useSwapStore', {
       )
     },
     getTokenPairsByTokenZeroID (done?: (error: boolean, rows: TokenPair[]) => void) {
-      if (this.SelectedToken === null || this.SelectedToken.ID < 0) {
+      if (!this.SelectedToken) {
         return
       }
       doActionWithError<unknown, GetTokenPairsResponse>(

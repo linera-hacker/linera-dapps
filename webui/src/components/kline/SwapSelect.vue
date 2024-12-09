@@ -102,8 +102,9 @@ const setSpecifyTokenPair = () => {
   }
 }
 
-watch(() => swapStore.SelectedToken, (selected) => {
-  if (selected === null) {
+watch(() => swapStore.SelectedToken, () => {
+  if (!swapStore.SelectedToken) {
+    swapStore.SelectedTokenPair = null
     return
   }
   swapStore.getTokenPairsByTokenZeroID()
