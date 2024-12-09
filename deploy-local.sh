@@ -27,8 +27,8 @@ options="N:n:"
 NETWORK_ID=1
 NETWORK_TYPE=devnet
 
-blob_gateway_creation_chain_id="ce7495598b56c8adf51fdaedf8fcfbd94c1cfb0673ebf9e1f3dedd8d3f855b54e8cad1ed3c9e2147167298aea4dbbe0c6544c7b6d078409cbaf97da14a1b6ac1"
-blob_gateway_app_id="ce7495598b56c8adf51fdaedf8fcfbd94c1cfb0673ebf9e1f3dedd8d3f855b54e8cad1ed3c9e2147167298aea4dbbe0c6544c7b6d078409cbaf97da14a1b6ac11db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
+blob_gateway_creation_chain_id="1d261c650bcecbf5267178d133b35fbbd7b0d2b22f97f8bba70652f2a03584eb"
+blob_gateway_app_id="d2e82569928a64dd68dc40eb2098bd3ec82d0fb2e903f5e909de492c24ada8c1ab7f405da28b3612f3b9d2efa5b4a85cf809946ca9d4aa5afa9a82ec6a4eb8611d261c650bcecbf5267178d133b35fbbd7b0d2b22f97f8bba70652f2a03584eb0f0000000000000000000000"
 
 app_logo_path='./assets/HackerLogoDark.png'
 
@@ -42,6 +42,9 @@ done
 case $NETWORK_TYPE in
   localnet)
     faucet_url=http://localhost:40080
+    ;;
+  testnet-archimedes)
+    faucet_url=https://faucet.testnet-archimedes.linera.net
     ;;
   devnet|*)
     faucet_url=https://faucet.devnet-2024-09-04.linera.net
@@ -86,13 +89,13 @@ case $NETWORK_ID in
     LOCAL_IP='172.16.31.73'
     ;;
   5)
-    WALLET_10_PUBLIC_IPORT='172.16.31.42:30090'
-    WALLET_11_PUBLIC_IPORT='172.16.31.42:30091'
-    WALLET_12_PUBLIC_IPORT='172.16.31.42:30092'
-    WALLET_13_PUBLIC_IPORT='172.16.31.42:30093'
-    WALLET_14_PUBLIC_IPORT='172.16.31.42:30094'
-    BLOB_GATEWAY_PUBLIC_IPORT='172.16.31.42:9081'
-    LOCAL_IP='172.16.31.42'
+    WALLET_10_PUBLIC_IPORT='172.21.132.201:30090'
+    WALLET_11_PUBLIC_IPORT='172.21.132.201:30091'
+    WALLET_12_PUBLIC_IPORT='172.21.132.201:30092'
+    WALLET_13_PUBLIC_IPORT='172.21.132.201:30093'
+    WALLET_14_PUBLIC_IPORT='172.21.132.201:30094'
+    BLOB_GATEWAY_PUBLIC_IPORT='172.21.132.201:9081'
+    LOCAL_IP='172.21.132.201'
     ;;
 esac
 
@@ -145,52 +148,47 @@ wallet_10_default_chain=`linera --with-wallet 10 wallet show | grep "Public Key"
 wallet_10_owner=`linera --with-wallet 10 wallet show | grep "Owner" | awk '{print $4}'`
 
 print $'\U01F4AB' $YELLOW " Deploying AMS application ..."
-ams_bid=`linera --with-wallet 14 publish-bytecode ./target/wasm32-unknown-unknown/release/ams_{contract,service}.wasm`
-ams_appid=`linera --with-wallet 14 create-application $ams_bid \
+ams_bid=`linera --max-retries 2 --with-wallet 14 publish-bytecode ./target/wasm32-unknown-unknown/release/ams_{contract,service}.wasm`
+ams_appid=`linera --max-retries 2 --with-wallet 14 create-application $ams_bid \
     --json-argument '{"application_types": ["SWAP", "ERC20", "AMS"]}' \
     `
 print $'\U01f499' $LIGHTGREEN " AMS application deployed"
 echo -e "    Bytecode ID:    $BLUE$ams_bid$NC"
 echo -e "    Application ID: $BLUE$ams_appid$NC"
 
-linera --with-wallet 10 request-application $ams_appid
-linera --with-wallet 11 request-application $ams_appid
-linera --with-wallet 12 request-application $ams_appid
-linera --with-wallet 13 request-application $ams_appid
+linera --max-retries 2 --with-wallet 10 request-application $ams_appid
+linera --max-retries 2 --with-wallet 11 request-application $ams_appid
+linera --max-retries 2 --with-wallet 12 request-application $ams_appid
+linera --max-retries 2 --with-wallet 13 request-application $ams_appid
 
 logo_blob_hash=`linera --with-wallet 10 publish-data-blob $app_logo_path`
-sleep 2
+sleep 10
 
 echo -e "    Blog Hash: $BLUE$logo_blob_hash$NC"
 
 echo -e "    Blog Gateway Application ID: $BLUE$blob_gateway_app_id$NC"
-linera --with-wallet 10 request-application $blob_gateway_app_id
-linera --with-wallet 11 request-application $blob_gateway_app_id
-linera --with-wallet 12 request-application $blob_gateway_app_id
-linera --with-wallet 13 request-application $blob_gateway_app_id
+linera --max-retries 2 --with-wallet 10 request-application $blob_gateway_app_id
+linera --max-retries 2 --with-wallet 11 request-application $blob_gateway_app_id
+linera --max-retries 2 --with-wallet 12 request-application $blob_gateway_app_id
+linera --max-retries 2 --with-wallet 13 request-application $blob_gateway_app_id
 
-sleep 3
+sleep 10
 
-function run_service_timeout() {
-  local_port=`expr 30080 + $1`
-  timeout 3s linera -w $1 service --port $local_port
-}
+linera --max-retries 2 --with-wallet 10 process-inbox
+linera --max-retries 2 --with-wallet 11 process-inbox
+linera --max-retries 2 --with-wallet 12 process-inbox
+linera --max-retries 2 --with-wallet 13 process-inbox
+linera --max-retries 2 --with-wallet 14 process-inbox
 
-run_service_timeout 10 &
-run_service_timeout 11 &
-run_service_timeout 12 &
-run_service_timeout 13 &
-run_service_timeout 14 &
-
-sleep 5
+sleep 15
 
 ####
 ## Mint ERC20 token and WLINERA token initial liquidity to wallet 14 default chain directly
 ####
 
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
-erc20_2_bid=`linera --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_2_appid=`linera --with-wallet 11 create-application $erc20_2_bid \
+erc20_2_bid=`linera --max-retries 2 --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
+erc20_2_appid=`linera --max-retries 2 --with-wallet 11 create-application $erc20_2_bid \
     --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
     --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000.","{\"chain_id\":\"'$wallet_10_default_chain'\",\"owner\":\"User:'$wallet_10_owner'\"}":"5000000."}, "token_metadata":{"logo":"'$logo_blob_hash'","twitter":"https://x.com/home2","telegram":"https://t.me/mysite2","discord":"https://discord.com/invite/mysite2","website":"https://mysite2.com","github":"https://github.com/mysite2","description":"mysite2 description","mintable":true}}' \
     `
@@ -199,8 +197,8 @@ echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_2_appid$NC"
 
 print $'\U01F4AB' $YELLOW " Deploying Swap application ..."
-swap_bid=`linera --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_{contract,service}.wasm`
-swap_appid=`linera --with-wallet 12 create-application $swap_bid \
+swap_bid=`linera --max-retries 2 --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_{contract,service}.wasm`
+swap_appid=`linera --max-retries 2 --with-wallet 12 create-application $swap_bid \
     --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo":"","description":"","application_name":"Linera Swap (CheCko)"}' \
     `
 print $'\U01f499' $LIGHTGREEN " Swap application deployed"
@@ -208,8 +206,8 @@ echo -e "    Bytecode ID:    $BLUE$swap_bid$NC"
 echo -e "    Application ID: $BLUE$swap_appid$NC"
 
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
-erc20_1_bid=`linera --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_1_appid=`linera --with-wallet 10 create-application $erc20_1_bid \
+erc20_1_bid=`linera --max-retries 2 --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
+erc20_1_appid=`linera --max-retries 2 --with-wallet 10 create-application $erc20_1_bid \
     --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
     --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'", "token_metadata":{"logo":"'$logo_blob_hash'","twitter":"https://x.com/mysite","telegram":"https://t.me/mysite","discord":"https://discord.com/invite/mysite","website":"https://mysite.com","github":"https://github.com/mysite","description":"mysite description","mintable":true}}' \
     `
@@ -217,19 +215,35 @@ print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
 
-linera --with-wallet 12 request-application $erc20_1_appid
-linera --with-wallet 12 request-application $erc20_2_appid
+linera --max-retries 2 --with-wallet 10 process-inbox
+linera --max-retries 2 --with-wallet 11 process-inbox
+linera --max-retries 2 --with-wallet 12 process-inbox
+linera --max-retries 2 --with-wallet 13 process-inbox
+linera --max-retries 2 --with-wallet 14 process-inbox
 
-linera --with-wallet 10 request-application $swap_appid
-linera --with-wallet 10 request-application $erc20_2_appid
-linera --with-wallet 10 request-application $swap_appid
+sleep 15
 
-linera --with-wallet 13 request-application $erc20_1_appid
-linera --with-wallet 13 request-application $erc20_2_appid
-linera --with-wallet 13 request-application $swap_appid
+linera --max-retries 2 --with-wallet 12 request-application $erc20_1_appid
+linera --max-retries 2 --with-wallet 12 request-application $erc20_2_appid
+
+linera --max-retries 2 --with-wallet 10 request-application $swap_appid
+linera --max-retries 2 --with-wallet 10 request-application $erc20_2_appid
+linera --max-retries 2 --with-wallet 10 request-application $swap_appid
+
+linera --max-retries 2 --with-wallet 13 request-application $erc20_1_appid
+linera --max-retries 2 --with-wallet 13 request-application $erc20_2_appid
+linera --max-retries 2 --with-wallet 13 request-application $swap_appid
+
+linera --max-retries 2 --with-wallet 10 process-inbox
+linera --max-retries 2 --with-wallet 11 process-inbox
+linera --max-retries 2 --with-wallet 12 process-inbox
+linera --max-retries 2 --with-wallet 13 process-inbox
+linera --max-retries 2 --with-wallet 14 process-inbox
+
+sleep 15
 
 print $'\U01F4AB' $YELLOW " Wait for requestApplication execution..."
-sleep 3
+sleep 10
 
 function print_apps() {
   print $'\U01F4AB' $YELLOW " $1"
@@ -338,13 +352,21 @@ ams_creation_owner=$owner
 ## Swap will subscribe to chain directly when it's pool is created
 ####
 
+linera --max-retries 2 --with-wallet 10 process-inbox
+linera --max-retries 2 --with-wallet 11 process-inbox
+linera --max-retries 2 --with-wallet 12 process-inbox
+linera --max-retries 2 --with-wallet 13 process-inbox
+linera --max-retries 2 --with-wallet 14 process-inbox
+
+sleep 15
+
 run_service 10 &
 run_service 11 &
 run_service 12 &
 run_service 13 &
 run_service 14 &
 
-sleep 5
+sleep 10
 
 print $'\U01F4AB' $YELLOW " Subscribe ERC20 creator chain..."
 # curl -H 'Content-Type: application/json' -X POST -d '{ "query": "mutation { subscribeCreatorChain }"}' $wallet_12_erc20_1_service
