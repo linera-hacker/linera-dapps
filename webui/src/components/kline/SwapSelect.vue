@@ -80,54 +80,54 @@ const processImg = (imageHash: string | undefined): string => {
   return blobImagePath + imageHash
 }
 
-watch(() => swapStore.Tokens, () => {
-  if (swapStore.Tokens.length === 0) {
-    swapStore.SelectedToken = null
-    return
-  }
-  if (t0Addr) {
-    for (const info of swapStore.Tokens) {
-      if (t0Addr && t0Addr === info.Address) {
-        swapStore.SelectedToken = info
-        return
-      }
-    }
-  }
-
-  if (!swapStore.SelectedToken) {
-    swapStore.SelectedToken = swapStore.Tokens[0]
-  }
-})
-
-watch(() => swapStore.TokenPairs, () => {
-  if (swapStore.TokenPairs.length === 0) {
-    swapStore.SelectedTokenPair = null
-    return
-  }
-  if (t1Addr) {
-    for (const info of swapStore.TokenPairs) {
-      if (t1Addr && t1Addr === info.TokenOneAddress) {
-        swapStore.SelectedTokenPair = info
-        return
-      }
-    }
-  }
-
-  if (!swapStore.SelectedTokenPair) {
-    swapStore.SelectedTokenPair = swapStore.TokenPairs[0]
-  }
-})
-
 watch(() => swapStore.SelectedToken, () => {
   if (!swapStore.SelectedToken) {
     swapStore.SelectedTokenPair = null
     return
   }
-  swapStore.getTokenPairsByTokenZeroID()
+  swapStore.getTokenPairsByTokenZeroID((error) => {
+    if (!error) {
+      if (swapStore.TokenPairs.length === 0) {
+        swapStore.SelectedTokenPair = null
+        return
+      }
+      if (t1Addr) {
+        for (const info of swapStore.TokenPairs) {
+          if (t1Addr && t1Addr === info.TokenOneAddress) {
+            swapStore.SelectedTokenPair = info
+            return
+          }
+        }
+      }
+
+      if (!swapStore.SelectedTokenPair) {
+        swapStore.SelectedTokenPair = swapStore.TokenPairs[0]
+      }
+    }
+  })
 })
 
 onMounted(() => {
-  swapStore.getTokens()
+  swapStore.getTokens((error) => {
+    if (!error) {
+      if (swapStore.Tokens.length === 0) {
+        swapStore.SelectedToken = null
+        return
+      }
+      if (t0Addr) {
+        for (const info of swapStore.Tokens) {
+          if (t0Addr && t0Addr === info.Address) {
+            swapStore.SelectedToken = info
+            return
+          }
+        }
+      }
+
+      if (!swapStore.SelectedToken) {
+        swapStore.SelectedToken = swapStore.Tokens[0]
+      }
+    }
+  })
 })
 
 </script>

@@ -5,8 +5,8 @@ import { NotifyType } from '../notification'
 
 export const useSwapStore = defineStore('useSwapStore', {
   state: () => ({
-    SelectedToken: {} as Token | null,
-    SelectedTokenPair: {} as TokenPair | null,
+    SelectedToken: null as Token | null,
+    SelectedTokenPair: null as TokenPair | null,
     Tokens: [] as Token[],
     TokenPairs: [] as TokenPair[],
     KPointTypes: [] as KPointTypeInfo[]
