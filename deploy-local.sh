@@ -626,14 +626,37 @@ sed -i "s/server-addr=.*/server-addr='http:\/\/$WALLET_12_PUBLIC_IPORT'/g" servi
 sed -i "s/chain-id=.*/chain-id='$swap_creation_chain'/g" service/kline/config/config.toml
 sed -i "s/app-id=.*/app-id='$swap_appid'/g" service/kline/config/config.toml
 
-sed -i "s/defaultSwapAppId = .*/defaultSwapAppId = '$swap_appid'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultSwapCreatorChain = .*/defaultSwapCreatorChain = '$swap_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultWLineraAppId = .*/defaultWLineraAppId = '$erc20_2_appid'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultWLineraCreatorChain = .*/defaultWLineraCreatorChain = '$wlinera_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultAMSAppId = .*/defaultAMSAppId = '$ams_appid'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultAMSCreatorChain = .*/defaultAMSCreatorChain = '$ams_creation_chain'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultBlobGatewayAppId = .*/defaultBlobGatewayAppId = '$blob_gateway_app_id'/g" ../linera-wallet/src/model/db/model.ts
-sed -i "s/defaultBlobGatewayCreatorChain = .*/defaultBlobGatewayCreatorChain = '$blob_gateway_creation_chain_id'/g" ../linera-wallet/src/model/db/model.ts
+linenumber=`grep -n "const defaultSwapAppId" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $swap_appid'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultSwapCreatorChain" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $swap_creation_chain'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultWLineraAppId" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $erc20_2_appid'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultWLineraCreatorChain" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $wlinera_creation_chain'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultAMSAppId" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $ams_appid'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultAMSCreatorChain" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $ams_creation_chain'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultBlobGatewayAppId" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $blob_gateway_app_id'/" src/model/db/model.ts
+
+linenumber=`grep -n "const defaultBlobGatewayCreatorChain" src/model/db/model.ts | awk -F ':' '{ print $1 }'`
+targetlinenumber=$(expr $linenumber + 1)
+sed -i "${targetlinenumber}s/.*/'  $blob_gateway_creation_chain_id'/" src/model/db/model.ts
 
 trap cleanup INT
 read -p "  Press any key to exit"
