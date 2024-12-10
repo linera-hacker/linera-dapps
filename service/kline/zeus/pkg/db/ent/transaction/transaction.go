@@ -23,6 +23,10 @@ const (
 	FieldTransactionID = "transaction_id"
 	// FieldTransactionType holds the string denoting the transaction_type field in the database.
 	FieldTransactionType = "transaction_type"
+	// FieldChainID holds the string denoting the chain_id field in the database.
+	FieldChainID = "chain_id"
+	// FieldOwner holds the string denoting the owner field in the database.
+	FieldOwner = "owner"
 	// FieldAmountZeroIn holds the string denoting the amount_zero_in field in the database.
 	FieldAmountZeroIn = "amount_zero_in"
 	// FieldAmountOneIn holds the string denoting the amount_one_in field in the database.
@@ -46,6 +50,8 @@ var Columns = []string{
 	FieldPoolID,
 	FieldTransactionID,
 	FieldTransactionType,
+	FieldChainID,
+	FieldOwner,
 	FieldAmountZeroIn,
 	FieldAmountOneIn,
 	FieldAmountZeroOut,

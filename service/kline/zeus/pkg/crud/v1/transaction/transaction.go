@@ -13,6 +13,8 @@ type Req struct {
 	PoolID          *uint64
 	TransactionID   *uint64
 	TransactionType *string
+	ChainID         *string
+	Owner           *string
 	AmountZeroIn    *float64
 	AmountOneIn     *float64
 	AmountZeroOut   *float64
@@ -30,6 +32,12 @@ func CreateSet(c *ent.TransactionCreate, req *Req) *ent.TransactionCreate {
 	}
 	if req.TransactionType != nil {
 		c.SetTransactionType(*req.TransactionType)
+	}
+	if req.ChainID != nil {
+		c.SetChainID(*req.ChainID)
+	}
+	if req.Owner != nil {
+		c.SetOwner(*req.Owner)
 	}
 	if req.AmountZeroIn != nil {
 		c.SetAmountZeroIn(*req.AmountZeroIn)
@@ -58,6 +66,12 @@ func UpdateSet(u *ent.TransactionUpdateOne, req *Req) (*ent.TransactionUpdateOne
 	}
 	if req.TransactionType != nil {
 		u = u.SetTransactionType(*req.TransactionType)
+	}
+	if req.ChainID != nil {
+		u = u.SetChainID(*req.ChainID)
+	}
+	if req.Owner != nil {
+		u = u.SetOwner(*req.Owner)
 	}
 	if req.AmountZeroIn != nil {
 		u = u.SetAmountZeroIn(*req.AmountZeroIn)

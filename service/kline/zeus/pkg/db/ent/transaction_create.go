@@ -81,6 +81,18 @@ func (tc *TransactionCreate) SetTransactionType(s string) *TransactionCreate {
 	return tc
 }
 
+// SetChainID sets the "chain_id" field.
+func (tc *TransactionCreate) SetChainID(s string) *TransactionCreate {
+	tc.mutation.SetChainID(s)
+	return tc
+}
+
+// SetOwner sets the "owner" field.
+func (tc *TransactionCreate) SetOwner(s string) *TransactionCreate {
+	tc.mutation.SetOwner(s)
+	return tc
+}
+
 // SetAmountZeroIn sets the "amount_zero_in" field.
 func (tc *TransactionCreate) SetAmountZeroIn(f float64) *TransactionCreate {
 	tc.mutation.SetAmountZeroIn(f)
@@ -240,6 +252,12 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.TransactionType(); !ok {
 		return &ValidationError{Name: "transaction_type", err: errors.New(`ent: missing required field "Transaction.transaction_type"`)}
 	}
+	if _, ok := tc.mutation.ChainID(); !ok {
+		return &ValidationError{Name: "chain_id", err: errors.New(`ent: missing required field "Transaction.chain_id"`)}
+	}
+	if _, ok := tc.mutation.Owner(); !ok {
+		return &ValidationError{Name: "owner", err: errors.New(`ent: missing required field "Transaction.owner"`)}
+	}
 	if _, ok := tc.mutation.AmountZeroIn(); !ok {
 		return &ValidationError{Name: "amount_zero_in", err: errors.New(`ent: missing required field "Transaction.amount_zero_in"`)}
 	}
@@ -336,6 +354,22 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldTransactionType,
 		})
 		_node.TransactionType = value
+	}
+	if value, ok := tc.mutation.ChainID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldChainID,
+		})
+		_node.ChainID = value
+	}
+	if value, ok := tc.mutation.Owner(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldOwner,
+		})
+		_node.Owner = value
 	}
 	if value, ok := tc.mutation.AmountZeroIn(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -528,6 +562,30 @@ func (u *TransactionUpsert) SetTransactionType(v string) *TransactionUpsert {
 // UpdateTransactionType sets the "transaction_type" field to the value that was provided on create.
 func (u *TransactionUpsert) UpdateTransactionType() *TransactionUpsert {
 	u.SetExcluded(transaction.FieldTransactionType)
+	return u
+}
+
+// SetChainID sets the "chain_id" field.
+func (u *TransactionUpsert) SetChainID(v string) *TransactionUpsert {
+	u.Set(transaction.FieldChainID, v)
+	return u
+}
+
+// UpdateChainID sets the "chain_id" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateChainID() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldChainID)
+	return u
+}
+
+// SetOwner sets the "owner" field.
+func (u *TransactionUpsert) SetOwner(v string) *TransactionUpsert {
+	u.Set(transaction.FieldOwner, v)
+	return u
+}
+
+// UpdateOwner sets the "owner" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateOwner() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldOwner)
 	return u
 }
 
@@ -785,6 +843,34 @@ func (u *TransactionUpsertOne) SetTransactionType(v string) *TransactionUpsertOn
 func (u *TransactionUpsertOne) UpdateTransactionType() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTransactionType()
+	})
+}
+
+// SetChainID sets the "chain_id" field.
+func (u *TransactionUpsertOne) SetChainID(v string) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetChainID(v)
+	})
+}
+
+// UpdateChainID sets the "chain_id" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateChainID() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateChainID()
+	})
+}
+
+// SetOwner sets the "owner" field.
+func (u *TransactionUpsertOne) SetOwner(v string) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetOwner(v)
+	})
+}
+
+// UpdateOwner sets the "owner" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateOwner() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateOwner()
 	})
 }
 
@@ -1220,6 +1306,34 @@ func (u *TransactionUpsertBulk) SetTransactionType(v string) *TransactionUpsertB
 func (u *TransactionUpsertBulk) UpdateTransactionType() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTransactionType()
+	})
+}
+
+// SetChainID sets the "chain_id" field.
+func (u *TransactionUpsertBulk) SetChainID(v string) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetChainID(v)
+	})
+}
+
+// UpdateChainID sets the "chain_id" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateChainID() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateChainID()
+	})
+}
+
+// SetOwner sets the "owner" field.
+func (u *TransactionUpsertBulk) SetOwner(v string) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetOwner(v)
+	})
+}
+
+// UpdateOwner sets the "owner" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateOwner() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateOwner()
 	})
 }
 

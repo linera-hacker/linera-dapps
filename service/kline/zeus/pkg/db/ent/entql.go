@@ -119,6 +119,8 @@ var schemaGraph = func() *sqlgraph.Schema {
 			transaction.FieldPoolID:          {Type: field.TypeUint64, Column: transaction.FieldPoolID},
 			transaction.FieldTransactionID:   {Type: field.TypeUint64, Column: transaction.FieldTransactionID},
 			transaction.FieldTransactionType: {Type: field.TypeString, Column: transaction.FieldTransactionType},
+			transaction.FieldChainID:         {Type: field.TypeString, Column: transaction.FieldChainID},
+			transaction.FieldOwner:           {Type: field.TypeString, Column: transaction.FieldOwner},
 			transaction.FieldAmountZeroIn:    {Type: field.TypeFloat64, Column: transaction.FieldAmountZeroIn},
 			transaction.FieldAmountOneIn:     {Type: field.TypeFloat64, Column: transaction.FieldAmountOneIn},
 			transaction.FieldAmountZeroOut:   {Type: field.TypeFloat64, Column: transaction.FieldAmountZeroOut},
@@ -523,6 +525,16 @@ func (f *TransactionFilter) WhereTransactionID(p entql.Uint64P) {
 // WhereTransactionType applies the entql string predicate on the transaction_type field.
 func (f *TransactionFilter) WhereTransactionType(p entql.StringP) {
 	f.Where(p.Field(transaction.FieldTransactionType))
+}
+
+// WhereChainID applies the entql string predicate on the chain_id field.
+func (f *TransactionFilter) WhereChainID(p entql.StringP) {
+	f.Where(p.Field(transaction.FieldChainID))
+}
+
+// WhereOwner applies the entql string predicate on the owner field.
+func (f *TransactionFilter) WhereOwner(p entql.StringP) {
+	f.Where(p.Field(transaction.FieldOwner))
 }
 
 // WhereAmountZeroIn applies the entql float64 predicate on the amount_zero_in field.

@@ -137,6 +137,8 @@ var (
 		{Name: "pool_id", Type: field.TypeUint64},
 		{Name: "transaction_id", Type: field.TypeUint64},
 		{Name: "transaction_type", Type: field.TypeString},
+		{Name: "chain_id", Type: field.TypeString},
+		{Name: "owner", Type: field.TypeString},
 		{Name: "amount_zero_in", Type: field.TypeFloat64},
 		{Name: "amount_one_in", Type: field.TypeFloat64},
 		{Name: "amount_zero_out", Type: field.TypeFloat64},
@@ -152,7 +154,7 @@ var (
 			{
 				Name:    "transaction_timestamp",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[11]},
+				Columns: []*schema.Column{TransactionsColumns[13]},
 			},
 			{
 				Name:    "transaction_transaction_id",
@@ -162,7 +164,7 @@ var (
 			{
 				Name:    "transaction_pool_id_timestamp_transaction_id",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[11], TransactionsColumns[5]},
+				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13], TransactionsColumns[5]},
 			},
 		},
 	}

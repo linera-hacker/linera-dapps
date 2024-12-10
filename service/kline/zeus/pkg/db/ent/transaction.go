@@ -27,6 +27,10 @@ type Transaction struct {
 	TransactionID uint64 `json:"transaction_id,omitempty"`
 	// TransactionType holds the value of the "transaction_type" field.
 	TransactionType string `json:"transaction_type,omitempty"`
+	// ChainID holds the value of the "chain_id" field.
+	ChainID string `json:"chain_id,omitempty"`
+	// Owner holds the value of the "owner" field.
+	Owner string `json:"owner,omitempty"`
 	// AmountZeroIn holds the value of the "amount_zero_in" field.
 	AmountZeroIn float64 `json:"amount_zero_in,omitempty"`
 	// AmountOneIn holds the value of the "amount_one_in" field.
@@ -48,7 +52,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullFloat64)
 		case transaction.FieldID, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt, transaction.FieldPoolID, transaction.FieldTransactionID, transaction.FieldTimestamp:
 			values[i] = new(sql.NullInt64)
-		case transaction.FieldTransactionType:
+		case transaction.FieldTransactionType, transaction.FieldChainID, transaction.FieldOwner:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Transaction", columns[i])
@@ -106,6 +110,18 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 				return fmt.Errorf("unexpected type %T for field transaction_type", values[i])
 			} else if value.Valid {
 				t.TransactionType = value.String
+			}
+		case transaction.FieldChainID:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field chain_id", values[i])
+			} else if value.Valid {
+				t.ChainID = value.String
+			}
+		case transaction.FieldOwner:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field owner", values[i])
+			} else if value.Valid {
+				t.Owner = value.String
 			}
 		case transaction.FieldAmountZeroIn:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -182,6 +198,12 @@ func (t *Transaction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("transaction_type=")
 	builder.WriteString(t.TransactionType)
+	builder.WriteString(", ")
+	builder.WriteString("chain_id=")
+	builder.WriteString(t.ChainID)
+	builder.WriteString(", ")
+	builder.WriteString("owner=")
+	builder.WriteString(t.Owner)
 	builder.WriteString(", ")
 	builder.WriteString("amount_zero_in=")
 	builder.WriteString(fmt.Sprintf("%v", t.AmountZeroIn))

@@ -3712,6 +3712,8 @@ type TransactionMutation struct {
 	transaction_id     *uint64
 	addtransaction_id  *int64
 	transaction_type   *string
+	chain_id           *string
+	owner              *string
 	amount_zero_in     *float64
 	addamount_zero_in  *float64
 	amount_one_in      *float64
@@ -4148,6 +4150,78 @@ func (m *TransactionMutation) ResetTransactionType() {
 	m.transaction_type = nil
 }
 
+// SetChainID sets the "chain_id" field.
+func (m *TransactionMutation) SetChainID(s string) {
+	m.chain_id = &s
+}
+
+// ChainID returns the value of the "chain_id" field in the mutation.
+func (m *TransactionMutation) ChainID() (r string, exists bool) {
+	v := m.chain_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldChainID returns the old "chain_id" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldChainID(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldChainID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldChainID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldChainID: %w", err)
+	}
+	return oldValue.ChainID, nil
+}
+
+// ResetChainID resets all changes to the "chain_id" field.
+func (m *TransactionMutation) ResetChainID() {
+	m.chain_id = nil
+}
+
+// SetOwner sets the "owner" field.
+func (m *TransactionMutation) SetOwner(s string) {
+	m.owner = &s
+}
+
+// Owner returns the value of the "owner" field in the mutation.
+func (m *TransactionMutation) Owner() (r string, exists bool) {
+	v := m.owner
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOwner returns the old "owner" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldOwner(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOwner is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOwner requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOwner: %w", err)
+	}
+	return oldValue.Owner, nil
+}
+
+// ResetOwner resets all changes to the "owner" field.
+func (m *TransactionMutation) ResetOwner() {
+	m.owner = nil
+}
+
 // SetAmountZeroIn sets the "amount_zero_in" field.
 func (m *TransactionMutation) SetAmountZeroIn(f float64) {
 	m.amount_zero_in = &f
@@ -4447,7 +4521,7 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, transaction.FieldCreatedAt)
 	}
@@ -4465,6 +4539,12 @@ func (m *TransactionMutation) Fields() []string {
 	}
 	if m.transaction_type != nil {
 		fields = append(fields, transaction.FieldTransactionType)
+	}
+	if m.chain_id != nil {
+		fields = append(fields, transaction.FieldChainID)
+	}
+	if m.owner != nil {
+		fields = append(fields, transaction.FieldOwner)
 	}
 	if m.amount_zero_in != nil {
 		fields = append(fields, transaction.FieldAmountZeroIn)
@@ -4501,6 +4581,10 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.TransactionID()
 	case transaction.FieldTransactionType:
 		return m.TransactionType()
+	case transaction.FieldChainID:
+		return m.ChainID()
+	case transaction.FieldOwner:
+		return m.Owner()
 	case transaction.FieldAmountZeroIn:
 		return m.AmountZeroIn()
 	case transaction.FieldAmountOneIn:
@@ -4532,6 +4616,10 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldTransactionID(ctx)
 	case transaction.FieldTransactionType:
 		return m.OldTransactionType(ctx)
+	case transaction.FieldChainID:
+		return m.OldChainID(ctx)
+	case transaction.FieldOwner:
+		return m.OldOwner(ctx)
 	case transaction.FieldAmountZeroIn:
 		return m.OldAmountZeroIn(ctx)
 	case transaction.FieldAmountOneIn:
@@ -4592,6 +4680,20 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTransactionType(v)
+		return nil
+	case transaction.FieldChainID:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetChainID(v)
+		return nil
+	case transaction.FieldOwner:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOwner(v)
 		return nil
 	case transaction.FieldAmountZeroIn:
 		v, ok := value.(float64)
@@ -4817,6 +4919,12 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldTransactionType:
 		m.ResetTransactionType()
+		return nil
+	case transaction.FieldChainID:
+		m.ResetChainID()
+		return nil
+	case transaction.FieldOwner:
+		m.ResetOwner()
 		return nil
 	case transaction.FieldAmountZeroIn:
 		m.ResetAmountZeroIn()
