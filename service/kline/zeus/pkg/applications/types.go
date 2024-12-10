@@ -26,7 +26,7 @@ var GetTransactionsReq = func(startTxID uint64) string {
 }
 
 type ChainAccountOwner struct {
-	ChainID string `json:"chainId,omitempty"`
+	ChainID string `json:"chain_id,omitempty"`
 	Owner   string `json:"owner,omitempty"`
 }
 
@@ -34,7 +34,7 @@ type Transaction struct {
 	PoolID          uint64  `json:"poolId,omitempty"`
 	TransactionID   uint64  `json:"transactionId,omitempty"`
 	TransactionType string  `json:"transactionType,omitempty"`
-	ChainID         string  `json:"chainId,omitempty"`
+	ChainID         string  `json:"chain_id,omitempty"`
 	Owner           string  `json:"owner,omitempty"`
 	AmountZeroIn    float64 `json:"amount0In,omitempty"`
 	AmountOneIn     float64 `json:"amount1In,omitempty"`
