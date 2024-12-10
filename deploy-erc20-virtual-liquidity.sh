@@ -38,6 +38,9 @@ case $NETWORK_TYPE in
   localnet)
     faucet_url=http://localhost:40080
     ;;
+  testnet-archimedes)
+    faucet_url=https://faucet.testnet-archimedes.linera.net
+    ;;
   devnet|*)
     faucet_url=https://faucet.devnet-2024-09-04.linera.net
     ;;
