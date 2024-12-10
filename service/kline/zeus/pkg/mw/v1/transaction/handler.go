@@ -99,6 +99,34 @@ func WithTransactionType(txType *string, must bool) func(context.Context, *Handl
 	}
 }
 
+func WithChainID(chainId *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if chainId == nil {
+			if must {
+				return fmt.Errorf("invalid chainid")
+			}
+			return nil
+		}
+
+		h.ChainID = chainId
+		return nil
+	}
+}
+
+func WithOwner(owner *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if owner == nil {
+			if must {
+				return fmt.Errorf("invalid owner")
+			}
+			return nil
+		}
+
+		h.Owner = owner
+		return nil
+	}
+}
+
 func WithAmountZeroIn(amount *float64, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if amount == nil {

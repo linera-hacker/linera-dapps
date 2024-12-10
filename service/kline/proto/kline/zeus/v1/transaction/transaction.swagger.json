@@ -282,6 +282,14 @@
           "type": "string",
           "title": "@inject_tag: sql:\"transaction_type\""
         },
+        "ChainID": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"chain_id\""
+        },
+        "Owner": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"owner\""
+        },
         "AmountZeroIn": {
           "type": "number",
           "format": "double",
@@ -335,6 +343,12 @@
           "format": "uint64"
         },
         "TransactionType": {
+          "type": "string"
+        },
+        "ChainID": {
+          "type": "string"
+        },
+        "Owner": {
           "type": "string"
         },
         "AmountZeroIn": {

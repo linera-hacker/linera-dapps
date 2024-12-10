@@ -24,6 +24,8 @@ func (Transaction) Fields() []ent.Field {
 		field.Uint64("pool_id"),
 		field.Uint64("transaction_id"),
 		field.String("transaction_type"),
+		field.String("chain_id"),
+		field.String("owner"),
 		field.Float("amount_zero_in"),
 		field.Float("amount_one_in"),
 		field.Float("amount_zero_out"),

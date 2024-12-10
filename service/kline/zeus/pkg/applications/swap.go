@@ -31,6 +31,8 @@ func (app *SwapApp) GetTransactions(txID uint64) ([]*Transaction, error) {
 			PoolID:          v.PoolID,
 			TransactionID:   v.TransactionID,
 			TransactionType: v.TransactionType,
+			ChainID:         v.Owner.ChainID,
+			Owner:           v.Owner.Owner,
 		}
 		a0in, err := strconv.ParseFloat(v.AmountZeroIn, 64)
 		if err != nil {

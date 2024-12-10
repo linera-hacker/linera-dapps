@@ -29,6 +29,8 @@ message TransactionReq {
   optional uint64 PoolID = 20;
   optional uint64 TransactionID = 30;
   optional string TransactionType = 40;
+  optional string ChainID = 50;
+  optional string Owner = 51;
   optional double AmountZeroIn = 60;
   optional double AmountOneIn = 70;
   optional double AmountZeroOut = 80;
@@ -45,6 +47,10 @@ message Transaction {
   uint64 TransactionID = 30;
   // @inject_tag: sql:"transaction_type"
   string TransactionType = 40;
+  // @inject_tag: sql:"chain_id"
+  string ChainID = 50;
+  // @inject_tag: sql:"owner"
+  string Owner = 51;
   // @inject_tag: sql:"amount_zero_in"
   double AmountZeroIn = 60;
   // @inject_tag: sql:"amount_one_in"

@@ -30,6 +30,8 @@ func (h *queryHandler) selectTransaction(stm *ent.TransactionQuery) {
 		transactionent.FieldPoolID,
 		transactionent.FieldTransactionID,
 		transactionent.FieldTransactionType,
+		transactionent.FieldChainID,
+		transactionent.FieldOwner,
 		transactionent.FieldAmountZeroIn,
 		transactionent.FieldAmountOneIn,
 		transactionent.FieldAmountZeroOut,

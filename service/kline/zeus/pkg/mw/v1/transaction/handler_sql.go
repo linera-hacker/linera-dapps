@@ -57,6 +57,20 @@ func (h *sqlHandler) baseKeys() error {
 		}
 		h.baseVals[transaction.FieldTransactionType] = string(strBytes)
 	}
+	if h.ChainID != nil {
+		strBytes, err := json.Marshal(*h.ChainID)
+		if err != nil {
+			return err
+		}
+		h.baseVals[transaction.FieldChainID] = string(strBytes)
+	}
+	if h.Owner != nil {
+		strBytes, err := json.Marshal(*h.Owner)
+		if err != nil {
+			return err
+		}
+		h.baseVals[transaction.FieldOwner] = string(strBytes)
+	}
 	if h.AmountZeroIn != nil {
 		strBytes, err := json.Marshal(*h.AmountZeroIn)
 		if err != nil {

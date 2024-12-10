@@ -115,6 +115,18 @@ func (tu *TransactionUpdate) SetTransactionType(s string) *TransactionUpdate {
 	return tu
 }
 
+// SetChainID sets the "chain_id" field.
+func (tu *TransactionUpdate) SetChainID(s string) *TransactionUpdate {
+	tu.mutation.SetChainID(s)
+	return tu
+}
+
+// SetOwner sets the "owner" field.
+func (tu *TransactionUpdate) SetOwner(s string) *TransactionUpdate {
+	tu.mutation.SetOwner(s)
+	return tu
+}
+
 // SetAmountZeroIn sets the "amount_zero_in" field.
 func (tu *TransactionUpdate) SetAmountZeroIn(f float64) *TransactionUpdate {
 	tu.mutation.ResetAmountZeroIn()
@@ -355,6 +367,20 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldTransactionType,
 		})
 	}
+	if value, ok := tu.mutation.ChainID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldChainID,
+		})
+	}
+	if value, ok := tu.mutation.Owner(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldOwner,
+		})
+	}
 	if value, ok := tu.mutation.AmountZeroIn(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeFloat64,
@@ -530,6 +556,18 @@ func (tuo *TransactionUpdateOne) AddTransactionID(u int64) *TransactionUpdateOne
 // SetTransactionType sets the "transaction_type" field.
 func (tuo *TransactionUpdateOne) SetTransactionType(s string) *TransactionUpdateOne {
 	tuo.mutation.SetTransactionType(s)
+	return tuo
+}
+
+// SetChainID sets the "chain_id" field.
+func (tuo *TransactionUpdateOne) SetChainID(s string) *TransactionUpdateOne {
+	tuo.mutation.SetChainID(s)
+	return tuo
+}
+
+// SetOwner sets the "owner" field.
+func (tuo *TransactionUpdateOne) SetOwner(s string) *TransactionUpdateOne {
+	tuo.mutation.SetOwner(s)
 	return tuo
 }
 
@@ -801,6 +839,20 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeString,
 			Value:  value,
 			Column: transaction.FieldTransactionType,
+		})
+	}
+	if value, ok := tuo.mutation.ChainID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldChainID,
+		})
+	}
+	if value, ok := tuo.mutation.Owner(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: transaction.FieldOwner,
 		})
 	}
 	if value, ok := tuo.mutation.AmountZeroIn(); ok {

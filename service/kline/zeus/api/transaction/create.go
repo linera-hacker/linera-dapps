@@ -30,6 +30,8 @@ func (s *Server) CreateTransaction(ctx context.Context, in *transactionproto.Cre
 		transaction.WithPoolID(req.PoolID, true),
 		transaction.WithTransactionID(req.TransactionID, true),
 		transaction.WithTransactionType(req.TransactionType, true),
+		transaction.WithChainID(req.ChainID, true),
+		transaction.WithOwner(req.Owner, true),
 		transaction.WithAmountZeroIn(req.AmountZeroIn, false),
 		transaction.WithAmountOneIn(req.AmountOneIn, false),
 		transaction.WithAmountZeroOut(req.AmountZeroOut, false),

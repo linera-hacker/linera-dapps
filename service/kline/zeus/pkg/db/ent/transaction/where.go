@@ -120,6 +120,20 @@ func TransactionType(v string) predicate.Transaction {
 	})
 }
 
+// ChainID applies equality check predicate on the "chain_id" field. It's identical to ChainIDEQ.
+func ChainID(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChainID), v))
+	})
+}
+
+// Owner applies equality check predicate on the "owner" field. It's identical to OwnerEQ.
+func Owner(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOwner), v))
+	})
+}
+
 // AmountZeroIn applies equality check predicate on the "amount_zero_in" field. It's identical to AmountZeroInEQ.
 func AmountZeroIn(v float64) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
@@ -571,6 +585,204 @@ func TransactionTypeEqualFold(v string) predicate.Transaction {
 func TransactionTypeContainsFold(v string) predicate.Transaction {
 	return predicate.Transaction(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldTransactionType), v))
+	})
+}
+
+// ChainIDEQ applies the EQ predicate on the "chain_id" field.
+func ChainIDEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDNEQ applies the NEQ predicate on the "chain_id" field.
+func ChainIDNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDIn applies the In predicate on the "chain_id" field.
+func ChainIDIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldChainID), v...))
+	})
+}
+
+// ChainIDNotIn applies the NotIn predicate on the "chain_id" field.
+func ChainIDNotIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldChainID), v...))
+	})
+}
+
+// ChainIDGT applies the GT predicate on the "chain_id" field.
+func ChainIDGT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDGTE applies the GTE predicate on the "chain_id" field.
+func ChainIDGTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDLT applies the LT predicate on the "chain_id" field.
+func ChainIDLT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDLTE applies the LTE predicate on the "chain_id" field.
+func ChainIDLTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDContains applies the Contains predicate on the "chain_id" field.
+func ChainIDContains(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDHasPrefix applies the HasPrefix predicate on the "chain_id" field.
+func ChainIDHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDHasSuffix applies the HasSuffix predicate on the "chain_id" field.
+func ChainIDHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDEqualFold applies the EqualFold predicate on the "chain_id" field.
+func ChainIDEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldChainID), v))
+	})
+}
+
+// ChainIDContainsFold applies the ContainsFold predicate on the "chain_id" field.
+func ChainIDContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldChainID), v))
+	})
+}
+
+// OwnerEQ applies the EQ predicate on the "owner" field.
+func OwnerEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerNEQ applies the NEQ predicate on the "owner" field.
+func OwnerNEQ(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerIn applies the In predicate on the "owner" field.
+func OwnerIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldOwner), v...))
+	})
+}
+
+// OwnerNotIn applies the NotIn predicate on the "owner" field.
+func OwnerNotIn(vs ...string) predicate.Transaction {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldOwner), v...))
+	})
+}
+
+// OwnerGT applies the GT predicate on the "owner" field.
+func OwnerGT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerGTE applies the GTE predicate on the "owner" field.
+func OwnerGTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerLT applies the LT predicate on the "owner" field.
+func OwnerLT(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerLTE applies the LTE predicate on the "owner" field.
+func OwnerLTE(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerContains applies the Contains predicate on the "owner" field.
+func OwnerContains(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerHasPrefix applies the HasPrefix predicate on the "owner" field.
+func OwnerHasPrefix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerHasSuffix applies the HasSuffix predicate on the "owner" field.
+func OwnerHasSuffix(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerEqualFold applies the EqualFold predicate on the "owner" field.
+func OwnerEqualFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldOwner), v))
+	})
+}
+
+// OwnerContainsFold applies the ContainsFold predicate on the "owner" field.
+func OwnerContainsFold(v string) predicate.Transaction {
+	return predicate.Transaction(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldOwner), v))
 	})
 }
 

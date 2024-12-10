@@ -25,10 +25,17 @@ var GetTransactionsReq = func(startTxID uint64) string {
 	return `{"query":"query{\n  getTransactions(startId: 0){\n  \ttransactionId\n    transactionType\n    poolId\n    owner\n    amount0In\n    amount1In\n    amount0Out\n    amount1Out\n    timestamp\n  }\n}"}`
 }
 
+type ChainAccountOwner struct {
+	ChainID string `json:"chainId,omitempty"`
+	Owner   string `json:"owner,omitempty"`
+}
+
 type Transaction struct {
 	PoolID          uint64  `json:"poolId,omitempty"`
 	TransactionID   uint64  `json:"transactionId,omitempty"`
 	TransactionType string  `json:"transactionType,omitempty"`
+	ChainID         string  `json:"chainId,omitempty"`
+	Owner           string  `json:"owner,omitempty"`
 	AmountZeroIn    float64 `json:"amount0In,omitempty"`
 	AmountOneIn     float64 `json:"amount1In,omitempty"`
 	AmountZeroOut   float64 `json:"amount0Out,omitempty"`
@@ -37,14 +44,15 @@ type Transaction struct {
 }
 
 type _Transaction struct {
-	PoolID          uint64 `json:"poolId,omitempty"`
-	TransactionID   uint64 `json:"transactionId,omitempty"`
-	TransactionType string `json:"transactionType,omitempty"`
-	AmountZeroIn    string `json:"amount0In,omitempty"`
-	AmountOneIn     string `json:"amount1In,omitempty"`
-	AmountZeroOut   string `json:"amount0Out,omitempty"`
-	AmountOneOut    string `json:"amount1Out,omitempty"`
-	Timestamp       uint64 `json:"timestamp,omitempty"`
+	PoolID          uint64            `json:"poolId,omitempty"`
+	TransactionID   uint64            `json:"transactionId,omitempty"`
+	TransactionType string            `json:"transactionType,omitempty"`
+	Owner           ChainAccountOwner `json:"owner,omitempty"`
+	AmountZeroIn    string            `json:"amount0In,omitempty"`
+	AmountOneIn     string            `json:"amount1In,omitempty"`
+	AmountZeroOut   string            `json:"amount0Out,omitempty"`
+	AmountOneOut    string            `json:"amount1Out,omitempty"`
+	Timestamp       uint64            `json:"timestamp,omitempty"`
 }
 
 type GetTransactions struct {

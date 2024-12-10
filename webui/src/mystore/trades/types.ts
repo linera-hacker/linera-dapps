@@ -9,6 +9,7 @@ export interface Transaction {
   PoolID: number;
   TransactionID: number;
   TransactionType: string;
+  ChainID: string;
   Owner: string;
   AmountZeroIn: number;
   AmountOneIn: number;
