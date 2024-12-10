@@ -27,8 +27,8 @@ options="N:n:"
 NETWORK_ID=1
 NETWORK_TYPE=devnet
 
-blob_gateway_creation_chain_id="01745e6b1b2335e6fea9034392768a0647642c9959ee95ad70fbb17f49ba1032"
-blob_gateway_app_id="a92fdfd16a99180b96f3b37e8d7ac696b61eb71c64e8e80ebec90ff7b823a23800c8e22a15a47dbaef7d5aa12eebef3a00ef0a4cf61a2614ef592145f5bba59601745e6b1b2335e6fea9034392768a0647642c9959ee95ad70fbb17f49ba10320d0000000000000000000000"
+blob_gateway_creation_chain_id="72da713f3122fa3f0451ce959f3af3f92fc8f7100f10e38aa504244389f21efb"
+blob_gateway_app_id="a92fdfd16a99180b96f3b37e8d7ac696b61eb71c64e8e80ebec90ff7b823a23800c8e22a15a47dbaef7d5aa12eebef3a00ef0a4cf61a2614ef592145f5bba59672da713f3122fa3f0451ce959f3af3f92fc8f7100f10e38aa504244389f21efb0d0000000000000000000000"
 
 app_logo_path='./assets/HackerLogoDark.png'
 
@@ -628,35 +628,35 @@ sed -i "s/app-id=.*/app-id='$swap_appid'/g" service/kline/config/config.toml
 
 linenumber=`grep -n "const defaultSwapAppId" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $swap_appid'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$swap_appid'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultSwapCreatorChain" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $swap_creation_chain'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$swap_creation_chain'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultWLineraAppId" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $erc20_2_appid'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$erc20_2_appid'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultWLineraCreatorChain" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $wlinera_creation_chain'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$wlinera_creation_chain'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultAMSAppId" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $ams_appid'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$ams_appid'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultAMSCreatorChain" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $ams_creation_chain'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$ams_creation_chain'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultBlobGatewayAppId" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $blob_gateway_app_id'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$blob_gateway_app_id'/" ../linera-wallet/src/model/db/model.ts
 
 linenumber=`grep -n "const defaultBlobGatewayCreatorChain" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
-sed -i "${targetlinenumber}s/.*/'  $blob_gateway_creation_chain_id'/" ../linera-wallet/src/model/db/model.ts
+sed -i "${targetlinenumber}s/.*/'$blob_gateway_creation_chain_id'/" ../linera-wallet/src/model/db/model.ts
 
 trap cleanup INT
 read -p "  Press any key to exit"
