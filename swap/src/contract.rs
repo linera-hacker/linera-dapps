@@ -194,13 +194,19 @@ impl ApplicationContract {
         Ok(())
     }
 
-    fn publish_message(&mut self, message: SwapMessage) {
+    async fn publish_message(&mut self, _message: SwapMessage) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
         let dest = Destination::Subscribers(ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()));
+        let state = self
+            .state
+            .to_subscriber_sync_state()
+            .await
+            .expect("Failed sync state");
+        let origin = message_owner(&mut self.runtime);
         self.runtime
-            .prepare_message(message)
+            .prepare_message(SwapMessage::SubscriberSync { origin, state })
             .with_authentication()
             .send_to(dest);
     }
@@ -211,7 +217,8 @@ impl ApplicationContract {
         state: SubscriberSyncState,
     ) -> Result<(), SwapError> {
         self.state.from_subscriber_sync_state(state.clone()).await?;
-        self.publish_message(SwapMessage::SubscriberSync { origin, state });
+        self.publish_message(SwapMessage::SubscriberSync { origin, state })
+            .await;
         Ok(())
     }
 
@@ -275,7 +282,7 @@ impl ApplicationContract {
             .await?
         {
             Some((msg, true)) => {
-                self.publish_message(SwapMessage::PoolMessage(msg));
+                self.publish_message(SwapMessage::PoolMessage(msg)).await;
             }
             _ => {}
         }
@@ -309,7 +316,7 @@ impl ApplicationContract {
             .await?
         {
             Some((msg, true)) => {
-                self.publish_message(SwapMessage::RouterMessage(msg));
+                self.publish_message(SwapMessage::RouterMessage(msg)).await;
             }
             _ => {}
         }

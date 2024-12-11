@@ -6,8 +6,8 @@ use std::str::FromStr;
 
 use linera_sdk::{
     base::{
-        Account, AccountOwner, Amount, ApplicationId, ChannelName, Destination, Owner,
-        WithContractAbi, CryptoHash
+        Account, AccountOwner, Amount, ApplicationId, ChannelName, CryptoHash, Destination, Owner,
+        WithContractAbi,
     },
     views::{RootView, View},
     Contract, ContractRuntime,
@@ -19,6 +19,7 @@ use spec::{
     account::ChainAccountOwner,
     ams::{AMSApplicationAbi, AMSOperation, Metadata},
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
+    blob_gateway::{BlobDataType, BlobGatewayApplicationAbi, BlobOperation},
     erc20::{
         ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument,
         SubscriberSyncState, TokenMetadata,
@@ -27,7 +28,6 @@ use spec::{
         abi::{SwapApplicationAbi, SwapOperation, SwapResponse},
         router::{RouterOperation, RouterResponse},
     },
-    blob_gateway::{BlobGatewayApplicationAbi, BlobOperation, BlobDataType}
 };
 
 pub struct ApplicationContract {
@@ -73,7 +73,8 @@ impl Contract for ApplicationContract {
             .await
             .expect("Invalid metadata");
 
-        let logo_hash = CryptoHash::from_str(token_metadata.logo.as_str()).expect("Invalid logo hash");
+        let logo_hash =
+            CryptoHash::from_str(token_metadata.logo.as_str()).expect("Invalid logo hash");
         match argument.blob_gateway_application_id {
             Some(application_id) => {
                 self.register_blob_gateway(application_id, logo_hash);
@@ -481,13 +482,20 @@ impl ApplicationContract {
         Ok(())
     }
 
-    fn publish_message(&mut self, message: ERC20Message) {
+    async fn publish_message(&mut self, _message: ERC20Message) {
         if self.runtime.chain_id() != self.runtime.application_creator_chain_id() {
             return;
         }
         let dest = Destination::Subscribers(ChannelName::from(CREATOR_CHAIN_CHANNEL.to_vec()));
+        // Just sync state here to avoid duplicate execution of message
+        let state = self
+            .state
+            .to_subscriber_sync_state()
+            .await
+            .expect("Failed sync state");
+        let origin = self.message_owner();
         self.runtime
-            .prepare_message(message)
+            .prepare_message(ERC20Message::SubscriberSync { origin, state })
             .with_authentication()
             .send_to(dest);
     }
@@ -501,7 +509,8 @@ impl ApplicationContract {
         if origin.chain_id != self.runtime.chain_id() {
             self.state.transfer(origin, amount, to.clone()).await?;
         }
-        self.publish_message(ERC20Message::Transfer { origin, to, amount });
+        self.publish_message(ERC20Message::Transfer { origin, to, amount })
+            .await;
         Ok(())
     }
 
@@ -525,7 +534,8 @@ impl ApplicationContract {
             amount,
             to,
             allowance_owner,
-        });
+        })
+        .await;
         Ok(())
     }
 
@@ -543,7 +553,8 @@ impl ApplicationContract {
             origin,
             spender,
             value,
-        });
+        })
+        .await;
         Ok(())
     }
 
@@ -556,7 +567,8 @@ impl ApplicationContract {
 
         self.state.transfer_ownership(owner, new_owner).await?;
 
-        self.publish_message(ERC20Message::TransferOwnership { origin, new_owner });
+        self.publish_message(ERC20Message::TransferOwnership { origin, new_owner })
+            .await;
         Ok(())
     }
 
@@ -576,7 +588,8 @@ impl ApplicationContract {
             origin,
             to,
             cur_amount,
-        });
+        })
+        .await;
         Ok(())
     }
 

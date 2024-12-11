@@ -1,11 +1,10 @@
-use async_graphql::{ Enum, Request, Response};
+use async_graphql::{Enum, Request, Response};
 use linera_sdk::{
-  abi::{ContractAbi, ServiceAbi},
-  base::CryptoHash,
-  graphql::GraphQLMutationRoot,
+    abi::{ContractAbi, ServiceAbi},
+    base::CryptoHash,
+    graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
-
 
 #[derive(Debug, Deserialize, Serialize, Clone, Eq, PartialEq, Enum, Copy)]
 pub enum BlobDataType {
@@ -38,15 +37,13 @@ pub enum BlobMessage {
 pub struct BlobGatewayApplicationAbi;
 
 impl ContractAbi for BlobGatewayApplicationAbi {
-  type Operation = BlobOperation;
-  type Response = BlobGatewayResponse;
+    type Operation = BlobOperation;
+    type Response = BlobGatewayResponse;
 }
 
 impl ServiceAbi for BlobGatewayApplicationAbi {
-  type Query = Request;
-  type QueryResponse = Response;
+    type Query = Request;
+    type QueryResponse = Response;
 }
 
-pub trait BlobQueryRoot {
-
-}
+pub trait BlobQueryRoot {}
