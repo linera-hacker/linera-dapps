@@ -143,9 +143,6 @@ impl SwapApplicationState {
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), StateError> {
-        if *self.subscribed_creator_chain.get() {
-            return Ok(());
-        }
         self.pool_id.set(state.pool_id);
         self.wlinera_application_id
             .set(state.wlinera_application_id);

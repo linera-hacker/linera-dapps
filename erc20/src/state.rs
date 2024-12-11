@@ -351,9 +351,6 @@ impl Application {
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), ERC20Error> {
-        if *self.subscribed_creator_chain.get() {
-            return Ok(());
-        }
         self.total_supply.set(state.total_supply);
         for (key, value) in &state.balances {
             self.balances.insert(key, *value)?;
