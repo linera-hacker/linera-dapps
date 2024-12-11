@@ -597,10 +597,6 @@ impl ApplicationContract {
         &mut self,
         state: SubscriberSyncState,
     ) -> Result<(), ERC20Error> {
-        if *self.state.total_supply.get() > Amount::ZERO {
-            log::warn!("Stale subscriber state on {}", self.runtime.chain_id());
-            return Ok(());
-        }
         self.state.from_subscriber_sync_state(state).await
     }
 }
