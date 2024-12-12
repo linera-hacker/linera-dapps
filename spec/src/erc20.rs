@@ -1,38 +1,106 @@
-use crate::account::ChainAccountOwner;
-use crate::base::{BaseMessage, BaseOperation};
-use async_graphql::{scalar, Context, Error, Request, Response};
+use crate::{
+    account::ChainAccountOwner,
+    base::{BaseMessage, BaseOperation},
+};
+use async_graphql::scalar;
+use async_graphql::{Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
-    base::Amount,
+    base::{Amount, ApplicationId},
     graphql::GraphQLMutationRoot,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+#[derive(Debug, Deserialize, Serialize, Clone)]
+pub struct ERC20Parameters {
+    pub initial_balances: HashMap<String, Amount>,
+    pub swap_application_id: Option<ApplicationId>,
+    pub token_metadata: Option<TokenMetadata>,
+}
+
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct InstantiationArgument {
     pub initial_supply: Amount,
-    pub owner: ChainAccountOwner,
     pub name: String,
     pub symbol: String,
     pub decimals: u8,
+    pub initial_currency: Option<Amount>,
+    pub fixed_currency: Option<bool>,
+    pub fee_percent: Option<Amount>,
+    pub ams_application_id: Option<ApplicationId>,
+    pub blob_gateway_application_id: Option<ApplicationId>,
+}
+
+#[derive(Default, Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
+pub struct TokenMetadata {
+    pub logo: String,
+    pub description: String,
+    pub twitter: Option<String>,
+    pub telegram: Option<String>,
+    pub discord: Option<String>,
+    pub website: Option<String>,
+    pub github: Option<String>,
+    pub mintable: bool,
+}
+
+scalar!(TokenMetadata);
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize, SimpleObject)]
+pub struct ChainAccountOwnerBalance {
+    pub owner: ChainAccountOwner,
+    pub balance: Amount,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
+pub struct SubscriberSyncState {
+    pub total_supply: Amount,
+    pub balances: HashMap<ChainAccountOwner, Amount>,
+    pub allowances: HashMap<ChainAccountOwner, HashMap<ChainAccountOwner, Amount>>,
+    pub locked_allowances: HashMap<ChainAccountOwner, Amount>,
+    pub name: String,
+    pub symbol: String,
+    pub decimals: u8,
+    pub initial_currency: Amount,
+    pub fixed_currency: bool,
+    pub fee_percent: Amount,
+    pub owner: Option<ChainAccountOwner>,
+    pub owner_balance: Amount,
+    pub token_metadata: Option<TokenMetadata>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 pub enum ERC20Message {
     BaseMessage(BaseMessage),
     Transfer {
+        origin: ChainAccountOwner,
         to: ChainAccountOwner,
         amount: Amount,
     },
     TransferFrom {
+        origin: ChainAccountOwner,
         from: ChainAccountOwner,
         amount: Amount,
         to: ChainAccountOwner,
+        allowance_owner: ChainAccountOwner,
     },
     Approve {
+        origin: ChainAccountOwner,
         spender: ChainAccountOwner,
         value: Amount,
+    },
+    Mint {
+        origin: ChainAccountOwner,
+        to: ChainAccountOwner,
+        cur_amount: Amount,
+    },
+    TransferOwnership {
+        origin: ChainAccountOwner,
+        new_owner: ChainAccountOwner,
+    },
+    SubscriberSync {
+        origin: ChainAccountOwner,
+        state: SubscriberSyncState,
     },
 }
 
@@ -55,6 +123,14 @@ pub enum ERC20Operation {
     BalanceOf {
         owner: ChainAccountOwner,
     },
+    Mint {
+        to: Option<ChainAccountOwner>,
+        amount: Amount,
+    },
+    TransferOwnership {
+        new_owner: ChainAccountOwner,
+    },
+    OwnerOf,
 }
 
 #[derive(Debug, Deserialize, Serialize, Default)]
@@ -62,6 +138,7 @@ pub enum ERC20Response {
     #[default]
     Ok,
     Balance(Amount),
+    Owner(ChainAccountOwner),
 }
 
 pub struct ERC20ApplicationAbi;
@@ -109,6 +186,22 @@ pub trait ERC20QueryRoot {
         owner: ChainAccountOwner,
         spender: ChainAccountOwner,
     ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
+
+    fn token_metadata(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Option<TokenMetadata>, Error>> + Send;
+
+    fn balance_top_list(
+        &self,
+        ctx: &Context<'_>,
+        limit: usize,
+    ) -> impl std::future::Future<Output = Result<Vec<ChainAccountOwnerBalance>, Error>> + Send;
+
+    fn subscribed_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<bool, Error>> + Send;
 }
 
 pub trait ERC20MutationRoot {
@@ -133,15 +226,25 @@ pub trait ERC20MutationRoot {
         spender: ChainAccountOwner,
         value: Amount,
     ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn subscribe_creator_chain(
+        &self,
+        ctx: &Context<'_>,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
+
+    fn mint(
+        &self,
+        ctx: &Context<'_>,
+        to: Option<ChainAccountOwner>,
+        amount: Amount,
+    ) -> impl std::future::Future<Output = Result<Vec<u8>, Error>> + Send;
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[derive(Debug, Clone, Deserialize, Serialize, Eq, PartialEq, Default, SimpleObject)]
 pub struct ERC20 {
     pub total_supply: Amount,
     pub balances: HashMap<ChainAccountOwner, Amount>,
 }
-
-scalar!(ERC20);
 
 impl ERC20 {
     pub fn _mint(&mut self, to: ChainAccountOwner, amount: Amount) {
@@ -152,6 +255,18 @@ impl ERC20 {
                 .get(&to)
                 .unwrap_or(&Amount::ZERO)
                 .saturating_add(amount),
+        );
+    }
+
+    // Liquidity to be burn should be returned to application already
+    pub fn _burn(&mut self, from: ChainAccountOwner, liquidity: Amount) {
+        self.total_supply = self.total_supply.saturating_sub(liquidity);
+        self.balances.insert(
+            from.clone(),
+            self.balances
+                .get(&from)
+                .unwrap_or(&Amount::ZERO)
+                .saturating_sub(liquidity),
         );
     }
 }

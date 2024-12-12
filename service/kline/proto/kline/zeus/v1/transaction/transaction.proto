@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package kline.v1.transaction;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction";
+import "google/api/annotations.proto";
+import "kline/kline.proto";
+
+service Manager {
+  rpc CreateTransaction(CreateTransactionRequest) returns (CreateTransactionResponse) {}
+  rpc UpdateTransaction(UpdateTransactionRequest) returns (UpdateTransactionResponse) {}
+  rpc GetTransaction(GetTransactionRequest) returns (GetTransactionResponse) {}
+  rpc GetTransactions(GetTransactionsRequest) returns (GetTransactionsResponse) {}
+  rpc GetTransactionsForLine(GetTransactionsForLineRequest)
+  returns (GetTransactionsForLineResponse) {
+  option (google.api.http) = {
+    post : "/v1/get/transactions/for/line"
+    body : "*"
+  };
+  }
+  rpc ExistTransaction(ExistTransactionRequest) returns (ExistTransactionResponse) {}
+  rpc ExistTransactionConds(ExistTransactionCondsRequest)
+      returns (ExistTransactionCondsResponse) {}
+  rpc DeleteTransaction(DeleteTransactionRequest) returns (DeleteTransactionResponse) {}
+}
+
+message TransactionReq {
+  optional uint32 ID = 10;
+  optional uint64 PoolID = 20;
+  optional uint64 TransactionID = 30;
+  optional string TransactionType = 40;
+  optional string ChainID = 50;
+  optional string Owner = 51;
+  optional double AmountZeroIn = 60;
+  optional double AmountOneIn = 70;
+  optional double AmountZeroOut = 80;
+  optional double AmountOneOut = 90;
+  optional uint32 Timestamp = 100;
+}
+
+message Transaction {
+  // @inject_tag: sql:"id"
+  uint32 ID = 10;
+  // @inject_tag: sql:"pool_id"
+  uint64 PoolID = 20;
+  // @inject_tag: sql:"transaction_id"
+  uint64 TransactionID = 30;
+  // @inject_tag: sql:"transaction_type"
+  string TransactionType = 40;
+  // @inject_tag: sql:"chain_id"
+  string ChainID = 50;
+  // @inject_tag: sql:"owner"
+  string Owner = 51;
+  // @inject_tag: sql:"amount_zero_in"
+  double AmountZeroIn = 60;
+  // @inject_tag: sql:"amount_one_in"
+  double AmountOneIn = 70;
+  // @inject_tag: sql:"amount_zero_out"
+  double AmountZeroOut = 80;
+  // @inject_tag: sql:"amount_one_out"
+  double AmountOneOut = 90;
+  // @inject_tag: sql:"timestamp"
+  uint32 Timestamp = 100;
+  // @inject_tag: sql:"created_at"
+  uint32 CreatedAt = 190;
+  // @inject_tag: sql:"updated_at"
+  uint32 UpdatedAt = 200;
+}
+
+message Conds {
+  kline.Uint32Val ID = 10;
+  kline.Uint64Val PoolID = 20;
+  kline.Uint64Val TransactionID = 30;
+  kline.StringVal TransactionType = 40;
+  kline.Uint32Val Timestamp = 60;
+  kline.Int32SliceVal IDs = 190;
+}
+
+message CreateTransactionRequest { TransactionReq Info = 10; }
+message CreateTransactionResponse { Transaction Info = 10; }
+
+message GetTransactionRequest { uint32 ID = 10; }
+message GetTransactionResponse { Transaction Info = 10; }
+
+message GetTransactionsRequest {
+  Conds Conds = 10;
+  int32 Offset = 20;
+  int32 Limit = 30;
+}
+
+message GetTransactionsResponse {
+  repeated Transaction Infos = 10;
+  uint32 Total = 20;
+}
+
+message GetTransactionsForLineRequest {
+  uint64 OriginalTxID = 10;
+  uint64 PoolID = 20;
+  int32 Offset = 30;
+  int32 Limit = 40;
+}
+
+message GetTransactionsForLineResponse {
+  uint64 OriginalTxID = 10;
+  uint64 PoolID = 20;
+  int32 Offset = 30;
+  int32 Limit = 40;
+  repeated Transaction Transactions = 50;
+  uint32 Total = 60;
+}
+
+message UpdateTransactionRequest { TransactionReq Info = 10; }
+message UpdateTransactionResponse { Transaction Info = 10; }
+
+message ExistTransactionRequest { uint32 ID = 10; }
+message ExistTransactionResponse { bool Exist = 10; }
+
+message ExistTransactionCondsRequest { Conds Conds = 10; }
+message ExistTransactionCondsResponse { bool Exist = 10; }
+
+message DeleteTransactionRequest { uint32 ID = 10; }
+message DeleteTransactionResponse { Transaction Info = 10; }

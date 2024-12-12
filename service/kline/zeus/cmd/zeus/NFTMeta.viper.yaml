@@ -1,0 +1,7 @@
+---
+config:
+  hostname: "nft-meta.npool.top"
+  http_port: 30100
+  grpc_port: 30101
+  prometheus_port: 30102
+  logdir: "./"

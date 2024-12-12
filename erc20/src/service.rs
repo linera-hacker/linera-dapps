@@ -2,7 +2,7 @@
 
 mod state;
 
-use self::state::{AllowanceKey, Application};
+use self::state::Application;
 use async_graphql::{EmptySubscription, Object, Schema};
 use linera_sdk::{
     base::{Amount, WithServiceAbi},
@@ -11,7 +11,10 @@ use linera_sdk::{
 };
 use spec::{
     account::ChainAccountOwner,
-    erc20::{ERC20MutationRoot, ERC20Operation, ERC20QueryRoot},
+    base::BaseOperation,
+    erc20::{
+        ChainAccountOwnerBalance, ERC20MutationRoot, ERC20Operation, ERC20QueryRoot, TokenMetadata,
+    },
 };
 use std::sync::Arc;
 
@@ -73,20 +76,42 @@ impl ERC20QueryRoot for QueryRoot {
     }
 
     async fn balance_of(&self, owner: ChainAccountOwner) -> Amount {
-        match self.state.balances.get(&owner).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        }
+        self.state.balance_of(owner).await.unwrap_or(Amount::ZERO)
     }
 
     async fn allowance(&self, owner: ChainAccountOwner, spender: ChainAccountOwner) -> Amount {
-        let allowance_key = AllowanceKey::new(owner, spender);
-        match self.state.allowances.get(&allowance_key).await {
-            Ok(Some(balance)) => balance,
-            Ok(None) => Amount::ZERO,
-            Err(_) => Amount::ZERO,
-        }
+        self.state
+            .owner_allowance(owner, spender)
+            .await
+            .unwrap_or(Amount::ZERO)
+    }
+
+    async fn token_metadata(&self) -> Option<TokenMetadata> {
+        let token_metadata = self.state.token_metadata.get().clone();
+        token_metadata
+    }
+
+    async fn balance_top_list(&self, limit: usize) -> Vec<ChainAccountOwnerBalance> {
+        let mut balances_vec: Vec<ChainAccountOwnerBalance> = Vec::new();
+
+        self.state
+            .balances
+            .for_each_index_value(|chain_owner, value| {
+                balances_vec.push(ChainAccountOwnerBalance {
+                    owner: chain_owner,
+                    balance: value,
+                });
+                Ok(())
+            })
+            .await
+            .expect("Failed get applications");
+        balances_vec.sort_by(|a, b| b.balance.partial_cmp(&a.balance).unwrap());
+
+        balances_vec.into_iter().take(limit).collect()
+    }
+
+    async fn subscribed_creator_chain(&self) -> bool {
+        *self.state.subscribed_creator_chain.get()
     }
 }
 
@@ -109,5 +134,16 @@ impl ERC20MutationRoot for MutationRoot {
 
     async fn approve(&self, spender: ChainAccountOwner, value: Amount) -> Vec<u8> {
         bcs::to_bytes(&ERC20Operation::Approve { spender, value }).unwrap()
+    }
+
+    async fn subscribe_creator_chain(&self) -> Vec<u8> {
+        bcs::to_bytes(&ERC20Operation::BaseOperation(
+            BaseOperation::SubscribeCreatorChain,
+        ))
+        .unwrap()
+    }
+
+    async fn mint(&self, to: Option<ChainAccountOwner>, amount: Amount) -> Vec<u8> {
+        bcs::to_bytes(&ERC20Operation::Mint { to, amount }).unwrap()
     }
 }

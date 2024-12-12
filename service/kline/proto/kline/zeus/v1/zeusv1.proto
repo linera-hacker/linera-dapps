@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package zeus.v1;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1";
+
+import "google/api/annotations.proto";
+import "google/protobuf/empty.proto";
+import "kline/kline.proto";
+
+service Manager {
+  rpc Version(google.protobuf.Empty) returns (kline.VersionResponse) {
+    option (google.api.http) = {
+      post : "/v1/version"
+      body : "*"
+    };
+  }
+}

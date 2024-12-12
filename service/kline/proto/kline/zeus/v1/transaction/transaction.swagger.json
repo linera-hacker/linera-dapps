@@ -1,0 +1,385 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kline/zeus/v1/transaction/transaction.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Manager"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/get/transactions/for/line": {
+      "post": {
+        "operationId": "Manager_GetTransactionsForLine",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/transactionGetTransactionsForLineResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/transactionGetTransactionsForLineRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "klineInt32SliceVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "klineStringVal": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string"
+        }
+      }
+    },
+    "klineUint32Val": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "klineUint64Val": {
+      "type": "object",
+      "properties": {
+        "Op": {
+          "type": "string"
+        },
+        "Value": {
+          "type": "string",
+          "format": "uint64"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "transactionConds": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "PoolID": {
+          "$ref": "#/definitions/klineUint64Val"
+        },
+        "TransactionID": {
+          "$ref": "#/definitions/klineUint64Val"
+        },
+        "TransactionType": {
+          "$ref": "#/definitions/klineStringVal"
+        },
+        "Timestamp": {
+          "$ref": "#/definitions/klineUint32Val"
+        },
+        "IDs": {
+          "$ref": "#/definitions/klineInt32SliceVal"
+        }
+      }
+    },
+    "transactionCreateTransactionResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/transactionTransaction"
+        }
+      }
+    },
+    "transactionDeleteTransactionResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/transactionTransaction"
+        }
+      }
+    },
+    "transactionExistTransactionCondsResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "transactionExistTransactionResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "transactionGetTransactionResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/transactionTransaction"
+        }
+      }
+    },
+    "transactionGetTransactionsForLineRequest": {
+      "type": "object",
+      "properties": {
+        "OriginalTxID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "Offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Limit": {
+          "type": "integer",
+          "format": "int32"
+        }
+      }
+    },
+    "transactionGetTransactionsForLineResponse": {
+      "type": "object",
+      "properties": {
+        "OriginalTxID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "Offset": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Limit": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "Transactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/transactionTransaction"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "transactionGetTransactionsResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/transactionTransaction"
+          }
+        },
+        "Total": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "transactionTransaction": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"id\""
+        },
+        "PoolID": {
+          "type": "string",
+          "format": "uint64",
+          "title": "@inject_tag: sql:\"pool_id\""
+        },
+        "TransactionID": {
+          "type": "string",
+          "format": "uint64",
+          "title": "@inject_tag: sql:\"transaction_id\""
+        },
+        "TransactionType": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"transaction_type\""
+        },
+        "ChainID": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"chain_id\""
+        },
+        "Owner": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"owner\""
+        },
+        "AmountZeroIn": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"amount_zero_in\""
+        },
+        "AmountOneIn": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"amount_one_in\""
+        },
+        "AmountZeroOut": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"amount_zero_out\""
+        },
+        "AmountOneOut": {
+          "type": "number",
+          "format": "double",
+          "title": "@inject_tag: sql:\"amount_one_out\""
+        },
+        "Timestamp": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"timestamp\""
+        },
+        "CreatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"created_at\""
+        },
+        "UpdatedAt": {
+          "type": "integer",
+          "format": "int64",
+          "title": "@inject_tag: sql:\"updated_at\""
+        }
+      }
+    },
+    "transactionTransactionReq": {
+      "type": "object",
+      "properties": {
+        "ID": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TransactionID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TransactionType": {
+          "type": "string"
+        },
+        "ChainID": {
+          "type": "string"
+        },
+        "Owner": {
+          "type": "string"
+        },
+        "AmountZeroIn": {
+          "type": "number",
+          "format": "double"
+        },
+        "AmountOneIn": {
+          "type": "number",
+          "format": "double"
+        },
+        "AmountZeroOut": {
+          "type": "number",
+          "format": "double"
+        },
+        "AmountOneOut": {
+          "type": "number",
+          "format": "double"
+        },
+        "Timestamp": {
+          "type": "integer",
+          "format": "int64"
+        }
+      }
+    },
+    "transactionUpdateTransactionResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/transactionTransaction"
+        }
+      }
+    }
+  }
+}

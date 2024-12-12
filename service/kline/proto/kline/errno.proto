@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package kline;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline";
+
+enum ERR {
+  OK = 0;
+
+  START = 10000;
+}

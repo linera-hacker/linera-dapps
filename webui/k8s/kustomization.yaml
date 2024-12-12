@@ -1,0 +1,6 @@
+commonLabels:
+  # app: webui-template
+
+resources:
+  - 01-webui-template.yaml
+  - 02-ingress.yaml

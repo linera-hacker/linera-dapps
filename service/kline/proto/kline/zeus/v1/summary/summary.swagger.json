@@ -1,0 +1,339 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "kline/zeus/v1/summary/summary.proto",
+    "version": "version not set"
+  },
+  "tags": [
+    {
+      "name": "Manager"
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/exit/token/by/symbol": {
+      "post": {
+        "operationId": "Manager_ExistToken",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/summaryExistTokenResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/summaryExistTokenRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/v1/get/one/day/volumn": {
+      "post": {
+        "operationId": "Manager_GetOneDayVolumn",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/summaryGetOneDayVolumnResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/summaryGetOneDayVolumnRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/v1/get/token/last/cond": {
+      "post": {
+        "operationId": "Manager_GetTokenLastCond",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/summaryGetTokenLastCondResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/summaryGetTokenLastCondRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    },
+    "/v1/get/token/last/conds": {
+      "post": {
+        "operationId": "Manager_GetTokenLastConds",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/summaryGetTokenLastCondsResponse"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/summaryGetTokenLastCondsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "Manager"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    },
+    "summaryExistTokenRequest": {
+      "type": "object",
+      "properties": {
+        "Symbol": {
+          "type": "string"
+        }
+      }
+    },
+    "summaryExistTokenResponse": {
+      "type": "object",
+      "properties": {
+        "Exist": {
+          "type": "boolean"
+        }
+      }
+    },
+    "summaryGetOneDayVolumnRequest": {
+      "type": "object"
+    },
+    "summaryGetOneDayVolumnResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/summaryTokenVolumn"
+          }
+        }
+      }
+    },
+    "summaryGetTokenLastCondRequest": {
+      "type": "object",
+      "properties": {
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TokenZeroAddress": {
+          "type": "string"
+        },
+        "TokenOneAddress": {
+          "type": "string"
+        }
+      }
+    },
+    "summaryGetTokenLastCondResponse": {
+      "type": "object",
+      "properties": {
+        "Info": {
+          "$ref": "#/definitions/summaryTokenLastCond"
+        }
+      }
+    },
+    "summaryGetTokenLastCondsRequest": {
+      "type": "object",
+      "properties": {
+        "PoolTokenConds": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/summaryPoolTokenCond"
+          }
+        }
+      }
+    },
+    "summaryGetTokenLastCondsResponse": {
+      "type": "object",
+      "properties": {
+        "Infos": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/summaryTokenLastCond"
+          }
+        }
+      }
+    },
+    "summaryPoolTokenCond": {
+      "type": "object",
+      "properties": {
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TokenZeroAddress": {
+          "type": "string"
+        },
+        "TokenOneAddress": {
+          "type": "string"
+        }
+      }
+    },
+    "summaryTokenLastCond": {
+      "type": "object",
+      "properties": {
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "TokenZeroAddress": {
+          "type": "string"
+        },
+        "TokenOneAddress": {
+          "type": "string"
+        },
+        "LastTxAt": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "LastTxZeroAmount": {
+          "type": "number",
+          "format": "double"
+        },
+        "LastTxOneAmount": {
+          "type": "number",
+          "format": "double"
+        },
+        "OneDayZeroAmountVolumn": {
+          "type": "number",
+          "format": "double"
+        },
+        "OneDayOneAmountVolumn": {
+          "type": "number",
+          "format": "double"
+        },
+        "NowPrice": {
+          "type": "number",
+          "format": "double"
+        },
+        "OneDayIncresePercent": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    },
+    "summaryTokenVolumn": {
+      "type": "object",
+      "properties": {
+        "PoolID": {
+          "type": "string",
+          "format": "uint64"
+        },
+        "Address": {
+          "type": "string"
+        },
+        "Name": {
+          "type": "string"
+        },
+        "Icon": {
+          "type": "string"
+        },
+        "Symbol": {
+          "type": "string"
+        },
+        "Amount": {
+          "type": "number",
+          "format": "double"
+        }
+      }
+    }
+  }
+}

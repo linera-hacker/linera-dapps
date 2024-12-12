@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package kline.v1.kprice;
+
+option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kprice";
+import "google/api/annotations.proto";
+import "kline/kline.proto";
+
+service Manager {
+  rpc CreateKPrice(CreateKPriceRequest) returns (CreateKPriceResponse) {}
+  rpc UpdateKPrice(UpdateKPriceRequest) returns (UpdateKPriceResponse) {}
+  rpc GetKPrice(GetKPriceRequest) returns (GetKPriceResponse) {}
+  rpc GetKPrices(GetKPricesRequest) returns (GetKPricesResponse) {}
+  rpc ExistKPrice(ExistKPriceRequest) returns (ExistKPriceResponse) {}
+  rpc ExistKPriceConds(ExistKPriceCondsRequest)
+      returns (ExistKPriceCondsResponse) {}
+  rpc DeleteKPrice(DeleteKPriceRequest) returns (DeleteKPriceResponse) {}
+}
+
+message KPriceReq {
+  optional uint32 ID = 10;
+  optional uint32 TokenPairID = 20;
+  optional double Price = 30;
+  optional uint32 Timestamp = 40;
+}
+
+message KPrice {
+  // @inject_tag: sql:"id"
+  uint32 ID = 10;
+  // @inject_tag: sql:"token_pair_id"
+  uint32 TokenPairID = 20;
+  // @inject_tag: sql:"price"
+  double Price = 30;
+  // @inject_tag: sql:"timestamp"
+  uint32 Timestamp = 40;
+  // @inject_tag: sql:"created_at"
+  uint32 CreatedAt = 190;
+  // @inject_tag: sql:"updated_at"
+  uint32 UpdatedAt = 200;
+}
+
+message Conds {
+  kline.Uint32Val ID = 10;
+  kline.Uint32Val TokenPairID = 20;
+  kline.Uint32Val Timestamp = 30;
+  kline.Int32SliceVal IDs = 190;
+}
+
+message CreateKPriceRequest { KPriceReq Info = 10; }
+message CreateKPriceResponse { KPrice Info = 10; }
+
+message GetKPriceRequest { uint32 ID = 10; }
+message GetKPriceResponse { KPrice Info = 10; }
+
+message GetKPricesRequest {
+  Conds Conds = 10;
+  int32 Offset = 20;
+  int32 Limit = 30;
+}
+
+message GetKPricesResponse {
+  repeated KPrice Infos = 10;
+  uint32 Total = 20;
+}
+
+message UpdateKPriceRequest { KPriceReq Info = 10; }
+message UpdateKPriceResponse { KPrice Info = 10; }
+
+message ExistKPriceRequest { uint32 ID = 10; }
+message ExistKPriceResponse { bool Exist = 10; }
+
+message ExistKPriceCondsRequest { Conds Conds = 10; }
+message ExistKPriceCondsResponse { bool Exist = 10; }
+
+message DeleteKPriceRequest { uint32 ID = 10; }
+message DeleteKPriceResponse { KPrice Info = 10; }
