@@ -12,7 +12,7 @@
     <q-space />
     <q-tabs
       v-model='tab'
-      class='text-black'
+      class='text-black horizontal-inner-x-margin-right'
       narrow-indicator
       dense indicator-color='red-6'
     >
