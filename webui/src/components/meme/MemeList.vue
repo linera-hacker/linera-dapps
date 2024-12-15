@@ -237,7 +237,7 @@ const loadTxData = () => {
     } as PoolTokenCond
     poolConds.push(poolTokenCond)
   }
-  userStore.getLastTranscations({
+  userStore.getLastTransactions({
     PoolTokenConds: poolConds
   }, (error: boolean, rows: LastTranscation[]) => {
     if (error) {

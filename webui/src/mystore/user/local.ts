@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { API, LastTranscation, GetLastTranscationRequest, GetLastTranscationResponse, GetLastTranscationsRequest, GetLastTranscationsResponse, ExistTokenRequest, ExistTokenResponse } from './types'
+import { API, LastTranscation, GetLastTranscationRequest, GetLastTranscationResponse, GetLastTransactionsRequest, GetLastTransactionsResponse, ExistTokenRequest, ExistTokenResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
 
@@ -32,9 +32,9 @@ export const useUserStore = defineStore('user', {
         }
       )
     },
-    getLastTransactions (req: GetLastTranscationsRequest, done?: (errors: boolean, rows: LastTranscation[]) => void) {
-      doActionWithError<unknown, GetLastTranscationsResponse>(
-        API.GetLastTranscations,
+    getLastTransactions (req: GetLastTransactionsRequest, done?: (errors: boolean, rows: LastTranscation[]) => void) {
+      doActionWithError<unknown, GetLastTransactionsResponse>(
+        API.GetLastTransactions,
         req,
         {
           Error: {
@@ -44,7 +44,7 @@ export const useUserStore = defineStore('user', {
             Type: NotifyType.Error
           }
         },
-        (resp: GetLastTranscationsResponse): void => {
+        (resp: GetLastTransactionsResponse): void => {
           done?.(false, resp.Infos)
         }, () => {
           done?.(true, [])
