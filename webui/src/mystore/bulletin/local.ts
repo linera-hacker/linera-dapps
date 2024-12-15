@@ -14,9 +14,8 @@ export const useBulletinStore = defineStore('useBulletinStore', {
         {},
         {
           Error: {
-            Title: 'get one day volumn',
-            Message: 'failed to get one day volumn',
-            Description: 'please retry',
+            Title: 'Get volume',
+            Message: 'Failed get one day volume',
             Popup: true,
             Type: NotifyType.Error
           }

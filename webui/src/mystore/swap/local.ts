@@ -18,9 +18,8 @@ export const useSwapStore = defineStore('useSwapStore', {
         {},
         {
           Error: {
-            Title: 'get tokens',
-            Message: 'failed to get tokens',
-            Description: 'please retry',
+            Title: 'Get tokens',
+            Message: 'Failed get tokens',
             Popup: true,
             Type: NotifyType.Error
           }
@@ -44,9 +43,8 @@ export const useSwapStore = defineStore('useSwapStore', {
         { Conds: { TokenZeroID: { Op: 'eq', Value: this.SelectedToken.ID } } },
         {
           Error: {
-            Title: 'get token pairs',
-            Message: 'failed to get token pairs',
-            Description: 'please retry',
+            Title: 'Get token pairs',
+            Message: 'Failed get token pairs',
             Popup: true,
             Type: NotifyType.Error
           }
@@ -66,9 +64,8 @@ export const useSwapStore = defineStore('useSwapStore', {
         {},
         {
           Error: {
-            Title: 'get kpoint types',
-            Message: 'failed to get kpoint types',
-            Description: 'please retry',
+            Title: 'Get kpoint types',
+            Message: 'Failed get kpoint types',
             Popup: true,
             Type: NotifyType.Error
           }

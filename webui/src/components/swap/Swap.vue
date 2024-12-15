@@ -340,6 +340,7 @@ const validateAmount = (): boolean => {
 }
 
 const SwapAmount = async () => {
+  if (!userStore.account) return
   if (!swapStore.SelectedToken) {
     return
   }
@@ -388,17 +389,15 @@ const SwapAmount = async () => {
         outAmount.value
       ).then().catch((e) => {
         notificationStore.pushNotification({
-          Title: 'swap amount',
-          Message: e as string,
-          Description: 'please retry'
+          Title: 'Swal',
+          Message: e as string
         })
       })
     }, 100)
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 }
@@ -424,9 +423,8 @@ watch(() => swapStore.SelectedToken, (selected) => {
     })
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 })
@@ -451,9 +449,8 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
     })
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 })
@@ -520,9 +517,8 @@ const refreshBalance = () => {
     }
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 }

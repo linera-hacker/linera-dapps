@@ -19,9 +19,8 @@ export const useUserStore = defineStore('user', {
         req,
         {
           Error: {
-            Title: 'get lastTranscation',
-            Message: 'failed to get lastTranscation',
-            Description: 'please retry',
+            Title: 'Get transaction',
+            Message: 'Failed get transaction',
             Popup: true,
             Type: NotifyType.Error
           }
@@ -33,15 +32,14 @@ export const useUserStore = defineStore('user', {
         }
       )
     },
-    getLastTranscations (req: GetLastTranscationsRequest, done?: (errors: boolean, rows: LastTranscation[]) => void) {
+    getLastTransactions (req: GetLastTranscationsRequest, done?: (errors: boolean, rows: LastTranscation[]) => void) {
       doActionWithError<unknown, GetLastTranscationsResponse>(
         API.GetLastTranscations,
         req,
         {
           Error: {
-            Title: 'get lastTranscations',
-            Message: 'failed to get lastTranscations',
-            Description: 'please retry',
+            Title: 'Get transactions',
+            Message: 'Failed get transactions',
             Popup: true,
             Type: NotifyType.Error
           }
@@ -59,9 +57,8 @@ export const useUserStore = defineStore('user', {
         req,
         {
           Error: {
-            Title: 'check exist token',
-            Message: 'failed to check exist token',
-            Description: 'please retry',
+            Title: 'Exists token',
+            Message: 'Failed check token exists',
             Popup: true,
             Type: NotifyType.Error
           }

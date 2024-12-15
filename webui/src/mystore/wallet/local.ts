@@ -16,9 +16,8 @@ export const useWalletStore = defineStore('useWalletStore', {
         req,
         {
           Error: {
-            Title: 'get balance',
-            Message: 'failed to get balance',
-            Description: 'please retry',
+            Title: 'Get balance',
+            Message: 'Failed get balance',
             Popup: true,
             Type: NotifyType.Error
           }
@@ -39,9 +38,8 @@ export const useWalletStore = defineStore('useWalletStore', {
         req,
         {
           Error: {
-            Title: 'calculate swap amount',
-            Message: 'failed to calculate swap amount',
-            Description: 'please retry',
+            Title: 'Calculate swap amount',
+            Message: 'Failed calculate swap amount',
             Popup: true,
             Type: NotifyType.Error
           }
