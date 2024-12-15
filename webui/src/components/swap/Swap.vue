@@ -409,6 +409,9 @@ watch(() => swapStore.SelectedToken, (selected) => {
     outAmount.value = 0
     return
   }
+  if (!userStore.account) {
+    return
+  }
 
   CalSwapInAmount(outAmount.value, undefined)
 
@@ -494,6 +497,9 @@ const subscriptionHandler = (msg: unknown) => {
 }
 
 const refreshBalance = () => {
+  if (!userStore.account) {
+    return
+  }
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     if (swapStore.SelectedToken !== null) {
       walletStore.getBalance(swapStore.SelectedToken.Address, userStore.chainId, v, (error, balance) => {

@@ -39,6 +39,12 @@ export default {
   MSG_YOU_ARE_BUYING: "You're Buying",
   MSG_SWAP: 'Swap',
   MSG_LIQUIDITY: 'Liquidity',
-  MSG_ADD_LIQUIDITY: 'Add_Liquidity',
-  MSG_REMOVE_LIQUIDITY: 'Remove_Liquidity'
+  MSG_ADD_LIQUIDITY: 'Add Liquidity',
+  MSG_REMOVE_LIQUIDITY: 'Remove Liquidity',
+  MSG_ID: 'ID',
+  MSG_BLOB_HASH: 'Blob hash',
+  MSG_DATATYPE: 'Data type',
+  MSG_CREATOR: 'Creator',
+  MSG_CREATED_AT: 'Created at',
+  MSG_THUMBNAIL: 'Thumbnail'
 }

@@ -2,14 +2,19 @@
   <div class='banner row'>
     <q-space />
     <div class='content flex items-center'>
-      <div class='flex items-center justify-center'>
-        <div class='slogan text-grey-9'>
+      <div class='flex items-center justify-center full-width'>
+        <div class='slogan text-grey-9 full-width text-center'>
           Pump with <span class='text-red-6 text-bold'>Linera</span> <strong class='text-black'>Microchain</strong>
         </div>
-        <div class='sub-slogan text-black'>Unleash unlimited power of next generation real-time & reactive web3 infrastructure</div>
+        <div class='sub-slogan text-black full-width text-center'>
+          Unleash unlimited power of next generation real-time & reactive web3 infrastructure
+        </div>
         <div class='row full-width vertical-inner-y-margin'>
           <q-space />
-          <q-btn rounded label='create new meme token now' class='bg-black text-white commit-btn' flat @click='onCreateMemeTokenClick' />
+          <q-btn
+            rounded label='create new meme token now' class='bg-black text-white commit-btn' flat
+            @click='onCreateMemeTokenClick'
+          />
           <q-space />
         </div>
       </div>
