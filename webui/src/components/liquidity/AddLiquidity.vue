@@ -291,6 +291,7 @@ const subscribeApplicationCreatorChain = async (applicationId: string) => {
 }
 
 const onAddLiquidity = async () => {
+  if (!userStore.account) return
   if (!swapStore.SelectedToken) {
     return
   }
@@ -337,16 +338,14 @@ const onAddLiquidity = async () => {
       tokenOneAmount.value
     ).then().catch((e) => {
       notificationStore.pushNotification({
-        Title: 'add Liquidity',
-        Message: e as string,
-        Description: 'please retry'
+        Title: 'Add liquidity',
+        Message: e as string
       })
     })
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 }
@@ -358,6 +357,8 @@ watch(() => swapStore.SelectedToken, (selected) => {
     return
   }
 
+  if (!userStore.account) return
+
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     walletStore.getBalance(selected.Address, userStore.chainId, v, (error, balance) => {
       if (error) {
@@ -367,9 +368,8 @@ watch(() => swapStore.SelectedToken, (selected) => {
     })
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 })
@@ -393,9 +393,8 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
     })
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 })
@@ -403,17 +402,13 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
 watch(tokenZeroAmount, (amount) => {
   if (amount === null || amount < 0) {
     tokenZeroAmount.value = 0
-    return
   }
-  if (!validateAmount()) return
 })
 
 watch(tokenOneAmount, (amount) => {
   if (amount === null || amount < 0) {
     tokenOneAmount.value = 0
-    return
   }
-  if (!validateAmount()) return
 })
 
 const subscriptionHandler = (msg: unknown) => {
@@ -428,6 +423,8 @@ const subscriptionHandler = (msg: unknown) => {
 }
 
 const refreshBalance = () => {
+  if (!userStore.account) return
+
   dbModel.ownerFromPublicKey(userStore.account).then((v) => {
     if (swapStore.SelectedToken !== null) {
       walletStore.getBalance(swapStore.SelectedToken.Address, userStore.chainId, v, (error, balance) => {
@@ -449,9 +446,8 @@ const refreshBalance = () => {
     }
   }).catch((e) => {
     notificationStore.pushNotification({
-      Title: 'gen account from user',
-      Message: e as string,
-      Description: 'please connect plugin and retry'
+      Title: 'Invalid account',
+      Message: e as string
     })
   })
 }

@@ -1,12 +1,13 @@
 <template>
-  <q-page class='flex flex-center'>
-    <div class='q-pa-md'>
+  <q-page class='flex justify-center'>
+    <div :style='{maxWidth: "1440px"}'>
       <q-table
         flat
         :rows='rows'
         :columns='columns'
         row-key='id'
         :pagination='initialPagination'
+        :style='{minWidth: "1280px"}'
       >
         <template #body-cell-thumbnail='props'>
           <q-td :props='props'>
@@ -33,6 +34,7 @@ import { getAppClientOptions } from 'src/apollo'
 import { provideApolloClient, useQuery } from '@vue/apollo-composable'
 import { blobImagePath, blobGatewayEndpoint, blobGatewayCreationChainID, blobGatewayAppID } from 'src/const/const'
 import { useI18n } from 'vue-i18n'
+
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { t } = useI18n({ useScope: 'global' })
 
@@ -132,7 +134,7 @@ const columns = computed(() => [
   },
   {
     name: 'blobHash',
-    label: t('MSG_BLOBHASH'),
+    label: t('MSG_BLOB_HASH'),
     sortable: true,
     field: (row: BlobInfo) => row.blobHash
   },

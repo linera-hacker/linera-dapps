@@ -1,12 +1,18 @@
 <template>
   <div class='row items-center'>
     <div class='cursor-pointer'>
-      <q-img :src='selectedIcon' width='36px' height='36px' />
+      <q-img
+        :src='selectedIcon'
+        height='36px'
+        width='480px'
+        fit='contain'
+        position='0 0'
+      />
     </div>
     <q-space />
     <q-tabs
       v-model='tab'
-      class='text-black'
+      class='text-black horizontal-inner-x-margin-right'
       narrow-indicator
       dense indicator-color='red-6'
     >
@@ -23,11 +29,10 @@
 </template>
 
 <script setup lang='ts'>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import swap from 'src/assets/Swap.svg'
-import meme from 'src/assets/Meme.svg'
+import { blobGatewayLogo, lineraMemeLogo, lineraSwapLogo } from 'src/assets'
 
 import ConnectWallet from './ConnectWallet.vue'
 
@@ -41,11 +46,21 @@ const tab = computed({
     void router.push({ path: '/' + v })
   }
 })
-const selectedIcon = computed(() => tab.value === 'meme' ? meme : swap)
+const selectedIcon = ref(lineraMemeLogo)
 
 const onCreateMemeTokenClick = () => {
   void router.push({ path: '/create/meme' })
 }
+
+onMounted(() => {
+  if (window.location.host.endsWith('linerameme.fun')) {
+    selectedIcon.value = lineraMemeLogo
+  } else if (window.location.host.endsWith('lineraswap.fun')) {
+    selectedIcon.value = lineraSwapLogo
+  } else if (window.location.host.endsWith('blobgateway.com')) {
+    selectedIcon.value = blobGatewayLogo
+  }
+})
 
 </script>
 

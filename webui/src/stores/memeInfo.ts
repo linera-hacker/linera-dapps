@@ -43,14 +43,19 @@ export interface NewMemeInfo {
 
 export interface MemeAppInfoSpec {
   ticker: string
+  // eslint-disable-next-line camelcase
   initial_supply: string
   mintable: boolean
 }
 
 export interface MemeAppRespInfo {
+  // eslint-disable-next-line camelcase
   application_id: string
+  // eslint-disable-next-line camelcase
   application_name: string
+  // eslint-disable-next-line camelcase
   application_type: string
+  // eslint-disable-next-line camelcase
   created_at: number
   description: string
   discord: string
@@ -88,6 +93,7 @@ export interface MemeAppInfoDisplay {
 }
 
 export interface ChainOwner {
+  // eslint-disable-next-line camelcase
   chain_id: string
   owner: string
 }
