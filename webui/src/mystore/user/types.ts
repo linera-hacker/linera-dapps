@@ -2,7 +2,7 @@ import { constants } from 'src/const'
 
 export enum API {
   GetLastTranscation = `${constants.klineEndpoint}/v1/get/token/last/cond`,
-  GetLastTranscations = `${constants.klineEndpoint}/v1/get/token/last/conds`,
+  GetLastTransactions = `${constants.klineEndpoint}/v1/get/token/last/conds`,
   ExistToken = `${constants.klineEndpoint}/v1/exit/token/by/symbol`
 }
 
@@ -34,11 +34,11 @@ export interface PoolTokenCond {
   TokenZeroAddress: string;
   TokenOneAddress: string;
 }
-export interface GetLastTranscationsRequest {
+export interface GetLastTransactionsRequest {
   PoolTokenConds: Array<PoolTokenCond>
 }
 
-export interface GetLastTranscationsResponse {
+export interface GetLastTransactionsResponse {
   Infos: Array<LastTranscation>;
 }
 
