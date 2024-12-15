@@ -275,6 +275,12 @@ const subscribeApplicationCreatorChain = async (applicationId: string) => {
   }
 }
 
+const delay = async (milliSeconds: number) => {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(undefined), milliSeconds)
+  })
+}
+
 const onRemoveLiquidity = async () => {
   if (!swapStore.SelectedToken) {
     return
@@ -300,24 +306,29 @@ const onRemoveLiquidity = async () => {
   if (!applicationIds.includes(swapStore.SelectedTokenPair?.TokenZeroAddress)) {
     await requestApplication(swapStore.SelectedTokenPair?.TokenZeroAddress)
   }
+  await delay(100)
   if (!applicationIds.includes(swapStore.SelectedTokenPair?.TokenOneAddress)) {
     await requestApplication(swapStore.SelectedTokenPair?.TokenOneAddress)
   }
+  await delay(100)
   try {
     await waitChainApplications([swapStore.SelectedTokenPair?.TokenZeroAddress, swapStore.SelectedTokenPair?.TokenOneAddress], 10)
   } catch (e) {
     console.log('Failed wait applications', e)
     return
   }
+  await delay(100)
   if (!await applicationSubscribed(swapStore.SelectedTokenPair?.TokenZeroAddress)) {
     await subscribeApplicationCreatorChain(swapStore.SelectedTokenPair?.TokenZeroAddress)
   }
+  await delay(100)
   if (!await applicationSubscribed(swapStore.SelectedTokenPair?.TokenOneAddress)) {
     await subscribeApplicationCreatorChain(swapStore.SelectedTokenPair?.TokenOneAddress)
   }
 
   if (!userStore.account) return
 
+  await delay(100)
   dbModel.ownerFromPublicKey(userStore.account).then(() => {
     walletStore.removeLiquidity(
       swapStore.SelectedTokenPair?.TokenZeroAddress || '',
