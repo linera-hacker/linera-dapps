@@ -6,6 +6,14 @@ export interface GetBalanceResponse {
   data: Balance;
 }
 
+export interface Liquidity {
+  getOwnerLiquidity: string
+}
+
+export interface GetLiquidityResponse {
+  data: Liquidity;
+}
+
 export interface CalSwapAmount {
   calculateSwapAmount: number;
 }

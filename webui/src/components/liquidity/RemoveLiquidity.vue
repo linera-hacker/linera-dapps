@@ -9,6 +9,12 @@
           </div>
         </div>
         <q-space />
+        <div class='row'>
+          <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
+          <div class='swap-amount-label text-grey-9 text-bold'>
+            {{ Number(ownerLiquidity) }}
+          </div>
+        </div>
       </div>
       <div class='row vertical-card-align swap-token'>
         <q-input
@@ -109,6 +115,7 @@ import { useBlockStore } from 'src/stores/block'
 const liquidityAmount = ref(1)
 const tokenZeroAmount = ref(0)
 const tokenOneAmount = ref(0)
+const ownerLiquidity = ref(0)
 
 const liquidityAmountError = ref(false)
 const tokenZeroAmountError = ref(false)
@@ -127,7 +134,7 @@ const subscriptionId = ref(undefined as unknown as string)
 const block = useBlockStore()
 
 const validateAmount = (): boolean => {
-  liquidityAmountError.value = liquidityAmount.value <= 0
+  liquidityAmountError.value = liquidityAmount.value <= 0 || liquidityAmount.value > ownerLiquidity.value
   return !liquidityAmountError.value
 }
 
@@ -282,16 +289,17 @@ const delay = async (milliSeconds: number) => {
 }
 
 const onRemoveLiquidity = async () => {
+  if (!userStore.account) return
   if (!swapStore.SelectedToken) {
     return
   }
   if (!swapStore.SelectedTokenPair) {
     return
   }
-  if (tokenZeroAmount.value || tokenZeroAmount.value < 0) {
+  if (tokenZeroAmount.value && tokenZeroAmount.value < 0) {
     return
   }
-  if (tokenOneAmount.value || tokenOneAmount.value < 0) {
+  if (tokenOneAmount.value && tokenOneAmount.value < 0) {
     return
   }
   if (!tokenZeroAmount.value) {
@@ -398,9 +406,28 @@ watch(() => swapStore.SelectedTokenPair, (selected) => {
       Message: e as string
     })
   })
+
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    walletStore.getOwnerLiquidity(selected.PoolID, userStore.chainId, v, (error, liquidity) => {
+      if (error) {
+        return
+      }
+      ownerLiquidity.value = Number(liquidity)
+    })
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'Invalid account',
+      Message: e as string
+    })
+  })
 })
 
 watch(liquidityAmount, (amount) => {
+  if (liquidityAmount.value > ownerLiquidity.value) {
+    liquidityAmountError.value = true
+    return
+  }
+  liquidityAmountError.value = false
   if (amount === null || amount < 0) {
     liquidityAmount.value = 1
   }
@@ -447,6 +474,13 @@ const refreshBalance = () => {
           return
         }
         inBalance.value = Number(balance)
+        validateAmount()
+      })
+      walletStore.getOwnerLiquidity(swapStore.SelectedTokenPair.PoolID, userStore.chainId, v, (error, liquidity) => {
+        if (error) {
+          return
+        }
+        ownerLiquidity.value = Number(liquidity)
         validateAmount()
       })
     }

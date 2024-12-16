@@ -38,7 +38,7 @@ export default {
   MSG_YOU_ARE_SELLING: "You're Selling",
   MSG_YOU_ARE_BUYING: "You're Buying",
   MSG_SWAP: 'Swap',
-  MSG_LIQUIDITY: 'Liquidity',
+  MSG_LIQUIDITY: 'Liq.',
   MSG_ADD_LIQUIDITY: 'Add Liquidity',
   MSG_REMOVE_LIQUIDITY: 'Remove Liquidity',
   MSG_ID: 'ID',

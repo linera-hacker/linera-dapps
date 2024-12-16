@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
-import { CalSwapAmountResponse, GetBalanceResponse } from './types'
+import { CalSwapAmountResponse, GetBalanceResponse, GetLiquidityResponse } from './types'
 import { gql } from '@apollo/client'
 import { constants } from 'src/const'
 
@@ -150,6 +150,28 @@ export const useWalletStore = defineStore('useWalletStore', {
           reject(e)
         })
       })
+    },
+    getOwnerLiquidity (poolID: number, accountChainID: string, accountAddr: string, done?: (error: boolean, liquidity: string) => void) {
+      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${constants.swapAppID}`
+      const req = { query: `query{\n  getOwnerLiquidity(poolId:${poolID},\n owner:{\n    chain_id: "${accountChainID}"\n    owner: "User:${accountAddr}"\n  })\n}` }
+      doActionWithError<unknown, GetLiquidityResponse>(
+        url,
+        req,
+        {
+          Error: {
+            Title: 'Get liquidity',
+            Message: 'Failed get liquidity',
+            Popup: true,
+            Type: NotifyType.Error
+          }
+        },
+        (resp: GetLiquidityResponse): void => {
+          done?.(false, resp.data.getOwnerLiquidity)
+        },
+        () => {
+          done?.(true, '0')
+        }
+      )
     }
   }
 })

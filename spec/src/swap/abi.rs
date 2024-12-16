@@ -96,6 +96,13 @@ pub trait SwapQueryRoot {
         start_id: Option<u64>,
         start_timestamp: Option<Timestamp>,
     ) -> impl std::future::Future<Output = Result<Vec<Transaction>, Error>> + Send;
+    
+    fn get_owner_liquidity(
+        &self,
+        ctx: &Context<'_>,
+        pool_id: u64,
+        owner: ChainAccountOwner,
+    ) -> impl std::future::Future<Output = Result<Amount, Error>> + Send;
 
     fn subscribed_creator_chain(
         &self,
