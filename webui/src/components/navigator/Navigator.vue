@@ -53,13 +53,13 @@ const onCreateMemeTokenClick = () => {
 }
 
 onMounted(() => {
-  if (window.location.host.endsWith('linerameme.fun')) {
+  if (window.location.hostname.endsWith('linerameme.fun')) {
     selectedIcon.value = lineraMemeLogo
     void router.push({ path: '/meme' })
-  } else if (window.location.host.endsWith('lineraswap.fun')) {
+  } else if (window.location.hostname.endsWith('lineraswap.fun')) {
     selectedIcon.value = lineraSwapLogo
     void router.push({ path: '/swap' })
-  } else if (window.location.host.endsWith('blobgateway.com')) {
+  } else if (window.location.hostname.endsWith('blobgateway.com')) {
     selectedIcon.value = blobGatewayLogo
     void router.push({ path: '/blob' })
   }
