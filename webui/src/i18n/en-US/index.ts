@@ -46,5 +46,18 @@ export default {
   MSG_DATATYPE: 'Data type',
   MSG_CREATOR: 'Creator',
   MSG_CREATED_AT: 'Created at',
-  MSG_THUMBNAIL: 'Thumbnail'
+  MSG_THUMBNAIL: 'Thumbnail',
+  MSG_TRANSACTION_TYPE: 'Transaction type',
+  MSG_ADDRESS: 'Address',
+  MSG_ACTION: 'Action',
+  MSG_AMOUNT: 'Amount',
+  MSG_DATE: 'Date',
+  MSG_CREATING_LIQUIDITY_POOL: 'Creating liquidity pool ...',
+  MSG_AUTHORIZING_WLINERA_TO_SWAP: 'Authorizing WTLINERA to SWAP ...',
+  MSG_MINTING_WLINERA: 'Minting WTLINERA ...',
+  MSG_AUTHORIZING_INITIAL_BALANCE_TO_SWAP: 'Authorizing initial balance to SWAP ...',
+  MSG_SUBSCRIBING_SWAP_CREATOR_CHAIN: 'Subscribing SWAP creator chain ...',
+  MSG_SUBSCRIBING_WLINERA_CREATOR_CHAIN: 'Subscribing WTLINERA creator chain ...',
+  MSG_REQUESTING_CREATED_APPLICATION_TO_SWAP_CHAIN: 'Requesting created application to SWAP chain ...',
+  MSG_REQUESTING_SWAP: 'Requesting SWAP ...'
 }
