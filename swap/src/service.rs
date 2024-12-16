@@ -154,6 +154,33 @@ impl SwapQueryRoot for QueryRoot {
             .collect()
     }
 
+    async fn get_owner_liquidity(
+        &self,
+        ctx: &Context<'_>,
+        pool_id: u64,
+        owner: ChainAccountOwner,
+    ) -> Amount {
+        let context = ctx.data::<Arc<SwapContext>>().unwrap();
+        let mut _liquidity = Amount::ZERO;
+        let pools = context.state.get_pool(pool_id).await.expect("Invalid pool");
+        match pools {
+            Some(pool) => {
+                match pool.erc20.balances.get(&owner) {
+                    Some(amount) => {
+                        _liquidity = *amount;
+                    }
+                    None => {
+                        _liquidity = Amount::ZERO;
+                    },
+                }
+            },
+            None => {
+                _liquidity = Amount::ZERO;
+            },
+        }
+        _liquidity
+    }
+
     async fn subscribed_creator_chain(&self, ctx: &Context<'_>) -> bool {
         let context = ctx.data::<Arc<SwapContext>>().unwrap();
         *context.state.subscribed_creator_chain.get()
