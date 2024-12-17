@@ -75,7 +75,6 @@
 
 <script setup lang='ts'>
 import { gql } from '@apollo/client'
-import { constants } from 'src/const'
 import { dbModel } from 'src/model'
 import { useNotificationStore } from 'src/mystore/notification'
 import { useSwapStore } from 'src/mystore/swap'
@@ -85,6 +84,7 @@ import { graphqlResult } from 'src/utils'
 import { shortId } from 'src/utils/shortid'
 import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useBlockStore } from 'src/stores/block'
+import { useHostStore } from 'src/mystore/host'
 
 const tokenZeroAmount = ref(0)
 const tokenOneAmount = ref(0)
@@ -100,9 +100,6 @@ const walletStore = useWalletStore()
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 
-const swapCreationChainID = ref(constants.swapCreationChainID)
-const swapAppID = ref(constants.swapAppID)
-
 const subscriptionId = ref(undefined as unknown as string)
 const block = useBlockStore()
 
@@ -114,8 +111,8 @@ const validateAmount = (): boolean => {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const approveToSwap = async (appID: string, publicKey: string, amount: string): Promise<any> => {
-  const chainId = swapCreationChainID.value
-  const owner = 'Application:' + swapAppID.value
+  const chainId = useHostStore().swapCreationChainId
+  const owner = 'Application:' + useHostStore().swapApplicationId
 
   const query = gql`
     mutation approve($chainId: String!, $owner: String!, $amount: String!) {

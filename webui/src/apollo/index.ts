@@ -4,14 +4,11 @@ import { createHttpLink, InMemoryCache, split } from '@apollo/client/core'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 import { getMainDefinition } from '@apollo/client/utilities'
-import * as constants from 'src/const'
-import { Cookies } from 'quasar'
+import { useHostStore } from 'src/mystore/host'
 
 export /* async */ function getClientOptions (/* {app, router, ...}, options?: Partial<BootFileParams<unknown>> */) {
-  // const port = Cookies.get('service-port') || constants.constants.port
-  // const host = Cookies.get('service-host') || constants.constants.host
-  const port = constants.constants.port
-  const host = constants.constants.host
+  const port = 8080
+  const host = '127.0.0.1'
   const wsLink = new GraphQLWsLink(
     createClient({
       url: `ws://${host}:${port}/ws`
@@ -23,11 +20,9 @@ export /* async */ function getClientOptions (/* {app, router, ...}, options?: P
       const chainId = operation.variables.chainId as string
       switch (operation.variables.endpoint) {
         case 'wlinera':
-          return `http://${host}:${port}/chains/${chainId}/applications/${constants.constants.Apps.wlineraApp}`
+          return `http://${host}:${port}/chains/${chainId}/applications/${useHostStore().wlineraApplicationId}`
         case 'swap':
-          return `http://${host}:${port}/chains/${chainId}/applications/${constants.constants.Apps.swapApp}`
-        case 'erc20':
-          return `http://${host}:${port}/chains/${chainId}/applications/${constants.constants.Apps.erc20App}`
+          return `http://${host}:${port}/chains/${chainId}/applications/${useHostStore().swapApplicationId}`
         case 'main':
           return `http://${host}:${port}`
         default:
@@ -120,8 +115,8 @@ export /* async */ function getClientOptions (/* {app, router, ...}, options?: P
 }
 
 export /* async */ function getAppClientOptions (url: string) {
-  const port = Cookies.get('service-port') || constants.constants.port
-  const host = Cookies.get('service-host') || constants.constants.host
+  const port = 8080
+  const host = '127.0.0.1'
   const wsLink = new GraphQLWsLink(
     createClient({
       url: `ws://${host}:${port}/ws`

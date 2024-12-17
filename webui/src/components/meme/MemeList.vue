@@ -23,7 +23,6 @@
 <script setup lang='ts'>
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { MemeAppRespInfo, MemeAppInfoSpec, MemeAppInfoDisplay } from 'src/stores/memeInfo'
-import * as constants from 'src/const'
 import { ApolloClient } from '@apollo/client/core'
 import gql from 'graphql-tag'
 import { graphqlResult } from 'src/utils'
@@ -31,19 +30,19 @@ import { getAppClientOptions } from 'src/apollo'
 import { provideApolloClient, useQuery } from '@vue/apollo-composable'
 import { Pool } from 'src/stores/pool'
 import { LastTranscation, useUserStore, PoolTokenCond } from 'src/mystore/user'
-import { wlineraAppID } from 'src/const/const'
 
 import MemeCard from './MemeCard.vue'
+import { useHostStore } from 'src/mystore/host'
 
 const userStore = useUserStore()
 
-const swapChainID = ref(constants.constants.swapCreationChainID)
-const swapAppID = ref(constants.constants.swapAppID)
-const swapEndPoint = ref(constants.constants.swapEndPoint)
+const swapChainID = ref(useHostStore().swapCreationChainId)
+const swapAppID = ref(useHostStore().swapApplicationId)
+const swapEndPoint = ref(useHostStore()._swapEndpoint())
 
-const amsChainID = ref(constants.constants.amsCreationChainID)
-const amsAppID = ref(constants.constants.amsAppID)
-const amsEndPoint = ref(constants.constants.amsEndPoint)
+const amsChainID = ref(useHostStore().amsCreationChainId)
+const amsAppID = ref(useHostStore().amsApplicationId)
+const amsEndPoint = ref(useHostStore()._amsEndpoint())
 
 const swapService = ref(swapEndPoint.value + '/chains/' + swapChainID.value + '/applications/' + swapAppID.value)
 const amsService = ref(amsEndPoint.value + '/chains/' + amsChainID.value + '/applications/' + amsAppID.value)
@@ -147,7 +146,7 @@ const getApplicationInfos = (url: string) => {
         initialSupply: parsedSpec.initial_supply,
         mintable: parsedSpec.mintable
       } as MemeAppInfoDisplay
-      if (apps[i].application_id === wlineraAppID) {
+      if (apps[i].application_id === useHostStore().wlineraApplicationId) {
         meme.lastTxAt = 0
         meme.lastTxZeroAmount = '0'
         meme.lastTxOneAmount = '0'
@@ -227,13 +226,13 @@ const useIntervalLoadData = () => {
 const loadTxData = () => {
   const poolConds = [] as Array<PoolTokenCond>
   for (let i = 0; i < memeAppInfos.value.length; i++) {
-    if (memeAppInfos.value[i].appID === wlineraAppID) {
+    if (memeAppInfos.value[i].appID === useHostStore().wlineraApplicationId) {
       continue
     }
     const poolTokenCond = {
       PoolID: Number(memeAppInfos.value[i].poolID),
       TokenZeroAddress: memeAppInfos.value[i].appID,
-      TokenOneAddress: wlineraAppID
+      TokenOneAddress: useHostStore().wlineraApplicationId
     } as PoolTokenCond
     poolConds.push(poolTokenCond)
   }

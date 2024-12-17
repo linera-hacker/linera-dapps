@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { API, Token, GetTokensResponse, TokenPair, GetTokenPairsResponse, KPointTypeInfo, GetKPointTypesResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
+import { useHostStore } from '../host'
 
 export const useSwapStore = defineStore('useSwapStore', {
   state: () => ({
@@ -14,7 +15,7 @@ export const useSwapStore = defineStore('useSwapStore', {
   actions: {
     getTokens (done?: (error: boolean, rows: Token[]) => void) {
       doActionWithError<unknown, GetTokensResponse>(
-        API.GetTokens,
+        useHostStore().formalizeKlinePath(API.GetTokens),
         {},
         {
           Error: {
@@ -39,7 +40,7 @@ export const useSwapStore = defineStore('useSwapStore', {
         return
       }
       doActionWithError<unknown, GetTokenPairsResponse>(
-        API.GetTokenPairs,
+        useHostStore().formalizeKlinePath(API.GetTokenPairs),
         { Conds: { TokenZeroID: { Op: 'eq', Value: this.SelectedToken.ID } } },
         {
           Error: {
@@ -60,7 +61,7 @@ export const useSwapStore = defineStore('useSwapStore', {
     },
     getKPointTypes (done?: (error: boolean, infos: KPointTypeInfo[]) => void) {
       doActionWithError<unknown, GetKPointTypesResponse>(
-        API.GetKPointTypes,
+        useHostStore().formalizeKlinePath(API.GetKPointTypes),
         {},
         {
           Error: {

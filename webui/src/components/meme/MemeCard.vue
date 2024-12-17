@@ -71,7 +71,7 @@ import { toRef, ref, watch } from 'vue'
 import { MemeAppInfoDisplay } from 'src/stores/memeInfo'
 import { discordLogo, githubLogo, internetLogo, telegramLogo, twitterLogo } from 'src/assets'
 import { useRouter } from 'vue-router'
-import { wlineraAppID, blobImagePath } from 'src/const/const'
+import { useHostStore } from 'src/mystore/host'
 
 interface Props {
   memeInfo: MemeAppInfoDisplay
@@ -87,7 +87,7 @@ const onSwap = (token0: string) => {
     path: 'swap',
     query: {
       token0,
-      token1: wlineraAppID
+      token1: useHostStore().wlineraApplicationId
     }
   })
 }
@@ -98,7 +98,7 @@ const goLink = (url: string, event: MouseEvent) => {
 }
 
 const processImg = (imageHash: string): string => {
-  return blobImagePath + imageHash
+  return useHostStore().blobDataPath(imageHash)
 }
 
 const timeAgo = (timestamp: number): string => {

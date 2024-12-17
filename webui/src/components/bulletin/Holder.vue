@@ -33,7 +33,6 @@
 </template>
 <script setup lang='ts'>
 import { onMounted, ref, watch } from 'vue'
-import * as constants from 'src/const'
 import gql from 'graphql-tag'
 import { useRouter } from 'vue-router'
 import { ApolloClient } from '@apollo/client/core'
@@ -44,6 +43,7 @@ import { OwnerBalance } from 'src/stores/memeInfo'
 import { trophyNo1, trophyNo2, trophyNo3 } from 'src/assets'
 import { useSwapStore } from 'src/mystore/swap'
 import { shortId } from 'src/utils/shortid'
+import { useHostStore } from 'src/mystore/host'
 
 const router = useRouter()
 const swapStore = useSwapStore()
@@ -69,11 +69,8 @@ onMounted(() => {
   }
 })
 
-const swapChainID = ref(constants.constants.swapCreationChainID)
-const swapEndPoint = ref(constants.constants.swapEndPoint)
-
 const getBalanceTopList = (limit: number) => {
-  const url = swapEndPoint.value + '/chains/' + swapChainID.value + '/applications/' + token0.value
+  const url = useHostStore().swapApplicationTokenPath(token0.value)
   const appOptions = /* await */ getAppClientOptions(url)
   const appApolloClient = new ApolloClient(appOptions)
   const { /* result, refetch, fetchMore, */ onResult /*, onError */ } = provideApolloClient(appApolloClient)(() => useQuery(gql`
@@ -84,7 +81,7 @@ const getBalanceTopList = (limit: number) => {
       }
     }
   `, {
-    chainId: swapChainID.value,
+    chainId: useHostStore().swapCreationChainId,
     limit: limit
   }, {
     fetchPolicy: 'network-only'

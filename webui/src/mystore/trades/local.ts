@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { API, Transaction, GetTransactionsForLineResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
+import { useHostStore } from '../host'
 
 export const useTradesStore = defineStore('useTradesStore', {
   state: () => ({
@@ -19,7 +20,7 @@ export const useTradesStore = defineStore('useTradesStore', {
         return
       }
       doActionWithError<unknown, GetTransactionsForLineResponse>(
-        API.GetTransactionsForLine,
+        useHostStore().formalizeKlinePath(API.GetTransactionsForLine),
         {
           Limit: 20,
           Offset: 0,
@@ -63,7 +64,7 @@ export const useTradesStore = defineStore('useTradesStore', {
       }
       this.RefreshTableHistoryLock = true
       doActionWithError<unknown, GetTransactionsForLineResponse>(
-        API.GetTransactionsForLine,
+        useHostStore().formalizeKlinePath(API.GetTransactionsForLine),
         {
           Limit: -20,
           Offset: -this.Transactions.length,

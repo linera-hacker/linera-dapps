@@ -91,7 +91,7 @@ import { NewMemeInfo, ChainApp, InitPoolLiquidity } from 'src/stores/memeInfo'
 import gql from 'graphql-tag'
 import { graphqlResult } from 'src/utils'
 import { useUserStore } from 'src/mystore/user'
-import * as constants from 'src/const'
+import { useHostStore } from 'src/mystore/host'
 
 const user = useUserStore()
 const account = computed(() => user.account?.trim())
@@ -127,7 +127,7 @@ const memeInfo = ref({
 } as NewMemeInfo)
 
 const onCheckSymbol = async () => {
-  const appID = constants.constants.amsAppID
+  const appID = useHostStore().amsApplicationId
   const symbol = memeInfo.value.symbol
   return new Promise((resolve, reject) => {
     getApplicationExistBySymbol(appID, symbol)
@@ -360,20 +360,20 @@ const createApplication = async (): Promise<any> => {
     initial_currency: '0.00001',
     fixed_currency: false,
     fee_percent: '0',
-    ams_application_id: constants.constants.amsAppID,
-    blob_gateway_application_id: constants.constants.blobGatewayAppID
+    ams_application_id: useHostStore().amsApplicationId,
+    blob_gateway_application_id: useHostStore().blobGatewayApplicationId
   } as InstantiationArgument
   const applicationParameters = {
     initial_balances: new Map([
       [
         JSON.stringify({
-          chain_id: constants.constants.swapCreationChainID,
-          owner: 'Application:' + constants.constants.swapAppID
+          chain_id: useHostStore().swapCreationChainId,
+          owner: 'Application:' + useHostStore().swapApplicationId
         } as ChainAccount),
         '5000000.'
       ]
     ]),
-    swap_application_id: constants.constants.swapAppID,
+    swap_application_id: useHostStore().swapApplicationId,
     token_metadata: {
       logo: memeInfo.value.logo,
       twitter: memeInfo.value.twitter,
@@ -401,7 +401,7 @@ const createApplication = async (): Promise<any> => {
           query: query.loc?.source?.body,
           variables: {
             chainId: chainId.value,
-            bytecodeId: constants.constants.erc20BID,
+            bytecodeId: useHostStore().erc20BytecodeId,
             parameters: JSON.stringify(applicationParameters, (key, value) => {
               if (value instanceof Map) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -502,7 +502,7 @@ const applicationCreatorChainId = (id: string) => {
   return middlePart
 }
 
-const blobGatewayAppID = ref(constants.constants.blobGatewayAppID)
+const blobGatewayAppID = ref(useHostStore().blobGatewayApplicationId)
 
 const requestApplication = async (appID: string) => {
   const publicKey = account.value
