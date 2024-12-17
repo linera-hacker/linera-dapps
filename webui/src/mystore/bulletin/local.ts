@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { API, TokenVolumn, GetOneDayVolumnResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
+import { useHostStore } from '../host'
 
 export const useBulletinStore = defineStore('useBulletinStore', {
   state: () => ({
@@ -10,7 +11,7 @@ export const useBulletinStore = defineStore('useBulletinStore', {
   actions: {
     getOneDayVolumn (done?: (error: boolean, rows: TokenVolumn[]) => void) {
       doActionWithError<unknown, GetOneDayVolumnResponse>(
-        API.GetOneDayVolumn,
+        useHostStore().formalizeKlinePath(API.GetOneDayVolumn),
         {},
         {
           Error: {

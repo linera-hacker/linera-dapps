@@ -61,11 +61,11 @@
 </template>
 
 <script setup lang='ts'>
+import { useHostStore } from 'src/mystore/host'
 import { useSwapStore } from 'src/mystore/swap'
 import { shortid } from 'src/utils'
 import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { blobImagePath } from 'src/const/const'
 
 const swapStore = useSwapStore()
 
@@ -77,7 +77,7 @@ const processImg = (imageHash: string | undefined): string => {
   if (imageHash === undefined) {
     return ''
   }
-  return blobImagePath + imageHash
+  return useHostStore().blobDataPath(imageHash)
 }
 
 watch(() => swapStore.SelectedToken, () => {

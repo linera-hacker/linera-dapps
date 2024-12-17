@@ -32,8 +32,8 @@ import gql from 'graphql-tag'
 import { graphqlResult } from 'src/utils'
 import { getAppClientOptions } from 'src/apollo'
 import { provideApolloClient, useQuery } from '@vue/apollo-composable'
-import { blobImagePath, blobGatewayEndpoint, blobGatewayCreationChainID, blobGatewayAppID } from 'src/const/const'
 import { useI18n } from 'vue-i18n'
+import { useHostStore } from 'src/mystore/host'
 
 // eslint-disable-next-line @typescript-eslint/unbound-method
 const { t } = useI18n({ useScope: 'global' })
@@ -54,7 +54,7 @@ const initialPagination = ref({
 })
 
 const onGetBlobLists = () => {
-  const url = blobGatewayEndpoint + '/chains/' + blobGatewayCreationChainID + '/applications/' + blobGatewayAppID + ''
+  const url = useHostStore().blobGatewayApplicationPath()
   void getBlobLists(url)
 }
 
@@ -87,7 +87,7 @@ const getBlobLists = (url: string) => {
         dataType: apps[i].dataType,
         createdAt: apps[i].createdAt,
         creator: apps[i].creator,
-        thumbnail: apps[i].dataType === 'IMAGE' ? blobImagePath + apps[i].blobHash : ''
+        thumbnail: apps[i].dataType === 'IMAGE' ? useHostStore().blobDataPath(apps[i].blobHash) : ''
       } as BlobInfo
       blobId.value += 1
       blobList.value.push(blob)

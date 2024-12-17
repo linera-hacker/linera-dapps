@@ -3,13 +3,13 @@ import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
 import { CalSwapAmountResponse, GetBalanceResponse, GetLiquidityResponse } from './types'
 import { gql } from '@apollo/client'
-import { constants } from 'src/const'
+import { useHostStore } from '../host'
 
 export const useWalletStore = defineStore('useWalletStore', {
   state: () => ({}),
   actions: {
     getBalance (erc20AppAddr: string, accountChainID: string, accountAddr: string, done?: (error: boolean, balance: string) => void) {
-      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${erc20AppAddr}`
+      const url = useHostStore().swapApplicationTokenPath(erc20AppAddr)
       const req = { query: `query{\n  balanceOf(owner:{\n    chain_id: "${accountChainID}"\n    owner: "User:${accountAddr}"\n  })\n}` }
       doActionWithError<unknown, GetBalanceResponse>(
         url,
@@ -31,7 +31,7 @@ export const useWalletStore = defineStore('useWalletStore', {
       )
     },
     calSwapAmount (tokenZeroAppAddr: string, tokenOneAppAddr: string, outAmount: number, done?: (error: boolean, amount: number) => void) {
-      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${constants.swapAppID}`
+      const url = useHostStore().swapApplicationPath()
       const req = { query: `query{\n  calculateSwapAmount(token0:"${tokenZeroAppAddr}",token1:"${tokenOneAppAddr}",amount1:"${outAmount}")\n}` }
       doActionWithError<unknown, CalSwapAmountResponse>(
         url,
@@ -68,7 +68,7 @@ export const useWalletStore = defineStore('useWalletStore', {
           method: 'linera_graphqlMutation',
           params: {
             publicKey: publicKey,
-            applicationId: constants.swapAppID,
+            applicationId: useHostStore().swapApplicationId,
             query: {
               query: mutate.loc?.source?.body,
               variables: {
@@ -99,7 +99,7 @@ export const useWalletStore = defineStore('useWalletStore', {
           method: 'linera_graphqlMutation',
           params: {
             publicKey: publicKey,
-            applicationId: constants.swapAppID,
+            applicationId: useHostStore().swapApplicationId,
             query: {
               query: mutate.loc?.source?.body,
               variables: {
@@ -131,7 +131,7 @@ export const useWalletStore = defineStore('useWalletStore', {
           method: 'linera_graphqlMutation',
           params: {
             publicKey: publicKey,
-            applicationId: constants.swapAppID,
+            applicationId: useHostStore().swapApplicationId,
             query: {
               query: mutate.loc?.source?.body,
               variables: {
@@ -152,7 +152,7 @@ export const useWalletStore = defineStore('useWalletStore', {
       })
     },
     getOwnerLiquidity (poolID: number, accountChainID: string, accountAddr: string, done?: (error: boolean, liquidity: string) => void) {
-      const url = `${constants.swapEndPoint}/chains/${constants.swapCreationChainID}/applications/${constants.swapAppID}`
+      const url = useHostStore().swapApplicationPath()
       const req = { query: `query{\n  getOwnerLiquidity(poolId:${poolID},\n owner:{\n    chain_id: "${accountChainID}"\n    owner: "User:${accountAddr}"\n  })\n}` }
       doActionWithError<unknown, GetLiquidityResponse>(
         url,

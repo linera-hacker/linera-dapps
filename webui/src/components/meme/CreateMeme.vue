@@ -122,7 +122,6 @@
 </template>
 <script setup lang='ts'>
 import { computed, ref } from 'vue'
-import * as constants from 'src/const'
 import { ApolloClient } from '@apollo/client/core'
 import gql from 'graphql-tag'
 import { getAppClientOptions } from 'src/apollo'
@@ -134,6 +133,7 @@ import { InitPoolLiquidity } from 'src/stores/memeInfo'
 
 import CreateMemeInner from './CreateMemeInner.vue'
 import ChainMemeBridge from '../bridge/db/ChainMemeBridge.vue'
+import { useHostStore } from 'src/mystore/host'
 
 const { t } = useI18n({ useScope: 'global' })
 
@@ -161,10 +161,10 @@ const onContinueClick = () => {
 
 const step = ref(1)
 
-const swapCreationChainID = ref(constants.constants.swapCreationChainID)
-const swapAppID = ref(constants.constants.swapAppID)
-const wlineraAppID = ref(constants.constants.wlineraAppID)
-const swapEndPoint = ref(constants.constants.swapEndPoint)
+const swapCreationChainID = ref(useHostStore().swapCreationChainId)
+const swapAppID = ref(useHostStore().swapApplicationId)
+const wlineraAppID = ref(useHostStore().wlineraApplicationId)
+const swapEndPoint = ref(useHostStore()._swapEndpoint())
 
 // approve
 const newAppApprove = ref('4500000')

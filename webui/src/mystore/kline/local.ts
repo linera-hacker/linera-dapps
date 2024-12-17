@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { API, KPoint, GetKPointsForLineResponse, EchartKPoints } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
+import { useHostStore } from '../host'
 
 export const useKLineStore = defineStore('useKLineStore', {
   state: () => ({
@@ -24,7 +25,7 @@ export const useKLineStore = defineStore('useKLineStore', {
         return
       }
       doActionWithError<unknown, GetKPointsForLineResponse>(
-        API.GetKPointsForLine,
+        useHostStore().formalizeKlinePath(API.GetKPointsForLine),
         {
           KPointType: this.SelectedKPType,
           Limit: 20,
@@ -71,7 +72,7 @@ export const useKLineStore = defineStore('useKLineStore', {
       }
       this.RefreshKlineHistoryLock = true
       doActionWithError<unknown, GetKPointsForLineResponse>(
-        API.GetKPointsForLine,
+        useHostStore().formalizeKlinePath(API.GetKPointsForLine),
         {
           KPointType: this.SelectedKPType,
           Limit: -100,

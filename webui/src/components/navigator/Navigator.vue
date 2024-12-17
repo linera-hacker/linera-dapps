@@ -31,6 +31,7 @@
 <script setup lang='ts'>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { host } from 'src/mystore'
 
 import { blobGatewayLogo, lineraMemeLogo, lineraSwapLogo } from 'src/assets'
 
@@ -52,7 +53,23 @@ const onCreateMemeTokenClick = () => {
   void router.push({ path: '/create/meme' })
 }
 
+const _host = host.useHostStore()
+
 onMounted(() => {
+  let apiHost = window.location.host
+  if (apiHost.startsWith('www.')) {
+    apiHost = apiHost.substring(3)
+  }
+  apiHost = 'api.' + apiHost
+
+  _host.amsDomainApiHost = apiHost
+  _host.klineDomainApiHost = apiHost
+  _host.blobGatewayDomainApiHost = apiHost
+  _host.swapDomainApiHost = apiHost
+  _host.apiSchema = window.location.protocol.replace(':', '')
+
+  if (window.location.pathname !== '/') return
+
   if (window.location.hostname.endsWith('linerameme.fun')) {
     selectedIcon.value = lineraMemeLogo
     void router.push({ path: '/meme' })
@@ -62,6 +79,9 @@ onMounted(() => {
   } else if (window.location.hostname.endsWith('blobgateway.com')) {
     selectedIcon.value = blobGatewayLogo
     void router.push({ path: '/blob' })
+  } else {
+    selectedIcon.value = lineraMemeLogo
+    void router.push({ path: '/meme' })
   }
 })
 

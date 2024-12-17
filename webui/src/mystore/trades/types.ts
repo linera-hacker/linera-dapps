@@ -1,7 +1,5 @@
-import { constants } from 'src/const'
-
 export enum API {
-  GetTransactionsForLine = `${constants.klineEndpoint}/v1/get/transactions/for/line`,
+  GetTransactionsForLine = '/v1/get/transactions/for/line',
 }
 
 export interface Transaction {

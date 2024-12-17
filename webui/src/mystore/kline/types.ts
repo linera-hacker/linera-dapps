@@ -1,7 +1,5 @@
-import { constants } from 'src/const'
-
 export enum API {
-  GetKPointsForLine = `${constants.klineEndpoint}/v1/get/kpoints/for/line`,
+  GetKPointsForLine = '/v1/get/kpoints/for/line',
 }
 
 export interface KPoint {

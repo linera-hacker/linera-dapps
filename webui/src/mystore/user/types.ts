@@ -1,9 +1,7 @@
-import { constants } from 'src/const'
-
 export enum API {
-  GetLastTranscation = `${constants.klineEndpoint}/v1/get/token/last/cond`,
-  GetLastTransactions = `${constants.klineEndpoint}/v1/get/token/last/conds`,
-  ExistToken = `${constants.klineEndpoint}/v1/exit/token/by/symbol`
+  GetLastTranscation = '/v1/get/token/last/cond',
+  GetLastTransactions = '/v1/get/token/last/conds',
+  ExistToken = '/v1/exit/token/by/symbol'
 }
 
 export interface LastTranscation {

@@ -1,7 +1,5 @@
-import { constants } from 'src/const'
-
 export enum API {
-  GetOneDayVolumn = `${constants.klineEndpoint}/v1/get/one/day/volumn`,
+  GetOneDayVolumn = '/v1/get/one/day/volumn',
 }
 
 export interface TokenVolumn {

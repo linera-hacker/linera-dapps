@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { API, LastTranscation, GetLastTranscationRequest, GetLastTranscationResponse, GetLastTransactionsRequest, GetLastTransactionsResponse, ExistTokenRequest, ExistTokenResponse } from './types'
 import { doActionWithError } from '../action'
 import { NotifyType } from '../notification'
+import { useHostStore } from '../host'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -15,7 +16,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     getLastTranscation (req: GetLastTranscationRequest, done?: (errors: boolean, row: LastTranscation) => void) {
       doActionWithError<unknown, GetLastTranscationResponse>(
-        API.GetLastTranscation,
+        useHostStore().formalizeKlinePath(API.GetLastTranscation),
         req,
         {
           Error: {
@@ -34,7 +35,7 @@ export const useUserStore = defineStore('user', {
     },
     getLastTransactions (req: GetLastTransactionsRequest, done?: (errors: boolean, rows: LastTranscation[]) => void) {
       doActionWithError<unknown, GetLastTransactionsResponse>(
-        API.GetLastTransactions,
+        useHostStore().formalizeKlinePath(API.GetLastTransactions),
         req,
         {
           Error: {
@@ -53,7 +54,7 @@ export const useUserStore = defineStore('user', {
     },
     existToken (req: ExistTokenRequest, done?: (errors: boolean, row: boolean) => void) {
       doActionWithError<unknown, ExistTokenResponse>(
-        API.ExistToken,
+        useHostStore().formalizeKlinePath(API.ExistToken),
         req,
         {
           Error: {

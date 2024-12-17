@@ -9,7 +9,7 @@
       </div>
     </div>
     <q-space />
-    <div class='vertical-card-padding'>
+    <div class='swap vertical-card-padding'>
       <q-tabs v-model='tab' dense>
         <q-tab name='swap' label='Swap' />
         <q-tab name='addLiquidity' label='Add Liquidity' />
@@ -27,10 +27,10 @@
           <RemoveLiquidity />
         </q-tab-panel>
       </q-tab-panels>
-      <div class='swap bg-white vertical-card-align bulletin-padding'>
+      <div class='bg-white vertical-card-align bulletin-padding'>
         <VolumeBulletin />
       </div>
-      <div class='swap bg-white vertical-card-align bulletin-padding'>
+      <div class='bg-white vertical-card-align bulletin-padding'>
         <HolderBulletin />
       </div>
     </div>
