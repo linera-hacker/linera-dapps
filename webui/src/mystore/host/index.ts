@@ -27,21 +27,25 @@ export const useHostStore = defineStore('hosts', {
   getters: {
     formalizeAmsPath (): (path: string) => string {
       return (path: string) => {
+        if (path.startsWith('/')) path = path.substring(1)
         return this.apiSchema + '://' + (this.useDomainApi ? this.amsDomainApiHost : this.amsDebugApiHost) + '/' + path
       }
     },
     formalizeKlinePath (): (path: string) => string {
       return (path: string) => {
+        if (path.startsWith('/')) path = path.substring(1)
         return this.apiSchema + '://' + (this.useDomainApi ? this.klineDomainApiHost : this.klineDebugApiHost) + '/' + path
       }
     },
     formalizeBlobGatewayPath (): (path: string) => string {
       return (path: string) => {
+        if (path.startsWith('/')) path = path.substring(1)
         return this.apiSchema + '://' + (this.useDomainApi ? this.blobGatewayDomainApiHost : this.blobGatewayDebugApiHost) + '/' + path
       }
     },
     formalizeSwapPath (): (path: string) => string {
       return (path: string) => {
+        if (path.startsWith('/')) path = path.substring(1)
         return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : this.swapDebugApiHost) + '/' + path
       }
     },
