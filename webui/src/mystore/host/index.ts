@@ -49,7 +49,11 @@ export const useHostStore = defineStore('hosts', {
     formalizeSwapPath (): (path: string) => string {
       return (path: string) => {
         if (path.startsWith('/')) path = path.substring(1)
+<<<<<<< HEAD
         return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/swap') : this.swapDebugApiHost) + '/' + path
+=======
+        return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : this.swapDebugApiHost) + '/' + path
+>>>>>>> b733e32 (Correct path)
       }
     },
     _amsEndpoint (): () => string {
