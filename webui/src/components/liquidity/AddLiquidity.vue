@@ -33,7 +33,7 @@
     <div class='row vertical-card-align'>
       <div class='decorate-border-bottom-bold exchange-separator' />
       <div class='exchange-symbol' size='28px'>
-        <q-icon name='bi-arrow-down-up' size='14px' class='text-grey-6' />
+        <q-icon name='bi-three-dots' size='14px' class='text-grey-6' />
       </div>
       <div class='decorate-border-bottom-bold exchange-separator' />
     </div>

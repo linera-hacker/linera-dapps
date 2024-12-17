@@ -12,7 +12,7 @@
         <div class='row'>
           <q-icon name='bi-wallet-fill text-grey-8 swap-amount-icon' size='16px' />
           <div class='swap-amount-label text-grey-9 text-bold'>
-            {{ Number(ownerLiquidity) }}
+            {{ Number(ownerLiquidity).toFixed(4) }}
           </div>
         </div>
       </div>

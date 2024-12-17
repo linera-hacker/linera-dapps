@@ -53,6 +53,7 @@ const onCreateMemeTokenClick = () => {
 }
 
 onMounted(() => {
+  if (window.location.pathname !== '/') return
   if (window.location.hostname.endsWith('linerameme.fun')) {
     selectedIcon.value = lineraMemeLogo
     void router.push({ path: '/meme' })
@@ -62,6 +63,9 @@ onMounted(() => {
   } else if (window.location.hostname.endsWith('blobgateway.com')) {
     selectedIcon.value = blobGatewayLogo
     void router.push({ path: '/blob' })
+  } else {
+    selectedIcon.value = lineraMemeLogo
+    void router.push({ path: '/meme' })
   }
 })
 
