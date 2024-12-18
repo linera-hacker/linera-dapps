@@ -27,8 +27,8 @@ options="N:n:"
 NETWORK_ID=1
 NETWORK_TYPE=devnet
 
-blob_gateway_creation_chain_id="c49d016b7770044b52de1a358ed6e037f2ebaab9ede5007018170638133bfc56"
-blob_gateway_app_id="6b1a6722636edf2f070b8563e27aaecb0ae12e05ea634917d55e0be86767c062f63ea0ad4991d52c422372831afda03e5e16ac9317d735d7b80e2ea6ff9fa0e7c49d016b7770044b52de1a358ed6e037f2ebaab9ede5007018170638133bfc560f0000000000000000000000"
+blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03"
+blob_gateway_app_id="b348f8039b02f685b8f90c147a650ea4ff590f74513c8080205836debcd7df6c69f4f4c55c769e3465e3f80c89c4d557a5ed748c1c41c1d2c19bf8e26389fbb31db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
 
 app_logo_path='./assets/HackerLogoDark.png'
 
@@ -608,19 +608,19 @@ print $'\U01F4AB' $LIGHTGREEN " WLINERA Creation Chain: $wlinera_creation_chain"
 print $'\U01F4AB' $LIGHTGREEN " TLA Application: $erc20_1_appid"
 print $'\U01F4AB' $LIGHTGREEN " TLA Creation Chain: $erc20_1_creation_chain"
 
-sed -i "s/erc20BID =.*/erc20BID = '$erc20_2_bid'/g" webui/src/const/const.ts
-sed -i "s/swapCreationChainID =.*/swapCreationChainID = '$swap_creation_chain'/g" webui/src/const/const.ts
-sed -i "s/swapCreationOwner =.*/swapCreationOwner = '$swap_creation_owner'/g" webui/src/const/const.ts
-sed -i "s/swapAppID =.*/swapAppID = '$swap_appid'/g" webui/src/const/const.ts
-sed -i "s/wlineraAppID =.*/wlineraAppID = '$erc20_2_appid'/g" webui/src/const/const.ts
-sed -i "s/amsCreationChainID =.*/amsCreationChainID = '$ams_creation_chain'/g" webui/src/const/const.ts
-sed -i "s/amsAppID =.*/amsAppID = '$ams_appid'/g" webui/src/const/const.ts
-sed -i "s/swapEndPoint =.*/swapEndPoint = 'http:\/\/$WALLET_12_PUBLIC_IPORT'/g" webui/src/const/const.ts
-sed -i "s/amsEndPoint =.*/amsEndPoint = 'http:\/\/$WALLET_14_PUBLIC_IPORT'/g" webui/src/const/const.ts
-sed -i "s/klineEndpoint =.*/klineEndpoint = 'http:\/\/$LOCAL_IP:30100'/g" webui/src/const/const.ts
-sed -i "s/blobGatewayEndpoint =.*/blobGatewayEndpoint = 'http:\/\/$BLOB_GATEWAY_PUBLIC_IPORT'/g" webui/src/const/const.ts
-sed -i "s/blobGatewayCreationChainID =.*/blobGatewayCreationChainID = '$blob_gateway_creation_chain_id'/g" webui/src/const/const.ts
-sed -i "s/blobGatewayAppID =.*/blobGatewayAppID = '$blob_gateway_app_id'/g" webui/src/const/const.ts
+sed -i "s/erc20BytecodeId: .*/erc20BytecodeId: '$erc20_2_bid',/g" webui/src/mystore/host/index.ts
+sed -i "s/swapCreationChainId: .*/swapCreationChainId: '$swap_creation_chain',/g" webui/src/mystore/host/index.ts
+sed -i "s/swapCreationOwner: .*/swapCreationOwner: '$swap_creation_owner',/g" webui/src/mystore/host/index.ts
+sed -i "s/swapApplicationId: .*/swapApplicationId: '$swap_appid',/g" webui/src/mystore/host/index.ts
+sed -i "s/wlineraApplicationId: .*/wlineraApplicationId: '$erc20_2_appid',/g" webui/src/mystore/host/index.ts
+sed -i "s/amsCreationChainId: .*/amsCreationChainId: '$ams_creation_chain',/g" webui/src/mystore/host/index.ts
+sed -i "s/amsApplicationId: .*/amsApplicationId: '$ams_appid',/g" webui/src/mystore/host/index.ts
+sed -i "s/swapEndPoint: .*/swapEndPoint: 'http:\/\/$WALLET_12_PUBLIC_IPORT',/g" webui/src/mystore/host/index.ts
+sed -i "s/amsEndPoint: .*/amsEndPoint: 'http:\/\/$WALLET_14_PUBLIC_IPORT',/g" webui/src/mystore/host/index.ts
+sed -i "s/klineEndpoint: .*/klineEndpoint: 'http:\/\/$LOCAL_IP:30100',/g" webui/src/mystore/host/index.ts
+sed -i "s/blobGatewayEndpoint: .*/blobGatewayEndpoint: 'http:\/\/$BLOB_GATEWAY_PUBLIC_IPORT',/g" webui/src/mystore/host/index.ts
+sed -i "s/blobGatewayCreationChainId: .*/blobGatewayCreationChainId: '$blob_gateway_creation_chain_id',/g" webui/src/mystore/host/index.ts
+sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id',/g" webui/src/mystore/host/index.ts
 
 sed -i "s/server-addr=.*/server-addr='http:\/\/$WALLET_12_PUBLIC_IPORT'/g" service/kline/config/config.toml
 sed -i "s/chain-id=.*/chain-id='$swap_creation_chain'/g" service/kline/config/config.toml
