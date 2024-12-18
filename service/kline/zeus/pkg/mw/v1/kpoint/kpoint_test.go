@@ -8,13 +8,13 @@ import (
 	"testing"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
-	v1 "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
-	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	"github.com/linera-hacker/linera-dapps/service/kline/proto/kline"
+	v1 "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
 )
 
 func init() {

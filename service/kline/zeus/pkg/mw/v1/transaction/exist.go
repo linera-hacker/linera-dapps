@@ -3,10 +3,10 @@ package transaction
 import (
 	"context"
 
-	transactioncrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	transactionent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
+	transactioncrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	transactionent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 )
 
 func (h *Handler) ExistTransaction(ctx context.Context) (bool, error) {

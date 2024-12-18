@@ -3,8 +3,8 @@ package transaction
 import (
 	"context"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 func (h *Handler) CreateTransaction(ctx context.Context) error {

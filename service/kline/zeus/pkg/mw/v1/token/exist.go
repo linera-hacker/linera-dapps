@@ -3,10 +3,10 @@ package token
 import (
 	"context"
 
-	tokencrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	tokenent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
+	tokencrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	tokenent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/token"
 )
 
 func (h *Handler) ExistToken(ctx context.Context) (bool, error) {

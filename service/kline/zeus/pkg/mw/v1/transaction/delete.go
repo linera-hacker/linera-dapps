@@ -5,11 +5,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
-	crud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	crud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 type deleteHandler struct {

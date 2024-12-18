@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
 )
 
 // KPointDelete is the builder for deleting a KPoint entity.

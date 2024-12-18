@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 func (h *Handler) CreateTokenPair(ctx context.Context) error {

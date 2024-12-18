@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	tokenproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
-	constant "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/const"
-	tokencrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
+	tokenproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/token"
+	constant "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/const"
+	tokencrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )

@@ -4,9 +4,9 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/mixin"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/mixin"
 )
 
 type KPoint struct {

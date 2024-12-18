@@ -7,8 +7,8 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/danced25519/linera-dapps/service/kline/common/version"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	"github.com/linera-hacker/linera-dapps/service/kline/common/version"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"

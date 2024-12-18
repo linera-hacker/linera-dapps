@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	"github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 type MultiHandler struct {

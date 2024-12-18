@@ -4,7 +4,7 @@ package tokenpair
 
 import (
 	"entgo.io/ent/dialect/sql"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.

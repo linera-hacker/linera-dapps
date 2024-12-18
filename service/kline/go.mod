@@ -1,4 +1,4 @@
-module github.com/danced25519/linera-dapps/service/kline
+module github.com/linera-hacker/linera-dapps/service/kline
 
 go 1.19
 
@@ -20,16 +20,6 @@ require (
 	google.golang.org/grpc v1.63.0
 	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.2.0
 	google.golang.org/protobuf v1.33.0
-)
-
-require (
-	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/mattn/go-runewidth v0.0.9 // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/spf13/cobra v1.5.0 // indirect
-	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 )
 
 require (

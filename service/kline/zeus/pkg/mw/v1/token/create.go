@@ -4,10 +4,10 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	tokenproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
-	tokencrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	tokenproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/token"
+	tokencrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 func (h *Handler) CreateToken(ctx context.Context) (*tokenproto.Token, error) {

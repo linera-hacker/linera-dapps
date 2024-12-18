@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	kpriceent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpriceent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
 )
 
 type Req struct {

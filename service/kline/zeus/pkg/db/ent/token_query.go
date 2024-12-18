@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/token"
 )
 
 // TokenQuery is the builder for querying Token entities.

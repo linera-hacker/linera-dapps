@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
 )
 
 // KPriceQuery is the builder for querying KPrice entities.

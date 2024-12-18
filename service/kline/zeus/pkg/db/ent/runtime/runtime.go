@@ -5,12 +5,12 @@ package runtime
 import (
 	"context"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/schema"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/schema"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/token"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 
 	"entgo.io/ent"
 	"entgo.io/ent/privacy"

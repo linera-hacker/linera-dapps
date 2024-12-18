@@ -20,7 +20,7 @@ PLATFORMS=(
 OUTPUT=$PROJECT_FOLDER/output
 
 
-pkg=github.com/danced25519/linera-dapps/service/kline/common/version
+pkg=github.com/linera-hacker/linera-dapps/service/kline/common/version
 service_name=$(
     cd $PROJECT_FOLDER
     basename $(pwd)

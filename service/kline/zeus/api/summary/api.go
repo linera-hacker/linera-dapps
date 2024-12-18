@@ -3,7 +3,7 @@ package summary
 import (
 	"context"
 
-	summary "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
+	summary "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

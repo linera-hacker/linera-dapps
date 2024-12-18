@@ -3,8 +3,8 @@ package transaction
 import (
 	"context"
 
-	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
-	transaction "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
+	transactionproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	transaction "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 

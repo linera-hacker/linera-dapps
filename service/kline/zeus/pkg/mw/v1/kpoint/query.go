@@ -6,15 +6,15 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/danced25519/linera-dapps/service/kline/common/kptype"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
-	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	kpointent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpointent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
 
-	kpointcrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kpoint"
+	kpointcrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/kpoint"
 )
 
 type queryHandler struct {
