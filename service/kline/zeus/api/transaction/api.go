@@ -3,7 +3,7 @@ package transaction
 import (
 	"context"
 
-	transaction "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction"
+	transaction "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

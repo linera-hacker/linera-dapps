@@ -3,10 +3,10 @@ package kprice
 import (
 	"context"
 
-	kpricecrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/kprice"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	kpriceent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kprice"
+	kpricecrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpriceent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
 )
 
 func (h *Handler) ExistKPrice(ctx context.Context) (bool, error) {

@@ -3,7 +3,7 @@ package kpoint
 import (
 	"context"
 
-	kpoint "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint"
+	kpoint "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package kline.v1.kprice;
 
-option go_package = "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kprice";
+option go_package = "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice";
 import "google/api/annotations.proto";
 import "kline/kline.proto";
 

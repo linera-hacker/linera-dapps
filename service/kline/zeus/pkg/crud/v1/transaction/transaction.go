@@ -3,9 +3,9 @@ package transaction
 import (
 	"fmt"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	transactionent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/transaction"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	transactionent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 )
 
 type Req struct {

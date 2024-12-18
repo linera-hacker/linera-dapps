@@ -7,13 +7,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Geapefurit/kline-back/proto/kline"
-	kpriceproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
 )
 
 func init() {

@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 
-	transactionproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction"
-	transaction "github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/transaction"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	transaction "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

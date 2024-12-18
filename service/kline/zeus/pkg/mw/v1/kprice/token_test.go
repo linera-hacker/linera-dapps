@@ -8,8 +8,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	tokenproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/token"
-	"github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/token"
+	tokenproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/token"
 )
 
 func init() {

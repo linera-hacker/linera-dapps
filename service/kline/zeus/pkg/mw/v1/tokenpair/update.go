@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 func (h *Handler) UpdateTokenPair(ctx context.Context) error {

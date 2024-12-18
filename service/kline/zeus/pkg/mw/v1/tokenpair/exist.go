@@ -3,10 +3,10 @@ package tokenpair
 import (
 	"context"
 
-	tokenpaircrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/tokenpair"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	tokenpairent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/tokenpair"
+	tokenpaircrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	tokenpairent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
 )
 
 func (h *Handler) ExistTokenPair(ctx context.Context) (bool, error) {

@@ -3,14 +3,14 @@ package api
 import (
 	"context"
 
-	mw "github.com/Geapefurit/kline-back/proto/kline/zeus/v1"
+	mw "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1"
 
-	"github.com/Geapefurit/kline-back/zeus/api/kpoint"
-	"github.com/Geapefurit/kline-back/zeus/api/kprice"
-	"github.com/Geapefurit/kline-back/zeus/api/summary"
-	"github.com/Geapefurit/kline-back/zeus/api/token"
-	"github.com/Geapefurit/kline-back/zeus/api/tokenpair"
-	"github.com/Geapefurit/kline-back/zeus/api/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/api/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/api/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/api/summary"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/api/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/api/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/api/transaction"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

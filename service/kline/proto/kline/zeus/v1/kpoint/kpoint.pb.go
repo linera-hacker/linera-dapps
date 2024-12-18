@@ -7,8 +7,8 @@
 package kpoint
 
 import (
-	kline "github.com/Geapefurit/kline-back/proto/kline"
-	v1 "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
+	kline "github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	v1 "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"

@@ -3,7 +3,7 @@ package tokenpair
 import (
 	"context"
 
-	tokenpair "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/tokenpair"
+	tokenpair "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

@@ -3,8 +3,8 @@ package kprice
 import (
 	"context"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 func (h *Handler) CreateKPrice(ctx context.Context) error {

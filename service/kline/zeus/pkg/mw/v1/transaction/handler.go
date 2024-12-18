@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	transactionproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction"
-	constant "github.com/Geapefurit/kline-back/zeus/pkg/const"
-	transactioncrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/transaction"
+	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	constant "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/const"
+	transactioncrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )

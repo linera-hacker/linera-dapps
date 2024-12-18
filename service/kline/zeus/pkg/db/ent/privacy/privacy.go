@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
 
 	"entgo.io/ent/entql"
 	"entgo.io/ent/privacy"

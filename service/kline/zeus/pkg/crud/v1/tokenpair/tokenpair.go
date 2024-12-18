@@ -3,9 +3,9 @@ package tokenpair
 import (
 	"fmt"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	tokenpairent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/tokenpair"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	tokenpairent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
 )
 
 type Req struct {

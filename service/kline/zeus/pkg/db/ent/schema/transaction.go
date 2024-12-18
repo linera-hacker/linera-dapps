@@ -5,7 +5,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/mixin"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/mixin"
 )
 
 type Transaction struct {

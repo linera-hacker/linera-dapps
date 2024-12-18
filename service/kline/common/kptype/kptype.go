@@ -3,8 +3,8 @@ package kptype
 import (
 	"time"
 
-	basetype "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
-	kpointproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint"
+	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
 )
 
 var KPointTypeInfos = map[basetype.KPointType]*kpointproto.KPointTypeInfo{

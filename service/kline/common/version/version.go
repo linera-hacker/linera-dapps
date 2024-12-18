@@ -3,7 +3,7 @@ package version
 import (
 	"fmt"
 
-	"github.com/Geapefurit/kline-back/proto/kline"
+	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
 
 	logger "github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	cv "github.com/NpoolPlatform/go-service-framework/pkg/version"

@@ -5,12 +5,12 @@ import (
 	"context"
 	"sort"
 
-	"github.com/Geapefurit/kline-back/common/kptype"
-	"github.com/Geapefurit/kline-back/proto/kline"
-	kpointproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint"
-	kpoint "github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/kpoint"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/common/kptype"
+	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	kpoint "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/kpoint"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

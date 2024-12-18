@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"entgo.io/ent/entql"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/privacy"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/privacy"
 )
 
 func FilterTimeRule() privacy.QueryMutationRule {

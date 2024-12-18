@@ -8,7 +8,7 @@ package v1
 
 import (
 	context "context"
-	kline "github.com/Geapefurit/kline-back/proto/kline"
+	kline "github.com/danced25519/linera-dapps/service/kline/proto/kline"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

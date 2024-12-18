@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kprice"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/predicate"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
 )
 
 // KPriceDelete is the builder for deleting a KPrice entity.

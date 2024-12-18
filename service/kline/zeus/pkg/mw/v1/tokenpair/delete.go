@@ -5,11 +5,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/Geapefurit/kline-back/proto/kline/zeus/v1/tokenpair"
-	crud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
+	crud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/tokenpair"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 type deleteHandler struct {

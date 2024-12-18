@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
 )
 
 // KPrice is the model entity for the KPrice schema.

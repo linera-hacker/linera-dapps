@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	basetype "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
-	kpointproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint"
-	constant "github.com/Geapefurit/kline-back/zeus/pkg/const"
-	kpointcrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/kpoint"
-	"github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/tokenpair"
+	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	constant "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/const"
+	kpointcrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )

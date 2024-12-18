@@ -4,11 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/Geapefurit/kline-back/config"
-	transactionproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction"
-	"github.com/Geapefurit/kline-back/zeus/pkg/applications"
-	"github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/transaction"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"github.com/danced25519/linera-dapps/service/kline/config"
+	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/applications"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 )
 
 type SamplingTransactionTask struct {

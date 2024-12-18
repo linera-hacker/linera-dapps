@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
 )
 
 // Token is the model entity for the Token schema.

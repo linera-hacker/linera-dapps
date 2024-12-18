@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/predicate"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
 )
 
 // TokenDelete is the builder for deleting a Token entity.

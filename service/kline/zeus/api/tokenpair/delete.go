@@ -3,8 +3,8 @@ package tokenpair
 import (
 	"context"
 
-	tokenpairproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/tokenpair"
-	tokenpair "github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/tokenpair"
+	tokenpairproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
+	tokenpair "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
