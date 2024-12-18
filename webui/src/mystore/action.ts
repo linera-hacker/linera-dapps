@@ -18,6 +18,7 @@ function doAction<MyRequest, MyResponse> (
   message: notification.ReqMessage,
   success: (resp: MyResponse) => void) {
   const _url = new URL(url)
+  const pathname = _url.pathname
   const api = axios.create({
     baseURL: _url.protocol + '//' + _url.host,
     headers: {
@@ -28,7 +29,7 @@ function doAction<MyRequest, MyResponse> (
     timeout: 60000
   })
   api
-    .post<MyRequest, AxiosResponse<MyResponse>>(url, req)
+    .post<MyRequest, AxiosResponse<MyResponse>>(pathname, req)
     .then((response: AxiosResponse<MyResponse>) => {
       success(response.data)
       if (message.Info) {
@@ -46,6 +47,7 @@ function doActionWithError<MyRequest, MyResponse> (
   success: (resp: MyResponse) => void,
   error: () => void) {
   const _url = new URL(url)
+  const pathname = _url.pathname
   const headers: Record<string, string | number | boolean> = {
     'Content-Type': 'application/json'
   }
@@ -57,7 +59,7 @@ function doActionWithError<MyRequest, MyResponse> (
     timeout: 60000
   })
   api
-    .post<MyRequest, AxiosResponse<MyResponse>>(url, req)
+    .post<MyRequest, AxiosResponse<MyResponse>>(pathname, req)
     .then((response: AxiosResponse<MyResponse>) => {
       success(response.data)
       if (message.Info) {
