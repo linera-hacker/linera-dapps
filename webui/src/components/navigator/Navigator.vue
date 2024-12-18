@@ -67,7 +67,10 @@ onMounted(() => {
   _host.blobGatewayDomainApiHost = apiHost + '/api/blobs'
   _host.swapDomainApiHost = apiHost + '/api/swap'
   _host.windowHost = window.location.host
-  // _host.apiSchema = window.location.protocol.replace(':', '')
+
+  if (window.location.protocol.startsWith('https')) {
+    _host.apiSchema = 'https'
+  }
 
   if (window.location.pathname !== '/') return
 
