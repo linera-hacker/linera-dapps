@@ -6,13 +6,13 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/danced25519/linera-dapps/service/kline/common/kptype"
-	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
-	summaryproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
-	tokenpairproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
+	"github.com/linera-hacker/linera-dapps/service/kline/proto/kline"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
+	summaryproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
+	tokenpairproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 )
 
 var oneDayTokenVolumn []*summaryproto.TokenVolumn

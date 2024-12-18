@@ -6,13 +6,13 @@ import (
 
 	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	transactionproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	transactionent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	transactionent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 
-	transactioncrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
+	transactioncrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
 )
 
 type queryHandler struct {

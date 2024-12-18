@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
-	constant "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/const"
-	kpricecrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kprice"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
+	kpriceproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
+	constant "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/const"
+	kpricecrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )

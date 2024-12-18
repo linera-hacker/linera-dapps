@@ -8,14 +8,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/danced25519/linera-dapps/service/kline/common/server"
-	"github.com/danced25519/linera-dapps/service/kline/config"
+	"github.com/linera-hacker/linera-dapps/service/kline/common/server"
+	"github.com/linera-hacker/linera-dapps/service/kline/config"
 	cli "github.com/urfave/cli/v2"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/beat"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/beat"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
 )
 
 func init() {

@@ -7,7 +7,7 @@
 package token
 
 import (
-	kline "github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	kline "github.com/linera-hacker/linera-dapps/service/kline/proto/kline"
 	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"

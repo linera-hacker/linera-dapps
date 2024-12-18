@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	tokenpairproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
-	tokenpair "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
+	tokenpairproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
+	tokenpair "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

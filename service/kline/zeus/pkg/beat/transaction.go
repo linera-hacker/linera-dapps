@@ -5,10 +5,10 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/danced25519/linera-dapps/service/kline/config"
-	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/applications"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/config"
+	transactionproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/applications"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 )
 
 type SamplingTransactionTask struct {

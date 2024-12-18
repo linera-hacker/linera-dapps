@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
-	kprice "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
+	kpriceproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
+	kprice "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

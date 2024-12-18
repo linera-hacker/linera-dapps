@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	kpointent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpointent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
 )
 
 type Req struct {

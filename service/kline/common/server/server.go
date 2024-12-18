@@ -6,9 +6,9 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/danced25519/linera-dapps/service/kline/common/servermux"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/api"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"github.com/linera-hacker/linera-dapps/service/kline/common/servermux"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/reflection"

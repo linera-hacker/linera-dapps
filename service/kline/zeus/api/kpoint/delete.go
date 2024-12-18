@@ -3,8 +3,8 @@ package kpoint
 import (
 	"context"
 
-	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
-	kpoint "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/kpoint"
+	kpointproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	kpoint "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kpoint"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 

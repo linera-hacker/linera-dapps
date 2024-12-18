@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
 )
 
 type sqlHandler struct {

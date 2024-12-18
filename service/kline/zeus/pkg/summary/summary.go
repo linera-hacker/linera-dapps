@@ -6,16 +6,16 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/danced25519/linera-dapps/service/kline/common/kptype"
-	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
-	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
-	summaryproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
-	tokenpairproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
-	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
+	"github.com/linera-hacker/linera-dapps/service/kline/proto/kline"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpriceproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
+	summaryproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
+	tokenpairproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
+	transactionproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 )
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {

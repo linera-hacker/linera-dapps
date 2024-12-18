@@ -9,8 +9,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 )
 
 // TransactionDelete is the builder for deleting a Transaction entity.

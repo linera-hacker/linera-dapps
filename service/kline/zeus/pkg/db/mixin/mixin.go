@@ -2,8 +2,8 @@ package mixin
 
 import (
 	"entgo.io/ent"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/privacy"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/rule"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/privacy"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/rule"
 )
 
 func (TimeMixin) Mixin() []ent.Mixin {

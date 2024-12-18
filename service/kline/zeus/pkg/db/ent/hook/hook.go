@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 // The KPointFunc type is an adapter to allow the use of ordinary

@@ -73,7 +73,7 @@ func ValidColumn(column string) bool {
 // package on the initialization of the application. Therefore,
 // it should be imported in the main as follows:
 //
-//	import _ "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/runtime"
+//	import _ "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/runtime"
 var (
 	Hooks  [1]ent.Hook
 	Policy ent.Policy

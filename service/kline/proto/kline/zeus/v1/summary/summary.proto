@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package kline.v1.summary;
 
-option go_package = "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/summary";
+option go_package = "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/summary";
 import "google/api/annotations.proto";
 
 service Manager {

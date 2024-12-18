@@ -5,15 +5,15 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
-	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
-	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
-	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
+	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
+	kpriceproto "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
 
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
-	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
-	kpriceent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpriceent "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
 
-	kpricecrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kprice"
+	kpricecrud "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/crud/v1/kprice"
 )
 
 type queryHandler struct {
