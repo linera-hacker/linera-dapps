@@ -7,14 +7,14 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/Geapefurit/kline-back/proto/kline"
-	v1 "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
-	kpointproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	v1 "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
 )
 
 func init() {

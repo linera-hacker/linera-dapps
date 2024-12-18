@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
 )
 
 // KPoint is the model entity for the KPoint schema.

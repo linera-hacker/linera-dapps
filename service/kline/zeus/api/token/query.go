@@ -4,9 +4,9 @@ package token
 import (
 	"context"
 
-	tokenproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/token"
-	token "github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/token"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	tokenproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
+	token "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/token"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

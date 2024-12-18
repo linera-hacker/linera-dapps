@@ -3,10 +3,10 @@ package kpoint
 import (
 	"context"
 
-	kpointcrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/kpoint"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	kpointent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kpoint"
+	kpointcrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpointent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
 )
 
 func (h *Handler) ExistKPoint(ctx context.Context) (bool, error) {

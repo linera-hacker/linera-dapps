@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/servicename"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/go-service-framework/pkg/version"
 	banner "github.com/common-nighthawk/go-figure"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/servicename"
 	cli "github.com/urfave/cli/v2"
 )
 

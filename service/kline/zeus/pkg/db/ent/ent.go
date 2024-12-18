@@ -10,11 +10,11 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kpoint"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kprice"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/tokenpair"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 )
 
 // ent aliases to avoid import conflicts in user's code.

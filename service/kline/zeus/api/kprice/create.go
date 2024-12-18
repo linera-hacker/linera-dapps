@@ -5,9 +5,9 @@ import (
 	"context"
 	"fmt"
 
-	kpriceproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kprice"
-	kprice "github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/kprice"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
+	kprice "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"

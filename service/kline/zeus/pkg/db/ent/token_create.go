@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
 )
 
 // TokenCreate is the builder for creating a Token entity.

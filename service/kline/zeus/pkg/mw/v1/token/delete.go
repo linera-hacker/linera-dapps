@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"time"
 
-	tokenproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/token"
-	tokencrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/token"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
+	tokenproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
+	tokencrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
 )
 
 func (h *Handler) DeleteToken(ctx context.Context) (*tokenproto.Token, error) {

@@ -3,7 +3,7 @@ package token
 import (
 	"context"
 
-	token "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/token"
+	token "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

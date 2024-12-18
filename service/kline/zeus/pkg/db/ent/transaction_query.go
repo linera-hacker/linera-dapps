@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/predicate"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 )
 
 // TransactionQuery is the builder for querying Transaction entities.

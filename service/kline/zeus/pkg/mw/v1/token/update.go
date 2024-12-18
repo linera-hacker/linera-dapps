@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	tokenproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/token"
-	tokencrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/token"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	tokenent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
+	tokenproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/token"
+	tokencrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	tokenent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
 )
 
 func (h *Handler) UpdateToken(ctx context.Context) (*tokenproto.Token, error) {

@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
-	transactionproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	transactionent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	transactionent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 
-	transactioncrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/transaction"
+	transactioncrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/transaction"
 )
 
 type queryHandler struct {

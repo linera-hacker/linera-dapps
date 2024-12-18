@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kpoint"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kprice"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/predicate"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/tokenpair"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 
 	"entgo.io/ent"
 )

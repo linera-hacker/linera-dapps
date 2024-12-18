@@ -10,14 +10,14 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	"github.com/Geapefurit/kline-back/config"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
+	"github.com/danced25519/linera-dapps/service/kline/config"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 
 	// ent policy runtime
-	_ "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/runtime"
+	_ "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/runtime"
 	_ "github.com/go-sql-driver/mysql"
 )
 

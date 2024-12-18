@@ -1,4 +1,4 @@
-module github.com/Geapefurit/kline-back
+module github.com/danced25519/linera-dapps/service/kline
 
 go 1.19
 

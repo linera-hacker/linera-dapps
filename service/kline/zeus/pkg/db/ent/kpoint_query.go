@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kpoint"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/predicate"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/predicate"
 )
 
 // KPointQuery is the builder for querying KPoint entities.

@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/transaction"
 )
 
 // Transaction is the model entity for the Transaction schema.

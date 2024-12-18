@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Geapefurit/kline-back/common/kptype"
-	basetype "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
-	kpointproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kpoint"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/common/kptype"
+	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpointproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kpoint"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	kpointent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/kpoint"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	kpointent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/kpoint"
 
-	kpointcrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/kpoint"
+	kpointcrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/kpoint"
 )
 
 type queryHandler struct {

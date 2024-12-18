@@ -19,7 +19,8 @@ PLATFORMS=(
 )
 OUTPUT=$PROJECT_FOLDER/output
 
-pkg=github.com/Geapefurit/linera-back/common/version
+
+pkg=github.com/danced25519/linera-dapps/service/kline/common/version
 service_name=$(
     cd $PROJECT_FOLDER
     basename $(pwd)

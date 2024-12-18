@@ -2,4 +2,4 @@
 
 package ent
 
-// The schema-stitching logic is generated in github.com/Geapefurit/kline-back/zeus/pkg/db/ent/runtime/runtime.go
+// The schema-stitching logic is generated in github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/runtime/runtime.go

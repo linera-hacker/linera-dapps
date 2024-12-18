@@ -1,5 +1,3 @@
-<a href="https://github.com/Geapefurit/kline/actions/workflows/ci.yml"><img src="https://github.com/Geapefurit/kline/workflows/test/badge.svg" alt="build status"></a>
-
 # kline (kline)
 vue3 framework use quasar ui and pinia manage store
 

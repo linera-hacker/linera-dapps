@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
-	tokenpairproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/tokenpair"
+	tokenpairproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
 
-	"github.com/Geapefurit/kline-back/zeus/pkg/db"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent"
-	"github.com/Geapefurit/kline-back/zeus/pkg/db/ent/token"
-	tokenpairent "github.com/Geapefurit/kline-back/zeus/pkg/db/ent/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/token"
+	tokenpairent "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/db/ent/tokenpair"
 
-	tokenpaircrud "github.com/Geapefurit/kline-back/zeus/pkg/crud/v1/tokenpair"
+	tokenpaircrud "github.com/danced25519/linera-dapps/service/kline/zeus/pkg/crud/v1/tokenpair"
 )
 
 type queryHandler struct {

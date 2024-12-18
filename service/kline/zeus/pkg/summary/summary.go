@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Geapefurit/kline-back/common/kptype"
-	"github.com/Geapefurit/kline-back/proto/kline"
-	basetype "github.com/Geapefurit/kline-back/proto/kline/basetype/v1"
-	kpriceproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/kprice"
-	summaryproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/summary"
-	tokenpairproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/tokenpair"
-	transactionproto "github.com/Geapefurit/kline-back/proto/kline/zeus/v1/transaction"
-	"github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/kprice"
-	"github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/tokenpair"
-	"github.com/Geapefurit/kline-back/zeus/pkg/mw/v1/transaction"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+	"github.com/danced25519/linera-dapps/service/kline/common/kptype"
+	"github.com/danced25519/linera-dapps/service/kline/proto/kline"
+	basetype "github.com/danced25519/linera-dapps/service/kline/proto/kline/basetype/v1"
+	kpriceproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/kprice"
+	summaryproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/summary"
+	tokenpairproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/tokenpair"
+	transactionproto "github.com/danced25519/linera-dapps/service/kline/proto/kline/zeus/v1/transaction"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
+	"github.com/danced25519/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 )
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
