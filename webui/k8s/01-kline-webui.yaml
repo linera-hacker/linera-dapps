@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webui-template
+  name: kline-webui
   namespace: kube-system
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: webui-template
+      app: kline-webui
   template:
     metadata:
       labels:
-        app: webui-template
+        app: kline-webui
     spec:
       containers:
-        - name: webui-template
-          image: uhub.service.ucloud.cn/entropypool/webui-template:latest
+        - name: kline-webui
+          image: DOCKER_REGISTRY/entropypool/kline-webui:latest
           imagePullPolicy: Always
           env:
             - name: ENV_ENVIRONMENT_TARGET
@@ -42,7 +42,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: webui-template
+  name: kline-webui
   namespace: kube-system
 spec:
   ports:
@@ -50,4 +50,4 @@ spec:
       port: 80
       targetPort: 80
   selector:
-    app: webui-template
+    app: kline-webui

@@ -1,0 +1,4 @@
+resources:
+  - 01-kline-service.yaml
+  - 02-traefik-ingress.yaml
+  - 03-strip-prefix.yaml
