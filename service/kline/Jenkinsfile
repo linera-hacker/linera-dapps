@@ -2,93 +2,14 @@ pipeline {
   agent any
   environment {
     GOPROXY = 'https://goproxy.cn,direct'
-    // env info from hack/set-golang-env.sh
-    GOVERSION = "go1.19.13"
-    GOTMPENV = "/opt/.golang/$GOVERSION"
-    GOROOT = "$GOTMPENV/goroot"
-    GOPATH = "$GOTMPENV/gopath"
-    GOBIN = "$GOROOT/bin"
-    PATH = "$PATH:$GOBIN"
-    GO111MODULE = "on"
+  }
+  tools {
+    go 'go'
   }
   stages {
     stage('Clone') {
       steps {
-        sh(returnStdout: true, script: '''
-          git tag -l | xargs git tag -d
-          git fetch origin --prune
-          echo "update tags for repo"
-        '''.stripIndent())
-        git(url: scm.userRemoteConfigs[0].url,credentialsId: 'KK-github-key', branch: '$BRANCH_NAME', changelog: true, poll: true)
-      }
-    }
-    stage('Prepare Golang ENV') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-      }
-      steps {
-        sh 'make prepare-golang-env'
-      }
-    }
-
-    stage('Prepare') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-      }
-      steps {
-        sh 'make deps'
-      }
-    }
-       
-    stage('Linting') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-      }
-      steps {
-        sh 'make verify'
-      }
-    }
-
-    stage('Compile') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-      }
-      steps {
-        sh (returnStdout: false, script: '''
-          TAG=latest make build
-        '''.stripIndent())
-      }
-    }
-
-    // TODO: support UT
-    stage('Unit Tests') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-      }
-      steps {
-        sh (returnStdout: false, script: '''
-          echo "TODO:will make it ok"
-        '''.stripIndent())
-      }
-    }
-
-    stage('Generate docker image for dev') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
-      }
-      steps {
-        sh 'TAG=latest DOCKER_REGISTRY=$DOCKER_REGISTRY make build-docker'
-      }
-    }
-    
-    stage('Release docker image for dev') {
-      when {
-        expression { RELEASE_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
-      }
-      steps {
-        sh 'TAG=latest DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker'
+        git(url: scm.userRemoteConfigs[0].url, branch: '$BRANCH_NAME', changelog: true, credentialsId: 'KK-github-key', poll: true)
       }
     }
 
@@ -98,80 +19,67 @@ pipeline {
         expression { BRANCH_NAME != 'master' }
       }
       steps {
-        sh 'make verify-build'
         sh(returnStdout: false, script: '''
+          cd service/kline/build
+          export all_proxy=$ALL_PROXY
+          export ENV_GO_DOWNLOAD_URL=$ENV_GO_DOWNLOAD_URL
+          export GO_DOWNLOAD_URL=$ENV_GO_DOWNLOAD_URL
           feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          TAG=$feature_name DOCKER_REGISTRY=$DOCKER_REGISTRY make build-docker
+          sed -i "s#UBUNTU2004_DOCKER_REGISTRY_URL#$UBUNTU2004_DOCKER_REGISTRY_URL#g" Dockerfile
+          bash build-docker $BRANCH_NAME $feature_name
         '''.stripIndent())
       }
     }
 
-    stage('Release docker image for feature') {
+    stage('Generate docker image for development') {
       when {
-        expression { RELEASE_TARGET == 'true' }
-        expression { BRANCH_NAME != 'master' }
+        expression { BUILD_TARGET == 'true' }
+        expression { BRANCH_NAME == 'master' }
       }
       steps {
-         sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          TAG=$feature_name DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker
+        sh(returnStdout: false, script: '''
+          cd service/kline/build
+          export all_proxy=$ALL_PROXY
+          export ENV_GO_DOWNLOAD_URL=$ENV_GO_DOWNLOAD_URL
+          export GO_DOWNLOAD_URL=$ENV_GO_DOWNLOAD_URL
+          sed -i "s#UBUNTU2004_DOCKER_REGISTRY_URL#$UBUNTU2004_DOCKER_REGISTRY_URL#g" Dockerfile
+          bash build-docker $BRANCH_NAME latest
         '''.stripIndent())
       }
     }
 
-    stage('Tag') {
+    stage('Tag patch') {
       when {
-        anyOf{
-          expression { TAG_MAJOR == 'true' }
-          expression { TAG_MINOR == 'true' }
-          expression { TAG_PATCH == 'true' }
-        }
-        anyOf{
-          expression { TAG_FOR == 'testing' }
-          expression { TAG_FOR == 'production' }
-        }
+        expression { TAG_PATCH == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
+        sh(returnStdout: false, script: '''
           set +e
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-
-          major=0
-          minor=0
-          patch=-1
-          if [ "$TAG_FOR" == 'testing' ]; then
-            patch=0
-          fi
-          
-          if [ 0 -eq $rc ]; then
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
+
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
+
+            case $TAG_FOR in
+              testing)
+                patch=$(( $patch + $patch % 2 + 1 ))
+                ;;
+              production)
+                patch=$(( $patch + 1 ))
+                git reset --hard
+                git checkout $tag
+                ;;
+            esac
+
+            tag=$major.$minor.$patch
+          else
+            tag=0.1.1
           fi
-
-          if [ "$TAG_MAJOR" == 'true' ]; then
-            major=$(( $major + 1 ))
-            minor=0
-          elif [ "$TAG_MINOR" == 'true' ]; then
-            minor=$(( $minor + 1 ))
-          fi    
-
-          case $TAG_FOR in
-            testing)
-              patch=$(( $patch + $patch % 2 + 1 ))
-              ;;
-            production)
-              patch=$(( $patch + ( $patch +  1 ) % 2 + 1 ))
-              git reset --hard
-              git checkout $tag
-              ;;
-          esac
-
-          tag=$major.$minor.$patch
-          
           git tag -a $tag -m "Bump version to $tag"
         '''.stripIndent())
 
@@ -180,121 +88,120 @@ pipeline {
         }
       }
     }
-    
-    
-    stage('Pick tag version for testing') {
+
+    stage('Tag minor') {
       when {
-        anyOf{
-          expression { RELEASE_TARGET == 'true' }
-          expression { BUILD_TARGET == 'true' }
-        }
-        expression { TAG_FOR == 'testing' }
+        expression { TAG_MINOR == 'true' }
       }
       steps {
         sh(returnStdout: false, script: '''
           set +e
-          # sync remote tags
-          git tag -l | xargs git tag -d
-          git fetch origin --prune
+          revlist=`git rev-list --tags --max-count=1`
+          rc=$?
+          set -e
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
+            tag=`git describe --tags $revlist`
+
+            major=`echo $tag | awk -F '.' '{ print $1 }'`
+            minor=`echo $tag | awk -F '.' '{ print $2 }'`
+            patch=`echo $tag | awk -F '.' '{ print $3 }'`
+
+            minor=$(( $minor + 1 ))
+            patch=1
+
+            tag=$major.$minor.$patch
+          else
+            tag=0.1.1
+          fi
+          git tag -a $tag -m "Bump version to $tag"
         '''.stripIndent())
 
-        script {
-          env.TAG_VERSION = sh(returnStdout: true,
-            script: 'git tag|grep \'[13579]$\'|sort -V|tail -n 1| tr -d \'\\n\''
-            )
+        withCredentials([gitUsernamePassword(credentialsId: 'KK-github-key', gitToolName: 'git-tool')]) {
+          sh 'git push --tag'
         }
       }
     }
 
-    stage('Pick tag version for production') {
+    stage('Tag major') {
       when {
-        anyOf{
-          expression { RELEASE_TARGET == 'true' }
-          expression { BUILD_TARGET == 'true' }
-        }
-        expression { TAG_FOR == 'production' }
+        expression { TAG_MAJOR == 'true' }
       }
       steps {
         sh(returnStdout: false, script: '''
           set +e
-          # sync remote tags
-          git tag -l | xargs git tag -d
-          git fetch origin --prune
+          revlist=`git rev-list --tags --max-count=1`
+          rc=$?
+          set -e
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
+            tag=`git describe --tags $revlist`
+
+            major=`echo $tag | awk -F '.' '{ print $1 }'`
+            minor=`echo $tag | awk -F '.' '{ print $2 }'`
+            patch=`echo $tag | awk -F '.' '{ print $3 }'`
+
+            major=$(( $major + 1 ))
+            minor=0
+            patch=1
+
+            tag=$major.$minor.$patch
+          else
+            tag=0.1.1
+          fi
+          git tag -a $tag -m "Bump version to $tag"
         '''.stripIndent())
 
-        script {
-          env.TAG_VERSION = sh(returnStdout: true,
-           script: 'git tag|grep \'[02468]$\'|sort -V|tail -n 1| tr -d \'\\n\''
-            )
+        withCredentials([gitUsernamePassword(credentialsId: 'KK-github-key', gitToolName: 'git-tool')]) {
+          sh 'git push --tag'
         }
       }
     }
 
-    stage('Generate docker image for test or prod') {
+    stage('Generate docker image for testing or production') {
       when {
         expression { BUILD_TARGET == 'true' }
-        anyOf{
-          expression { TAG_FOR == 'testing' }
-          expression { TAG_FOR == 'production' }
-        }
       }
       steps {
         sh(returnStdout: false, script: '''
           set +e
-          git reset --hard
-          git checkout $TAG_VERSION
+          revlist=`git rev-list --tags --max-count=1`
+          rc=$?
+          set -e
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
+            tag=`git describe --tags $revlist`
+            git reset --hard
+            git checkout $tag
+          fi
         '''.stripIndent())
-        sh 'TAG=$TAG_VERSION DOCKER_REGISTRY=$DOCKER_REGISTRY make build-docker'
-      }
-    }
-    
-    stage('Release docker image for test or prod') {
-      when {
-        expression { RELEASE_TARGET == 'true' }
-        anyOf{
-          expression { TAG_FOR == 'testing' }
-          expression { TAG_FOR == 'production' }
-        }
-      }
-      steps {
-        sh 'TAG=$TAG_VERSION DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker'
+
+        sh(returnStdout: false, script: '''
+          cd service/kline/build
+          export all_proxy=$ALL_PROXY
+          export ENV_GO_DOWNLOAD_URL=$ENV_GO_DOWNLOAD_URL
+          export GO_DOWNLOAD_URL=$ENV_GO_DOWNLOAD_URL
+          sed -i "s#UBUNTU2004_DOCKER_REGISTRY_URL#$UBUNTU2004_DOCKER_REGISTRY_URL#g" Dockerfile
+          bash build-docker $tag $tag
+        '''.stripIndent())
       }
     }
 
-    stage('Release docker image for all(development testing production)') {
+    stage('Release docker image for development') {
       when {
         expression { RELEASE_TARGET == 'true' }
-        expression { TAG_FOR == '' }
-        expression { BRANCH_NAME == 'master' }
       }
       steps {
-        sh 'TAG=latest DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker'
         sh(returnStdout: false, script: '''
-          # sync remote tags
-          git tag -l | xargs git tag -d
-          git fetch origin --prune
-          echo $?
-
+          branch=latest
+          if [ "x$BRANCH_NAME" != "xmaster" ]; then
+            branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          fi
           set +e
-          prod_tag=$(git tag|grep '[02468]$'|sort -V|tail -n 1| tr -d '\n')
-          docker images | grep web3eye | grep $prod_tag
+          docker images | grep kline-service | grep $branch
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
-            TAG=$prod_tag DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker
+            DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
           fi
-
-          set +e
-          test_tag=$(git tag|grep '[13579]$'|sort -V|tail -n 1| tr -d '\n')
-          docker images | grep web3eye | grep $test_tag
-          rc=$?
-          set -e
-          if [ 0 -eq $rc ]; then
-            TAG=$test_tag DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker
-          fi
-        '''.stripIndent())
-        sh(returnStdout: false, script: '''
-          images=`docker images | grep 'web3eye|none' | awk '{ print $3 }'`
+          images=`docker images | grep entropypool | grep kline-service | grep none | awk '{ print $3 }'`
           for image in $images; do
             docker rmi $image -f
           done
@@ -302,150 +209,203 @@ pipeline {
       }
     }
 
-    // switch k8s env
-    stage('Switch to current cluster') {
+    stage('Release docker image for testing') {
       when {
-        expression { DEPLOY_TARGET == 'true' }
-      }
-
-      steps {
-        sh 'cd /etc/kubeasz; ./ezctl checkout $TARGET_ENV'
-      }
-    }
-
-    stage('Deploy for feature') {
-      when {
-        expression { DEPLOY_TARGET == 'true' }
-        expression { BRANCH_NAME != 'master' }
+        expression { RELEASE_TARGET == 'true' }
       }
       steps {
         sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          export CERT_NAME=$CERT_NAME  # for webui and dashboard
-          export ROOT_DOMAIN=$ROOT_DOMAIN  # for webui dashboard and gateway
-          export ROOT_DOMAIN_HTTP_PORT=$ROOT_DOMAIN_HTTP_PORT  # for gateway
-          TAG=$feature_name make deploy-to-k8s-cluster
-        '''.stripIndent())
-      }
-    }
-
-    stage('Deploy for dev') {
-      when {
-        expression { DEPLOY_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
-        expression { TARGET_ENV ==~ /.*development.*/ }
-      }
-      steps {
-         sh(returnStdout: true, script: '''
-          export CERT_NAME=$CERT_NAME  # for webui and dashboard
-          export ROOT_DOMAIN=$ROOT_DOMAIN  # for webui dashboard and gateway
-          export ROOT_DOMAIN_HTTP_PORT=$ROOT_DOMAIN_HTTP_PORT  # for gateway
-          TAG=latest make deploy-to-k8s-cluster
-        '''.stripIndent())
-      }
-    }
-
-    stage('Deploy for test') {
-      when {
-        expression { DEPLOY_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
-        anyOf{
-          expression { TARGET_ENV ==~ /.*testing.*/ }
-        }
-      }
-      steps {
-        sh(returnStdout: true, script: '''
           set +e
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ ! 0 -eq $rc ]; then
-            exit 0
+
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
+            tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
+            set +e
+            docker images | grep kline-service | grep $tag
+            rc=$?
+            set -e
+            if [ 0 -eq $rc ]; then
+              DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+            fi
           fi
-          tag=`git describe --tags $revlist`
-
-          git reset --hard
-          git checkout $tag
-
-          export CERT_NAME=$CERT_NAME  # for webui and dashboard
-          export ROOT_DOMAIN=$ROOT_DOMAIN  # for webui dashboard and gateway
-          export ROOT_DOMAIN_HTTP_PORT=$ROOT_DOMAIN_HTTP_PORT  # for gateway
-          TAG=$tag make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
 
-    stage('Deploy for prod') {
+    stage('Release docker image for production') {
       when {
-        expression { DEPLOY_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
-        anyOf{
-          expression { TARGET_ENV ==~ /.*production.*/ }
-        }
+        expression { RELEASE_TARGET == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
-          tag=$(git tag|grep '[02468]$'|sort -V|tail -n 1| tr -d '\n')
-          
+        sh(returnStdout: false, script: '''
+          set +e
+          taglist=`git rev-list --tags`
+          rc=$?
+          set -e
+
+          if [ 0 -eq $rc -a x"$taglist" != x ]; then
+            tag=`git tag --sort=-v:refname | grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
+            set +e
+            docker images | grep kline-service | grep $tag
+            rc=$?
+            set -e
+            if [ 0 -eq $rc ]; then
+              DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+            fi
+          fi
+        '''.stripIndent())
+      }
+    }
+
+    stage('Deploy for development') {
+      when {
+        expression { DEPLOY_TARGET == 'true' }
+        expression { TARGET_ENV ==~ /.*development.*/ }
+      }
+      steps {
+        sh(returnStdout: false, script: '''
+          branch=latest
+          if [ "x$BRANCH_NAME" != "xmaster" ]; then
+            branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          fi
+          sed -i "s/kline-service:latest/kline-service:$branch/g" cmd/kline-service/k8s/01-kline-service.yaml
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" cmd/kline-service/k8s/01-kline-service.yaml
+          if [ "x$REPLICAS_COUNT" == "x" ];then
+            REPLICAS_COUNT=2
+          fi
+          sed -i "s/replicas: 2/replicas: $REPLICAS_COUNT/g" cmd/kline-service/k8s/01-kline-service.yaml
+          make deploy-to-k8s-cluster
+        '''.stripIndent())
+      }
+    }
+
+    stage('Deploy for testing') {
+      when {
+        expression { DEPLOY_TARGET == 'true' }
+        expression { TARGET_ENV ==~ /.*testing.*/ }
+      }
+      steps {
+        sh(returnStdout: false, script: '''
+          set +e
+          revlist=`git rev-list --tags --max-count=1`
+          rc=$?
+          set -e
+          if [ ! 0 -eq $rc -o x"$revlist" == x]; then
+            exit 0
+          fi
+          tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
+
           git reset --hard
           git checkout $tag
-          export CERT_NAME=$CERT_NAME  # for webui and dashboard
-          export ROOT_DOMAIN=$ROOT_DOMAIN  # for webui dashboard and gateway
-          export ROOT_DOMAIN_HTTP_PORT=$ROOT_DOMAIN_HTTP_PORT  # for gateway
-          TAG=$tag make deploy-to-k8s-cluster
+          sed -i "s/kline-service:latest/kline-service:$tag/g" cmd/kline-service/k8s/01-kline-service.yaml
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" cmd/kline-service/k8s/01-kline-service.yaml
+          if [ "x$REPLICAS_COUNT" == "x" ];then
+            REPLICAS_COUNT=2
+          fi
+          sed -i "s/replicas: 2/replicas: $REPLICAS_COUNT/g" cmd/kline-service/k8s/01-kline-service.yaml
+          sed -i "s/imagePullPolicy: Always/imagePullPolicy: IfNotPresent/g" cmd/kline-service/k8s/01-kline-service.yaml
+          make deploy-to-k8s-cluster
+        '''.stripIndent())
+      }
+    }
+
+    stage('Deploy for production') {
+      when {
+        expression { DEPLOY_TARGET == 'true' }
+        expression { TARGET_ENV ==~ /.*production.*/ }
+      }
+      steps {
+        sh(returnStdout: false, script: '''
+          set +e
+          taglist=`git rev-list --tags`
+          rc=$?
+          set -e
+          if [ ! 0 -eq $rc -o x"$revlist" == x]; then
+            exit 0
+          fi
+          tag=`git tag --sort=-v:refname | grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
+          git reset --hard
+          git checkout $tag
+          sed -i "s/kline-service:latest/kline-service:$tag/g" cmd/kline-service/k8s/01-kline-service.yaml
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" cmd/kline-service/k8s/01-kline-service.yaml
+          if [ "x$REPLICAS_COUNT" == "x" ];then
+            REPLICAS_COUNT=2
+          fi
+          sed -i "s/replicas: 2/replicas: $REPLICAS_COUNT/g" cmd/kline-service/k8s/01-kline-service.yaml
+          sed -i "s/imagePullPolicy: Always/imagePullPolicy: IfNotPresent/g" cmd/kline-service/k8s/01-kline-service.yaml
+          make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
 
     stage('Post') {
       steps {
+        // Assemble vet and lint info.
+        // warnings parserConfigurations: [
+        //   [pattern: 'govet.txt', parserName: 'Go Vet'],
+        //   [pattern: 'golint.txt', parserName: 'Go Lint']
+        // ]
+
+        // sh 'go2xunit -fail -input gotest.txt -output gotest.xml'
+        // junit "gotest.xml"
         sh 'echo Posting'
       }
     }
   }
-
   post('Report') {
-    always {
-      echo "Anyway,finished the job."
+    fixed {
+      script {
+        sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh fixed')
      }
-    // success {
-    //   script {
-    //     sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh successful')
-    //  }
-    //   script {
-    //     // env.ForEmailPlugin = env.WORKSPACE
-    //     emailext attachmentsPattern: 'TestResults\\*.trx',
-    //     body: '${FILE,path="$JENKINS_HOME/email-templates/success_email_tmp.html"}',
-    //     mimeType: 'text/html',
-    //     subject: currentBuild.currentResult + " : " + env.JOB_NAME,
-    //     to: '$DEFAULT_RECIPIENTS'
-    //   }
-    //  }
-    // failure {
-    //   script {
-    //     sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh failure')
-    //  }
-    //   script {
-    //     // env.ForEmailPlugin = env.WORKSPACE
-    //     emailext attachmentsPattern: 'TestResults\\*.trx',
-    //     body: '${FILE,path="$JENKINS_HOME/email-templates/fail_email_tmp.html"}',
-    //     mimeType: 'text/html',
-    //     subject: currentBuild.currentResult + " : " + env.JOB_NAME,
-    //     to: '$DEFAULT_RECIPIENTS'
-    //   }
-    //  }
-    // aborted {
-    //   script {
-    //     sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh aborted')
-    //  }
-    //   script {
-    //     // env.ForEmailPlugin = env.WORKSPACE
-    //     emailext attachmentsPattern: 'TestResults\\*.trx',
-    //     body: '${FILE,path="$JENKINS_HOME/email-templates/fail_email_tmp.html"}',
-    //     mimeType: 'text/html',
-    //     subject: currentBuild.currentResult + " : " + env.JOB_NAME,
-    //     to: '$DEFAULT_RECIPIENTS'
-    //   }
-    // }
+      script {
+        // env.ForEmailPlugin = env.WORKSPACE
+        emailext attachmentsPattern: 'TestResults\\*.trx',
+        body: '${FILE,path="$JENKINS_HOME/email-templates/success_email_tmp.html"}',
+        mimeType: 'text/html',
+        subject: currentBuild.currentResult + " : " + env.JOB_NAME,
+        to: '$DEFAULT_RECIPIENTS'
+      }
+     }
+    success {
+      script {
+        sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh successful')
+     }
+      script {
+        // env.ForEmailPlugin = env.WORKSPACE
+        emailext attachmentsPattern: 'TestResults\\*.trx',
+        body: '${FILE,path="$JENKINS_HOME/email-templates/success_email_tmp.html"}',
+        mimeType: 'text/html',
+        subject: currentBuild.currentResult + " : " + env.JOB_NAME,
+        to: '$DEFAULT_RECIPIENTS'
+      }
+     }
+    failure {
+      script {
+        sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh failure')
+     }
+      script {
+        // env.ForEmailPlugin = env.WORKSPACE
+        emailext attachmentsPattern: 'TestResults\\*.trx',
+        body: '${FILE,path="$JENKINS_HOME/email-templates/fail_email_tmp.html"}',
+        mimeType: 'text/html',
+        subject: currentBuild.currentResult + " : " + env.JOB_NAME,
+        to: '$DEFAULT_RECIPIENTS'
+      }
+     }
+    aborted {
+      script {
+        sh(script: 'bash $JENKINS_HOME/wechat-templates/send_wxmsg.sh aborted')
+     }
+      script {
+        // env.ForEmailPlugin = env.WORKSPACE
+        emailext attachmentsPattern: 'TestResults\\*.trx',
+        body: '${FILE,path="$JENKINS_HOME/email-templates/fail_email_tmp.html"}',
+        mimeType: 'text/html',
+        subject: currentBuild.currentResult + " : " + env.JOB_NAME,
+        to: '$DEFAULT_RECIPIENTS'
+      }
+     }
   }
 }

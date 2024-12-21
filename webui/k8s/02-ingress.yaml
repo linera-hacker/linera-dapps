@@ -1,11 +1,11 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: webui-template-ingress
+  name: kline-webui-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: webui-template
-    k8s.kuboard.cn/workload: webui-template
+    k8s.kuboard.cn/displayName: kline-webui
+    k8s.kuboard.cn/workload: kline-webui
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
     traefik.ingress.kubernetes.io/router.middlewares:
@@ -14,17 +14,23 @@ metadata:
       kube-system-common-headers@kubernetescrd
 
 spec:
+  tls:
+    - hosts:
+        - '*.testnet.linerameme.fun'
+        - 'testnet.linerameme.fun'
+      secretName: testnet-linerameme-fun-tls
   rules:
-    - host: vue-template.npool.top
-      http: &http_ruless
+    - host: testnet.linerameme.fun
+      http:
         paths:
           - path: /
             backend:
-              serviceName: webui-template
+              serviceName: kline-webui
               servicePort: 80
-    - host: vue-template.xpool.top
-      http: *http_rules
-    - host: www.vue-template.npool.top
-      http: *http_rules
-    - host: www.vue-template.xpool.top
-      http: *http_rules
+    - host: www.testnet.linerameme.fun
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80

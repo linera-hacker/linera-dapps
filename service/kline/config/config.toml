@@ -2,8 +2,8 @@ version="0.0.1"
 
 [zeus]
 domain="zeus"
-http-port=30100
-grpc-port=30101
+http-port=50870
+grpc-port=50871
 log-file="/var/log/zeus.log"
 
 [mysql]
