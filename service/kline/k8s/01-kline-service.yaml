@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: kline-service
-          image: DOCKER_REGISTRY/entropypool/kline-service:latest
+          image: DOCKER_REGISTRY/linera/kline-service:latest
           imagePullPolicy: Always
           env:
             - name: ENV_ENVIRONMENT_TARGET
