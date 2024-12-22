@@ -1,3 +1,4 @@
 target
 node_modules
 tmp
+.00-configmap.yaml
