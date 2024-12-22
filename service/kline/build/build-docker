@@ -17,4 +17,4 @@ done
 docker build . --build-arg ALL_PROXY=$all_proxy --build-arg GOTAR=$BASECACHE/$GONAME \
 	--build-arg GONAME=$GONAME \
 	--build-arg BRANCH_NAME=$BRANCH_NAME \
-	-t $DOCKER_REGISTRY/entropypool/kline-service:$IMAGE_VERSION
+	-t $DOCKER_REGISTRY/linera/kline-service:$IMAGE_VERSION
