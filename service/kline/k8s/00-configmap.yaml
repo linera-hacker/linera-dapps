@@ -7,3 +7,4 @@ data:
   environment.swap_chain_id: "$ENV_SWAP_CHAIN_ID"
   environment.swap_app_id: "$ENV_SWAP_APP_ID"
   environment.swap_server_addr: "$ENV_SWAP_SERVER_ADDR"
+  environment.branch_name: "$BRANCH_NAME"

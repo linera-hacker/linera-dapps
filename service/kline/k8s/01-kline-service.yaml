@@ -59,6 +59,13 @@ spec:
                 configMapKeyRef:
                   name: kline-service-environment
                   key: environment.swap_server_addr
+            - name: BRANCH_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: kline-service-environment
+                  key: environment.branch_name
+      imagePullSecrets:
+        - name: regcred
 ---
 apiVersion: v1
 kind: Service
