@@ -62,11 +62,15 @@ onMounted(() => {
   }
   apiHost = 'api.' + apiHost
 
-  _host.amsDomainApiHost = apiHost
-  _host.klineDomainApiHost = apiHost
-  _host.blobGatewayDomainApiHost = apiHost
-  _host.swapDomainApiHost = apiHost
-  _host.apiSchema = window.location.protocol.replace(':', '')
+  _host.amsDomainApiHost = apiHost + '/api/ams'
+  _host.klineDomainApiHost = apiHost + '/api/kline'
+  _host.blobGatewayDomainApiHost = apiHost + '/api/blobs'
+  _host.swapDomainApiHost = apiHost + '/api/swap'
+  _host.windowHost = window.location.host
+
+  if (window.location.protocol.startsWith('https')) {
+    _host.apiSchema = 'https'
+  }
 
   if (window.location.pathname !== '/') return
 

@@ -17,8 +17,19 @@ function doAction<MyRequest, MyResponse> (
   req: MyRequest,
   message: notification.ReqMessage,
   success: (resp: MyResponse) => void) {
-  axios
-    .post<MyRequest, AxiosResponse<MyResponse>>(url, req)
+  const _url = new URL(url)
+  const pathname = _url.pathname
+  const api = axios.create({
+    baseURL: _url.protocol + '//' + _url.host,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    withCredentials: false,
+    responseType: 'json',
+    timeout: 60000
+  })
+  api
+    .post<MyRequest, AxiosResponse<MyResponse>>(pathname, req)
     .then((response: AxiosResponse<MyResponse>) => {
       success(response.data)
       if (message.Info) {
@@ -35,8 +46,20 @@ function doActionWithError<MyRequest, MyResponse> (
   message: notification.ReqMessage,
   success: (resp: MyResponse) => void,
   error: () => void) {
-  axios
-    .post<MyRequest, AxiosResponse<MyResponse>>(url, req)
+  const _url = new URL(url)
+  const pathname = _url.pathname
+  const headers: Record<string, string | number | boolean> = {
+    'Content-Type': 'application/json'
+  }
+  const api = axios.create({
+    baseURL: _url.protocol + '//' + _url.host,
+    headers,
+    withCredentials: false,
+    responseType: 'json',
+    timeout: 60000
+  })
+  api
+    .post<MyRequest, AxiosResponse<MyResponse>>(pathname, req)
     .then((response: AxiosResponse<MyResponse>) => {
       success(response.data)
       if (message.Info) {
