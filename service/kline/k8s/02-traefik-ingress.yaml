@@ -34,3 +34,9 @@ spec:
       http: *http_rules
     - host: api.testnet.linerablob.fun
       http: *http_rules
+    - host: api.hk-testnet.linerameme.fun
+      http: *http_rules
+    - host: api.hk-testnet.lineraswap.fun
+      http: *http_rules
+    - host: api.hk-testnet.linerablob.fun
+      http: *http_rules
