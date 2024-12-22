@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: kline-webui
-          image: DOCKER_REGISTRY/entropypool/kline-webui:latest
+          image: DOCKER_REGISTRY/linera/kline-webui:latest
           imagePullPolicy: Always
           env:
             - name: ENV_ENVIRONMENT_TARGET

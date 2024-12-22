@@ -80,7 +80,7 @@ pipeline {
           cd webui
           feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
           sed -i "s#NGINX1.20_DOCKER_REGISTRY_URL#$NGINX_DOCKER_REGISTRY_URL#g" Dockerfile
-          docker build -t $DOCKER_REGISTRY/entropypool/kline-webui:$feature_name .
+          docker build -t $DOCKER_REGISTRY/linera/kline-webui:$feature_name .
         '''.stripIndent())
       }
     }
@@ -94,7 +94,7 @@ pipeline {
         sh(returnStdout: false, script: '''
           cd webui
           sed -i "s#NGINX1.20_DOCKER_REGISTRY_URL#$NGINX_DOCKER_REGISTRY_URL#g" Dockerfile
-          docker build -t $DOCKER_REGISTRY/entropypool/kline-webui:latest .
+          docker build -t $DOCKER_REGISTRY/linera/kline-webui:latest .
         '''.stripIndent())
       }
     }
@@ -259,7 +259,7 @@ pipeline {
           yarn
           yarn build
           sed -i "s#NGINX1.20_DOCKER_REGISTRY_URL#$NGINX_DOCKER_REGISTRY_URL#g" Dockerfile
-          docker build -t $DOCKER_REGISTRY/entropypool/kline-webui:$tag .
+          docker build -t $DOCKER_REGISTRY/linera/kline-webui:$tag .
         '''.stripIndent())
       }
     }
