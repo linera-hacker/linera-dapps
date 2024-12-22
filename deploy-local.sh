@@ -23,9 +23,10 @@ WALLET_BASE=$PROJECT_ROOT/linera/dapps
 mkdir -p $WALLET_BASE
 rm $WALLET_BASE/* -rf
 
-options="N:n:"
+options="N:n:k:"
 NETWORK_ID=1
 NETWORK_TYPE=devnet
+K8S=0
 
 blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03"
 blob_gateway_app_id="b348f8039b02f685b8f90c147a650ea4ff590f74513c8080205836debcd7df6c69f4f4c55c769e3465e3f80c89c4d557a5ed748c1c41c1d2c19bf8e26389fbb31db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
@@ -36,6 +37,7 @@ while getopts $options opt; do
   case ${opt} in
     N) NETWORK_TYPE=${OPTARG} ;;
     n) NETWORK_ID=${OPTARG} ;;
+    k) K8S=${OPTARG} ;;
   esac
 done
 
@@ -608,6 +610,7 @@ print $'\U01F4AB' $LIGHTGREEN " WLINERA Creation Chain: $wlinera_creation_chain"
 print $'\U01F4AB' $LIGHTGREEN " TLA Application: $erc20_1_appid"
 print $'\U01F4AB' $LIGHTGREEN " TLA Creation Chain: $erc20_1_creation_chain"
 
+if [ 0 -eq $K8S ]; then
 sed -i "s/erc20BytecodeId: .*/erc20BytecodeId: '$erc20_2_bid',/g" webui/src/mystore/host/index.ts
 sed -i "s/swapCreationChainId: .*/swapCreationChainId: '$swap_creation_chain',/g" webui/src/mystore/host/index.ts
 sed -i "s/swapCreationOwner: .*/swapCreationOwner: '$swap_creation_owner',/g" webui/src/mystore/host/index.ts
@@ -657,6 +660,7 @@ sed -i "${targetlinenumber}s/.*/'$blob_gateway_app_id'/" ../linera-wallet/src/mo
 linenumber=`grep -n "const defaultBlobGatewayCreatorChain" ../linera-wallet/src/model/db/model.ts | awk -F ':' '{ print $1 }'`
 targetlinenumber=$(expr $linenumber + 1)
 sed -i "${targetlinenumber}s/.*/'$blob_gateway_creation_chain_id'/" ../linera-wallet/src/model/db/model.ts
+fi
 
 trap cleanup INT
 read -p "  Press any key to exit"
