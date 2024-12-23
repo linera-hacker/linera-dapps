@@ -60,7 +60,6 @@ onMounted(() => {
   if (apiHost.startsWith('www.')) {
     apiHost = apiHost.substring(3)
   }
-  apiHost = 'api.' + apiHost
 
   _host.amsDomainApiHost = apiHost + '/api/ams'
   _host.klineDomainApiHost = apiHost + '/api/kline'
