@@ -40,3 +40,5 @@ spec:
       http: *http_rules
     - host: api.hk-testnet.linerablob.fun
       http: *http_rules
+    - host: hk.testnet-archimedes.lineraswap.fun
+      http: *http_rules
