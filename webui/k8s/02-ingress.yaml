@@ -16,11 +16,11 @@ metadata:
 spec:
   tls:
     - hosts:
-        - '*.hk-testnet.linerameme.fun'
-        - 'hk-testnet.linerameme.fun'
-      secretName: hk-testnet-linerameme-fun-tls
+        - '*.hk.testnet-archimedes.lineraswap.fun'
+        - 'hk.testnet-archimedes.lineraswap.fun'
+      secretName: hk-testnet-archimedes-lineraswap-fun-tls
   rules:
-    - host: hk-testnet.linerameme.fun
+    - host: hk.testnet-archimedes.lineraswap.fun
       http:
         paths:
           - path: /
