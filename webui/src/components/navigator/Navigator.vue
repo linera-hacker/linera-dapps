@@ -56,16 +56,6 @@ const onCreateMemeTokenClick = () => {
 const _host = host.useHostStore()
 
 onMounted(() => {
-  let apiHost = window.location.host
-  if (apiHost.startsWith('www.')) {
-    apiHost = apiHost.substring(3)
-  }
-  apiHost = 'api.' + apiHost
-
-  _host.amsDomainApiHost = apiHost + '/api/ams'
-  _host.klineDomainApiHost = apiHost + '/api/kline'
-  _host.blobGatewayDomainApiHost = apiHost + '/api/blobs'
-  _host.swapDomainApiHost = apiHost + '/api/swap'
   _host.windowHost = window.location.host
 
   if (window.location.protocol.startsWith('https')) {
