@@ -43,8 +43,6 @@ pipeline {
           export blob_gateway_creation_chain_id=$ENV_BLOB_CREATION_CHAIN_ID
           export blob_gateway_app_id=$ENV_BLOB_APP_ID
 
-          sed -i "s/useDomainApi: .*/useDomainApi: $ENV_USE_DOMAIN,/g" src/mystore/host/index.ts
-          sed -i "s/apiSchema: .*/apiSchema: '$ENV_API_SCHEMA',/g" src/mystore/host/index.ts
           sed -i "s/erc20BytecodeId: .*/erc20BytecodeId: '$erc20_2_bid',/g" src/mystore/host/index.ts
           sed -i "s/swapCreationChainId: .*/swapCreationChainId: '$swap_creation_chain',/g" src/mystore/host/index.ts
           sed -i "s/swapCreationOwner: .*/swapCreationOwner: '$swap_creation_owner',/g" src/mystore/host/index.ts
@@ -53,7 +51,7 @@ pipeline {
           sed -i "s/amsCreationChainId: .*/amsCreationChainId: '$ams_creation_chain',/g" src/mystore/host/index.ts
           sed -i "s/amsApplicationId: .*/amsApplicationId: '$ams_appid',/g" src/mystore/host/index.ts
           sed -i "s/blobGatewayCreationChainId: .*/blobGatewayCreationChainId: '$blob_gateway_creation_chain_id',/g" src/mystore/host/index.ts
-          sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id',/g" src/mystore/host/index.ts
+          sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id'/g" src/mystore/host/index.ts
 
           set +e
           PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin command quasar
@@ -235,8 +233,6 @@ pipeline {
           export blob_gateway_creation_chain_id=$ENV_BLOB_CREATION_CHAIN_ID
           export blob_gateway_app_id=$ENV_BLOB_APP_ID
 
-          sed -i "s/useDomainApi: .*/useDomainApi: $ENV_USE_DOMAIN,/g" src/mystore/host/index.ts
-          sed -i "s/apiSchema: .*/apiSchema: '$ENV_API_SCHEMA',/g" src/mystore/host/index.ts
           sed -i "s/erc20BytecodeId: .*/erc20BytecodeId: '$erc20_2_bid',/g" src/mystore/host/index.ts
           sed -i "s/swapCreationChainId: .*/swapCreationChainId: '$swap_creation_chain',/g" src/mystore/host/index.ts
           sed -i "s/swapCreationOwner: .*/swapCreationOwner: '$swap_creation_owner',/g" src/mystore/host/index.ts
@@ -245,7 +241,7 @@ pipeline {
           sed -i "s/amsCreationChainId: .*/amsCreationChainId: '$ams_creation_chain',/g" src/mystore/host/index.ts
           sed -i "s/amsApplicationId: .*/amsApplicationId: '$ams_appid',/g" src/mystore/host/index.ts
           sed -i "s/blobGatewayCreationChainId: .*/blobGatewayCreationChainId: '$blob_gateway_creation_chain_id',/g" src/mystore/host/index.ts
-          sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id',/g" src/mystore/host/index.ts
+          sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id'/g" src/mystore/host/index.ts
 
           set +e
           PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin command quasar
