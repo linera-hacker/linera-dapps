@@ -2,61 +2,64 @@ import { defineStore } from 'pinia'
 
 export const useHostStore = defineStore('hosts', {
   state: () => ({
-    useDomainApi: false,
-    apiSchema: 'http',
-    amsDomainApiHost: 'api.linerameme.fun',
-    klineDomainApiHost: 'api.linerameme.fun',
-    blobGatewayDomainApiHost: 'api.linerameme.fun',
-    swapDomainApiHost: 'api.linerameme.fun',
+    useDomainApi: process.env.NODE_ENV === 'production',
+    apiSchema: process.env.NODE_ENV === 'production' ? 'https' : 'http',
 
-    amsDebugApiHost: '172.16.31.42:30094',
-    klineDebugApiHost: '172.16.31.42:30100',
-    blobGatewayDebugApiHost: '172.16.31.42:9081',
-    swapDebugApiHost: '172.16.31.42:30092',
+    amsDomainApiHost: 'hk.testnet-archimedes.respeer.ai/api/ams',
+    klineDomainApiHost: 'hk.testnet-archimedes.lineraswap.fun/api/kline',
+    blobGatewayDomainApiHost: 'hk.testnet-archimedes.blobgateway.com/api/blobs',
+    swapDomainApiHost: 'hk.testnet-archimedes.lineraswap.fun/api/swap',
 
-    erc20BytecodeId: 'e17e44525efd606bc3a0cad0f878de9810a1749401d71684e7890232f2c1e2080a437cd9615a5239bc7d336cce13ad879a459f2e0a8d3fdc6bf83ac3cb4ebf2c',
-    swapCreationChainId: 'be20093606a7296fbda537060becfecc62b5441fa784b3d26d6742152a80a1f9',
-    swapCreationOwner: 'e349827852196d4f5a4fbea95cfe118d683ec47ced11adb3a0d27ff961f0e92a',
-    swapApplicationId: '2866ea0ae6589f359be49ed6e91a07cece93163d146f455c18a15bbc6dcccf5a1690502a30feb0c7ba184272c183ab9a7dfcfbf400cb5f146b0a7b2ace2d8515be20093606a7296fbda537060becfecc62b5441fa784b3d26d6742152a80a1f9050000000000000000000000',
-    wlineraApplicationId: 'e17e44525efd606bc3a0cad0f878de9810a1749401d71684e7890232f2c1e2080a437cd9615a5239bc7d336cce13ad879a459f2e0a8d3fdc6bf83ac3cb4ebf2c36137b1ddac30eb9d0d4821a1560e66795dbdad6dbf4b708a8d81ca3df866e1b050000000000000000000000',
-    amsCreationChainId: 'a393137daba303e8b561cb3a5bff50efba1fb7f24950db28f1844b7ac2c1cf27',
-    amsApplicationId: '19da788bdf56d68baf06719ade3262271ba4ce692609a81d75d44d87a1cb8d3440941f100db894ad191828ec8952baa68b9da2e4223707f798a32547aee2c32aa393137daba303e8b561cb3a5bff50efba1fb7f24950db28f1844b7ac2c1cf27010000000000000000000000',
-    blobGatewayCreationChainId: '1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03',
-    blobGatewayApplicationId: 'b348f8039b02f685b8f90c147a650ea4ff590f74513c8080205836debcd7df6c69f4f4c55c769e3465e3f80c89c4d557a5ed748c1c41c1d2c19bf8e26389fbb31db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000'
+    windowHost: 'localhost:8080',
+
+    amsDebugApiHost: '/api/ams',
+    klineDebugApiHost: '/api/kline',
+    blobGatewayDebugApiHost: '/api/blobs',
+    swapDebugApiHost: '/api/swap',
+
+    erc20BytecodeId: '716c598da8db64bd276d6efbae5c67842c9caf16eade6587d51b0ff001e4a7b407b5e65376146b60763dfc1776a4353e15e3333f7ba53ccc88756f2b0d6308d2',
+    swapCreationChainId: '962a32f98ab686e2e6caa5b1cb343761e8d0928410a2bd427afcbb4e9a06d5a9',
+    swapCreationOwner: '85187250005ae8444b08ddea4a5702b90454b20966e8a7eda60c51a47e0a6515',
+    swapApplicationId: 'ca30b7409bfa4a373c2597ca63568ce698679c53ddeef9cc033aba955d2823b5f332095b5e2bb1757c03fd11fa58e930c7f6e28cc5cea0309f21db1dca210a22962a32f98ab686e2e6caa5b1cb343761e8d0928410a2bd427afcbb4e9a06d5a9060000000000000000000000',
+    wlineraApplicationId: '716c598da8db64bd276d6efbae5c67842c9caf16eade6587d51b0ff001e4a7b407b5e65376146b60763dfc1776a4353e15e3333f7ba53ccc88756f2b0d6308d29ab0c2036a048e4f1132a776a2fdfb1fa37345e15601f95229e559463d91aa31060000000000000000000000',
+    amsCreationChainId: 'a680686fd185b5bf96f9b8515523b05d1ed92010dc617a21fa9ecdaa7b63b53f',
+    amsApplicationId: '61afe169cf65c3798ebe9f968f0317bfb37a1087a131efa180308ba3d82e8ba53f73938f84203fb4f8cbc8f0a0eab6101872be430b536c756d5bfa7855d2a868a680686fd185b5bf96f9b8515523b05d1ed92010dc617a21fa9ecdaa7b63b53f030000000000000000000000',
+    blobGatewayCreationChainId: 'a2acd39056bf5a5591e5f7ecc1869f8b998eeb32ca89f98d871f135375a50d11',
+    blobGatewayApplicationId: '1bb9526a4624c2c29623e5cb699cf52315f77337055de65349b8116e212828db7103993ccfcf753b78737131616f7aac2d001b26de2da03374ddbba0aeca0548a2acd39056bf5a5591e5f7ecc1869f8b998eeb32ca89f98d871f135375a50d110f0000000000000000000000'
   }),
   getters: {
     formalizeAmsPath (): (path: string) => string {
       return (path: string) => {
         if (path.startsWith('/')) path = path.substring(1)
-        return this.apiSchema + '://' + (this.useDomainApi ? this.amsDomainApiHost : this.amsDebugApiHost) + '/' + path
+        return this.apiSchema + '://' + (this.useDomainApi ? this.amsDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/ams') : this.amsDebugApiHost) + '/' + path
       }
     },
     formalizeKlinePath (): (path: string) => string {
       return (path: string) => {
         if (path.startsWith('/')) path = path.substring(1)
-        return this.apiSchema + '://' + (this.useDomainApi ? this.klineDomainApiHost : this.klineDebugApiHost) + '/' + path
+        return this.apiSchema + '://' + (this.useDomainApi ? this.klineDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/kline') : this.klineDebugApiHost) + '/' + path
       }
     },
     formalizeBlobGatewayPath (): (path: string) => string {
       return (path: string) => {
         if (path.startsWith('/')) path = path.substring(1)
-        return this.apiSchema + '://' + (this.useDomainApi ? this.blobGatewayDomainApiHost : this.blobGatewayDebugApiHost) + '/' + path
+        return this.apiSchema + '://' + (this.useDomainApi ? this.blobGatewayDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/blobs') : this.blobGatewayDebugApiHost) + '/' + path
       }
     },
     formalizeSwapPath (): (path: string) => string {
       return (path: string) => {
         if (path.startsWith('/')) path = path.substring(1)
-        return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : this.swapDebugApiHost) + '/' + path
+        return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/swap') : this.swapDebugApiHost) + '/' + path
       }
     },
     _amsEndpoint (): () => string {
       return () => {
-        return this.apiSchema + '://' + (this.useDomainApi ? this.amsDomainApiHost : this.amsDebugApiHost)
+        return this.apiSchema + '://' + (this.useDomainApi ? this.amsDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/ams') : this.amsDebugApiHost)
       }
     },
     _swapEndpoint (): () => string {
       return () => {
-        return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : this.swapDebugApiHost)
+        return this.apiSchema + '://' + (this.useDomainApi ? this.swapDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/swap') : this.swapDebugApiHost)
       }
     },
     blobGatewayApplicationPath (): () => string {

@@ -57,7 +57,7 @@ module.exports = configure(function (ctx) {
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-build
     build: {
-      vueRouterMode: 'history', // available values: 'hash', 'history'
+      vueRouterMode: 'history' // available values: 'hash', 'history'
 
       // transpile: false,
       // publicPath: '/',
@@ -78,18 +78,39 @@ module.exports = configure(function (ctx) {
 
       // https://quasar.dev/quasar-cli/handling-webpack
       // "chain" is a webpack-chain object https://github.com/neutrinojs/webpack-chain
-      chainWebpack (/* chain */) {
-        //
-      }
     },
 
     // Full list of options: https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-devServer
     devServer: {
       proxy: {
-        '/api': {
-          target: 'https://api.development.npool.top',
+        '/api/ams': {
+          target: 'https://hk.testnet-archimedes.lineraswap.fun',
           pathRewrite: {
-            '^/api': '/api'
+            '^/api/ams': '/api/ams'
+          },
+          secure: false,
+          changeOrigin: true
+        },
+        '/api/kline': {
+          target: 'https://hk.testnet-archimedes.lineraswap.fun',
+          pathRewrite: {
+            '^/api/kline': '/api/kline'
+          },
+          secure: false,
+          changeOrigin: true
+        },
+        '/api/blobs': {
+          target: 'https://hk.testnet-archimedes.blobgateway.com',
+          pathRewrite: {
+            '^/api/blobs': '/api/blobs'
+          },
+          secure: false,
+          changeOrigin: true
+        },
+        '/api/swap': {
+          target: 'https://hk.testnet-archimedes.lineraswap.fun',
+          pathRewrite: {
+            '^/api/swap': '/api/swap'
           },
           secure: false,
           changeOrigin: true
@@ -98,7 +119,8 @@ module.exports = configure(function (ctx) {
 
       https: false,
       port: 8080,
-      open: true // opens browser window automatically
+      open: true, // opens browser window automatically
+      historyApiFallback: true
     },
 
     // https://quasar.dev/quasar-cli/quasar-conf-js#Property%3A-framework
