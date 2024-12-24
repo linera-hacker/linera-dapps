@@ -429,6 +429,32 @@ watch(() => swapStore.SelectedToken, (selected) => {
   })
 })
 
+watch(() => userStore.account, () => {
+  if (!swapStore.SelectedTokenPair) {
+    outAmount.value = 0
+    return
+  }
+  if (!userStore.account) {
+    return
+  }
+
+  CalSwapInAmount(outAmount.value, undefined)
+
+  dbModel.ownerFromPublicKey(userStore.account).then((v) => {
+    walletStore.getBalance(userStore.account, userStore.chainId, v, (error, balance) => {
+      if (error) {
+        return
+      }
+      outBalance.value = Number(balance)
+    })
+  }).catch((e) => {
+    notificationStore.pushNotification({
+      Title: 'Invalid account',
+      Message: e as string
+    })
+  })
+})
+
 watch(() => swapStore.SelectedTokenPair, (selected) => {
   if (!selected) {
     inAmount.value = 0
