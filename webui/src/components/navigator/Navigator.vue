@@ -62,8 +62,6 @@ onMounted(() => {
     _host.apiSchema = 'https'
   }
 
-  if (window.location.pathname !== '/') return
-
   if (window.location.hostname.endsWith('linerameme.fun')) {
     selectedIcon.value = lineraMemeLogo
     void router.push({ path: '/meme' })

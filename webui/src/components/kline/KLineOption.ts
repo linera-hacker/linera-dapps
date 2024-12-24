@@ -171,7 +171,8 @@ const option: EChartsOption = {
       scale: true,
       splitArea: {
         show: true
-      }
+      },
+      boundaryGap: ["5%","5%"]
     }
   ],
   dataZoom: [
