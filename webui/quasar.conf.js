@@ -84,7 +84,7 @@ module.exports = configure(function (ctx) {
     devServer: {
       proxy: {
         '/api/ams': {
-          target: 'https://testnet-archimedes.lineraswap.fun',
+          target: 'https://testnet-archimedes.respeer.ai',
           pathRewrite: {
             '^/api/ams': '/api/ams'
           },
