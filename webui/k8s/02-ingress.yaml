@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: kline-webui-ingress
+  name: kline-webui-swap-ingress
   namespace: kube-system
   annotations:
     k8s.kuboard.cn/displayName: kline-webui
@@ -21,6 +21,66 @@ spec:
       secretName: hk-testnet-archimedes-lineraswap-fun-tls
   rules:
     - host: hk.testnet-archimedes.lineraswap.fun
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-meme-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-webui
+    k8s.kuboard.cn/workload: kline-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.hk.testnet-archimedes.linerameme.fun'
+        - 'hk.testnet-archimedes.linerameme.fun'
+      secretName: hk-testnet-archimedes-linerameme-fun-tls
+  rules:
+    - host: hk.testnet-archimedes.linerameme.fun
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-blob-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-webui
+    k8s.kuboard.cn/workload: kline-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.hk.testnet-archimedes.blobgateway.com'
+        - 'hk.testnet-archimedes.blobgateway.com'
+      secretName: hk-testnet-archimedes-blobgateway-com-tls
+  rules:
+    - host: hk.testnet-archimedes.blobgateway.com
       http:
         paths:
           - path: /

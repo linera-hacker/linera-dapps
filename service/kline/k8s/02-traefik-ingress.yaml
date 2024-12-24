@@ -22,23 +22,15 @@ spec:
             backend:
               serviceName: kline-service
               servicePort: 50870
-    - host: api.linerameme.fun
+    - host: testnet-archimedes.lineraswap.fun
       http: *http_rules
-    - host: api.lineraswap.fun
+    - host: testnet-archimedes.linerameme.fun
       http: *http_rules
-    - host: api.linerablob.fun
-      http: *http_rules
-    - host: api.testnet.linerameme.fun
-      http: *http_rules
-    - host: api.testnet.lineraswap.fun
-      http: *http_rules
-    - host: api.testnet.linerablob.fun
-      http: *http_rules
-    - host: api.hk-testnet.linerameme.fun
-      http: *http_rules
-    - host: api.hk-testnet.lineraswap.fun
-      http: *http_rules
-    - host: api.hk-testnet.linerablob.fun
+    - host: testnet-archimedes.blobgateway.com
       http: *http_rules
     - host: hk.testnet-archimedes.lineraswap.fun
+      http: *http_rules
+    - host: hk.testnet-archimedes.linerameme.fun
+      http: *http_rules
+    - host: hk.testnet-archimedes.blobgateway.com
       http: *http_rules
