@@ -2,7 +2,7 @@
 
 while true
 do
-git clone -b $BRANCH_NAME https://github.com/hong-t/linera-dapps.git
+git clone -b $BRANCH_NAME https://github.com/linera-hacker/linera-dapps.git
 [ 0 -eq $? ] && break
 sleep 30
 done
