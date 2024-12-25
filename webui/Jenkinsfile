@@ -12,13 +12,13 @@ pipeline {
         expression { BUILD_TARGET == 'true' }
       }
       steps {
-        sh (returnStdout: false, script: '''
+        sh(returnStdout: false, script: '''
           set +e
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
-            tag=`git describe --tags $revlist`
+          if [ 0 -eq $rc ] && [ x"$revlist" != x ]; then
+            tag=`git tag -l | sort -V | tail -n1`
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
@@ -28,51 +28,72 @@ pipeline {
           fi
         '''.stripIndent())
 
-        withCredentials([gitUsernamePassword(credentialsId: 'KK-github-key', gitToolName: 'git-tool')]) {
-          sh (returnStdout: false, script: '''
-            set +e
-            git add package.json
-            git commit -m "update package version"
-            git push origin $BRANCH_NAME
-            set -e
-          '''.stripIndent())
-        }
-        
-        sh (returnStdout: false, script: '''
+
+        sh(returnStdout: false, script: '''
+          cd webui
+          export ENV_USE_DOMAIN=$ENV_USE_DOMAIN
+          export ENV_API_SCHEMA=$ENV_API_SCHEMA
+          export erc20_2_bid=$ENV_ERC20_BYTECODE_ID
+          export swap_creation_chain=$ENV_SWAP_CREATION_CHAIN_ID
+          export swap_creation_owner=$ENV_SWAP_CREATION_OWNER
+          export swap_appid=$ENV_SWAP_APP_ID
+          export erc20_2_appid=$ENV_WLINERA_APP_ID
+          export ams_creation_chain=$ENV_AMS_CREATION_CHAIN_ID
+          export ams_appid=$ENV_AMS_APP_ID
+          export blob_gateway_creation_chain_id=$ENV_BLOB_CREATION_CHAIN_ID
+          export blob_gateway_app_id=$ENV_BLOB_APP_ID
+
+          sed -i "s/erc20BytecodeId: .*/erc20BytecodeId: '$erc20_2_bid',/g" src/mystore/host/index.ts
+          sed -i "s/swapCreationChainId: .*/swapCreationChainId: '$swap_creation_chain',/g" src/mystore/host/index.ts
+          sed -i "s/swapCreationOwner: .*/swapCreationOwner: '$swap_creation_owner',/g" src/mystore/host/index.ts
+          sed -i "s/swapApplicationId: .*/swapApplicationId: '$swap_appid',/g" src/mystore/host/index.ts
+          sed -i "s/wlineraApplicationId: .*/wlineraApplicationId: '$erc20_2_appid',/g" src/mystore/host/index.ts
+          sed -i "s/amsCreationChainId: .*/amsCreationChainId: '$ams_creation_chain',/g" src/mystore/host/index.ts
+          sed -i "s/amsApplicationId: .*/amsApplicationId: '$ams_appid',/g" src/mystore/host/index.ts
+          sed -i "s/blobGatewayCreationChainId: .*/blobGatewayCreationChainId: '$blob_gateway_creation_chain_id',/g" src/mystore/host/index.ts
+          sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id'/g" src/mystore/host/index.ts
+
           set +e
           PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin command quasar
           rc=$?
           set -e
           if [ ! $rc -eq 0 ]; then
-            n v16.14.0
-            PATH=/usr/local/bin:$PATH npm i -g mirror-config-china --registry=https://registry.npm.taobao.org
+            n v20
             PATH=/usr/local/bin:$PATH npm install --global --registry https://registry.npm.taobao.org yarn
             PATH=/usr/local/bin:$PATH yarn add global quasar-cli@latest
           fi
-          PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin yarn install --registry https://registry.npm.taobao.org/
-          PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin quasar build
+          yarn
+          yarn build
         '''.stripIndent())
       }
     }
 
-    stage('Switch to current cluster') {
+    stage('Generate docker image for feature') {
       when {
-        anyOf {
-          expression { BUILD_TARGET == 'true' }
-          expression { DEPLOY_TARGET == 'true' }
-        }
+        expression { BUILD_TARGET == 'true' }
+        expression { BRANCH_NAME != 'master' }
       }
       steps {
-        sh 'cd /etc/kubeasz; ./ezctl checkout $TARGET_ENV'
+        sh(returnStdout: false, script: '''
+          cd webui
+          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          sed -i "s#NGINX1.20_DOCKER_REGISTRY_URL#$NGINX_DOCKER_REGISTRY_URL#g" Dockerfile
+          docker build -t $DOCKER_REGISTRY/linera/kline-webui:$feature_name .
+        '''.stripIndent())
       }
     }
 
     stage('Generate docker image for development') {
       when {
         expression { BUILD_TARGET == 'true' }
+        expression { BRANCH_NAME == 'master' }
       }
       steps {
-        sh 'docker build -t $DOCKER_REGISTRY/entropypool/webui-template:latest .'
+        sh(returnStdout: false, script: '''
+          cd webui
+          sed -i "s#NGINX1.20_DOCKER_REGISTRY_URL#$NGINX_DOCKER_REGISTRY_URL#g" Dockerfile
+          docker build -t $DOCKER_REGISTRY/linera/kline-webui:latest .
+        '''.stripIndent())
       }
     }
 
@@ -81,13 +102,13 @@ pipeline {
         expression { TAG_PATCH == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
+        sh(returnStdout: false, script: '''
           set +e
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
-            tag=`git describe --tags $revlist`
+          if [ 0 -eq $rc ] && [ x"$revlist" != x ]; then
+            tag=`git tag -l | sort -V | tail -n1`
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
@@ -124,13 +145,13 @@ pipeline {
         expression { TAG_MINOR == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
+        sh(returnStdout: false, script: '''
           set +e
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
-            tag=`git describe --tags $revlist`
+          if [ 0 -eq $rc ] && [ x"$revlist" != x ]; then
+            tag=`git tag -l | sort -V | tail -n1`
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
@@ -159,13 +180,13 @@ pipeline {
         expression { TAG_MAJOR == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
+        sh(returnStdout: false, script: '''
           set +e
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
-            tag=`git describe --tags $revlist`
+          if [ 0 -eq $rc ] && [ x"$revlist" != x ]; then
+            tag=`git tag -l | sort -V | tail -n1`
             major=`echo $tag | awk -F '.' '{ print $1 }'`
             minor=`echo $tag | awk -F '.' '{ print $2 }'`
             patch=`echo $tag | awk -F '.' '{ print $3 }'`
@@ -195,24 +216,69 @@ pipeline {
         expression { BUILD_TARGET == 'true' }
       }
       steps {
-        sh(returnStdout: true, script: '''
-          revlist=`git rev-list --tags --max-count=1`
-          tag=`git describe --tags $revlist`
+        sh(returnStdout: false, script: '''
+          cd webui
+          tag=`git tag -l | sort -V | tail -n1`
           git reset --hard
           git checkout $tag
+          export ENV_USE_DOMAIN=$ENV_USE_DOMAIN
+          export ENV_API_SCHEMA=$ENV_API_SCHEMA
+          export erc20_2_bid=$ENV_ERC20_BYTECODE_ID
+          export swap_creation_chain=$ENV_SWAP_CREATION_CHAIN_ID
+          export swap_creation_owner=$ENV_SWAP_CREATION_OWNER
+          export swap_appid=$ENV_SWAP_APP_ID
+          export erc20_2_appid=$ENV_WLINERA_APP_ID
+          export ams_creation_chain=$ENV_AMS_CREATION_CHAIN_ID
+          export ams_appid=$ENV_AMS_APP_ID
+          export blob_gateway_creation_chain_id=$ENV_BLOB_CREATION_CHAIN_ID
+          export blob_gateway_app_id=$ENV_BLOB_APP_ID
+
+          sed -i "s/erc20BytecodeId: .*/erc20BytecodeId: '$erc20_2_bid',/g" src/mystore/host/index.ts
+          sed -i "s/swapCreationChainId: .*/swapCreationChainId: '$swap_creation_chain',/g" src/mystore/host/index.ts
+          sed -i "s/swapCreationOwner: .*/swapCreationOwner: '$swap_creation_owner',/g" src/mystore/host/index.ts
+          sed -i "s/swapApplicationId: .*/swapApplicationId: '$swap_appid',/g" src/mystore/host/index.ts
+          sed -i "s/wlineraApplicationId: .*/wlineraApplicationId: '$erc20_2_appid',/g" src/mystore/host/index.ts
+          sed -i "s/amsCreationChainId: .*/amsCreationChainId: '$ams_creation_chain',/g" src/mystore/host/index.ts
+          sed -i "s/amsApplicationId: .*/amsApplicationId: '$ams_appid',/g" src/mystore/host/index.ts
+          sed -i "s/blobGatewayCreationChainId: .*/blobGatewayCreationChainId: '$blob_gateway_creation_chain_id',/g" src/mystore/host/index.ts
+          sed -i "s/blobGatewayApplicationId: .*/blobGatewayApplicationId: '$blob_gateway_app_id'/g" src/mystore/host/index.ts
+
           set +e
           PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin command quasar
           rc=$?
           set -e
           if [ ! $rc -eq 0 ]; then
-            n v16.14.0
-            PATH=/usr/local/bin:$PATH npm i -g mirror-config-china --registry=https://registry.npm.taobao.org
+            n v20
             PATH=/usr/local/bin:$PATH npm install --global --registry https://registry.npm.taobao.org yarn
             PATH=/usr/local/bin:$PATH yarn add global quasar-cli@latest
           fi
-          PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin yarn install --registry https://registry.npm.taobao.org/
-          PATH=/usr/local/bin:$PATH:./node_modules/@quasar/app/bin quasar build
-          docker build -t $DOCKER_REGISTRY/entropypool/webui-template:$tag .
+          yarn
+          yarn build
+          sed -i "s#NGINX1.20_DOCKER_REGISTRY_URL#$NGINX_DOCKER_REGISTRY_URL#g" Dockerfile
+          docker build -t $DOCKER_REGISTRY/linera/kline-webui:$tag .
+        '''.stripIndent())
+      }
+    }
+
+    stage('Release docker image for feature') {
+      when {
+        expression { RELEASE_TARGET == 'true' }
+        expression { BRANCH_NAME != 'master' }
+      }
+      steps {
+        sh(returnStdout: false, script: '''
+          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          set +e
+          docker images | grep kline-webui | grep $feature_name
+          rc=$?
+          set -e
+          if [ 0 -eq $rc ]; then
+            docker push $DOCKER_REGISTRY/entropypool/kline-webui:$feature_name
+          fi
+          images=`docker images | grep entropypool | grep kline-webui | grep none | awk '{ print $3 }'`
+          for image in $images; do
+            docker rmi $image -f
+          done
         '''.stripIndent())
       }
     }
@@ -222,9 +288,15 @@ pipeline {
         expression { RELEASE_TARGET == 'true' }
       }
       steps {
-        sh 'docker push $DOCKER_REGISTRY/entropypool/webui-template:latest'
-        sh(returnStdout: true, script: '''
-          images=`docker images | grep entropypool | grep webui-template | grep none | awk '{ print $3 }'`
+        sh(returnStdout: false, script: '''
+          set +e
+          docker images | grep kline-webui | grep latest
+          rc=$?
+          set -e
+          if [ 0 -eq $rc ]; then
+            docker push $DOCKER_REGISTRY/entropypool/kline-webui:latest
+          fi
+          images=`docker images | grep entropypool | grep kline-webui | grep none | awk '{ print $3 }'`
           for image in $images; do
             docker rmi $image -f
           done
@@ -238,15 +310,14 @@ pipeline {
       }
       steps {
         sh(returnStdout: false, script: '''
-          revlist=`git rev-list --tags --max-count=1`
-          tag=`git describe --tags $revlist`
+          tag=`git tag -l | sort -V | tail -n1`
 
           set +e
-          docker images | grep webui-template | grep $tag
+          docker images | grep kline-webui | grep $tag
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
-            docker push $DOCKER_REGISTRY/entropypool/webui-template:$tag
+            docker push $DOCKER_REGISTRY/entropypool/kline-webui:$tag
           fi
         '''.stripIndent())
       }
@@ -258,8 +329,7 @@ pipeline {
       }
       steps {
         sh(returnStdout: false, script: '''
-          revlist=`git rev-list --tags --max-count=1`
-          tag=`git describe --tags $revlist`
+          tag=`git tag -l | sort -V | tail -n1`
 
           major=`echo $tag | awk -F '.' '{ print $1 }'`
           minor=`echo $tag | awk -F '.' '{ print $2 }'`
@@ -269,12 +339,27 @@ pipeline {
           tag=$major.$minor.$patch
 
           set +e
-          docker images | grep webui-template | grep $tag
+          docker images | grep kline-webui | grep $tag
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
-            docker push $DOCKER_REGISTRY/entropypool/webui-template:$tag
+            docker push $DOCKER_REGISTRY/entropypool/kline-webui:$tag
           fi
+        '''.stripIndent())
+      }
+    }
+
+    stage('Deploy for feature') {
+      when {
+        expression { DEPLOY_TARGET == 'true' }
+        expression { BRANCH_NAME != 'master' }
+      }
+      steps {
+        sh(returnStdout: false, script: '''
+          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          sed -i "s/kline-webui:latest/kline-webui:$feature_name/g" webui/k8s/01-kline-webui.yaml.yaml
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" webui/k8s/01-kline-webui.yaml.yaml
+          kubectl apply -k k8s
         '''.stripIndent())
       }
     }
@@ -282,29 +367,32 @@ pipeline {
     stage('Deploy for development') {
       when {
         expression { DEPLOY_TARGET == 'true' }
-        expression { TARGET_ENV == 'development' }
+        expression { TARGET_ENV ==~ /.*development.*/ }
+        expression { BRANCH_NAME == 'master' }
       }
       steps {
-        sh 'sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" k8s/01-webui-template.yaml'
-        sh 'kubectl apply -k k8s'
+        sh '''
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" webui/k8s/01-kline-webui.yaml.yaml
+          kubectl apply -k webui/k8s
+        '''
       }
     }
 
     stage('Deploy for testing') {
       when {
         expression { DEPLOY_TARGET == 'true' }
-        expression { TARGET_ENV == 'testing' }
+        expression { TARGET_ENV ==~ /.*testing.*/ }
+        expression { BRANCH_NAME == 'master' }
       }
       steps {
-        sh(returnStdout: true, script: '''
-          revlist=`git rev-list --tags --max-count=1`
-          tag=`git describe --tags $revlist`
+        sh(returnStdout: false, script: '''
+          tag=`git tag -l | sort -V | tail -n1`
 
           git reset --hard
           git checkout $tag
-          sed -i "s/webui-template:latest/webui-template:$tag/g" k8s/01-webui-template.yaml
-          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" k8s/01-webui-template.yaml
-          kubectl apply -k k8s
+          sed -i "s/kline-webui:latest/kline-webui:$tag/g" webui/k8s/01-kline-webui.yaml.yaml
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" webui/k8s/01-kline-webui.yaml.yaml
+          kubectl apply -k webui/k8s
         '''.stripIndent())
       }
     }
@@ -315,9 +403,8 @@ pipeline {
         expression { TARGET_ENV ==~ /.*production.*/ }
       }
       steps {
-        sh(returnStdout: true, script: '''
-          revlist=`git rev-list --tags --max-count=1`
-          tag=`git describe --tags $revlist`
+        sh(returnStdout: false, script: '''
+          tag=`git tag -l | sort -V | tail -n1`
 
           major=`echo $tag | awk -F '.' '{ print $1 }'`
           minor=`echo $tag | awk -F '.' '{ print $2 }'`
@@ -327,9 +414,9 @@ pipeline {
 
           git reset --hard
           git checkout $tag
-          sed -i "s/webui-template:latest/webui-template:$tag/g" k8s/01-webui-template.yaml
-          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" k8s/01-webui-template.yaml
-          kubectl apply -k k8s
+          sed -i "s/kline-webui:latest/kline-webui:$tag/g" webui/k8s/01-kline-webui.yaml.yaml
+          sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" webui/k8s/01-kline-webui.yaml.yaml
+          kubectl apply -k webui/k8s
         '''.stripIndent())
       }
     }
