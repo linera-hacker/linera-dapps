@@ -80,9 +80,9 @@ const processImg = (imageHash: string | undefined): string => {
   return useHostStore().blobDataPath(imageHash)
 }
 
-watch(() => swapStore.SelectedToken, () => {
-  swapStore.SelectedTokenPair = null
+const getTokenPairs = () => {
   if (!swapStore.SelectedToken) {
+    swapStore.SelectedTokenPair = null
     return
   }
   swapStore.getTokenPairsByTokenZeroID((error) => {
@@ -105,6 +105,10 @@ watch(() => swapStore.SelectedToken, () => {
       }
     }
   })
+}
+
+watch(() => swapStore.SelectedToken, () => {
+  getTokenPairs()
 })
 
 const refreshTokens = () => {
@@ -118,6 +122,7 @@ const refreshTokens = () => {
         for (const info of swapStore.Tokens) {
           if (t0Addr && t0Addr === info.Address) {
             swapStore.SelectedToken = info
+            getTokenPairs()
             return
           }
         }
@@ -125,6 +130,7 @@ const refreshTokens = () => {
 
       if (!swapStore.SelectedToken) {
         swapStore.SelectedToken = swapStore.Tokens[0]
+        getTokenPairs()
       }
     }
   })

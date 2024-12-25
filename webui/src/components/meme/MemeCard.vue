@@ -9,7 +9,9 @@
         <q-item-label class='text-h6'>
           <q-badge color='green-6'>
             {{ memeInfo.ticker }}
-          </q-badge> {{ memeInfo.appName }}
+          </q-badge>
+          {{ memeInfo.appName }}
+          <q-icon name='bi-copy' size='16px' :style='{marginTop: "-3px"}' @click.stop='(evt) => _copyToClipboard(memeInfo.appID, evt)' />
         </q-item-label>
         <q-item-label>
           <div class='vertical-inner-y-margin'>
@@ -72,6 +74,8 @@ import { MemeAppInfoDisplay } from 'src/stores/memeInfo'
 import { discordLogo, githubLogo, internetLogo, telegramLogo, twitterLogo } from 'src/assets'
 import { useRouter } from 'vue-router'
 import { useHostStore } from 'src/mystore/host'
+import { copyToClipboard } from 'quasar'
+import { notification } from 'src/mystore'
 
 interface Props {
   memeInfo: MemeAppInfoDisplay
@@ -81,6 +85,36 @@ const memeInfo = toRef(props, 'memeInfo')
 const newTx = ref(true)
 
 const router = useRouter()
+
+const _notification = notification.useNotificationStore()
+
+const _copyToClipboard = (
+  content: string,
+  evt: {
+    preventDefault(): unknown
+    clipboardData: { getData: (arg0: string) => string }
+  }
+) => {
+  evt.preventDefault()
+  copyToClipboard(content)
+    .then(() => {
+      _notification.pushNotification({
+        Title: 'Copy content',
+        Message: `Success copy ${content.substring(0, 20)}... to clipboard.`,
+        Popup: true,
+        Type: notification.NotifyType.Info
+      })
+    })
+    .catch((e) => {
+      _notification.pushNotification({
+        Title: 'Copy content',
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        Message: `Failed copy ${content.substring(0, 20)}...: ${e}`,
+        Popup: true,
+        Type: notification.NotifyType.Error
+      })
+    })
+}
 
 const onSwap = (token0: string) => {
   void router.push({
