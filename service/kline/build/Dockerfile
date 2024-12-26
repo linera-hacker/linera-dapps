@@ -16,6 +16,7 @@ ARG ENV_SWAP_SERVER_ADDR
 COPY $GOTAR /$GONAME
 RUN tar -C /usr -xzf /$GONAME
 
+RUN chmod 777 /tmp
 RUN apt-get update -y
 RUN apt-get install git wget make curl jq vim -y
 COPY entrypoint.sh /usr/local/bin/entrypoint-inner.sh
