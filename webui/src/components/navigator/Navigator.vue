@@ -62,20 +62,18 @@ onMounted(() => {
     _host.apiSchema = 'https'
   }
 
-  if (window.location.pathname !== '/') return
-
   if (window.location.hostname.endsWith('linerameme.fun')) {
     selectedIcon.value = lineraMemeLogo
-    void router.push({ path: '/meme' })
+    void router.push({ path: window.location.pathname === '/' ? '/meme' : window.location.pathname })
   } else if (window.location.hostname.endsWith('lineraswap.fun')) {
     selectedIcon.value = lineraSwapLogo
-    void router.push({ path: '/swap' })
+    void router.push({ path: window.location.pathname === '/' ? '/swap' : window.location.pathname })
   } else if (window.location.hostname.endsWith('blobgateway.com')) {
     selectedIcon.value = blobGatewayLogo
-    void router.push({ path: '/blob' })
+    void router.push({ path: window.location.pathname === '/' ? '/blob' : window.location.pathname })
   } else {
     selectedIcon.value = lineraMemeLogo
-    void router.push({ path: '/meme' })
+    void router.push({ path: window.location.pathname === '/' ? '/meme' : window.location.pathname })
   }
 })
 

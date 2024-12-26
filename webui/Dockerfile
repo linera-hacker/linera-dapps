@@ -1,4 +1,4 @@
-FROM nginx:1.20
+FROM NGINX1.20_DOCKER_REGISTRY_URL
 
 user root
 

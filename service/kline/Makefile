@@ -51,7 +51,7 @@ DEVELOPMENT= dev
 endif
 
 ifndef DOCKER_REGISTRY
-DOCKER_REGISTRY= uhub.service.ucloud.cn
+DOCKER_REGISTRY=$DOCKER_REGISTRY
 endif
 
 ifndef TAG

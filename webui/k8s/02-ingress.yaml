@@ -1,11 +1,11 @@
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
 metadata:
-  name: webui-template-ingress
+  name: kline-webui-swap-ingress
   namespace: kube-system
   annotations:
-    k8s.kuboard.cn/displayName: webui-template
-    k8s.kuboard.cn/workload: webui-template
+    k8s.kuboard.cn/displayName: kline-swap-webui
+    k8s.kuboard.cn/workload: kline-swap-webui
     kubernetes.io/ingress.class: "traefik-internet"
     traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
     traefik.ingress.kubernetes.io/router.middlewares:
@@ -14,17 +14,167 @@ metadata:
       kube-system-common-headers@kubernetescrd
 
 spec:
+  tls:
+    - hosts:
+        - '*.hk.testnet-archimedes.lineraswap.fun'
+        - 'hk.testnet-archimedes.lineraswap.fun'
+      secretName: hk-testnet-archimedes-lineraswap-fun-tls
   rules:
-    - host: vue-template.npool.top
-      http: &http_ruless
+    - host: hk.testnet-archimedes.lineraswap.fun
+      http:
         paths:
           - path: /
             backend:
-              serviceName: webui-template
+              serviceName: kline-webui
               servicePort: 80
-    - host: vue-template.xpool.top
-      http: *http_rules
-    - host: www.vue-template.npool.top
-      http: *http_rules
-    - host: www.vue-template.xpool.top
-      http: *http_rules
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-meme-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-meme-webui
+    k8s.kuboard.cn/workload: kline-meme-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.hk.testnet-archimedes.linerameme.fun'
+        - 'hk.testnet-archimedes.linerameme.fun'
+      secretName: hk-testnet-archimedes-linerameme-fun-tls
+  rules:
+    - host: hk.testnet-archimedes.linerameme.fun
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-blob-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-blob-webui
+    k8s.kuboard.cn/workload: kline-blob-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.hk.testnet-archimedes.blobgateway.com'
+        - 'hk.testnet-archimedes.blobgateway.com'
+      secretName: hk-testnet-archimedes-blobgateway-com-tls
+  rules:
+    - host: hk.testnet-archimedes.blobgateway.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80
+
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-testnet-swap-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-testnet-swap-webui
+    k8s.kuboard.cn/workload: kline-testnet-swap-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.testnet-archimedes.lineraswap.fun'
+        - 'testnet-archimedes.lineraswap.fun'
+      secretName: testnet-archimedes-lineraswap-fun-tls
+  rules:
+    - host: testnet-archimedes.lineraswap.fun
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-testnet-meme-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-testnet-meme-webui
+    k8s.kuboard.cn/workload: kline-testnet-meme-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.testnet-archimedes.linerameme.fun'
+        - 'testnet-archimedes.linerameme.fun'
+      secretName: testnet-archimedes-linerameme-fun-tls
+  rules:
+    - host: testnet-archimedes.linerameme.fun
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80
+---
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: kline-webui-testnet-blob-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: kline-testnet-blob-webui
+    k8s.kuboard.cn/workload: kline-testnet-blob-webui
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure, web
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-http-redirect-https-testing@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  tls:
+    - hosts:
+        - '*.testnet-archimedes.blobgateway.com'
+        - 'testnet-archimedes.blobgateway.com'
+      secretName: testnet-archimedes-blobgateway-com-tls
+  rules:
+    - host: testnet-archimedes.blobgateway.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: kline-webui
+              servicePort: 80

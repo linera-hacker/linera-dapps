@@ -2,8 +2,8 @@ version="0.0.1"
 
 [zeus]
 domain="zeus"
-http-port=30100
-grpc-port=30101
+http-port=50870
+grpc-port=50871
 log-file="/var/log/zeus.log"
 
 [mysql]
@@ -14,6 +14,6 @@ password="12345679"
 database="zeus"
 
 [swap-app]
-server-addr='http://210.209.69.38:23103'
-chain-id='58578dbca48967fd92b1344d740a74856ff11c830a7065947f110cff3cca118a'
-app-id='0c9e557b2c282e737ab631de4a88764b38c2f604f6b80df1fa0cbaecec239e06dc96ec01a1c237598853fedd337d2c8ad61f637b4dd41ac7aa1341c472af238158578dbca48967fd92b1344d740a74856ff11c830a7065947f110cff3cca118a070000000000000000000000'
+server-addr='http://linera-dapps-service:30092'
+chain-id='23011460ebc72efac0b7f73ccd5bcb5d12eda134c75054d55e90c8abc0b99dda'
+app-id='ca30b7409bfa4a373c2597ca63568ce698679c53ddeef9cc033aba955d2823b5f332095b5e2bb1757c03fd11fa58e930c7f6e28cc5cea0309f21db1dca210a2223011460ebc72efac0b7f73ccd5bcb5d12eda134c75054d55e90c8abc0b99dda060000000000000000000000'

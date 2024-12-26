@@ -105,9 +105,9 @@ const imageError = ref(false)
 const applicationIds = ref([] as string[])
 
 const initPoolLiquidity = ref({
-  amount0Initial: '5',
+  amount0Initial: '100000',
   amount1Initial: '1',
-  amount0Virtual: '5',
+  amount0Virtual: '100000',
   amount1Virtual: '1'
 } as InitPoolLiquidity)
 

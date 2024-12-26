@@ -263,8 +263,8 @@ const loadTxData = () => {
   })
 }
 
-const interval = setInterval(useIntervalLoadData, 15 * 1000)
-const txInterval = setInterval(loadTxData, 5 * 1000)
+const interval = setInterval(useIntervalLoadData, 30 * 1000)
+const txInterval = setInterval(loadTxData, 30 * 1000)
 
 onBeforeUnmount(() => {
   clearInterval(interval)

@@ -1,0 +1,20 @@
+BRANCH_NAME=$1
+IMAGE_VERSION=$2
+
+GONAME=go1.22.10.linux-amd64.tar.gz
+BASECACHE=tmp
+mkdir -p $BASECACHE
+
+while true
+do
+  [ ! -f $BASECACHE/$GONAME ] && wget $GO_DOWNLOAD_URL -P $BASECACHE/
+  gofile_md5sum=`md5sum $BASECACHE/$GONAME |awk '{ print $1 }'`
+  [ "$gofile_md5sum" == "c322460c675c40141fb23149f8bdbad7" ] && break
+  rm $BASECACHE/$GONAME
+  sleep 10
+done
+
+docker build . --build-arg ALL_PROXY=$all_proxy --build-arg GOTAR=$BASECACHE/$GONAME \
+	--build-arg GONAME=$GONAME \
+	--build-arg BRANCH_NAME=$BRANCH_NAME \
+	-t $DOCKER_REGISTRY/linera/kline-service:$IMAGE_VERSION

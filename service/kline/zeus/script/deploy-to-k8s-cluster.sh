@@ -34,7 +34,7 @@ if [ "$1" == "dev" ]; then
   version=latest
 fi
 
-DOCKER_REGISTRY=uhub.service.ucloud.cn
+DOCKER_REGISTRY=$DOCKER_REGISTRY
 # For testing or production environment, pass the second variable
 if [[ "x" != "x$2" ]]; then
    DOCKER_REGISTRY=$2
@@ -48,7 +48,7 @@ service_name=$(
 echo "Deploy docker image for $PLATFORM -- $version"
 
 sed -i "s/$service_name:latest/$service_name:$version/g" $PROJECT_FOLDER/cmd/$service_name/k8s/02-$service_name.yaml
-sed -i "s/uhub\.service\.ucloud\.cn/$DOCKER_REGISTRY/g" $PROJECT_FOLDER/cmd/$service_name/k8s/02-$service_name.yaml
+sed -i "s/DOCKER_REGISTRY/$DOCKER_REGISTRY/g" $PROJECT_FOLDER/cmd/$service_name/k8s/02-$service_name.yaml
 
 set +e
 

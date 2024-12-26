@@ -37,7 +37,7 @@ fi
 if [[ "xdev" == "x$1" ]]; then
   version=latest
 fi
-registry=uhub.service.ucloud.cn
+registry=$DOCKER_REGISTRY
 OrginazeName=web3eye
 
 if [[ "x" != $2 ]]; then
