@@ -121,7 +121,7 @@ function create_wallet() {
 }
 
 function __run_service() {
-  linera -w $1 service --port $2
+  linera --max-retries 100 --retry-delay-ms 10 -w $1 service --port $2
 }
 
 function run_service () {
