@@ -65,19 +65,23 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 			continue
 		}
+		fmt.Println("Pool request 1", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 		lastTx, err := GetLastTransaction(ctx, poolID)
 		if err != nil {
 			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 			continue
 		}
+		fmt.Println("Pool request 2", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 		oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("Pool request 3", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 		txVolumn, err := GetOneDayVolumn(ctx, poolID)
 		if err != nil {
 			return nil, err
 		}
+		fmt.Println("Pool request 4", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 		tokenLastCond := &summaryproto.TokenLastCond{
 			PoolID:                 poolID,
 			TokenZeroAddress:       t0Addr,
@@ -91,7 +95,7 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
 		}
 		results = append(results, tokenLastCond)
-		defer fmt.Println("Pool request", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+		fmt.Println("Pool request", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 	}
 
 	fmt.Println("Pools request", uid, time.Now().Sub(start))
