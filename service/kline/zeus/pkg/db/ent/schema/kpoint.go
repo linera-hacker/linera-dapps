@@ -37,5 +37,6 @@ func (KPoint) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("token_pair_id", "k_point_type", "end_time"),
 		index.Fields("end_time"),
+		index.Fields("token_pair_id"),
 	}
 }

@@ -66,7 +66,7 @@ export const calculateMA = (dayCount: number, nums: number[][]) => {
     for (let j = 0; j < dayCount; j++) {
       sum += nums[i - j][1]
     }
-    result.push('' + (sum / dayCount).toFixed(3))
+    result.push('' + (sum / dayCount).toFixed(8))
   }
   return result
 }
