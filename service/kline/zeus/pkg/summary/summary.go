@@ -55,14 +55,11 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
 	results := []*summaryproto.TokenLastCond{}
 	uid := uuid.New()
-	fmt.Println("Start --- ", time.Now(), uid)
-	defer fmt.Println("End --- ", time.Now(), uid)
+	start := time.Now()
 	for i := 0; i < len(poolTokens); i++ {
 		poolID := poolTokens[i].PoolID
 		t0Addr := poolTokens[i].TokenZeroAddress
 		t1Addr := poolTokens[i].TokenOneAddress
-		fmt.Println("Start", poolID, t0Addr, t1Addr, time.Now(), uid)
-		defer fmt.Println("End", poolID, t0Addr, t1Addr, time.Now(), uid)
 		tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 		if err != nil {
 			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
@@ -94,8 +91,10 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
 		}
 		results = append(results, tokenLastCond)
+		defer fmt.Println("Pool request", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 	}
 
+	fmt.Println("Pools request", uid, time.Now().Sub(start))
 	return results, nil
 }
 
