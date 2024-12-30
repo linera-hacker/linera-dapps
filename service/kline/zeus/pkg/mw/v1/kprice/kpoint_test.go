@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
 
@@ -119,7 +118,6 @@ func deleteKP(t *testing.T) {
 }
 
 func TestKP(t *testing.T) {
-	logger.Init(logger.DebugLevel, "./a.log")
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
