@@ -52,11 +52,14 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
 	results := []*summaryproto.TokenLastCond{}
+	fmt.Println("Start", poolID, time.Now())
+	defer fmt.Println("End", poolID, time.Now())
 	for i := 0; i < len(poolTokens); i++ {
 		poolID := poolTokens[i].PoolID
 		t0Addr := poolTokens[i].TokenZeroAddress
 		t1Addr := poolTokens[i].TokenOneAddress
-		fmt.Println(poolID, t0Addr, t1Addr)
+		fmt.Println("Start", poolID, t0Addr, t1Addr, time.Now())
+		defer fmt.Println("End", poolID, t0Addr, t1Addr, time.Now())
 		tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 		if err != nil {
 			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
