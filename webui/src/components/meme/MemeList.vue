@@ -121,7 +121,7 @@ const getApplicationInfos = (url: string) => {
     for (let i = 0; i < apps.length; i++) {
       const poolId = appPoolIDsMap.value.get(apps[i].application_id)
       if (poolId === undefined || poolId === null || poolId === '') {
-        // continue
+        continue
       }
       const checkExist = appIDsMap.value.get(apps[i].application_id)
       if (checkExist) {

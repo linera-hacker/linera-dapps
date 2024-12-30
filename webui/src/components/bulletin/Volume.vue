@@ -36,7 +36,17 @@
 import { useBulletinStore } from 'src/mystore/bulletin'
 import { shortId } from 'src/utils/shortid'
 import { trophyNo1, trophyNo2, trophyNo3 } from 'src/assets'
+import { onMounted, computed, watch } from 'vue'
+import { useSwapStore } from 'src/mystore/swap'
 
 const bulletinStore = useBulletinStore()
-bulletinStore.getOneDayVolumn()
+const selectedToken = computed(() => useSwapStore().SelectedToken)
+
+watch(selectedToken, () => {
+  bulletinStore.getOneDayVolumn()
+})
+
+onMounted(() => {
+  bulletinStore.getOneDayVolumn()
+})
 </script>
