@@ -21,72 +21,88 @@ import (
 	_ "github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent/runtime"
 )
 
-const (
-	maxLifeTime     = time.Minute
-	maxConns        = 10
-	maxFailedConter = 3
-)
+type db struct {
+	db      *sql.DB
+	address string
+}
 
 var (
-	mu            = sync.Mutex{}
-	failedConter  = 0
-	connConter    = -1
-	masterMysqlIP string
-	connList      = []*sql.DB{}
+	mu        = sync.Mutex{}
+	mysqlConn *db
 )
 
 func client() (*ent.Client, error) {
-	var err error
-	if failedConter >= maxFailedConter {
-		failedConter = 0
-		masterMysqlIP, err = GetMasterIP()
-		if err != nil {
-			panic(err)
-		}
+
+	conn, err := GetConn()
+	if err != nil {
+		return nil, err
 	}
 
-	if len(connList) < maxConns {
-		conn, err := GetConn()
-		if err != nil {
-			failedConter++
-			return nil, err
-		}
-		connList = append(connList, conn)
-	}
-
-	if connConter >= maxConns-1 {
-		connConter = 0
-	} else {
-		connConter++
-	}
-
-	drv := entsql.OpenDB(dialect.MySQL, connList[connConter])
+	drv := entsql.OpenDB(dialect.MySQL, conn)
 	return ent.NewClient(ent.Driver(drv)), nil
 }
 
-func GetConn() (*sql.DB, error) {
+func GetConn() (conn *sql.DB, err error) {
+	masterMysqlIP, err := GetMasterIP()
+	if err != nil {
+		return nil, err
+	}
+
 	mu.Lock()
-	defer mu.Unlock()
+	if mysqlConn != nil {
+		conn = mysqlConn.db
+		mu.Unlock()
+		return
+	}
+	mu.Unlock()
 
 	myConfig := config.GetConfig().MySQL
-
 	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&interpolateParams=true",
 		myConfig.User, myConfig.Password,
 		masterMysqlIP,
 		myConfig.Port,
 		myConfig.Database,
 	)
-	conn, err := sql.Open("mysql", dataSourceName)
+
+	conn, err = open("mysql", dataSourceName)
 	if err != nil {
+		logger.Sugar().Warnf("call open error: %v", err)
+		return nil, err
+	}
+
+	return
+}
+
+func open(driverName, dataSourceName string) (conn *sql.DB, err error) {
+	// double lock check
+	mu.Lock()
+	if mysqlConn != nil && mysqlConn.address == dataSourceName {
+		conn = mysqlConn.db
+		mu.Unlock()
+		return
+	}
+
+	logger.Sugar().Infof("Reopen database %v: %v", driverName, dataSourceName)
+	conn, err = sql.Open(driverName, dataSourceName)
+	if err != nil {
+		mu.Unlock()
 		logger.Sugar().Warnf("call Open error: %v", err)
 		return nil, err
 	}
 
 	// https://github.com/go-sql-driver/mysql
 	// See "Important settings" section.
-	conn.SetConnMaxLifetime(maxLifeTime)
-	conn.SetMaxOpenConns(maxConns)
-	conn.SetMaxIdleConns(maxConns)
+	conn.SetConnMaxLifetime(time.Minute * 3)
+	conn.SetMaxOpenConns(2)
+	conn.SetMaxIdleConns(1)
+
+	// maybe should close
+	if mysqlConn != nil {
+		mysqlConn.db.Close()
+	}
+
+	mysqlConn = &db{db: conn, address: dataSourceName}
+	mu.Unlock()
 
 	return conn, nil
 }
@@ -94,8 +110,10 @@ func GetConn() (*sql.DB, error) {
 func InitDatabase() error {
 	mu.Lock()
 	defer mu.Unlock()
-	var err error
-
+	masterMysqlIP, err := GetMasterIP()
+	if err != nil {
+		return err
+	}
 	myConfig := config.GetConfig().MySQL
 
 	withoutDBMSN := fmt.Sprintf("%v:%v@tcp(%v:%v)/?parseTime=true&interpolateParams=true",
@@ -166,10 +184,6 @@ func GetMasterIP() (string, error) {
 
 func Init() error {
 	var err error
-	masterMysqlIP, err = GetMasterIP()
-	if err != nil {
-		panic(err)
-	}
 
 	err = InitDatabase()
 	if err != nil {
