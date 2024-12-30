@@ -16,6 +16,8 @@ import (
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
+
+	"github.com/google/uuid"
 )
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
@@ -52,14 +54,15 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
 	results := []*summaryproto.TokenLastCond{}
-	fmt.Println("Start --- ", time.Now())
-	defer fmt.Println("End --- ", time.Now())
+	uid := uuid.New()
+	fmt.Println("Start --- ", time.Now(), uid)
+	defer fmt.Println("End --- ", time.Now(), uid)
 	for i := 0; i < len(poolTokens); i++ {
 		poolID := poolTokens[i].PoolID
 		t0Addr := poolTokens[i].TokenZeroAddress
 		t1Addr := poolTokens[i].TokenOneAddress
-		fmt.Println("Start", poolID, t0Addr, t1Addr, time.Now())
-		defer fmt.Println("End", poolID, t0Addr, t1Addr, time.Now())
+		fmt.Println("Start", poolID, t0Addr, t1Addr, time.Now(), uid)
+		defer fmt.Println("End", poolID, t0Addr, t1Addr, time.Now(), uid)
 		tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 		if err != nil {
 			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
