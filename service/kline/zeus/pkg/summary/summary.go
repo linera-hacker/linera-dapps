@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"time"
+	"sync"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
@@ -53,50 +54,56 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 }
 
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
-	results := []*summaryproto.TokenLastCond{}
-	uid := uuid.New()
-	start := time.Now()
+	results := make([]*summaryproto.TokenLastCond{}, len(poolTokens))
+	var wg sync.WaitGroup
+
 	for i := 0; i < len(poolTokens); i++ {
-		poolID := poolTokens[i].PoolID
-		t0Addr := poolTokens[i].TokenZeroAddress
-		t1Addr := poolTokens[i].TokenOneAddress
-		tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
-		if err != nil {
-			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
-			continue
-		}
-		fmt.Println("Pool request 1", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-		lastTx, err := GetLastTransaction(ctx, poolID)
-		if err != nil {
-			fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
-			continue
-		}
-		fmt.Println("Pool request 2", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-		oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println("Pool request 3", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-		txVolumn, err := GetOneDayVolumn(ctx, poolID)
-		if err != nil {
-			return nil, err
-		}
-		fmt.Println("Pool request 4", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-		tokenLastCond := &summaryproto.TokenLastCond{
-			PoolID:                 poolID,
-			TokenZeroAddress:       t0Addr,
-			TokenOneAddress:        t1Addr,
-			LastTxAt:               lastTx.Timestamp,
-			LastTxZeroAmount:       lastTx.AmountZeroIn,
-			LastTxOneAmount:        lastTx.AmountOneIn,
-			OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
-			OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
-			NowPrice:               oneDayPrices[1].Price,
-			OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
-		}
-		results = append(results, tokenLastCond)
-		fmt.Println("Pool request", poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			poolID := poolTokens[i].PoolID
+			t0Addr := poolTokens[i].TokenZeroAddress
+			t1Addr := poolTokens[i].TokenOneAddress
+			tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
+			if err != nil {
+				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
+				continue
+			}
+			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			lastTx, err := GetLastTransaction(ctx, poolID)
+			if err != nil {
+				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
+				continue
+			}
+			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			txVolumn, err := GetOneDayVolumn(ctx, poolID)
+			if err != nil {
+				return nil, err
+			}
+			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			tokenLastCond := &summaryproto.TokenLastCond{
+				PoolID:                 poolID,
+				TokenZeroAddress:       t0Addr,
+				TokenOneAddress:        t1Addr,
+				LastTxAt:               lastTx.Timestamp,
+				LastTxZeroAmount:       lastTx.AmountZeroIn,
+				LastTxOneAmount:        lastTx.AmountOneIn,
+				OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
+				OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
+				NowPrice:               oneDayPrices[1].Price,
+				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
+			}
+			results[i] = tokenLastCond
+			fmt.Println("Pool request", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+		}(i)
 	}
+
+	wg.Wait()
 
 	fmt.Println("Pools request", uid, time.Now().Sub(start))
 	return results, nil
