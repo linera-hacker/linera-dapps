@@ -159,6 +159,53 @@ func (h *Handler) GetLatestKPrices(ctx context.Context) ([]*kpriceproto.KPrice, 
 	return handler.infos, handler.total, nil
 }
 
+func (h *Handler) GetEarlistKPrice(ctx context.Context) ([]*kpriceproto.KPrice, uint32, error) {
+	handler := &queryHandler{
+		Handler: h,
+	}
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		stm, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
+		if err != nil {
+			return err
+		}
+		handler.selectKPrice(stm)
+		handler.stm.
+			Limit(int(h.Limit)).
+			Order(ent.Asc(kpriceent.FieldTimestamp)).
+			Offset(int(h.Offset))
+		return handler.scan(_ctx)
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	return handler.infos, handler.total, nil
+}
+
+func (h *Handler) GetLatestKPrice(ctx context.Context) ([]*kpriceproto.KPrice, uint32, error) {
+	handler := &queryHandler{
+		Handler: h,
+	}
+
+	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		stm, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
+		if err != nil {
+			return err
+		}
+		handler.selectKPrice(stm)
+
+		handler.stm.
+			Offset(int(h.Offset)).
+			Limit(int(h.Limit)).
+			Order(ent.Desc(kpriceent.FieldTimestamp))
+		return handler.scan(_ctx)
+	})
+	if err != nil {
+		return nil, 0, err
+	}
+	return handler.infos, handler.total, nil
+}
+
 type kpMinMax struct {
 	TokenPairID uint32  `sql:"token_pair_id"`
 	Low         float64 `sql:"low"`
