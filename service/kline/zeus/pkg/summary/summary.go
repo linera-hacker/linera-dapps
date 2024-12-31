@@ -3,8 +3,8 @@ package summary
 import (
 	"context"
 	"fmt"
-	"time"
 	"sync"
+	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
@@ -72,39 +72,44 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			timeNow := time.Now()
+			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
 			lastTx, err := GetLastTransaction(ctx, poolID)
 			if err != nil {
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
-			if err != nil {
-				retErr = err
-				return
-			}
-			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			txVolumn, err := GetOneDayVolumn(ctx, poolID)
-			if err != nil {
-				retErr = err
-				return
-			}
-			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			timeNow = time.Now()
+			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
+			// oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
+			// if err != nil {
+			// 	retErr = err
+			// 	return
+			// }
+			// timeNow = time.Now()
+			// fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
+			// txVolumn, err := GetOneDayVolumn(ctx, poolID)
+			// if err != nil {
+			// 	retErr = err
+			// 	return
+			// }
+			// timeNow = time.Now()
+			// fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
 			tokenLastCond := &summaryproto.TokenLastCond{
-				PoolID:                 poolID,
-				TokenZeroAddress:       t0Addr,
-				TokenOneAddress:        t1Addr,
-				LastTxAt:               lastTx.Timestamp,
-				LastTxZeroAmount:       lastTx.AmountZeroIn,
-				LastTxOneAmount:        lastTx.AmountOneIn,
-				OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
-				OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
-				NowPrice:               oneDayPrices[1].Price,
-				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
+				PoolID:           poolID,
+				TokenZeroAddress: t0Addr,
+				TokenOneAddress:  t1Addr,
+				LastTxAt:         lastTx.Timestamp,
+				LastTxZeroAmount: lastTx.AmountZeroIn,
+				LastTxOneAmount:  lastTx.AmountOneIn,
+				// OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
+				// OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
+				// NowPrice:               oneDayPrices[1].Price,
+				// OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
 			}
 			results[i] = tokenLastCond
-			fmt.Println("Pool request", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			timeNow = time.Now()
+			fmt.Println("Pool request 5 ", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
 		}(i)
 	}
 
