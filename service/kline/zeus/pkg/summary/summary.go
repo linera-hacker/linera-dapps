@@ -73,28 +73,29 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				return
 			}
 			timeNow := time.Now()
-			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
+			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			timeNow = time.Now()
 			lastTx, err := GetLastTransaction(ctx, poolID)
 			if err != nil {
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
+			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
 			timeNow = time.Now()
-			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
 			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
 			if err != nil {
 				retErr = err
 				return
 			}
+			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
 			timeNow = time.Now()
-			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
 			txVolumn, err := GetOneDayVolumn(ctx, poolID)
 			if err != nil {
 				retErr = err
 				return
 			}
+			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
 			timeNow = time.Now()
-			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
 			tokenLastCond := &summaryproto.TokenLastCond{
 				PoolID:                 poolID,
 				TokenZeroAddress:       t0Addr,
@@ -109,7 +110,7 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			}
 			results[i] = tokenLastCond
 			timeNow = time.Now()
-			fmt.Println("Pool request 5 ", i, poolID, t0Addr, t1Addr, uid, timeNow.Sub(start))
+			fmt.Println("Pool request 5 ", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
 		}(i)
 	}
 
