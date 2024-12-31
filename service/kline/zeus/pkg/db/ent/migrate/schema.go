@@ -39,6 +39,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{KpointsColumns[11]},
 			},
+			{
+				Name:    "kpoint_token_pair_id",
+				Unique:  false,
+				Columns: []*schema.Column{KpointsColumns[4]},
+			},
 		},
 	}
 	// KpricesColumns holds the columns for the "kprices" table.
@@ -58,14 +63,9 @@ var (
 		PrimaryKey: []*schema.Column{KpricesColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "kprice_timestamp",
+				Name:    "kprice_token_pair_id",
 				Unique:  false,
-				Columns: []*schema.Column{KpricesColumns[6]},
-			},
-			{
-				Name:    "kprice_token_pair_id_timestamp",
-				Unique:  false,
-				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[6]},
+				Columns: []*schema.Column{KpricesColumns[4]},
 			},
 		},
 	}
@@ -162,9 +162,14 @@ var (
 				Columns: []*schema.Column{TransactionsColumns[5]},
 			},
 			{
-				Name:    "transaction_pool_id_timestamp_transaction_id",
+				Name:    "transaction_pool_id_timestamp",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13], TransactionsColumns[5]},
+				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13]},
+			},
+			{
+				Name:    "transaction_timestamp_pool_id",
+				Unique:  false,
+				Columns: []*schema.Column{TransactionsColumns[13], TransactionsColumns[4]},
 			},
 		},
 	}
