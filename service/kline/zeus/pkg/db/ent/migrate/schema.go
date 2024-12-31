@@ -67,6 +67,11 @@ var (
 				Unique:  false,
 				Columns: []*schema.Column{KpricesColumns[4]},
 			},
+			{
+				Name:    "kprice_token_pair_id_timestamp",
+				Unique:  false,
+				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[6]},
+			},
 		},
 	}
 	// TokensColumns holds the columns for the "tokens" table.
