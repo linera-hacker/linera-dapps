@@ -159,7 +159,7 @@ func (h *Handler) GetLatestKPrices(ctx context.Context) ([]*kpriceproto.KPrice, 
 	return handler.infos, handler.total, nil
 }
 
-func (h *Handler) GetEarlistKPrice(ctx context.Context) ([]*kpriceproto.KPrice, error) {
+func (h *Handler) GetEarlistKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -179,10 +179,10 @@ func (h *Handler) GetEarlistKPrice(ctx context.Context) ([]*kpriceproto.KPrice, 
 	if err != nil {
 		return nil, err
 	}
-	return handler.infos, nil
+	return handler.infos[0], nil
 }
 
-func (h *Handler) GetLatestKPrice(ctx context.Context) ([]*kpriceproto.KPrice, error) {
+func (h *Handler) GetLatestKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -203,7 +203,7 @@ func (h *Handler) GetLatestKPrice(ctx context.Context) ([]*kpriceproto.KPrice, e
 	if err != nil {
 		return nil, err
 	}
-	return handler.infos, nil
+	return handler.infos[0], nil
 }
 
 type kpMinMax struct {
