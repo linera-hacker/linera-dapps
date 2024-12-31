@@ -144,7 +144,6 @@ func (h *Handler) GetLatestKPrices(ctx context.Context) ([]*kpriceproto.KPrice, 
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		cli.Debug()
 		if err := handler.queryKPrices(ctx, cli); err != nil {
 			return err
 		}
