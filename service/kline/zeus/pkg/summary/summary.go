@@ -67,7 +67,7 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			poolID := poolTokens[i].PoolID
 			t0Addr := poolTokens[i].TokenZeroAddress
 			t1Addr := poolTokens[i].TokenOneAddress
-			tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
+			_, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 			if err != nil {
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
