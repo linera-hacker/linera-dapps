@@ -92,9 +92,9 @@ func open(driverName, dataSourceName string) (conn *sql.DB, err error) {
 
 	// https://github.com/go-sql-driver/mysql
 	// See "Important settings" section.
-	conn.SetConnMaxLifetime(time.Minute * 3)
-	conn.SetMaxOpenConns(10)
-	conn.SetMaxIdleConns(2)
+	conn.SetConnMaxLifetime(time.Minute * 10)
+	conn.SetMaxOpenConns(20)
+	conn.SetMaxIdleConns(20)
 
 	// maybe should close
 	if mysqlConn != nil {

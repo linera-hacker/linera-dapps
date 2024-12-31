@@ -14,7 +14,6 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/beat"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
 )
 
@@ -38,9 +37,9 @@ var runCmd = &cli.Command{
 			panic(fmt.Errorf("mysql init err: %v", err))
 		}
 
-		go beat.RunSamplingKPoint(c.Context)
-		go beat.RunSamplingKPrice(c.Context)
-		go beat.RunSamplingTransaction(c.Context)
+		// go beat.RunSamplingKPoint(c.Context)
+		// go beat.RunSamplingKPrice(c.Context)
+		// go beat.RunSamplingTransaction(c.Context)
 
 		go server.RunGRPCServer(config.GetConfig().Zeus.GrpcPort)
 		go server.RunHTTPServer(config.GetConfig().Zeus.HTTPPort, config.GetConfig().Zeus.GrpcPort)
