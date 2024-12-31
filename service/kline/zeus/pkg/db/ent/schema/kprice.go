@@ -31,5 +31,6 @@ func (KPrice) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("token_pair_id"),
 		index.Fields("token_pair_id", "timestamp"),
+		index.Fields("timestamp"),
 	}
 }
