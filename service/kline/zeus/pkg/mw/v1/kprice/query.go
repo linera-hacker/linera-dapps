@@ -127,9 +127,9 @@ func (h *Handler) GetEarlistKPrices(ctx context.Context) ([]*kpriceproto.KPrice,
 			return err
 		}
 		handler.stm.
-			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
-			Order(ent.Asc(kpriceent.FieldTimestamp))
+			Order(ent.Asc(kpriceent.FieldTimestamp)).
+			Offset(int(h.Offset))
 		return handler.scan(_ctx)
 	})
 	if err != nil {
