@@ -144,7 +144,8 @@ const getApplicationInfos = (url: string) => {
         website: apps[i].website,
         ticker: parsedSpec.ticker,
         initialSupply: parsedSpec.initial_supply,
-        mintable: parsedSpec.mintable
+        mintable: parsedSpec.mintable,
+        poolCreated: !(poolId === undefined || poolId === null || poolId === '')
       } as MemeAppInfoDisplay
       if (apps[i].application_id === useHostStore().wlineraApplicationId) {
         meme.lastTxAt = 0
@@ -213,7 +214,7 @@ const onLoad = (index, done: () => void) => {
     void onGetAppInfos()
     onHiding()
     done()
-  }, 2000)
+  }, 30000)
 }
 
 const runningInterval = ref(true)
