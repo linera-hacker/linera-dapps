@@ -48,26 +48,26 @@ func (task *SamplingKPointTask) createInitialKPoint(ctx context.Context) error {
 		return err
 	}
 
-	earlistKPs, _, err := kpH.GetEarlistKPrices(ctx)
+	earlistKP, err := kpH.GetEarlistKPrice(ctx)
 	if err != nil {
 		return err
 	}
-	if len(earlistKPs) == 0 {
+	if earlistKP == nil {
 		return nil
 	}
 
-	latestKPs, _, err := kpH.GetLatestKPrices(ctx)
+	latestKP, err := kpH.GetLatestKPrice(ctx)
 	if err != nil {
 		return err
 	}
-	if len(latestKPs) == 0 {
+	if latestKP == nil {
 		return nil
 	}
 
-	startTime := earlistKPs[0].Timestamp - earlistKPs[0].Timestamp%task.interval
+	startTime := earlistKP.Timestamp - earlistKP.Timestamp%task.interval
 	endTime := startTime + task.interval
 
-	if endTime+updateGraceTime > latestKPs[0].Timestamp {
+	if endTime+updateGraceTime > latestKP.Timestamp {
 		return nil
 	}
 
