@@ -189,7 +189,7 @@ func GetOneDayKPrice(ctx context.Context, tpID uint32) (ret [2]*kpriceproto.KPri
 		return ret, err
 	}
 	ret[1] = info
-	fmt.Println("sssssssssss1", time.Since(startTime))
+	fmt.Println("sssssssssss2", time.Since(startTime))
 
 	return ret, nil
 }
