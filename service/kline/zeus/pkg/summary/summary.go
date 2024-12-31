@@ -17,8 +17,6 @@ import (
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
-
-	"github.com/google/uuid"
 )
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
@@ -56,8 +54,6 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
 	results := make([]*summaryproto.TokenLastCond, len(poolTokens))
 	var wg sync.WaitGroup
-	uid := uuid.New()
-	start := time.Now()
 	var retErr error
 
 	for i := 0; i < len(poolTokens); i++ {
@@ -72,30 +68,21 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			timeNow := time.Now()
-			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			timeNow = time.Now()
 			lastTx, err := GetLastTransaction(ctx, poolID)
 			if err != nil {
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
-			timeNow = time.Now()
 			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
 			if err != nil {
 				retErr = err
 				return
 			}
-			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
-			timeNow = time.Now()
 			txVolumn, err := GetOneDayVolumn(ctx, poolID)
 			if err != nil {
 				retErr = err
 				return
 			}
-			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
-			timeNow = time.Now()
 			tokenLastCond := &summaryproto.TokenLastCond{
 				PoolID:                 poolID,
 				TokenZeroAddress:       t0Addr,
@@ -109,8 +96,6 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
 			}
 			results[i] = tokenLastCond
-			timeNow = time.Now()
-			fmt.Println("Pool request 5 ", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(timeNow))
 		}(i)
 	}
 
@@ -120,7 +105,6 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 		return nil, retErr
 	}
 
-	fmt.Println("Pools request", uid, time.Now().Sub(start))
 	return results, nil
 }
 
@@ -191,17 +175,21 @@ func GetOneDayKPrice(ctx context.Context, tpID uint32) (ret [2]*kpriceproto.KPri
 	nowTimestap := uint32(time.Now().Unix())
 	yesterdayTimestap := nowTimestap - kptype.KPointTypeInfos[basetype.KPointType_OneDay].GetSeconds()
 
+	startTime := time.Now()
 	info, err := getEarlistKPrice(ctx, tpID, yesterdayTimestap)
 	if err != nil {
 		return ret, err
 	}
 	ret[0] = info
+	fmt.Println("sssssssssss1", time.Since(startTime))
+	startTime = time.Now()
 
 	info, err = getLatestKPrice(ctx, tpID, nowTimestap)
 	if err != nil {
 		return ret, err
 	}
 	ret[1] = info
+	fmt.Println("sssssssssss1", time.Since(startTime))
 
 	return ret, nil
 }
