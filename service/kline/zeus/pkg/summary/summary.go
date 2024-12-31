@@ -175,22 +175,16 @@ func GetOneDayKPrice(ctx context.Context, tpID uint32) (ret [2]*kpriceproto.KPri
 	nowTimestap := uint32(time.Now().Unix())
 	yesterdayTimestap := nowTimestap - kptype.KPointTypeInfos[basetype.KPointType_OneDay].GetSeconds()
 
-	startTime := time.Now()
 	info, err := getEarlistKPrice(ctx, tpID, yesterdayTimestap)
 	if err != nil {
 		return ret, err
 	}
 	ret[0] = info
-	fmt.Println("sssssssssss1", time.Since(startTime))
-	startTime = time.Now()
-
 	info, err = getLatestKPrice(ctx, tpID, nowTimestap)
 	if err != nil {
 		return ret, err
 	}
 	ret[1] = info
-	fmt.Println("sssssssssss2", time.Since(startTime))
-
 	return ret, nil
 }
 
