@@ -2,7 +2,6 @@ package kpoint
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/db/ent"
@@ -14,13 +13,9 @@ func (h *Handler) CreateKPointWithCli(ctx context.Context, cli *ent.Client) erro
 	if err != nil {
 		return err
 	}
-	rc, err := cli.ExecContext(ctx, sql)
+	_, err = cli.ExecContext(ctx, sql)
 	if err != nil {
 		return err
-	}
-
-	if n, err := rc.RowsAffected(); err != nil || n != 1 {
-		return fmt.Errorf("fail create kpoint: %v", err)
 	}
 	return nil
 }
