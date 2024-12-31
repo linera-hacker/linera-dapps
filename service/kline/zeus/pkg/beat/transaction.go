@@ -26,7 +26,7 @@ func (st *SamplingTransactionTask) StartSampling(ctx context.Context, interval t
 	for {
 		select {
 		// try to start with whole seconds and offset 10 milliseconds
-		case <-time.NewTicker(interval*time.Second + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
+		case <-time.NewTimer(interval*time.Second + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
 			go func() {
 				err := st.samplingAndStore(ctx)
 				if err != nil {

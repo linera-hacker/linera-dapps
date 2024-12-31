@@ -161,7 +161,7 @@ func (task *SamplingKPointTask) StartSampling(ctx context.Context, seconds uint3
 	task.closeChan = make(chan struct{})
 	for {
 		select {
-		case <-time.NewTicker(time.Second * time.Duration(seconds)).C:
+		case <-time.NewTimer(time.Second * time.Duration(seconds)).C:
 			go func() {
 				err := task.samplingAndStore(ctx)
 				if err != nil {

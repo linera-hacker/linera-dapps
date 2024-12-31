@@ -211,7 +211,7 @@ func (st *SamplingKPriceTask) StartSampling(ctx context.Context, seconds uint32)
 	for {
 		select {
 		// try to start with whole seconds and offset 10 milliseconds
-		case <-time.NewTicker(time.Second*time.Duration(seconds) + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
+		case <-time.NewTimer(time.Second*time.Duration(seconds) + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
 			go func() {
 				err := st.samplingAndStore(ctx)
 				if err != nil {
