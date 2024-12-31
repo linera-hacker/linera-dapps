@@ -39,6 +39,5 @@ func (Transaction) Indexes() []ent.Index {
 		index.Fields("timestamp"),
 		index.Fields("transaction_id"),
 		index.Fields("pool_id", "timestamp"),
-		index.Fields("timestamp", "pool_id"),
 	}
 }
