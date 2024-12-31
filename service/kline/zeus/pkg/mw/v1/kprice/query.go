@@ -124,6 +124,7 @@ func (h *Handler) GetEarlistKPrices(ctx context.Context) ([]*kpriceproto.KPrice,
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		cli.Debug()
+		fmt.Println("ssssssssssssssssssssssssss")
 		if err := handler.queryKPrices(ctx, cli); err != nil {
 			return err
 		}
