@@ -63,7 +63,7 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			poolID := poolTokens[i].PoolID
 			t0Addr := poolTokens[i].TokenZeroAddress
 			t1Addr := poolTokens[i].TokenOneAddress
-			tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
+			_, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 			if err != nil {
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
@@ -73,11 +73,11 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
-			if err != nil {
-				retErr = err
-				return
-			}
+			// oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
+			// if err != nil {
+			// 	retErr = err
+			// 	return
+			// }
 			txVolumn, err := GetOneDayVolumn(ctx, poolID)
 			if err != nil {
 				retErr = err
@@ -92,8 +92,8 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				LastTxOneAmount:        lastTx.AmountOneIn,
 				OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
 				OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
-				NowPrice:               oneDayPrices[1].Price,
-				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
+				// NowPrice:               oneDayPrices[1].Price,
+				// OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
 			}
 			results[i] = tokenLastCond
 		}(i)
