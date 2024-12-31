@@ -45,6 +45,13 @@ const routes: RouteRecordRaw[] = [
         meta: {
           NeedLogined: false
         }
+      },
+      {
+        path: '/add/liquidity',
+        component: () => import('pages/AddLiquidity.vue'),
+        meta: {
+          NeedLogined: false
+        }
       }
     ]
   },

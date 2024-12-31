@@ -90,6 +90,7 @@ export interface MemeAppInfoDisplay {
   oneDayOneAmountVolumn: string
   nowPrice: string
   oneDayIncresePercent: string
+  poolCreated: boolean
 }
 
 export interface ChainOwner {

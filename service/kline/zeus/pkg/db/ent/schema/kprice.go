@@ -29,7 +29,6 @@ func (KPrice) Fields() []ent.Field {
 
 func (KPrice) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("timestamp"),
-		index.Fields("token_pair_id", "timestamp"),
+		index.Fields("token_pair_id"),
 	}
 }

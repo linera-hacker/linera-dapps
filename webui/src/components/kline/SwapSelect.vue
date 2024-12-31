@@ -64,7 +64,7 @@
 import { useHostStore } from 'src/mystore/host'
 import { useSwapStore } from 'src/mystore/swap'
 import { shortid } from 'src/utils'
-import { onMounted, watch } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 const swapStore = useSwapStore()
@@ -72,6 +72,8 @@ const swapStore = useSwapStore()
 const router = useRouter()
 const t0Addr = router.currentRoute.value.query.token0
 const t1Addr = router.currentRoute.value.query.token1
+
+const selectedToken = computed(() => swapStore.SelectedToken)
 
 const processImg = (imageHash: string | undefined): string => {
   if (imageHash === undefined) {
@@ -86,52 +88,59 @@ const getTokenPairs = () => {
     return
   }
   swapStore.getTokenPairsByTokenZeroID((error) => {
-    if (!error) {
-      if (swapStore.TokenPairs.length === 0) {
-        swapStore.SelectedTokenPair = null
+    if (error) return
+    if (swapStore.TokenPairs.length === 0) {
+      swapStore.SelectedTokenPair = null
+      return
+    }
+
+    const _t0Addr = t0Addr || selectedToken.value?.Address
+    const _t1Addr = t1Addr || useHostStore().wlineraApplicationId
+
+    if (_t0Addr) {
+      for (const info of swapStore.TokenPairs) {
+        if (_t0Addr !== info.TokenZeroAddress && _t0Addr !== info.TokenOneAddress) {
+          continue
+        }
+        if (_t1Addr !== info.TokenZeroAddress && _t1Addr !== info.TokenOneAddress) {
+          continue
+        }
+        swapStore.SelectedTokenPair = info
         return
       }
-      if (t1Addr) {
-        for (const info of swapStore.TokenPairs) {
-          if (t1Addr && t1Addr === info.TokenOneAddress) {
-            swapStore.SelectedTokenPair = info
-            return
-          }
-        }
-      }
+    }
 
-      if (!swapStore.SelectedTokenPair) {
-        swapStore.SelectedTokenPair = swapStore.TokenPairs[0]
-      }
+    if (!swapStore.SelectedTokenPair) {
+      swapStore.SelectedTokenPair = swapStore.TokenPairs[0]
     }
   })
 }
 
-watch(() => swapStore.SelectedToken, () => {
+watch(selectedToken, () => {
   getTokenPairs()
 })
 
 const refreshTokens = () => {
   swapStore.getTokens((error) => {
-    if (!error) {
-      if (swapStore.Tokens.length === 0) {
-        swapStore.SelectedToken = null
-        return
-      }
-      if (t0Addr) {
-        for (const info of swapStore.Tokens) {
-          if (t0Addr && t0Addr === info.Address) {
-            swapStore.SelectedToken = info
-            getTokenPairs()
-            return
-          }
+    if (error) return
+    if (swapStore.Tokens.length === 0) {
+      swapStore.SelectedToken = null
+      return
+    }
+    const _t0Addr = t0Addr || selectedToken.value?.Address
+    if (_t0Addr) {
+      for (const info of swapStore.Tokens) {
+        if (_t0Addr && _t0Addr === info.Address) {
+          swapStore.SelectedToken = info
+          getTokenPairs()
+          return
         }
       }
+    }
 
-      if (!swapStore.SelectedToken) {
-        swapStore.SelectedToken = swapStore.Tokens[0]
-        getTokenPairs()
-      }
+    if (!swapStore.SelectedToken) {
+      swapStore.SelectedToken = swapStore.Tokens[0]
+      getTokenPairs()
     }
   })
 }

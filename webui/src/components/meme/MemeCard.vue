@@ -117,13 +117,23 @@ const _copyToClipboard = (
 }
 
 const onSwap = (token0: string) => {
-  void router.push({
-    path: 'swap',
-    query: {
-      token0,
-      token1: useHostStore().wlineraApplicationId
-    }
-  })
+  if (memeInfo.value.poolCreated) {
+    void router.push({
+      path: '/swap',
+      query: {
+        token0,
+        token1: useHostStore().wlineraApplicationId
+      }
+    })
+  } else {
+    void router.push({
+      path: '/add/liquidity',
+      query: {
+        token0Id: memeInfo.value.appID,
+        token0Ticker: memeInfo.value.ticker
+      }
+    })
+  }
 }
 
 const goLink = (url: string, event: MouseEvent) => {

@@ -7,9 +7,9 @@ import { useHostStore } from '../host'
 export const useKLineStore = defineStore('useKLineStore', {
   state: () => ({
     NeedInitKLine: true,
-    SelectedKPType: null as string | null,
-    SelectedTokenPairID: null as number | null,
-    OriginalTime: 0 as number,
+    SelectedKPType: undefined as string | undefined,
+    SelectedTokenPairID: -1,
+    OriginalTime: 0,
     EchartPoinsData: {
       CategoryItems: [],
       Nums: []
