@@ -211,16 +211,16 @@ func getLatestKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kprice
 		return nil, err
 	}
 
-	infos, _, err := handler.GetLatestKPrices(ctx)
+	info, err := handler.GetLatestKPrice(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(infos) == 0 {
+	if info == nil {
 		return nil, nil
 	}
 
-	return infos[0], nil
+	return info, nil
 }
 
 func getEarlistKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpriceproto.KPrice, error) {
@@ -240,16 +240,16 @@ func getEarlistKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpric
 		return nil, err
 	}
 
-	infos, _, err := handler.GetEarlistKPrices(ctx)
+	info, err := handler.GetEarlistKPrice(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(infos) == 0 {
+	if info == nil {
 		return nil, fmt.Errorf("cannot get earlist price")
 	}
 
-	return infos[0], nil
+	return info, nil
 }
 
 func GetOneDayVolumn(ctx context.Context, poolID uint64) (*transaction.TransactionVolumn, error) {
