@@ -25,14 +25,14 @@
         src='' width='15px' height='15px'
         class='cursor-pointer horizontal-inner-x-margin-right'
       />
-      <div>{{ shortId(item.owner.chain_id, 8) }}</div>
+      <div>{{ shortId(item.owner.owner, 8) }}</div>
       <q-space />
-      <div>{{ Number(item.balance).toFixed(2) }} WLINERA</div>
+      <div>{{ Number(item.balance).toFixed(2) }} {{ selectedToken?.Symbol }}</div>
     </div>
   </div>
 </template>
 <script setup lang='ts'>
-import { onMounted, ref, watch } from 'vue'
+import { onMounted, ref, watch, computed } from 'vue'
 import gql from 'graphql-tag'
 import { useRouter } from 'vue-router'
 import { ApolloClient } from '@apollo/client/core'
@@ -49,16 +49,17 @@ const router = useRouter()
 const swapStore = useSwapStore()
 
 const topList = ref([] as Array<OwnerBalance>)
+const selectedToken = computed(() => swapStore.SelectedToken)
 
 const token0 = ref('')
 
-watch(() => swapStore.SelectedTokenPair, (selected) => {
+watch(selectedToken, (selected) => {
   if (!selected) {
     token0.value = ''
     topList.value = []
     return
   }
-  token0.value = selected.TokenZeroAddress
+  token0.value = selectedToken.value?.Address as string
   void getBalanceTopList(10)
 })
 

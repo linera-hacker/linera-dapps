@@ -25,7 +25,7 @@
 </template>
 
 <script setup lang='ts'>
-import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount, computed } from 'vue'
 import { useSwapStore } from 'src/mystore/swap'
 import { initEchart, setKPointsToEchart, setStartAndEnd, calculateZoomStart } from './KLineOption'
 import * as echarts from 'echarts/core'
@@ -35,12 +35,14 @@ import SwapSelect from './SwapSelect.vue'
 const selectedKPType = ref('')
 const swapStore = useSwapStore()
 const klineStore = useKLineStore()
-swapStore.getKPointTypes()
+
+const selectedTokenPairId = computed(() => swapStore.SelectedTokenPair?.ID)
+const kPointTypes = computed(() => [...swapStore.KPointTypes])
 
 let myChart: echarts.ECharts
 let intervalID: number
 
-watch(() => swapStore.KPointTypes, (items) => {
+watch(kPointTypes, (items) => {
   if (items === null || items.length === 0) {
     return
   }
@@ -52,12 +54,8 @@ watch(selectedKPType, (selected) => {
   initKPointsStore()
 })
 
-watch(() => swapStore.SelectedTokenPair, (selected) => {
-  if (!selected) {
-    klineStore.SelectedTokenPairID = null
-  } else {
-    klineStore.SelectedTokenPairID = selected.ID
-  }
+watch(selectedTokenPairId, () => {
+  klineStore.SelectedTokenPairID = selectedTokenPairId.value || -1
   initKPointsStore()
 })
 
@@ -87,6 +85,7 @@ interface eventParams {
 }
 
 onMounted(() => {
+  swapStore.getKPointTypes()
   myChart = initEchart('chart-container')
   myChart.on('datazoom', (params) => {
     const _params = params as eventParams
