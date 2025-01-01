@@ -22,6 +22,8 @@ var (
 		{Name: "close", Type: field.TypeFloat64},
 		{Name: "start_time", Type: field.TypeUint32},
 		{Name: "end_time", Type: field.TypeUint32},
+		{Name: "start_date_timestamp", Type: field.TypeUint32},
+		{Name: "end_date_timestamp", Type: field.TypeUint32},
 	}
 	// KpointsTable holds the schema information for the "kpoints" table.
 	KpointsTable = &schema.Table{
@@ -30,14 +32,24 @@ var (
 		PrimaryKey: []*schema.Column{KpointsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "kpoint_token_pair_id_k_point_type_end_time",
+				Name:    "kpoint_token_pair_id",
 				Unique:  false,
-				Columns: []*schema.Column{KpointsColumns[4], KpointsColumns[5], KpointsColumns[11]},
+				Columns: []*schema.Column{KpointsColumns[4]},
 			},
 			{
-				Name:    "kpoint_end_time",
+				Name:    "kpoint_token_pair_id_k_point_type",
 				Unique:  false,
-				Columns: []*schema.Column{KpointsColumns[11]},
+				Columns: []*schema.Column{KpointsColumns[4], KpointsColumns[5]},
+			},
+			{
+				Name:    "kpoint_token_pair_id_k_point_type_start_date_timestamp",
+				Unique:  false,
+				Columns: []*schema.Column{KpointsColumns[4], KpointsColumns[5], KpointsColumns[12]},
+			},
+			{
+				Name:    "kpoint_token_pair_id_k_point_type_end_date_timestamp",
+				Unique:  false,
+				Columns: []*schema.Column{KpointsColumns[4], KpointsColumns[5], KpointsColumns[13]},
 			},
 		},
 	}
@@ -50,6 +62,7 @@ var (
 		{Name: "token_pair_id", Type: field.TypeUint32},
 		{Name: "price", Type: field.TypeFloat64},
 		{Name: "timestamp", Type: field.TypeUint32},
+		{Name: "date_timestamp", Type: field.TypeUint32},
 	}
 	// KpricesTable holds the schema information for the "kprices" table.
 	KpricesTable = &schema.Table{
@@ -58,14 +71,14 @@ var (
 		PrimaryKey: []*schema.Column{KpricesColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "kprice_timestamp",
+				Name:    "kprice_token_pair_id",
 				Unique:  false,
-				Columns: []*schema.Column{KpricesColumns[6]},
+				Columns: []*schema.Column{KpricesColumns[4]},
 			},
 			{
-				Name:    "kprice_token_pair_id_timestamp",
+				Name:    "kprice_token_pair_id_date_timestamp",
 				Unique:  false,
-				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[6]},
+				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[7]},
 			},
 		},
 	}
@@ -144,6 +157,7 @@ var (
 		{Name: "amount_zero_out", Type: field.TypeFloat64},
 		{Name: "amount_one_out", Type: field.TypeFloat64},
 		{Name: "timestamp", Type: field.TypeUint32},
+		{Name: "date_timestamp", Type: field.TypeUint32},
 	}
 	// TransactionsTable holds the schema information for the "transactions" table.
 	TransactionsTable = &schema.Table{
@@ -152,19 +166,14 @@ var (
 		PrimaryKey: []*schema.Column{TransactionsColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "transaction_timestamp",
+				Name:    "transaction_pool_id",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[13]},
+				Columns: []*schema.Column{TransactionsColumns[4]},
 			},
 			{
-				Name:    "transaction_transaction_id",
+				Name:    "transaction_pool_id_date_timestamp",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[5]},
-			},
-			{
-				Name:    "transaction_pool_id_timestamp_transaction_id",
-				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13], TransactionsColumns[5]},
+				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[14]},
 			},
 		},
 	}

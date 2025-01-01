@@ -31,13 +31,13 @@ func (Transaction) Fields() []ent.Field {
 		field.Float("amount_zero_out"),
 		field.Float("amount_one_out"),
 		field.Uint32("timestamp"),
+		field.Uint32("date_timestamp"),
 	}
 }
 
 func (Transaction) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("timestamp"),
-		index.Fields("transaction_id"),
-		index.Fields("pool_id", "timestamp", "transaction_id"),
+		index.Fields("pool_id"),
+		index.Fields("pool_id", "date_timestamp"),
 	}
 }

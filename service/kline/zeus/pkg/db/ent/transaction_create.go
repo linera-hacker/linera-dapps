@@ -123,6 +123,12 @@ func (tc *TransactionCreate) SetTimestamp(u uint32) *TransactionCreate {
 	return tc
 }
 
+// SetDateTimestamp sets the "date_timestamp" field.
+func (tc *TransactionCreate) SetDateTimestamp(u uint32) *TransactionCreate {
+	tc.mutation.SetDateTimestamp(u)
+	return tc
+}
+
 // SetID sets the "id" field.
 func (tc *TransactionCreate) SetID(u uint32) *TransactionCreate {
 	tc.mutation.SetID(u)
@@ -273,6 +279,9 @@ func (tc *TransactionCreate) check() error {
 	if _, ok := tc.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "Transaction.timestamp"`)}
 	}
+	if _, ok := tc.mutation.DateTimestamp(); !ok {
+		return &ValidationError{Name: "date_timestamp", err: errors.New(`ent: missing required field "Transaction.date_timestamp"`)}
+	}
 	return nil
 }
 
@@ -410,6 +419,14 @@ func (tc *TransactionCreate) createSpec() (*Transaction, *sqlgraph.CreateSpec) {
 			Column: transaction.FieldTimestamp,
 		})
 		_node.Timestamp = value
+	}
+	if value, ok := tc.mutation.DateTimestamp(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: transaction.FieldDateTimestamp,
+		})
+		_node.DateTimestamp = value
 	}
 	return _node, _spec
 }
@@ -676,6 +693,24 @@ func (u *TransactionUpsert) UpdateTimestamp() *TransactionUpsert {
 // AddTimestamp adds v to the "timestamp" field.
 func (u *TransactionUpsert) AddTimestamp(v uint32) *TransactionUpsert {
 	u.Add(transaction.FieldTimestamp, v)
+	return u
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (u *TransactionUpsert) SetDateTimestamp(v uint32) *TransactionUpsert {
+	u.Set(transaction.FieldDateTimestamp, v)
+	return u
+}
+
+// UpdateDateTimestamp sets the "date_timestamp" field to the value that was provided on create.
+func (u *TransactionUpsert) UpdateDateTimestamp() *TransactionUpsert {
+	u.SetExcluded(transaction.FieldDateTimestamp)
+	return u
+}
+
+// AddDateTimestamp adds v to the "date_timestamp" field.
+func (u *TransactionUpsert) AddDateTimestamp(v uint32) *TransactionUpsert {
+	u.Add(transaction.FieldDateTimestamp, v)
 	return u
 }
 
@@ -976,6 +1011,27 @@ func (u *TransactionUpsertOne) AddTimestamp(v uint32) *TransactionUpsertOne {
 func (u *TransactionUpsertOne) UpdateTimestamp() *TransactionUpsertOne {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTimestamp()
+	})
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (u *TransactionUpsertOne) SetDateTimestamp(v uint32) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetDateTimestamp(v)
+	})
+}
+
+// AddDateTimestamp adds v to the "date_timestamp" field.
+func (u *TransactionUpsertOne) AddDateTimestamp(v uint32) *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddDateTimestamp(v)
+	})
+}
+
+// UpdateDateTimestamp sets the "date_timestamp" field to the value that was provided on create.
+func (u *TransactionUpsertOne) UpdateDateTimestamp() *TransactionUpsertOne {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateDateTimestamp()
 	})
 }
 
@@ -1439,6 +1495,27 @@ func (u *TransactionUpsertBulk) AddTimestamp(v uint32) *TransactionUpsertBulk {
 func (u *TransactionUpsertBulk) UpdateTimestamp() *TransactionUpsertBulk {
 	return u.Update(func(s *TransactionUpsert) {
 		s.UpdateTimestamp()
+	})
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (u *TransactionUpsertBulk) SetDateTimestamp(v uint32) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.SetDateTimestamp(v)
+	})
+}
+
+// AddDateTimestamp adds v to the "date_timestamp" field.
+func (u *TransactionUpsertBulk) AddDateTimestamp(v uint32) *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.AddDateTimestamp(v)
+	})
+}
+
+// UpdateDateTimestamp sets the "date_timestamp" field to the value that was provided on create.
+func (u *TransactionUpsertBulk) UpdateDateTimestamp() *TransactionUpsertBulk {
+	return u.Update(func(s *TransactionUpsert) {
+		s.UpdateDateTimestamp()
 	})
 }
 

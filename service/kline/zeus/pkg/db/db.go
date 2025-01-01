@@ -220,7 +220,6 @@ func WithTx(ctx context.Context, fn func(ctx context.Context, tx *ent.Tx) error)
 			err := tx.Rollback()
 			if err != nil {
 				logger.Sugar().Errorf("fail rollback: %v", err)
-				return
 			}
 		}
 	}()

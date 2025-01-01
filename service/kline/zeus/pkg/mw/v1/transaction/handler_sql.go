@@ -105,6 +105,13 @@ func (h *sqlHandler) baseKeys() error {
 			return err
 		}
 		h.baseVals[transaction.FieldTimestamp] = string(strBytes)
+
+		dateTimestamp := *h.Timestamp / 24 / 60 / 60 * 24 * 60 * 60
+		strBytes, err = json.Marshal(dateTimestamp)
+		if err != nil {
+			return err
+		}
+		h.baseVals[transaction.FieldDateTimestamp] = string(strBytes)
 	}
 
 	if h.BondTransactionID == nil {

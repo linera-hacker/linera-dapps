@@ -233,10 +233,17 @@ func (h *Handler) GetVolumnFromTransactionByPoolID(ctx context.Context, startTim
 }
 
 func getVolumnFromTransactionByPoolID(ctx context.Context, cli *ent.Client, startTime, endTime uint32, poolID uint64) (*TransactionVolumn, error) {
+	startDateTimestamp := startTime / 24 / 60 / 60 * 24 * 60 * 60
+	endDateTimestamp := endTime / 24 / 60 / 60 * 24 * 60 * 60
+
 	countVolumnSql := fmt.Sprintf(
-		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE `timestamp`>=%v && `timestamp`<=%v  && pool_id='%v';",
+		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE ((`timestamp`>=%v && `timestamp`<=%v) or (`timestamp`>=%v AND `timestamp`<=%v) or (`date_timestamp`>=%v AND `date_timestamp`<=%v)) AND pool_id='%v';",
 		startTime,
+		startDateTimestamp,
+		endDateTimestamp,
 		endTime,
+		startDateTimestamp,
+		endDateTimestamp,
 		poolID,
 	)
 	_txVolumn := []*TransactionVolumn{}
@@ -259,10 +266,17 @@ func getVolumnFromTransactionByPoolID(ctx context.Context, cli *ent.Client, star
 }
 
 func getVolumnFromTransaction(ctx context.Context, cli *ent.Client, startTime, endTime uint32) ([]*TransactionVolumn, error) {
+	startDateTimestamp := startTime / 24 / 60 / 60 * 24 * 60 * 60
+	endDateTimestamp := endTime / 24 / 60 / 60 * 24 * 60 * 60
+
 	countVolumnSql := fmt.Sprintf(
-		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE `timestamp`>=%v && `timestamp`<=%v  GROUP BY pool_id;",
+		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE ((`timestamp`>=%v && `timestamp`<=%v) or (`timestamp`>=%v AND `timestamp`<=%v) or (`date_timestamp`>=%v AND `date_timestamp`<=%v)) GROUP BY pool_id;",
 		startTime,
+		startDateTimestamp,
+		endDateTimestamp,
 		endTime,
+		startDateTimestamp,
+		endDateTimestamp,
 	)
 
 	_txVolumn := []*TransactionVolumn{}

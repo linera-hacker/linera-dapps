@@ -120,6 +120,13 @@ func Timestamp(v uint32) predicate.KPrice {
 	})
 }
 
+// DateTimestamp applies equality check predicate on the "date_timestamp" field. It's identical to DateTimestampEQ.
+func DateTimestamp(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDateTimestamp), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v uint32) predicate.KPrice {
 	return predicate.KPrice(func(s *sql.Selector) {
@@ -501,6 +508,70 @@ func TimestampLT(v uint32) predicate.KPrice {
 func TimestampLTE(v uint32) predicate.KPrice {
 	return predicate.KPrice(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldTimestamp), v))
+	})
+}
+
+// DateTimestampEQ applies the EQ predicate on the "date_timestamp" field.
+func DateTimestampEQ(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldDateTimestamp), v))
+	})
+}
+
+// DateTimestampNEQ applies the NEQ predicate on the "date_timestamp" field.
+func DateTimestampNEQ(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldDateTimestamp), v))
+	})
+}
+
+// DateTimestampIn applies the In predicate on the "date_timestamp" field.
+func DateTimestampIn(vs ...uint32) predicate.KPrice {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldDateTimestamp), v...))
+	})
+}
+
+// DateTimestampNotIn applies the NotIn predicate on the "date_timestamp" field.
+func DateTimestampNotIn(vs ...uint32) predicate.KPrice {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldDateTimestamp), v...))
+	})
+}
+
+// DateTimestampGT applies the GT predicate on the "date_timestamp" field.
+func DateTimestampGT(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldDateTimestamp), v))
+	})
+}
+
+// DateTimestampGTE applies the GTE predicate on the "date_timestamp" field.
+func DateTimestampGTE(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldDateTimestamp), v))
+	})
+}
+
+// DateTimestampLT applies the LT predicate on the "date_timestamp" field.
+func DateTimestampLT(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldDateTimestamp), v))
+	})
+}
+
+// DateTimestampLTE applies the LTE predicate on the "date_timestamp" field.
+func DateTimestampLTE(v uint32) predicate.KPrice {
+	return predicate.KPrice(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldDateTimestamp), v))
 	})
 }
 

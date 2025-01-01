@@ -81,6 +81,12 @@ func (kc *KPriceCreate) SetTimestamp(u uint32) *KPriceCreate {
 	return kc
 }
 
+// SetDateTimestamp sets the "date_timestamp" field.
+func (kc *KPriceCreate) SetDateTimestamp(u uint32) *KPriceCreate {
+	kc.mutation.SetDateTimestamp(u)
+	return kc
+}
+
 // SetID sets the "id" field.
 func (kc *KPriceCreate) SetID(u uint32) *KPriceCreate {
 	kc.mutation.SetID(u)
@@ -210,6 +216,9 @@ func (kc *KPriceCreate) check() error {
 	if _, ok := kc.mutation.Timestamp(); !ok {
 		return &ValidationError{Name: "timestamp", err: errors.New(`ent: missing required field "KPrice.timestamp"`)}
 	}
+	if _, ok := kc.mutation.DateTimestamp(); !ok {
+		return &ValidationError{Name: "date_timestamp", err: errors.New(`ent: missing required field "KPrice.date_timestamp"`)}
+	}
 	return nil
 }
 
@@ -291,6 +300,14 @@ func (kc *KPriceCreate) createSpec() (*KPrice, *sqlgraph.CreateSpec) {
 			Column: kprice.FieldTimestamp,
 		})
 		_node.Timestamp = value
+	}
+	if value, ok := kc.mutation.DateTimestamp(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kprice.FieldDateTimestamp,
+		})
+		_node.DateTimestamp = value
 	}
 	return _node, _spec
 }
@@ -449,6 +466,24 @@ func (u *KPriceUpsert) UpdateTimestamp() *KPriceUpsert {
 // AddTimestamp adds v to the "timestamp" field.
 func (u *KPriceUpsert) AddTimestamp(v uint32) *KPriceUpsert {
 	u.Add(kprice.FieldTimestamp, v)
+	return u
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (u *KPriceUpsert) SetDateTimestamp(v uint32) *KPriceUpsert {
+	u.Set(kprice.FieldDateTimestamp, v)
+	return u
+}
+
+// UpdateDateTimestamp sets the "date_timestamp" field to the value that was provided on create.
+func (u *KPriceUpsert) UpdateDateTimestamp() *KPriceUpsert {
+	u.SetExcluded(kprice.FieldDateTimestamp)
+	return u
+}
+
+// AddDateTimestamp adds v to the "date_timestamp" field.
+func (u *KPriceUpsert) AddDateTimestamp(v uint32) *KPriceUpsert {
+	u.Add(kprice.FieldDateTimestamp, v)
 	return u
 }
 
@@ -623,6 +658,27 @@ func (u *KPriceUpsertOne) AddTimestamp(v uint32) *KPriceUpsertOne {
 func (u *KPriceUpsertOne) UpdateTimestamp() *KPriceUpsertOne {
 	return u.Update(func(s *KPriceUpsert) {
 		s.UpdateTimestamp()
+	})
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (u *KPriceUpsertOne) SetDateTimestamp(v uint32) *KPriceUpsertOne {
+	return u.Update(func(s *KPriceUpsert) {
+		s.SetDateTimestamp(v)
+	})
+}
+
+// AddDateTimestamp adds v to the "date_timestamp" field.
+func (u *KPriceUpsertOne) AddDateTimestamp(v uint32) *KPriceUpsertOne {
+	return u.Update(func(s *KPriceUpsert) {
+		s.AddDateTimestamp(v)
+	})
+}
+
+// UpdateDateTimestamp sets the "date_timestamp" field to the value that was provided on create.
+func (u *KPriceUpsertOne) UpdateDateTimestamp() *KPriceUpsertOne {
+	return u.Update(func(s *KPriceUpsert) {
+		s.UpdateDateTimestamp()
 	})
 }
 
@@ -960,6 +1016,27 @@ func (u *KPriceUpsertBulk) AddTimestamp(v uint32) *KPriceUpsertBulk {
 func (u *KPriceUpsertBulk) UpdateTimestamp() *KPriceUpsertBulk {
 	return u.Update(func(s *KPriceUpsert) {
 		s.UpdateTimestamp()
+	})
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (u *KPriceUpsertBulk) SetDateTimestamp(v uint32) *KPriceUpsertBulk {
+	return u.Update(func(s *KPriceUpsert) {
+		s.SetDateTimestamp(v)
+	})
+}
+
+// AddDateTimestamp adds v to the "date_timestamp" field.
+func (u *KPriceUpsertBulk) AddDateTimestamp(v uint32) *KPriceUpsertBulk {
+	return u.Update(func(s *KPriceUpsert) {
+		s.AddDateTimestamp(v)
+	})
+}
+
+// UpdateDateTimestamp sets the "date_timestamp" field to the value that was provided on create.
+func (u *KPriceUpsertBulk) UpdateDateTimestamp() *KPriceUpsertBulk {
+	return u.Update(func(s *KPriceUpsert) {
+		s.UpdateDateTimestamp()
 	})
 }
 

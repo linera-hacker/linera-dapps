@@ -30,13 +30,16 @@ func (KPoint) Fields() []ent.Field {
 		field.Float("close"),
 		field.Uint32("start_time"),
 		field.Uint32("end_time"),
+		field.Uint32("start_date_timestamp"),
+		field.Uint32("end_date_timestamp"),
 	}
 }
 
 func (KPoint) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("token_pair_id", "k_point_type", "end_time"),
-		index.Fields("end_time"),
 		index.Fields("token_pair_id"),
+		index.Fields("token_pair_id", "k_point_type"),
+		index.Fields("token_pair_id", "k_point_type", "start_date_timestamp"),
+		index.Fields("token_pair_id", "k_point_type", "end_date_timestamp"),
 	}
 }

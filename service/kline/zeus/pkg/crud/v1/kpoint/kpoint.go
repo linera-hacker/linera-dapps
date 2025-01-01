@@ -141,41 +141,65 @@ func SetQueryConds(q *ent.KPointQuery, conds *Conds) (*ent.KPointQuery, error) {
 		}
 	}
 	if conds.StartAt != nil {
-		startat, ok := conds.StartAt.Val.(uint32)
+		startAt, ok := conds.StartAt.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid startat")
 		}
+
+		startDateTimestamp := startAt / 24 / 60 / 60 * 24 * 60 * 60
+		nextDateTimestamp := startDateTimestamp + 24 * 60 * 60
+
 		switch conds.StartAt.Op {
 		case cruder.LT:
-			q.Where(kpointent.StartTimeLT(startat))
+			q.Where(kpointent.StartDateTimestampLT(startDateTimestamp))
+			q.Where(kpointent.StartTimeLT(startAt))
+			q.Where(kpointent.StartTimeGTE(startDateTimestamp))
 		case cruder.LTE:
-			q.Where(kpointent.StartTimeLTE(startat))
+			q.Where(kpointent.StartDateTimestampLTE(startDateTimestamp))
+			q.Where(kpointent.StartTimeLTE(startAt))
+			q.Where(kpointent.StartTimeGTE(startDateTimestamp))
 		case cruder.GT:
-			q.Where(kpointent.StartTimeGT(startat))
+			q.Where(kpointent.StartDateTimestampGT(nextDateTimestamp))
+			q.Where(kpointent.StartTimeGT(startAt))
+			q.Where(kpointent.StartTimeLTE(nextDateTimestamp))
 		case cruder.GTE:
-			q.Where(kpointent.StartTimeGTE(startat))
+			q.Where(kpointent.StartDateTimestampGT(nextDateTimestamp))
+			q.Where(kpointent.StartTimeGTE(startAt))
+			q.Where(kpointent.StartTimeLTE(nextDateTimestamp))
 		case cruder.EQ:
-			q.Where(kpointent.StartTimeGTE(startat))
+			q.Where(kpointent.StartTimeGTE(startAt))
 		default:
 			return nil, fmt.Errorf("invalid startat field")
 		}
 	}
 	if conds.EndAt != nil {
-		endat, ok := conds.EndAt.Val.(uint32)
+		endAt, ok := conds.EndAt.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid endat")
 		}
+
+		endDateTimestamp := endAt / 24 / 60 / 60 * 24 * 60 * 60
+		nextDateTimestamp := endDateTimestamp + 24 * 60 * 60
+
 		switch conds.EndAt.Op {
 		case cruder.LT:
-			q.Where(kpointent.EndTimeLT(endat))
+			q.Where(kpointent.EndDateTimestampLT(endDateTimestamp))
+			q.Where(kpointent.EndTimeLT(endAt))
+			q.Where(kpointent.EndTimeGTE(endDateTimestamp))
 		case cruder.LTE:
-			q.Where(kpointent.EndTimeLTE(endat))
+			q.Where(kpointent.EndDateTimestampLTE(endDateTimestamp))
+			q.Where(kpointent.EndTimeLTE(endAt))
+			q.Where(kpointent.EndTimeGTE(endDateTimestamp))
 		case cruder.GT:
-			q.Where(kpointent.EndTimeGT(endat))
+			q.Where(kpointent.EndDateTimestampGT(nextDateTimestamp))
+			q.Where(kpointent.EndTimeGT(endAt))
+			q.Where(kpointent.EndTimeLTE(nextDateTimestamp))
 		case cruder.GTE:
-			q.Where(kpointent.EndTimeGTE(endat))
+			q.Where(kpointent.EndDateTimestampGTE(nextDateTimestamp))
+			q.Where(kpointent.EndTimeGTE(endAt))
+			q.Where(kpointent.EndTimeLTE(nextDateTimestamp))
 		case cruder.EQ:
-			q.Where(kpointent.EndTimeGTE(endat))
+			q.Where(kpointent.EndTimeGTE(endAt))
 		default:
 			return nil, fmt.Errorf("invalid endat field")
 		}

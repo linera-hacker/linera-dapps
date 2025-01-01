@@ -58,6 +58,13 @@ func (h *sqlHandler) baseKeys() error {
 		}
 		h.baseVals[kprice.FieldTimestamp] = string(strBytes)
 		h.BondTime = h.Timestamp
+
+		dateTimestamp := *h.Timestamp / 24 / 60 / 60 * 24 * 60 * 60
+		strBytes, err = json.Marshal(dateTimestamp)
+		if err != nil {
+			return err
+		}
+		h.baseVals[kprice.FieldDateTimestamp] = string(strBytes)
 	}
 
 	if h.BondTime == nil {

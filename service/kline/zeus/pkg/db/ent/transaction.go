@@ -41,6 +41,8 @@ type Transaction struct {
 	AmountOneOut float64 `json:"amount_one_out,omitempty"`
 	// Timestamp holds the value of the "timestamp" field.
 	Timestamp uint32 `json:"timestamp,omitempty"`
+	// DateTimestamp holds the value of the "date_timestamp" field.
+	DateTimestamp uint32 `json:"date_timestamp,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -50,7 +52,7 @@ func (*Transaction) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case transaction.FieldAmountZeroIn, transaction.FieldAmountOneIn, transaction.FieldAmountZeroOut, transaction.FieldAmountOneOut:
 			values[i] = new(sql.NullFloat64)
-		case transaction.FieldID, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt, transaction.FieldPoolID, transaction.FieldTransactionID, transaction.FieldTimestamp:
+		case transaction.FieldID, transaction.FieldCreatedAt, transaction.FieldUpdatedAt, transaction.FieldDeletedAt, transaction.FieldPoolID, transaction.FieldTransactionID, transaction.FieldTimestamp, transaction.FieldDateTimestamp:
 			values[i] = new(sql.NullInt64)
 		case transaction.FieldTransactionType, transaction.FieldChainID, transaction.FieldOwner:
 			values[i] = new(sql.NullString)
@@ -153,6 +155,12 @@ func (t *Transaction) assignValues(columns []string, values []interface{}) error
 			} else if value.Valid {
 				t.Timestamp = uint32(value.Int64)
 			}
+		case transaction.FieldDateTimestamp:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field date_timestamp", values[i])
+			} else if value.Valid {
+				t.DateTimestamp = uint32(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -219,6 +227,9 @@ func (t *Transaction) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("timestamp=")
 	builder.WriteString(fmt.Sprintf("%v", t.Timestamp))
+	builder.WriteString(", ")
+	builder.WriteString("date_timestamp=")
+	builder.WriteString(fmt.Sprintf("%v", t.DateTimestamp))
 	builder.WriteByte(')')
 	return builder.String()
 }

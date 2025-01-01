@@ -37,6 +37,8 @@ const (
 	FieldAmountOneOut = "amount_one_out"
 	// FieldTimestamp holds the string denoting the timestamp field in the database.
 	FieldTimestamp = "timestamp"
+	// FieldDateTimestamp holds the string denoting the date_timestamp field in the database.
+	FieldDateTimestamp = "date_timestamp"
 	// Table holds the table name of the transaction in the database.
 	Table = "transactions"
 )
@@ -57,6 +59,7 @@ var Columns = []string{
 	FieldAmountZeroOut,
 	FieldAmountOneOut,
 	FieldTimestamp,
+	FieldDateTimestamp,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

@@ -189,20 +189,35 @@ func (h *Handler) GetKPointFromKPrice(ctx context.Context, startTime, endTime ui
 }
 
 func getKPointFromKPrice(ctx context.Context, cli *ent.Client, startTime, endTime uint32, kpType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
+	startDateTimestamp := startTime / 24 / 60 / 60 * 24 * 60 * 60
+	endDateTimestamp := endTime / 24 / 60 / 60 * 24 * 60 * 60
+
 	selectMinMaxSql := fmt.Sprintf(
-		"SELECT token_pair_id,MIN(price) as low,MAX(price) as high FROM  kprices WHERE `timestamp`>=%v AND `timestamp`<=%v  GROUP BY token_pair_id;",
+		"SELECT token_pair_id,MIN(price) as low,MAX(price) as high FROM  kprices WHERE ((`timestamp`>=%v AND `timestamp`<=%v) or (`timestamp`>=%v AND `timestamp`<=%v) or (`date_timestamp`>=%v AND `date_timestamp`<=%v)) GROUP BY token_pair_id;",
 		startTime,
+		startDateTimestamp,
+		endDateTimestamp,
 		endTime,
+		startDateTimestamp,
+		endDateTimestamp,
 	)
 	selectOpenSql := fmt.Sprintf(
-		"SELECT t1.token_pair_id,t1.price as open FROM kprices t1 INNER JOIN (SELECT MIN(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
+		"SELECT t1.token_pair_id,t1.price as open FROM kprices t1 INNER JOIN (SELECT MIN(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE ((`timestamp`>=%v AND `timestamp`<=%v) or (`timestamp`>=%v AND `timestamp`<=%v) or (`date_timestamp`>=%v AND `date_timestamp`<=%v)) GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
 		startTime,
+		startDateTimestamp,
+		endDateTimestamp,
 		endTime,
+		startDateTimestamp,
+		endDateTimestamp,
 	)
 	selectCloseSql := fmt.Sprintf(
-		"SELECT t1.token_pair_id,t1.price as close FROM kprices t1 INNER JOIN (SELECT MAX(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
+		"SELECT t1.token_pair_id,t1.price as close FROM kprices t1 INNER JOIN (SELECT MAX(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE ((`timestamp`>=%v AND `timestamp`<=%v) or (`timestamp`>=%v AND `timestamp`<=%v) or (`date_timestamp`>=%v AND `date_timestamp`<=%v)) GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
 		startTime,
+		startDateTimestamp,
+		endDateTimestamp,
 		endTime,
+		startDateTimestamp,
+		endDateTimestamp,
 	)
 
 	queryFunc := func(ctx context.Context, cli *ent.Client, sqlStr string, v interface{}) error {

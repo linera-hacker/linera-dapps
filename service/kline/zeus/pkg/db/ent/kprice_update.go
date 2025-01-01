@@ -122,6 +122,19 @@ func (ku *KPriceUpdate) AddTimestamp(u int32) *KPriceUpdate {
 	return ku
 }
 
+// SetDateTimestamp sets the "date_timestamp" field.
+func (ku *KPriceUpdate) SetDateTimestamp(u uint32) *KPriceUpdate {
+	ku.mutation.ResetDateTimestamp()
+	ku.mutation.SetDateTimestamp(u)
+	return ku
+}
+
+// AddDateTimestamp adds u to the "date_timestamp" field.
+func (ku *KPriceUpdate) AddDateTimestamp(u int32) *KPriceUpdate {
+	ku.mutation.AddDateTimestamp(u)
+	return ku
+}
+
 // Mutation returns the KPriceMutation object of the builder.
 func (ku *KPriceUpdate) Mutation() *KPriceMutation {
 	return ku.mutation
@@ -304,6 +317,20 @@ func (ku *KPriceUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: kprice.FieldTimestamp,
 		})
 	}
+	if value, ok := ku.mutation.DateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kprice.FieldDateTimestamp,
+		})
+	}
+	if value, ok := ku.mutation.AddedDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kprice.FieldDateTimestamp,
+		})
+	}
 	_spec.Modifiers = ku.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, ku.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -416,6 +443,19 @@ func (kuo *KPriceUpdateOne) SetTimestamp(u uint32) *KPriceUpdateOne {
 // AddTimestamp adds u to the "timestamp" field.
 func (kuo *KPriceUpdateOne) AddTimestamp(u int32) *KPriceUpdateOne {
 	kuo.mutation.AddTimestamp(u)
+	return kuo
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (kuo *KPriceUpdateOne) SetDateTimestamp(u uint32) *KPriceUpdateOne {
+	kuo.mutation.ResetDateTimestamp()
+	kuo.mutation.SetDateTimestamp(u)
+	return kuo
+}
+
+// AddDateTimestamp adds u to the "date_timestamp" field.
+func (kuo *KPriceUpdateOne) AddDateTimestamp(u int32) *KPriceUpdateOne {
+	kuo.mutation.AddDateTimestamp(u)
 	return kuo
 }
 
@@ -629,6 +669,20 @@ func (kuo *KPriceUpdateOne) sqlSave(ctx context.Context) (_node *KPrice, err err
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: kprice.FieldTimestamp,
+		})
+	}
+	if value, ok := kuo.mutation.DateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kprice.FieldDateTimestamp,
+		})
+	}
+	if value, ok := kuo.mutation.AddedDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kprice.FieldDateTimestamp,
 		})
 	}
 	_spec.Modifiers = kuo.modifiers

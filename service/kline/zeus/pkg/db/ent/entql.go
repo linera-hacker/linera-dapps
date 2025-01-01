@@ -29,17 +29,19 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "KPoint",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			kpoint.FieldCreatedAt:   {Type: field.TypeUint32, Column: kpoint.FieldCreatedAt},
-			kpoint.FieldUpdatedAt:   {Type: field.TypeUint32, Column: kpoint.FieldUpdatedAt},
-			kpoint.FieldDeletedAt:   {Type: field.TypeUint32, Column: kpoint.FieldDeletedAt},
-			kpoint.FieldTokenPairID: {Type: field.TypeUint32, Column: kpoint.FieldTokenPairID},
-			kpoint.FieldKPointType:  {Type: field.TypeString, Column: kpoint.FieldKPointType},
-			kpoint.FieldOpen:        {Type: field.TypeFloat64, Column: kpoint.FieldOpen},
-			kpoint.FieldHigh:        {Type: field.TypeFloat64, Column: kpoint.FieldHigh},
-			kpoint.FieldLow:         {Type: field.TypeFloat64, Column: kpoint.FieldLow},
-			kpoint.FieldClose:       {Type: field.TypeFloat64, Column: kpoint.FieldClose},
-			kpoint.FieldStartTime:   {Type: field.TypeUint32, Column: kpoint.FieldStartTime},
-			kpoint.FieldEndTime:     {Type: field.TypeUint32, Column: kpoint.FieldEndTime},
+			kpoint.FieldCreatedAt:          {Type: field.TypeUint32, Column: kpoint.FieldCreatedAt},
+			kpoint.FieldUpdatedAt:          {Type: field.TypeUint32, Column: kpoint.FieldUpdatedAt},
+			kpoint.FieldDeletedAt:          {Type: field.TypeUint32, Column: kpoint.FieldDeletedAt},
+			kpoint.FieldTokenPairID:        {Type: field.TypeUint32, Column: kpoint.FieldTokenPairID},
+			kpoint.FieldKPointType:         {Type: field.TypeString, Column: kpoint.FieldKPointType},
+			kpoint.FieldOpen:               {Type: field.TypeFloat64, Column: kpoint.FieldOpen},
+			kpoint.FieldHigh:               {Type: field.TypeFloat64, Column: kpoint.FieldHigh},
+			kpoint.FieldLow:                {Type: field.TypeFloat64, Column: kpoint.FieldLow},
+			kpoint.FieldClose:              {Type: field.TypeFloat64, Column: kpoint.FieldClose},
+			kpoint.FieldStartTime:          {Type: field.TypeUint32, Column: kpoint.FieldStartTime},
+			kpoint.FieldEndTime:            {Type: field.TypeUint32, Column: kpoint.FieldEndTime},
+			kpoint.FieldStartDateTimestamp: {Type: field.TypeUint32, Column: kpoint.FieldStartDateTimestamp},
+			kpoint.FieldEndDateTimestamp:   {Type: field.TypeUint32, Column: kpoint.FieldEndDateTimestamp},
 		},
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
@@ -53,12 +55,13 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "KPrice",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			kprice.FieldCreatedAt:   {Type: field.TypeUint32, Column: kprice.FieldCreatedAt},
-			kprice.FieldUpdatedAt:   {Type: field.TypeUint32, Column: kprice.FieldUpdatedAt},
-			kprice.FieldDeletedAt:   {Type: field.TypeUint32, Column: kprice.FieldDeletedAt},
-			kprice.FieldTokenPairID: {Type: field.TypeUint32, Column: kprice.FieldTokenPairID},
-			kprice.FieldPrice:       {Type: field.TypeFloat64, Column: kprice.FieldPrice},
-			kprice.FieldTimestamp:   {Type: field.TypeUint32, Column: kprice.FieldTimestamp},
+			kprice.FieldCreatedAt:     {Type: field.TypeUint32, Column: kprice.FieldCreatedAt},
+			kprice.FieldUpdatedAt:     {Type: field.TypeUint32, Column: kprice.FieldUpdatedAt},
+			kprice.FieldDeletedAt:     {Type: field.TypeUint32, Column: kprice.FieldDeletedAt},
+			kprice.FieldTokenPairID:   {Type: field.TypeUint32, Column: kprice.FieldTokenPairID},
+			kprice.FieldPrice:         {Type: field.TypeFloat64, Column: kprice.FieldPrice},
+			kprice.FieldTimestamp:     {Type: field.TypeUint32, Column: kprice.FieldTimestamp},
+			kprice.FieldDateTimestamp: {Type: field.TypeUint32, Column: kprice.FieldDateTimestamp},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -126,6 +129,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			transaction.FieldAmountZeroOut:   {Type: field.TypeFloat64, Column: transaction.FieldAmountZeroOut},
 			transaction.FieldAmountOneOut:    {Type: field.TypeFloat64, Column: transaction.FieldAmountOneOut},
 			transaction.FieldTimestamp:       {Type: field.TypeUint32, Column: transaction.FieldTimestamp},
+			transaction.FieldDateTimestamp:   {Type: field.TypeUint32, Column: transaction.FieldDateTimestamp},
 		},
 	}
 	return graph
@@ -232,6 +236,16 @@ func (f *KPointFilter) WhereEndTime(p entql.Uint32P) {
 	f.Where(p.Field(kpoint.FieldEndTime))
 }
 
+// WhereStartDateTimestamp applies the entql uint32 predicate on the start_date_timestamp field.
+func (f *KPointFilter) WhereStartDateTimestamp(p entql.Uint32P) {
+	f.Where(p.Field(kpoint.FieldStartDateTimestamp))
+}
+
+// WhereEndDateTimestamp applies the entql uint32 predicate on the end_date_timestamp field.
+func (f *KPointFilter) WhereEndDateTimestamp(p entql.Uint32P) {
+	f.Where(p.Field(kpoint.FieldEndDateTimestamp))
+}
+
 // addPredicate implements the predicateAdder interface.
 func (kq *KPriceQuery) addPredicate(pred func(s *sql.Selector)) {
 	kq.predicates = append(kq.predicates, pred)
@@ -300,6 +314,11 @@ func (f *KPriceFilter) WherePrice(p entql.Float64P) {
 // WhereTimestamp applies the entql uint32 predicate on the timestamp field.
 func (f *KPriceFilter) WhereTimestamp(p entql.Uint32P) {
 	f.Where(p.Field(kprice.FieldTimestamp))
+}
+
+// WhereDateTimestamp applies the entql uint32 predicate on the date_timestamp field.
+func (f *KPriceFilter) WhereDateTimestamp(p entql.Uint32P) {
+	f.Where(p.Field(kprice.FieldDateTimestamp))
 }
 
 // addPredicate implements the predicateAdder interface.
@@ -560,4 +579,9 @@ func (f *TransactionFilter) WhereAmountOneOut(p entql.Float64P) {
 // WhereTimestamp applies the entql uint32 predicate on the timestamp field.
 func (f *TransactionFilter) WhereTimestamp(p entql.Uint32P) {
 	f.Where(p.Field(transaction.FieldTimestamp))
+}
+
+// WhereDateTimestamp applies the entql uint32 predicate on the date_timestamp field.
+func (f *TransactionFilter) WhereDateTimestamp(p entql.Uint32P) {
+	f.Where(p.Field(transaction.FieldDateTimestamp))
 }

@@ -192,6 +192,19 @@ func (tu *TransactionUpdate) AddTimestamp(u int32) *TransactionUpdate {
 	return tu
 }
 
+// SetDateTimestamp sets the "date_timestamp" field.
+func (tu *TransactionUpdate) SetDateTimestamp(u uint32) *TransactionUpdate {
+	tu.mutation.ResetDateTimestamp()
+	tu.mutation.SetDateTimestamp(u)
+	return tu
+}
+
+// AddDateTimestamp adds u to the "date_timestamp" field.
+func (tu *TransactionUpdate) AddDateTimestamp(u int32) *TransactionUpdate {
+	tu.mutation.AddDateTimestamp(u)
+	return tu
+}
+
 // Mutation returns the TransactionMutation object of the builder.
 func (tu *TransactionUpdate) Mutation() *TransactionMutation {
 	return tu.mutation
@@ -451,6 +464,20 @@ func (tu *TransactionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: transaction.FieldTimestamp,
 		})
 	}
+	if value, ok := tu.mutation.DateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: transaction.FieldDateTimestamp,
+		})
+	}
+	if value, ok := tu.mutation.AddedDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: transaction.FieldDateTimestamp,
+		})
+	}
 	_spec.Modifiers = tu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -633,6 +660,19 @@ func (tuo *TransactionUpdateOne) SetTimestamp(u uint32) *TransactionUpdateOne {
 // AddTimestamp adds u to the "timestamp" field.
 func (tuo *TransactionUpdateOne) AddTimestamp(u int32) *TransactionUpdateOne {
 	tuo.mutation.AddTimestamp(u)
+	return tuo
+}
+
+// SetDateTimestamp sets the "date_timestamp" field.
+func (tuo *TransactionUpdateOne) SetDateTimestamp(u uint32) *TransactionUpdateOne {
+	tuo.mutation.ResetDateTimestamp()
+	tuo.mutation.SetDateTimestamp(u)
+	return tuo
+}
+
+// AddDateTimestamp adds u to the "date_timestamp" field.
+func (tuo *TransactionUpdateOne) AddDateTimestamp(u int32) *TransactionUpdateOne {
+	tuo.mutation.AddDateTimestamp(u)
 	return tuo
 }
 
@@ -923,6 +963,20 @@ func (tuo *TransactionUpdateOne) sqlSave(ctx context.Context) (_node *Transactio
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: transaction.FieldTimestamp,
+		})
+	}
+	if value, ok := tuo.mutation.DateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: transaction.FieldDateTimestamp,
+		})
+	}
+	if value, ok := tuo.mutation.AddedDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: transaction.FieldDateTimestamp,
 		})
 	}
 	_spec.Modifiers = tuo.modifiers

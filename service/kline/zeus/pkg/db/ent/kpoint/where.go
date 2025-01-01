@@ -155,6 +155,20 @@ func EndTime(v uint32) predicate.KPoint {
 	})
 }
 
+// StartDateTimestamp applies equality check predicate on the "start_date_timestamp" field. It's identical to StartDateTimestampEQ.
+func StartDateTimestamp(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// EndDateTimestamp applies equality check predicate on the "end_date_timestamp" field. It's identical to EndDateTimestampEQ.
+func EndDateTimestamp(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEndDateTimestamp), v))
+	})
+}
+
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v uint32) predicate.KPoint {
 	return predicate.KPoint(func(s *sql.Selector) {
@@ -905,6 +919,134 @@ func EndTimeLT(v uint32) predicate.KPoint {
 func EndTimeLTE(v uint32) predicate.KPoint {
 	return predicate.KPoint(func(s *sql.Selector) {
 		s.Where(sql.LTE(s.C(FieldEndTime), v))
+	})
+}
+
+// StartDateTimestampEQ applies the EQ predicate on the "start_date_timestamp" field.
+func StartDateTimestampEQ(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// StartDateTimestampNEQ applies the NEQ predicate on the "start_date_timestamp" field.
+func StartDateTimestampNEQ(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// StartDateTimestampIn applies the In predicate on the "start_date_timestamp" field.
+func StartDateTimestampIn(vs ...uint32) predicate.KPoint {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldStartDateTimestamp), v...))
+	})
+}
+
+// StartDateTimestampNotIn applies the NotIn predicate on the "start_date_timestamp" field.
+func StartDateTimestampNotIn(vs ...uint32) predicate.KPoint {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldStartDateTimestamp), v...))
+	})
+}
+
+// StartDateTimestampGT applies the GT predicate on the "start_date_timestamp" field.
+func StartDateTimestampGT(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// StartDateTimestampGTE applies the GTE predicate on the "start_date_timestamp" field.
+func StartDateTimestampGTE(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// StartDateTimestampLT applies the LT predicate on the "start_date_timestamp" field.
+func StartDateTimestampLT(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// StartDateTimestampLTE applies the LTE predicate on the "start_date_timestamp" field.
+func StartDateTimestampLTE(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStartDateTimestamp), v))
+	})
+}
+
+// EndDateTimestampEQ applies the EQ predicate on the "end_date_timestamp" field.
+func EndDateTimestampEQ(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEndDateTimestamp), v))
+	})
+}
+
+// EndDateTimestampNEQ applies the NEQ predicate on the "end_date_timestamp" field.
+func EndDateTimestampNEQ(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEndDateTimestamp), v))
+	})
+}
+
+// EndDateTimestampIn applies the In predicate on the "end_date_timestamp" field.
+func EndDateTimestampIn(vs ...uint32) predicate.KPoint {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldEndDateTimestamp), v...))
+	})
+}
+
+// EndDateTimestampNotIn applies the NotIn predicate on the "end_date_timestamp" field.
+func EndDateTimestampNotIn(vs ...uint32) predicate.KPoint {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldEndDateTimestamp), v...))
+	})
+}
+
+// EndDateTimestampGT applies the GT predicate on the "end_date_timestamp" field.
+func EndDateTimestampGT(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldEndDateTimestamp), v))
+	})
+}
+
+// EndDateTimestampGTE applies the GTE predicate on the "end_date_timestamp" field.
+func EndDateTimestampGTE(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldEndDateTimestamp), v))
+	})
+}
+
+// EndDateTimestampLT applies the LT predicate on the "end_date_timestamp" field.
+func EndDateTimestampLT(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldEndDateTimestamp), v))
+	})
+}
+
+// EndDateTimestampLTE applies the LTE predicate on the "end_date_timestamp" field.
+func EndDateTimestampLTE(v uint32) predicate.KPoint {
+	return predicate.KPoint(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldEndDateTimestamp), v))
 	})
 }
 

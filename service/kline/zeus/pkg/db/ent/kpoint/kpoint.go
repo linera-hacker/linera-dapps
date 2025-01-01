@@ -33,6 +33,10 @@ const (
 	FieldStartTime = "start_time"
 	// FieldEndTime holds the string denoting the end_time field in the database.
 	FieldEndTime = "end_time"
+	// FieldStartDateTimestamp holds the string denoting the start_date_timestamp field in the database.
+	FieldStartDateTimestamp = "start_date_timestamp"
+	// FieldEndDateTimestamp holds the string denoting the end_date_timestamp field in the database.
+	FieldEndDateTimestamp = "end_date_timestamp"
 	// Table holds the table name of the kpoint in the database.
 	Table = "kpoints"
 )
@@ -51,6 +55,8 @@ var Columns = []string{
 	FieldClose,
 	FieldStartTime,
 	FieldEndTime,
+	FieldStartDateTimestamp,
+	FieldEndDateTimestamp,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

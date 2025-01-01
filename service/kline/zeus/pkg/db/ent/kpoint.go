@@ -37,6 +37,10 @@ type KPoint struct {
 	StartTime uint32 `json:"start_time,omitempty"`
 	// EndTime holds the value of the "end_time" field.
 	EndTime uint32 `json:"end_time,omitempty"`
+	// StartDateTimestamp holds the value of the "start_date_timestamp" field.
+	StartDateTimestamp uint32 `json:"start_date_timestamp,omitempty"`
+	// EndDateTimestamp holds the value of the "end_date_timestamp" field.
+	EndDateTimestamp uint32 `json:"end_date_timestamp,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -46,7 +50,7 @@ func (*KPoint) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case kpoint.FieldOpen, kpoint.FieldHigh, kpoint.FieldLow, kpoint.FieldClose:
 			values[i] = new(sql.NullFloat64)
-		case kpoint.FieldID, kpoint.FieldCreatedAt, kpoint.FieldUpdatedAt, kpoint.FieldDeletedAt, kpoint.FieldTokenPairID, kpoint.FieldStartTime, kpoint.FieldEndTime:
+		case kpoint.FieldID, kpoint.FieldCreatedAt, kpoint.FieldUpdatedAt, kpoint.FieldDeletedAt, kpoint.FieldTokenPairID, kpoint.FieldStartTime, kpoint.FieldEndTime, kpoint.FieldStartDateTimestamp, kpoint.FieldEndDateTimestamp:
 			values[i] = new(sql.NullInt64)
 		case kpoint.FieldKPointType:
 			values[i] = new(sql.NullString)
@@ -137,6 +141,18 @@ func (k *KPoint) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				k.EndTime = uint32(value.Int64)
 			}
+		case kpoint.FieldStartDateTimestamp:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field start_date_timestamp", values[i])
+			} else if value.Valid {
+				k.StartDateTimestamp = uint32(value.Int64)
+			}
+		case kpoint.FieldEndDateTimestamp:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field end_date_timestamp", values[i])
+			} else if value.Valid {
+				k.EndDateTimestamp = uint32(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -197,6 +213,12 @@ func (k *KPoint) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("end_time=")
 	builder.WriteString(fmt.Sprintf("%v", k.EndTime))
+	builder.WriteString(", ")
+	builder.WriteString("start_date_timestamp=")
+	builder.WriteString(fmt.Sprintf("%v", k.StartDateTimestamp))
+	builder.WriteString(", ")
+	builder.WriteString("end_date_timestamp=")
+	builder.WriteString(fmt.Sprintf("%v", k.EndDateTimestamp))
 	builder.WriteByte(')')
 	return builder.String()
 }

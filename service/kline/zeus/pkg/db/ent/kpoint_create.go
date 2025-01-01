@@ -119,6 +119,18 @@ func (kc *KPointCreate) SetEndTime(u uint32) *KPointCreate {
 	return kc
 }
 
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (kc *KPointCreate) SetStartDateTimestamp(u uint32) *KPointCreate {
+	kc.mutation.SetStartDateTimestamp(u)
+	return kc
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (kc *KPointCreate) SetEndDateTimestamp(u uint32) *KPointCreate {
+	kc.mutation.SetEndDateTimestamp(u)
+	return kc
+}
+
 // SetID sets the "id" field.
 func (kc *KPointCreate) SetID(u uint32) *KPointCreate {
 	kc.mutation.SetID(u)
@@ -264,6 +276,12 @@ func (kc *KPointCreate) check() error {
 	if _, ok := kc.mutation.EndTime(); !ok {
 		return &ValidationError{Name: "end_time", err: errors.New(`ent: missing required field "KPoint.end_time"`)}
 	}
+	if _, ok := kc.mutation.StartDateTimestamp(); !ok {
+		return &ValidationError{Name: "start_date_timestamp", err: errors.New(`ent: missing required field "KPoint.start_date_timestamp"`)}
+	}
+	if _, ok := kc.mutation.EndDateTimestamp(); !ok {
+		return &ValidationError{Name: "end_date_timestamp", err: errors.New(`ent: missing required field "KPoint.end_date_timestamp"`)}
+	}
 	return nil
 }
 
@@ -385,6 +403,22 @@ func (kc *KPointCreate) createSpec() (*KPoint, *sqlgraph.CreateSpec) {
 			Column: kpoint.FieldEndTime,
 		})
 		_node.EndTime = value
+	}
+	if value, ok := kc.mutation.StartDateTimestamp(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldStartDateTimestamp,
+		})
+		_node.StartDateTimestamp = value
+	}
+	if value, ok := kc.mutation.EndDateTimestamp(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldEndDateTimestamp,
+		})
+		_node.EndDateTimestamp = value
 	}
 	return _node, _spec
 }
@@ -633,6 +667,42 @@ func (u *KPointUpsert) UpdateEndTime() *KPointUpsert {
 // AddEndTime adds v to the "end_time" field.
 func (u *KPointUpsert) AddEndTime(v uint32) *KPointUpsert {
 	u.Add(kpoint.FieldEndTime, v)
+	return u
+}
+
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (u *KPointUpsert) SetStartDateTimestamp(v uint32) *KPointUpsert {
+	u.Set(kpoint.FieldStartDateTimestamp, v)
+	return u
+}
+
+// UpdateStartDateTimestamp sets the "start_date_timestamp" field to the value that was provided on create.
+func (u *KPointUpsert) UpdateStartDateTimestamp() *KPointUpsert {
+	u.SetExcluded(kpoint.FieldStartDateTimestamp)
+	return u
+}
+
+// AddStartDateTimestamp adds v to the "start_date_timestamp" field.
+func (u *KPointUpsert) AddStartDateTimestamp(v uint32) *KPointUpsert {
+	u.Add(kpoint.FieldStartDateTimestamp, v)
+	return u
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (u *KPointUpsert) SetEndDateTimestamp(v uint32) *KPointUpsert {
+	u.Set(kpoint.FieldEndDateTimestamp, v)
+	return u
+}
+
+// UpdateEndDateTimestamp sets the "end_date_timestamp" field to the value that was provided on create.
+func (u *KPointUpsert) UpdateEndDateTimestamp() *KPointUpsert {
+	u.SetExcluded(kpoint.FieldEndDateTimestamp)
+	return u
+}
+
+// AddEndDateTimestamp adds v to the "end_date_timestamp" field.
+func (u *KPointUpsert) AddEndDateTimestamp(v uint32) *KPointUpsert {
+	u.Add(kpoint.FieldEndDateTimestamp, v)
 	return u
 }
 
@@ -912,6 +982,48 @@ func (u *KPointUpsertOne) AddEndTime(v uint32) *KPointUpsertOne {
 func (u *KPointUpsertOne) UpdateEndTime() *KPointUpsertOne {
 	return u.Update(func(s *KPointUpsert) {
 		s.UpdateEndTime()
+	})
+}
+
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (u *KPointUpsertOne) SetStartDateTimestamp(v uint32) *KPointUpsertOne {
+	return u.Update(func(s *KPointUpsert) {
+		s.SetStartDateTimestamp(v)
+	})
+}
+
+// AddStartDateTimestamp adds v to the "start_date_timestamp" field.
+func (u *KPointUpsertOne) AddStartDateTimestamp(v uint32) *KPointUpsertOne {
+	return u.Update(func(s *KPointUpsert) {
+		s.AddStartDateTimestamp(v)
+	})
+}
+
+// UpdateStartDateTimestamp sets the "start_date_timestamp" field to the value that was provided on create.
+func (u *KPointUpsertOne) UpdateStartDateTimestamp() *KPointUpsertOne {
+	return u.Update(func(s *KPointUpsert) {
+		s.UpdateStartDateTimestamp()
+	})
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (u *KPointUpsertOne) SetEndDateTimestamp(v uint32) *KPointUpsertOne {
+	return u.Update(func(s *KPointUpsert) {
+		s.SetEndDateTimestamp(v)
+	})
+}
+
+// AddEndDateTimestamp adds v to the "end_date_timestamp" field.
+func (u *KPointUpsertOne) AddEndDateTimestamp(v uint32) *KPointUpsertOne {
+	return u.Update(func(s *KPointUpsert) {
+		s.AddEndDateTimestamp(v)
+	})
+}
+
+// UpdateEndDateTimestamp sets the "end_date_timestamp" field to the value that was provided on create.
+func (u *KPointUpsertOne) UpdateEndDateTimestamp() *KPointUpsertOne {
+	return u.Update(func(s *KPointUpsert) {
+		s.UpdateEndDateTimestamp()
 	})
 }
 
@@ -1354,6 +1466,48 @@ func (u *KPointUpsertBulk) AddEndTime(v uint32) *KPointUpsertBulk {
 func (u *KPointUpsertBulk) UpdateEndTime() *KPointUpsertBulk {
 	return u.Update(func(s *KPointUpsert) {
 		s.UpdateEndTime()
+	})
+}
+
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (u *KPointUpsertBulk) SetStartDateTimestamp(v uint32) *KPointUpsertBulk {
+	return u.Update(func(s *KPointUpsert) {
+		s.SetStartDateTimestamp(v)
+	})
+}
+
+// AddStartDateTimestamp adds v to the "start_date_timestamp" field.
+func (u *KPointUpsertBulk) AddStartDateTimestamp(v uint32) *KPointUpsertBulk {
+	return u.Update(func(s *KPointUpsert) {
+		s.AddStartDateTimestamp(v)
+	})
+}
+
+// UpdateStartDateTimestamp sets the "start_date_timestamp" field to the value that was provided on create.
+func (u *KPointUpsertBulk) UpdateStartDateTimestamp() *KPointUpsertBulk {
+	return u.Update(func(s *KPointUpsert) {
+		s.UpdateStartDateTimestamp()
+	})
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (u *KPointUpsertBulk) SetEndDateTimestamp(v uint32) *KPointUpsertBulk {
+	return u.Update(func(s *KPointUpsert) {
+		s.SetEndDateTimestamp(v)
+	})
+}
+
+// AddEndDateTimestamp adds v to the "end_date_timestamp" field.
+func (u *KPointUpsertBulk) AddEndDateTimestamp(v uint32) *KPointUpsertBulk {
+	return u.Update(func(s *KPointUpsert) {
+		s.AddEndDateTimestamp(v)
+	})
+}
+
+// UpdateEndDateTimestamp sets the "end_date_timestamp" field to the value that was provided on create.
+func (u *KPointUpsertBulk) UpdateEndDateTimestamp() *KPointUpsertBulk {
+	return u.Update(func(s *KPointUpsert) {
+		s.UpdateEndDateTimestamp()
 	})
 }
 

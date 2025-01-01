@@ -194,6 +194,32 @@ func (ku *KPointUpdate) AddEndTime(u int32) *KPointUpdate {
 	return ku
 }
 
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (ku *KPointUpdate) SetStartDateTimestamp(u uint32) *KPointUpdate {
+	ku.mutation.ResetStartDateTimestamp()
+	ku.mutation.SetStartDateTimestamp(u)
+	return ku
+}
+
+// AddStartDateTimestamp adds u to the "start_date_timestamp" field.
+func (ku *KPointUpdate) AddStartDateTimestamp(u int32) *KPointUpdate {
+	ku.mutation.AddStartDateTimestamp(u)
+	return ku
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (ku *KPointUpdate) SetEndDateTimestamp(u uint32) *KPointUpdate {
+	ku.mutation.ResetEndDateTimestamp()
+	ku.mutation.SetEndDateTimestamp(u)
+	return ku
+}
+
+// AddEndDateTimestamp adds u to the "end_date_timestamp" field.
+func (ku *KPointUpdate) AddEndDateTimestamp(u int32) *KPointUpdate {
+	ku.mutation.AddEndDateTimestamp(u)
+	return ku
+}
+
 // Mutation returns the KPointMutation object of the builder.
 func (ku *KPointUpdate) Mutation() *KPointMutation {
 	return ku.mutation
@@ -445,6 +471,34 @@ func (ku *KPointUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: kpoint.FieldEndTime,
 		})
 	}
+	if value, ok := ku.mutation.StartDateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldStartDateTimestamp,
+		})
+	}
+	if value, ok := ku.mutation.AddedStartDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldStartDateTimestamp,
+		})
+	}
+	if value, ok := ku.mutation.EndDateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldEndDateTimestamp,
+		})
+	}
+	if value, ok := ku.mutation.AddedEndDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldEndDateTimestamp,
+		})
+	}
 	_spec.Modifiers = ku.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, ku.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -629,6 +683,32 @@ func (kuo *KPointUpdateOne) SetEndTime(u uint32) *KPointUpdateOne {
 // AddEndTime adds u to the "end_time" field.
 func (kuo *KPointUpdateOne) AddEndTime(u int32) *KPointUpdateOne {
 	kuo.mutation.AddEndTime(u)
+	return kuo
+}
+
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (kuo *KPointUpdateOne) SetStartDateTimestamp(u uint32) *KPointUpdateOne {
+	kuo.mutation.ResetStartDateTimestamp()
+	kuo.mutation.SetStartDateTimestamp(u)
+	return kuo
+}
+
+// AddStartDateTimestamp adds u to the "start_date_timestamp" field.
+func (kuo *KPointUpdateOne) AddStartDateTimestamp(u int32) *KPointUpdateOne {
+	kuo.mutation.AddStartDateTimestamp(u)
+	return kuo
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (kuo *KPointUpdateOne) SetEndDateTimestamp(u uint32) *KPointUpdateOne {
+	kuo.mutation.ResetEndDateTimestamp()
+	kuo.mutation.SetEndDateTimestamp(u)
+	return kuo
+}
+
+// AddEndDateTimestamp adds u to the "end_date_timestamp" field.
+func (kuo *KPointUpdateOne) AddEndDateTimestamp(u int32) *KPointUpdateOne {
+	kuo.mutation.AddEndDateTimestamp(u)
 	return kuo
 }
 
@@ -911,6 +991,34 @@ func (kuo *KPointUpdateOne) sqlSave(ctx context.Context) (_node *KPoint, err err
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: kpoint.FieldEndTime,
+		})
+	}
+	if value, ok := kuo.mutation.StartDateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldStartDateTimestamp,
+		})
+	}
+	if value, ok := kuo.mutation.AddedStartDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldStartDateTimestamp,
+		})
+	}
+	if value, ok := kuo.mutation.EndDateTimestamp(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldEndDateTimestamp,
+		})
+	}
+	if value, ok := kuo.mutation.AddedEndDateTimestamp(); ok {
+		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
+			Type:   field.TypeUint32,
+			Value:  value,
+			Column: kpoint.FieldEndDateTimestamp,
 		})
 	}
 	_spec.Modifiers = kuo.modifiers

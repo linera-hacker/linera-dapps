@@ -37,34 +37,38 @@ const (
 // KPointMutation represents an operation that mutates the KPoint nodes in the graph.
 type KPointMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uint32
-	created_at       *uint32
-	addcreated_at    *int32
-	updated_at       *uint32
-	addupdated_at    *int32
-	deleted_at       *uint32
-	adddeleted_at    *int32
-	token_pair_id    *uint32
-	addtoken_pair_id *int32
-	k_point_type     *string
-	open             *float64
-	addopen          *float64
-	high             *float64
-	addhigh          *float64
-	low              *float64
-	addlow           *float64
-	close            *float64
-	addclose         *float64
-	start_time       *uint32
-	addstart_time    *int32
-	end_time         *uint32
-	addend_time      *int32
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*KPoint, error)
-	predicates       []predicate.KPoint
+	op                      Op
+	typ                     string
+	id                      *uint32
+	created_at              *uint32
+	addcreated_at           *int32
+	updated_at              *uint32
+	addupdated_at           *int32
+	deleted_at              *uint32
+	adddeleted_at           *int32
+	token_pair_id           *uint32
+	addtoken_pair_id        *int32
+	k_point_type            *string
+	open                    *float64
+	addopen                 *float64
+	high                    *float64
+	addhigh                 *float64
+	low                     *float64
+	addlow                  *float64
+	close                   *float64
+	addclose                *float64
+	start_time              *uint32
+	addstart_time           *int32
+	end_time                *uint32
+	addend_time             *int32
+	start_date_timestamp    *uint32
+	addstart_date_timestamp *int32
+	end_date_timestamp      *uint32
+	addend_date_timestamp   *int32
+	clearedFields           map[string]struct{}
+	done                    bool
+	oldValue                func(context.Context) (*KPoint, error)
+	predicates              []predicate.KPoint
 }
 
 var _ ent.Mutation = (*KPointMutation)(nil)
@@ -780,6 +784,118 @@ func (m *KPointMutation) ResetEndTime() {
 	m.addend_time = nil
 }
 
+// SetStartDateTimestamp sets the "start_date_timestamp" field.
+func (m *KPointMutation) SetStartDateTimestamp(u uint32) {
+	m.start_date_timestamp = &u
+	m.addstart_date_timestamp = nil
+}
+
+// StartDateTimestamp returns the value of the "start_date_timestamp" field in the mutation.
+func (m *KPointMutation) StartDateTimestamp() (r uint32, exists bool) {
+	v := m.start_date_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStartDateTimestamp returns the old "start_date_timestamp" field's value of the KPoint entity.
+// If the KPoint object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *KPointMutation) OldStartDateTimestamp(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStartDateTimestamp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStartDateTimestamp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStartDateTimestamp: %w", err)
+	}
+	return oldValue.StartDateTimestamp, nil
+}
+
+// AddStartDateTimestamp adds u to the "start_date_timestamp" field.
+func (m *KPointMutation) AddStartDateTimestamp(u int32) {
+	if m.addstart_date_timestamp != nil {
+		*m.addstart_date_timestamp += u
+	} else {
+		m.addstart_date_timestamp = &u
+	}
+}
+
+// AddedStartDateTimestamp returns the value that was added to the "start_date_timestamp" field in this mutation.
+func (m *KPointMutation) AddedStartDateTimestamp() (r int32, exists bool) {
+	v := m.addstart_date_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetStartDateTimestamp resets all changes to the "start_date_timestamp" field.
+func (m *KPointMutation) ResetStartDateTimestamp() {
+	m.start_date_timestamp = nil
+	m.addstart_date_timestamp = nil
+}
+
+// SetEndDateTimestamp sets the "end_date_timestamp" field.
+func (m *KPointMutation) SetEndDateTimestamp(u uint32) {
+	m.end_date_timestamp = &u
+	m.addend_date_timestamp = nil
+}
+
+// EndDateTimestamp returns the value of the "end_date_timestamp" field in the mutation.
+func (m *KPointMutation) EndDateTimestamp() (r uint32, exists bool) {
+	v := m.end_date_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEndDateTimestamp returns the old "end_date_timestamp" field's value of the KPoint entity.
+// If the KPoint object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *KPointMutation) OldEndDateTimestamp(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEndDateTimestamp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEndDateTimestamp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEndDateTimestamp: %w", err)
+	}
+	return oldValue.EndDateTimestamp, nil
+}
+
+// AddEndDateTimestamp adds u to the "end_date_timestamp" field.
+func (m *KPointMutation) AddEndDateTimestamp(u int32) {
+	if m.addend_date_timestamp != nil {
+		*m.addend_date_timestamp += u
+	} else {
+		m.addend_date_timestamp = &u
+	}
+}
+
+// AddedEndDateTimestamp returns the value that was added to the "end_date_timestamp" field in this mutation.
+func (m *KPointMutation) AddedEndDateTimestamp() (r int32, exists bool) {
+	v := m.addend_date_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetEndDateTimestamp resets all changes to the "end_date_timestamp" field.
+func (m *KPointMutation) ResetEndDateTimestamp() {
+	m.end_date_timestamp = nil
+	m.addend_date_timestamp = nil
+}
+
 // Where appends a list predicates to the KPointMutation builder.
 func (m *KPointMutation) Where(ps ...predicate.KPoint) {
 	m.predicates = append(m.predicates, ps...)
@@ -799,7 +915,7 @@ func (m *KPointMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *KPointMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 13)
 	if m.created_at != nil {
 		fields = append(fields, kpoint.FieldCreatedAt)
 	}
@@ -833,6 +949,12 @@ func (m *KPointMutation) Fields() []string {
 	if m.end_time != nil {
 		fields = append(fields, kpoint.FieldEndTime)
 	}
+	if m.start_date_timestamp != nil {
+		fields = append(fields, kpoint.FieldStartDateTimestamp)
+	}
+	if m.end_date_timestamp != nil {
+		fields = append(fields, kpoint.FieldEndDateTimestamp)
+	}
 	return fields
 }
 
@@ -863,6 +985,10 @@ func (m *KPointMutation) Field(name string) (ent.Value, bool) {
 		return m.StartTime()
 	case kpoint.FieldEndTime:
 		return m.EndTime()
+	case kpoint.FieldStartDateTimestamp:
+		return m.StartDateTimestamp()
+	case kpoint.FieldEndDateTimestamp:
+		return m.EndDateTimestamp()
 	}
 	return nil, false
 }
@@ -894,6 +1020,10 @@ func (m *KPointMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldStartTime(ctx)
 	case kpoint.FieldEndTime:
 		return m.OldEndTime(ctx)
+	case kpoint.FieldStartDateTimestamp:
+		return m.OldStartDateTimestamp(ctx)
+	case kpoint.FieldEndDateTimestamp:
+		return m.OldEndDateTimestamp(ctx)
 	}
 	return nil, fmt.Errorf("unknown KPoint field %s", name)
 }
@@ -980,6 +1110,20 @@ func (m *KPointMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetEndTime(v)
 		return nil
+	case kpoint.FieldStartDateTimestamp:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStartDateTimestamp(v)
+		return nil
+	case kpoint.FieldEndDateTimestamp:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEndDateTimestamp(v)
+		return nil
 	}
 	return fmt.Errorf("unknown KPoint field %s", name)
 }
@@ -1018,6 +1162,12 @@ func (m *KPointMutation) AddedFields() []string {
 	if m.addend_time != nil {
 		fields = append(fields, kpoint.FieldEndTime)
 	}
+	if m.addstart_date_timestamp != nil {
+		fields = append(fields, kpoint.FieldStartDateTimestamp)
+	}
+	if m.addend_date_timestamp != nil {
+		fields = append(fields, kpoint.FieldEndDateTimestamp)
+	}
 	return fields
 }
 
@@ -1046,6 +1196,10 @@ func (m *KPointMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedStartTime()
 	case kpoint.FieldEndTime:
 		return m.AddedEndTime()
+	case kpoint.FieldStartDateTimestamp:
+		return m.AddedStartDateTimestamp()
+	case kpoint.FieldEndDateTimestamp:
+		return m.AddedEndDateTimestamp()
 	}
 	return nil, false
 }
@@ -1125,6 +1279,20 @@ func (m *KPointMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddEndTime(v)
 		return nil
+	case kpoint.FieldStartDateTimestamp:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStartDateTimestamp(v)
+		return nil
+	case kpoint.FieldEndDateTimestamp:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddEndDateTimestamp(v)
+		return nil
 	}
 	return fmt.Errorf("unknown KPoint numeric field %s", name)
 }
@@ -1194,6 +1362,12 @@ func (m *KPointMutation) ResetField(name string) error {
 	case kpoint.FieldEndTime:
 		m.ResetEndTime()
 		return nil
+	case kpoint.FieldStartDateTimestamp:
+		m.ResetStartDateTimestamp()
+		return nil
+	case kpoint.FieldEndDateTimestamp:
+		m.ResetEndDateTimestamp()
+		return nil
 	}
 	return fmt.Errorf("unknown KPoint field %s", name)
 }
@@ -1249,25 +1423,27 @@ func (m *KPointMutation) ResetEdge(name string) error {
 // KPriceMutation represents an operation that mutates the KPrice nodes in the graph.
 type KPriceMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *uint32
-	created_at       *uint32
-	addcreated_at    *int32
-	updated_at       *uint32
-	addupdated_at    *int32
-	deleted_at       *uint32
-	adddeleted_at    *int32
-	token_pair_id    *uint32
-	addtoken_pair_id *int32
-	price            *float64
-	addprice         *float64
-	timestamp        *uint32
-	addtimestamp     *int32
-	clearedFields    map[string]struct{}
-	done             bool
-	oldValue         func(context.Context) (*KPrice, error)
-	predicates       []predicate.KPrice
+	op                Op
+	typ               string
+	id                *uint32
+	created_at        *uint32
+	addcreated_at     *int32
+	updated_at        *uint32
+	addupdated_at     *int32
+	deleted_at        *uint32
+	adddeleted_at     *int32
+	token_pair_id     *uint32
+	addtoken_pair_id  *int32
+	price             *float64
+	addprice          *float64
+	timestamp         *uint32
+	addtimestamp      *int32
+	date_timestamp    *uint32
+	adddate_timestamp *int32
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*KPrice, error)
+	predicates        []predicate.KPrice
 }
 
 var _ ent.Mutation = (*KPriceMutation)(nil)
@@ -1710,6 +1886,62 @@ func (m *KPriceMutation) ResetTimestamp() {
 	m.addtimestamp = nil
 }
 
+// SetDateTimestamp sets the "date_timestamp" field.
+func (m *KPriceMutation) SetDateTimestamp(u uint32) {
+	m.date_timestamp = &u
+	m.adddate_timestamp = nil
+}
+
+// DateTimestamp returns the value of the "date_timestamp" field in the mutation.
+func (m *KPriceMutation) DateTimestamp() (r uint32, exists bool) {
+	v := m.date_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDateTimestamp returns the old "date_timestamp" field's value of the KPrice entity.
+// If the KPrice object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *KPriceMutation) OldDateTimestamp(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDateTimestamp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDateTimestamp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDateTimestamp: %w", err)
+	}
+	return oldValue.DateTimestamp, nil
+}
+
+// AddDateTimestamp adds u to the "date_timestamp" field.
+func (m *KPriceMutation) AddDateTimestamp(u int32) {
+	if m.adddate_timestamp != nil {
+		*m.adddate_timestamp += u
+	} else {
+		m.adddate_timestamp = &u
+	}
+}
+
+// AddedDateTimestamp returns the value that was added to the "date_timestamp" field in this mutation.
+func (m *KPriceMutation) AddedDateTimestamp() (r int32, exists bool) {
+	v := m.adddate_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDateTimestamp resets all changes to the "date_timestamp" field.
+func (m *KPriceMutation) ResetDateTimestamp() {
+	m.date_timestamp = nil
+	m.adddate_timestamp = nil
+}
+
 // Where appends a list predicates to the KPriceMutation builder.
 func (m *KPriceMutation) Where(ps ...predicate.KPrice) {
 	m.predicates = append(m.predicates, ps...)
@@ -1729,7 +1961,7 @@ func (m *KPriceMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *KPriceMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 7)
 	if m.created_at != nil {
 		fields = append(fields, kprice.FieldCreatedAt)
 	}
@@ -1747,6 +1979,9 @@ func (m *KPriceMutation) Fields() []string {
 	}
 	if m.timestamp != nil {
 		fields = append(fields, kprice.FieldTimestamp)
+	}
+	if m.date_timestamp != nil {
+		fields = append(fields, kprice.FieldDateTimestamp)
 	}
 	return fields
 }
@@ -1768,6 +2003,8 @@ func (m *KPriceMutation) Field(name string) (ent.Value, bool) {
 		return m.Price()
 	case kprice.FieldTimestamp:
 		return m.Timestamp()
+	case kprice.FieldDateTimestamp:
+		return m.DateTimestamp()
 	}
 	return nil, false
 }
@@ -1789,6 +2026,8 @@ func (m *KPriceMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldPrice(ctx)
 	case kprice.FieldTimestamp:
 		return m.OldTimestamp(ctx)
+	case kprice.FieldDateTimestamp:
+		return m.OldDateTimestamp(ctx)
 	}
 	return nil, fmt.Errorf("unknown KPrice field %s", name)
 }
@@ -1840,6 +2079,13 @@ func (m *KPriceMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTimestamp(v)
 		return nil
+	case kprice.FieldDateTimestamp:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDateTimestamp(v)
+		return nil
 	}
 	return fmt.Errorf("unknown KPrice field %s", name)
 }
@@ -1866,6 +2112,9 @@ func (m *KPriceMutation) AddedFields() []string {
 	if m.addtimestamp != nil {
 		fields = append(fields, kprice.FieldTimestamp)
 	}
+	if m.adddate_timestamp != nil {
+		fields = append(fields, kprice.FieldDateTimestamp)
+	}
 	return fields
 }
 
@@ -1886,6 +2135,8 @@ func (m *KPriceMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedPrice()
 	case kprice.FieldTimestamp:
 		return m.AddedTimestamp()
+	case kprice.FieldDateTimestamp:
+		return m.AddedDateTimestamp()
 	}
 	return nil, false
 }
@@ -1937,6 +2188,13 @@ func (m *KPriceMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddTimestamp(v)
 		return nil
+	case kprice.FieldDateTimestamp:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDateTimestamp(v)
+		return nil
 	}
 	return fmt.Errorf("unknown KPrice numeric field %s", name)
 }
@@ -1981,6 +2239,9 @@ func (m *KPriceMutation) ResetField(name string) error {
 		return nil
 	case kprice.FieldTimestamp:
 		m.ResetTimestamp()
+		return nil
+	case kprice.FieldDateTimestamp:
+		m.ResetDateTimestamp()
 		return nil
 	}
 	return fmt.Errorf("unknown KPrice field %s", name)
@@ -3724,6 +3985,8 @@ type TransactionMutation struct {
 	addamount_one_out  *float64
 	timestamp          *uint32
 	addtimestamp       *int32
+	date_timestamp     *uint32
+	adddate_timestamp  *int32
 	clearedFields      map[string]struct{}
 	done               bool
 	oldValue           func(context.Context) (*Transaction, error)
@@ -4502,6 +4765,62 @@ func (m *TransactionMutation) ResetTimestamp() {
 	m.addtimestamp = nil
 }
 
+// SetDateTimestamp sets the "date_timestamp" field.
+func (m *TransactionMutation) SetDateTimestamp(u uint32) {
+	m.date_timestamp = &u
+	m.adddate_timestamp = nil
+}
+
+// DateTimestamp returns the value of the "date_timestamp" field in the mutation.
+func (m *TransactionMutation) DateTimestamp() (r uint32, exists bool) {
+	v := m.date_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDateTimestamp returns the old "date_timestamp" field's value of the Transaction entity.
+// If the Transaction object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TransactionMutation) OldDateTimestamp(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDateTimestamp is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDateTimestamp requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDateTimestamp: %w", err)
+	}
+	return oldValue.DateTimestamp, nil
+}
+
+// AddDateTimestamp adds u to the "date_timestamp" field.
+func (m *TransactionMutation) AddDateTimestamp(u int32) {
+	if m.adddate_timestamp != nil {
+		*m.adddate_timestamp += u
+	} else {
+		m.adddate_timestamp = &u
+	}
+}
+
+// AddedDateTimestamp returns the value that was added to the "date_timestamp" field in this mutation.
+func (m *TransactionMutation) AddedDateTimestamp() (r int32, exists bool) {
+	v := m.adddate_timestamp
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDateTimestamp resets all changes to the "date_timestamp" field.
+func (m *TransactionMutation) ResetDateTimestamp() {
+	m.date_timestamp = nil
+	m.adddate_timestamp = nil
+}
+
 // Where appends a list predicates to the TransactionMutation builder.
 func (m *TransactionMutation) Where(ps ...predicate.Transaction) {
 	m.predicates = append(m.predicates, ps...)
@@ -4521,7 +4840,7 @@ func (m *TransactionMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TransactionMutation) Fields() []string {
-	fields := make([]string, 0, 13)
+	fields := make([]string, 0, 14)
 	if m.created_at != nil {
 		fields = append(fields, transaction.FieldCreatedAt)
 	}
@@ -4561,6 +4880,9 @@ func (m *TransactionMutation) Fields() []string {
 	if m.timestamp != nil {
 		fields = append(fields, transaction.FieldTimestamp)
 	}
+	if m.date_timestamp != nil {
+		fields = append(fields, transaction.FieldDateTimestamp)
+	}
 	return fields
 }
 
@@ -4595,6 +4917,8 @@ func (m *TransactionMutation) Field(name string) (ent.Value, bool) {
 		return m.AmountOneOut()
 	case transaction.FieldTimestamp:
 		return m.Timestamp()
+	case transaction.FieldDateTimestamp:
+		return m.DateTimestamp()
 	}
 	return nil, false
 }
@@ -4630,6 +4954,8 @@ func (m *TransactionMutation) OldField(ctx context.Context, name string) (ent.Va
 		return m.OldAmountOneOut(ctx)
 	case transaction.FieldTimestamp:
 		return m.OldTimestamp(ctx)
+	case transaction.FieldDateTimestamp:
+		return m.OldDateTimestamp(ctx)
 	}
 	return nil, fmt.Errorf("unknown Transaction field %s", name)
 }
@@ -4730,6 +5056,13 @@ func (m *TransactionMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetTimestamp(v)
 		return nil
+	case transaction.FieldDateTimestamp:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDateTimestamp(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Transaction field %s", name)
 }
@@ -4768,6 +5101,9 @@ func (m *TransactionMutation) AddedFields() []string {
 	if m.addtimestamp != nil {
 		fields = append(fields, transaction.FieldTimestamp)
 	}
+	if m.adddate_timestamp != nil {
+		fields = append(fields, transaction.FieldDateTimestamp)
+	}
 	return fields
 }
 
@@ -4796,6 +5132,8 @@ func (m *TransactionMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedAmountOneOut()
 	case transaction.FieldTimestamp:
 		return m.AddedTimestamp()
+	case transaction.FieldDateTimestamp:
+		return m.AddedDateTimestamp()
 	}
 	return nil, false
 }
@@ -4875,6 +5213,13 @@ func (m *TransactionMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddTimestamp(v)
 		return nil
+	case transaction.FieldDateTimestamp:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDateTimestamp(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Transaction numeric field %s", name)
 }
@@ -4940,6 +5285,9 @@ func (m *TransactionMutation) ResetField(name string) error {
 		return nil
 	case transaction.FieldTimestamp:
 		m.ResetTimestamp()
+		return nil
+	case transaction.FieldDateTimestamp:
+		m.ResetDateTimestamp()
 		return nil
 	}
 	return fmt.Errorf("unknown Transaction field %s", name)

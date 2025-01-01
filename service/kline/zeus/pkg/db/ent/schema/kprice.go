@@ -24,11 +24,13 @@ func (KPrice) Fields() []ent.Field {
 		field.Uint32("token_pair_id"),
 		field.Float("price"),
 		field.Uint32("timestamp"),
+		field.Uint32("date_timestamp"),
 	}
 }
 
 func (KPrice) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("token_pair_id"),
+		index.Fields("token_pair_id", "date_timestamp"),
 	}
 }

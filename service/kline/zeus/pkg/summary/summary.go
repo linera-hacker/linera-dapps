@@ -17,8 +17,6 @@ import (
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
-
-	"github.com/google/uuid"
 )
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
@@ -56,8 +54,6 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
 	results := make([]*summaryproto.TokenLastCond, len(poolTokens))
 	var wg sync.WaitGroup
-	uid := uuid.New()
-	start := time.Now()
 	var retErr error
 
 	for i := 0; i < len(poolTokens); i++ {
@@ -72,25 +68,21 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 			lastTx, err := GetLastTransaction(ctx, poolID)
 			if err != nil {
 				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
 				return
 			}
-			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
 			if err != nil {
 				retErr = err
 				return
 			}
-			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 			txVolumn, err := GetOneDayVolumn(ctx, poolID)
 			if err != nil {
 				retErr = err
 				return
 			}
-			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 			tokenLastCond := &summaryproto.TokenLastCond{
 				PoolID:                 poolID,
 				TokenZeroAddress:       t0Addr,
@@ -104,7 +96,6 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
 			}
 			results[i] = tokenLastCond
-			fmt.Println("Pool request", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
 		}(i)
 	}
 
@@ -114,7 +105,6 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 		return nil, retErr
 	}
 
-	fmt.Println("Pools request", uid, time.Now().Sub(start))
 	return results, nil
 }
 

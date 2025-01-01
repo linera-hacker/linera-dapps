@@ -88,6 +88,13 @@ func (h *sqlHandler) baseKeys() error {
 			return err
 		}
 		h.baseVals[kpoint.FieldStartTime] = string(strBytes)
+
+		dateTimestamp := *h.StartTime / 24 / 60 / 60 * 24 * 60 * 60
+		strBytes, err = json.Marshal(dateTimestamp)
+		if err != nil {
+			return err
+		}
+		h.baseVals[kpoint.FieldStartDateTimestamp] = string(strBytes)
 	}
 	if h.EndTime != nil {
 		strBytes, err := json.Marshal(*h.EndTime)
@@ -96,6 +103,13 @@ func (h *sqlHandler) baseKeys() error {
 		}
 		h.baseVals[kpoint.FieldEndTime] = string(strBytes)
 		h.BondEndTime = h.EndTime
+
+		dateTimestamp := *h.EndTime / 24 / 60 / 60 * 24 * 60 * 60
+		strBytes, err = json.Marshal(dateTimestamp)
+		if err != nil {
+			return err
+		}
+		h.baseVals[kpoint.FieldEndDateTimestamp] = string(strBytes)
 	}
 	if h.BondKPointType == nil {
 		return fmt.Errorf("please give kpointtype")

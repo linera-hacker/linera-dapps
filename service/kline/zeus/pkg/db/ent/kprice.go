@@ -27,6 +27,8 @@ type KPrice struct {
 	Price float64 `json:"price,omitempty"`
 	// Timestamp holds the value of the "timestamp" field.
 	Timestamp uint32 `json:"timestamp,omitempty"`
+	// DateTimestamp holds the value of the "date_timestamp" field.
+	DateTimestamp uint32 `json:"date_timestamp,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -36,7 +38,7 @@ func (*KPrice) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case kprice.FieldPrice:
 			values[i] = new(sql.NullFloat64)
-		case kprice.FieldID, kprice.FieldCreatedAt, kprice.FieldUpdatedAt, kprice.FieldDeletedAt, kprice.FieldTokenPairID, kprice.FieldTimestamp:
+		case kprice.FieldID, kprice.FieldCreatedAt, kprice.FieldUpdatedAt, kprice.FieldDeletedAt, kprice.FieldTokenPairID, kprice.FieldTimestamp, kprice.FieldDateTimestamp:
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type KPrice", columns[i])
@@ -95,6 +97,12 @@ func (k *KPrice) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				k.Timestamp = uint32(value.Int64)
 			}
+		case kprice.FieldDateTimestamp:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field date_timestamp", values[i])
+			} else if value.Valid {
+				k.DateTimestamp = uint32(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -140,6 +148,9 @@ func (k *KPrice) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("timestamp=")
 	builder.WriteString(fmt.Sprintf("%v", k.Timestamp))
+	builder.WriteString(", ")
+	builder.WriteString("date_timestamp=")
+	builder.WriteString(fmt.Sprintf("%v", k.DateTimestamp))
 	builder.WriteByte(')')
 	return builder.String()
 }
