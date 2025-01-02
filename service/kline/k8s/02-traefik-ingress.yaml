@@ -15,22 +15,57 @@ metadata:
 
 spec:
   rules:
-    - host: api.npool.top
-      http: &http_rules
+    - host: hk.testnet-archimedes.lineraswap.fun
+      http: &hk_http_rules
         paths:
           - path: /api/kline/v1
             backend:
               serviceName: kline-service
               servicePort: 50870
-    - host: testnet-archimedes.lineraswap.fun
-      http: *http_rules
-    - host: testnet-archimedes.linerameme.fun
-      http: *http_rules
-    - host: testnet-archimedes.blobgateway.com
-      http: *http_rules
-    - host: hk.testnet-archimedes.lineraswap.fun
-      http: *http_rules
     - host: hk.testnet-archimedes.linerameme.fun
-      http: *http_rules
+      http: *hk_http_rules
     - host: hk.testnet-archimedes.blobgateway.com
-      http: *http_rules
+      http: *hk_http_rules
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: hk-kline-service
+  namespace: kube-system
+spec:
+  type: ExternalName
+  ports:
+    - name: https
+      port: 443
+      targetPort: 443
+  externalName: hk.testnet-archimedes.lineraswap.fun
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kline-service-traefik-app-ingress-route
+  namespace: kube-system
+  annotations:
+
+spec:
+  entryPoints:
+    - web
+    - websecure
+  routes:
+    - match: Host(`testnet-archimedes.linerameme.fun`) && PathPrefix(`/api/kline/v1`)
+      kind: Rule
+      services:
+        - name: hk-kline-service
+          port: 443
+    - match: Host(`testnet-archimedes.lineraswap.fun`) && PathPrefix(`/api/kline/v1`)
+      kind: Rule
+      services:
+        - name: hk-kline-service
+          port: 443
+    - match: Host(`testnet-archimedes.blobgateway.fun`) && PathPrefix(`/api/kline/v1`)
+      kind: Rule
+      services:
+        - name: hk-kline-service
+          port: 443
