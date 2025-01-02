@@ -22,11 +22,12 @@ var updateGraceTime = uint32(1)
 type SamplingKPointTask struct {
 	interval  uint32
 	kpType    basetype.KPointType
+	colKPType *basetype.KPointType
 	closeChan chan struct{}
 }
 
-func GetSamplingKPointTask(kpType basetype.KPointType) (*SamplingKPointTask, error) {
-	task := SamplingKPointTask{kpType: kpType}
+func GetSamplingKPointTask(kpType basetype.KPointType, colKPType *basetype.KPointType) (*SamplingKPointTask, error) {
+	task := SamplingKPointTask{kpType: kpType, colKPType: colKPType}
 	info, ok := kptype.KPointTypeInfos[kpType]
 	if !ok {
 		return nil, fmt.Errorf("invalid kptype")
@@ -71,7 +72,7 @@ func (task *SamplingKPointTask) createInitialKPoint(ctx context.Context) error {
 		return nil
 	}
 
-	kpReqs, err := kpH.GetKPointFromKPrice(ctx, startTime, endTime, task.kpType)
+	kpReqs, err := kprice.GetKPointFromKPrice(ctx, startTime, endTime, task.kpType)
 	if err != nil {
 		return err
 	}
@@ -94,15 +95,16 @@ func (task *SamplingKPointTask) createKPoints(ctx context.Context, startTime uin
 		return nil
 	}
 
-	kpH, err := kprice.NewHandler(ctx)
-	if err != nil {
-		return err
-	}
-
 	_startTime := startTime
 	timePeriodsLen := (now - startTime) / task.interval
 	for i := uint32(0); i < timePeriodsLen; i++ {
-		kpReqs, err := kpH.GetKPointFromKPrice(ctx, _startTime, _startTime+task.interval, task.kpType)
+		var kpReqs []*kpointproto.KPointReq
+		var err error
+		if task.colKPType == nil {
+			kpReqs, err = kprice.GetKPointFromKPrice(ctx, _startTime, _startTime+task.interval, task.kpType)
+		} else {
+			kpReqs, err = kpoint.GetKPointFromKPoint(ctx, _startTime, _startTime+task.interval, task.kpType, *task.colKPType)
+		}
 		if err != nil {
 			return err
 		}
@@ -162,12 +164,10 @@ func (task *SamplingKPointTask) StartSampling(ctx context.Context, seconds uint3
 	for {
 		select {
 		case <-time.NewTimer(time.Second * time.Duration(seconds)).C:
-			go func() {
-				err := task.samplingAndStore(ctx)
-				if err != nil {
-					logger.Sugar().Error(err)
-				}
-			}()
+			err := task.samplingAndStore(ctx)
+			if err != nil {
+				logger.Sugar().Error(err)
+			}
 		case <-ctx.Done():
 			return
 		case <-task.closeChan:
@@ -181,13 +181,16 @@ func (task *SamplingKPointTask) Close() {
 }
 
 func RunSamplingKPoint(ctx context.Context) {
+	var lastKPType *basetype.KPointType
 	for _kptype, interval := range kptype.KPTypeSampleSecond {
-		task, err := GetSamplingKPointTask(_kptype)
+		task, err := GetSamplingKPointTask(_kptype, lastKPType)
+		lastKPType = &_kptype
 		if err != nil {
 			panic(err)
 		}
 		go task.StartSampling(ctx, interval)
 		// let tasks not be triggered at the same second
 		time.Sleep(time.Second)
+		return
 	}
 }

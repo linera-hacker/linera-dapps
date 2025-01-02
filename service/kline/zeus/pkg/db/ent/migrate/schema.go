@@ -73,6 +73,11 @@ var (
 				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[6]},
 			},
 			{
+				Name:    "kprice_timestamp_token_pair_id",
+				Unique:  false,
+				Columns: []*schema.Column{KpricesColumns[6], KpricesColumns[4]},
+			},
+			{
 				Name:    "kprice_timestamp",
 				Unique:  false,
 				Columns: []*schema.Column{KpricesColumns[6]},
@@ -175,11 +180,6 @@ var (
 				Name:    "transaction_pool_id_timestamp",
 				Unique:  false,
 				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13]},
-			},
-			{
-				Name:    "transaction_timestamp_pool_id",
-				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[13], TransactionsColumns[4]},
 			},
 		},
 	}

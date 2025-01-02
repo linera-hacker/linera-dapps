@@ -47,12 +47,12 @@ var KPointTypeInfos = map[basetype.KPointType]*kpointproto.KPointTypeInfo{
 
 var KPTypeSampleSecond = map[basetype.KPointType]uint32{
 	basetype.KPointType_FiveSecond: 5,
-	basetype.KPointType_OneMinute:  10,
+	basetype.KPointType_OneMinute:  30,
 	basetype.KPointType_TenMinute:  60,
-	basetype.KPointType_OneHour:    60,
-	basetype.KPointType_OneDay:     60,
-	basetype.KPointType_OneWeek:    60,
-	basetype.KPointType_OneMonth:   60,
+	basetype.KPointType_OneHour:    60 * 5,
+	basetype.KPointType_OneDay:     60 * 60,
+	basetype.KPointType_OneWeek:    60 * 60,
+	basetype.KPointType_OneMonth:   60 * 60,
 }
 
 func FormatU32Time(t uint32) string {

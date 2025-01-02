@@ -4,7 +4,7 @@ version="0.0.1"
 domain="zeus"
 http-port=50870
 grpc-port=50871
-log-file="/var/log/zeus.log"
+log-file="./zeus.log"
 
 [mysql]
 domain="localhost"
@@ -14,6 +14,6 @@ password="12345679"
 database="zeus"
 
 [swap-app]
-server-addr='http://linera-dapps-service:30092'
-chain-id='23011460ebc72efac0b7f73ccd5bcb5d12eda134c75054d55e90c8abc0b99dda'
-app-id='ca30b7409bfa4a373c2597ca63568ce698679c53ddeef9cc033aba955d2823b5f332095b5e2bb1757c03fd11fa58e930c7f6e28cc5cea0309f21db1dca210a2223011460ebc72efac0b7f73ccd5bcb5d12eda134c75054d55e90c8abc0b99dda060000000000000000000000'
+server-addr='https://testnet-archimedes.lineraswap.fun/api/swap'
+chain-id='3414591cbf66cd0ed4f46dd33dc88c5ce296204d164f31a8c0a953ef6826afa3'
+app-id='ca30b7409bfa4a373c2597ca63568ce698679c53ddeef9cc033aba955d2823b5f332095b5e2bb1757c03fd11fa58e930c7f6e28cc5cea0309f21db1dca210a223414591cbf66cd0ed4f46dd33dc88c5ce296204d164f31a8c0a953ef6826afa3060000000000000000000000'

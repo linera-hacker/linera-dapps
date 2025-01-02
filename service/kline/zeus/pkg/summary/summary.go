@@ -19,6 +19,18 @@ import (
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
 )
 
+// TokenLastCond cache
+type TLCCache struct {
+	updateTime time.Time
+	info       *summaryproto.TokenLastCond
+}
+
+var tlcCache map[uint64]*TLCCache
+
+func init() {
+	tlcCache = make(map[uint64]*TLCCache)
+}
+
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
 	tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
 	if err != nil {
@@ -63,48 +75,30 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			poolID := poolTokens[i].PoolID
 			t0Addr := poolTokens[i].TokenZeroAddress
 			t1Addr := poolTokens[i].TokenOneAddress
-			tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
-			if err != nil {
-				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
-				return
-			}
-			lastTx, err := GetLastTransaction(ctx, poolID)
-			if err != nil {
-				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
-				return
-			}
-			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
-			if err != nil {
-				retErr = err
-				return
-			}
-			txVolumn, err := GetOneDayVolumn(ctx, poolID)
-			if err != nil {
-				retErr = err
-				return
-			}
-			tokenLastCond := &summaryproto.TokenLastCond{
-				PoolID:                 poolID,
-				TokenZeroAddress:       t0Addr,
-				TokenOneAddress:        t1Addr,
-				LastTxAt:               lastTx.Timestamp,
-				LastTxZeroAmount:       lastTx.AmountZeroIn,
-				LastTxOneAmount:        lastTx.AmountOneIn,
-				OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
-				OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
-				NowPrice:               oneDayPrices[1].Price,
-				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
-			}
-			results[i] = tokenLastCond
-		}(i)
-	}
 
+			if tlcCache[poolID] != nil && tlcCache[poolID].updateTime.After(time.Now()) {
+				results[i] = tlcCache[poolID].info
+				return
+			}
+
+			ret, err := GetTokenLastCond(ctx, poolID, t0Addr, t1Addr)
+			if err != nil {
+				retErr = err
+				return
+			}
+			tlcCache[poolID] = &TLCCache{
+				updateTime: time.Now().Add(time.Second * 10),
+				info:       ret,
+			}
+			results[i] = ret
+		}(i)
+
+	}
 	wg.Wait()
 
 	if retErr != nil {
 		return nil, retErr
 	}
-
 	return results, nil
 }
 
