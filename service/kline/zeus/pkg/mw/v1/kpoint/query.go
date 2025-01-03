@@ -58,7 +58,7 @@ func (h *queryHandler) queryKPoint(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryKPoints(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryKPoints(_ context.Context, cli *ent.Client) error {
 	stm, err := kpointcrud.SetQueryConds(cli.KPoint.Query(), h.Conds)
 	if err != nil {
 		return err

@@ -45,7 +45,7 @@ func (h *queryHandler) queryTokenPair(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryTokenPairs(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryTokenPairs(_ context.Context, cli *ent.Client) error {
 	stm, err := tokenpaircrud.SetQueryConds(cli.TokenPair.Query(), h.Conds)
 	if err != nil {
 		return err

@@ -45,7 +45,7 @@ func (h *queryHandler) queryKPrice(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryKPrices(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryKPrices(_ context.Context, cli *ent.Client) error {
 	stm, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
 	if err != nil {
 		return err

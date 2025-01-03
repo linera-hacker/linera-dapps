@@ -51,7 +51,7 @@ func (h *queryHandler) queryTransaction(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryTransactions(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryTransactions(_ context.Context, cli *ent.Client) error {
 	stm, err := transactioncrud.SetQueryConds(cli.Transaction.Query(), h.Conds)
 	if err != nil {
 		return err

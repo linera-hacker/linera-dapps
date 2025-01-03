@@ -42,7 +42,7 @@ func (h *queryHandler) queryToken(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryTokens(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryTokens(_ context.Context, cli *ent.Client) error {
 	stm, err := tokencrud.SetQueryConds(cli.Token.Query(), h.Conds)
 	if err != nil {
 		return err
