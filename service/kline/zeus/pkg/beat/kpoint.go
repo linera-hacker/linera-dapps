@@ -181,16 +181,13 @@ func (task *SamplingKPointTask) Close() {
 }
 
 func RunSamplingKPoint(ctx context.Context) {
-	var lastKPType *basetype.KPointType
-	for _kptype, interval := range kptype.KPTypeSampleSecond {
-		task, err := GetSamplingKPointTask(_kptype, lastKPType)
-		lastKPType = &_kptype
+	for _, info := range kptype.KPTypeSampleSecond {
+		task, err := GetSamplingKPointTask(info.KPType, info.CollectKPType)
 		if err != nil {
 			panic(err)
 		}
-		go task.StartSampling(ctx, interval)
+		go task.StartSampling(ctx, info.Secounds)
 		// let tasks not be triggered at the same second
 		time.Sleep(time.Second)
-		return
 	}
 }

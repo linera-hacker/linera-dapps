@@ -45,14 +45,49 @@ var KPointTypeInfos = map[basetype.KPointType]*kpointproto.KPointTypeInfo{
 	},
 }
 
-var KPTypeSampleSecond = map[basetype.KPointType]uint32{
-	basetype.KPointType_FiveSecond: 5,
-	basetype.KPointType_OneMinute:  30,
-	basetype.KPointType_TenMinute:  60,
-	basetype.KPointType_OneHour:    60 * 5,
-	basetype.KPointType_OneDay:     60 * 60,
-	basetype.KPointType_OneWeek:    60 * 60,
-	basetype.KPointType_OneMonth:   60 * 60,
+type SampleInfo struct {
+	KPType        basetype.KPointType
+	CollectKPType *basetype.KPointType
+	Secounds      uint32
+}
+
+// sort by time
+var KPTypeSampleSecond = []SampleInfo{
+	{
+		KPType:        basetype.KPointType_FiveSecond,
+		CollectKPType: nil,
+		Secounds:      5,
+	},
+	{
+		KPType:        basetype.KPointType_OneMinute,
+		CollectKPType: basetype.KPointType_FiveSecond.Enum(),
+		Secounds:      30,
+	},
+	{
+		KPType:        basetype.KPointType_TenMinute,
+		CollectKPType: basetype.KPointType_OneMinute.Enum(),
+		Secounds:      60,
+	},
+	{
+		KPType:        basetype.KPointType_OneHour,
+		CollectKPType: basetype.KPointType_TenMinute.Enum(),
+		Secounds:      60 * 1,
+	},
+	{
+		KPType:        basetype.KPointType_OneDay,
+		CollectKPType: basetype.KPointType_OneHour.Enum(),
+		Secounds:      60 * 60,
+	},
+	{
+		KPType:        basetype.KPointType_OneWeek,
+		CollectKPType: basetype.KPointType_OneDay.Enum(),
+		Secounds:      60 * 60,
+	},
+	{
+		KPType:        basetype.KPointType_OneMonth,
+		CollectKPType: basetype.KPointType_OneWeek.Enum(),
+		Secounds:      60 * 60,
+	},
 }
 
 func FormatU32Time(t uint32) string {
