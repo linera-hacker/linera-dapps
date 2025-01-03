@@ -143,24 +143,17 @@ func (h *sqlHandler) genCreateSQL() (string, error) {
 	h.baseVals[transaction.FieldDeletedAt] = fmt.Sprintf("%v", 0)
 
 	keys := []string{}
-	selectVals := []string{}
-	bondVals := []string{}
+	values := []string{}
 
 	for k, v := range h.baseVals {
 		keys = append(keys, k)
-		selectVals = append(selectVals, fmt.Sprintf("%v as %v", v, k))
+		values = append(values, v)
 	}
 
-	for k, v := range h.bondVals {
-		bondVals = append(bondVals, fmt.Sprintf("%v=%v", k, v))
-	}
-
-	sql := fmt.Sprintf("insert into %v (%v) select * from (select %v) as tmp where not exists (select * from %v where %v and deleted_at=0);",
+	sql := fmt.Sprintf("replace into %v (%v) VALUES (%v);",
 		transaction.Table,
 		strings.Join(keys, ","),
-		strings.Join(selectVals, ","),
-		transaction.Table,
-		strings.Join(bondVals, " AND "),
+		strings.Join(values, ","),
 	)
 
 	return sql, nil

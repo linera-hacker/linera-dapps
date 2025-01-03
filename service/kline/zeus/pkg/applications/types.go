@@ -1,5 +1,7 @@
 package applications
 
+import "fmt"
+
 // ################### Swap App ####################
 
 var GetReservesReq = `{"query":"query {\n  getPools {\n    id\n    token0\n    token1\n    reserve0\n    reserve1\n  }\n}"}`
@@ -22,7 +24,7 @@ type TokenPairReserves struct {
 
 // TODO: will be check when wallet is callable
 var GetTransactionsReq = func(startTxID uint64) string {
-	return `{"query":"query{\n  getTransactions(startId: 0){\n  \ttransactionId\n    transactionType\n    poolId\n    owner\n    amount0In\n    amount1In\n    amount0Out\n    amount1Out\n    timestamp\n  }\n}"}`
+	return fmt.Sprintf(`{"query":"query{\n  getTransactions(startId: %v){\n  \ttransactionId\n    transactionType\n    poolId\n    owner\n    amount0In\n    amount1In\n    amount0Out\n    amount1Out\n    timestamp\n  }\n}"}`, startTxID)
 }
 
 type ChainAccountOwner struct {

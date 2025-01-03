@@ -31,7 +31,7 @@ var (
 		Indexes: []*schema.Index{
 			{
 				Name:    "kpoint_token_pair_id_k_point_type_end_time",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{KpointsColumns[4], KpointsColumns[5], KpointsColumns[11]},
 			},
 			{
@@ -69,7 +69,7 @@ var (
 			},
 			{
 				Name:    "kprice_token_pair_id_timestamp",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[6]},
 			},
 			{
@@ -150,7 +150,7 @@ var (
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
 		{Name: "pool_id", Type: field.TypeUint64},
-		{Name: "transaction_id", Type: field.TypeUint64},
+		{Name: "transaction_id", Type: field.TypeUint64, Unique: true},
 		{Name: "transaction_type", Type: field.TypeString},
 		{Name: "chain_id", Type: field.TypeString},
 		{Name: "owner", Type: field.TypeString},

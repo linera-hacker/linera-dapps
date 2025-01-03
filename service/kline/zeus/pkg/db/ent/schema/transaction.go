@@ -22,7 +22,7 @@ func (Transaction) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("id"),
 		field.Uint64("pool_id"),
-		field.Uint64("transaction_id"),
+		field.Uint64("transaction_id").Unique(),
 		field.String("transaction_type"),
 		field.String("chain_id"),
 		field.String("owner"),
