@@ -239,20 +239,16 @@ type KPriceData struct {
 }
 
 func createKPrices(ctx context.Context, kpriceReqs []*kpriceproto.KPriceReq) error {
-	for _, req := range kpriceReqs {
-		createH, err := kprice.NewHandler(ctx,
-			kprice.WithTokenPairID(req.TokenPairID, true),
-			kprice.WithPrice(req.Price, true),
-			kprice.WithTime(req.Timestamp, true),
-		)
-		if err != nil {
-			return err
-		}
-		if err := createH.CreateKPrice(ctx); err != nil {
-			return err
-		}
+	if len(kpriceReqs) == 0 {
+		return nil
 	}
-	return nil
+
+	nmcH, err := kprice.NewMultiCreateHandler(ctx, kpriceReqs, true)
+	if err != nil {
+		return err
+	}
+
+	return nmcH.CreateKPrices(ctx)
 }
 
 func (st *SamplingKPriceTask) samplingAndStore(ctx context.Context) error {
