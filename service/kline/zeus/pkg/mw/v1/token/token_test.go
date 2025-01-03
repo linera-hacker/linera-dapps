@@ -118,9 +118,8 @@ func query(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	infos, total, err := handler.GetTokens(context.Background())
+	infos, err := handler.GetTokens(context.Background())
 	assert.Nil(t, err)
-	assert.Equal(t, total, uint32(1))
 	assert.Equal(t, infos[0], info)
 }
 

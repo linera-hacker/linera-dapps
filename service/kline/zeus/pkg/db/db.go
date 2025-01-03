@@ -42,11 +42,6 @@ func client() (*ent.Client, error) {
 }
 
 func GetConn() (conn *sql.DB, err error) {
-	masterMysqlIP, err := GetMasterIP()
-	if err != nil {
-		return nil, err
-	}
-
 	mu.Lock()
 	if mysqlConn != nil {
 		conn = mysqlConn.db
@@ -54,6 +49,11 @@ func GetConn() (conn *sql.DB, err error) {
 		return
 	}
 	mu.Unlock()
+
+	masterMysqlIP, err := GetMasterIP()
+	if err != nil {
+		return nil, err
+	}
 
 	myConfig := config.GetConfig().MySQL
 	dataSourceName := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true&interpolateParams=true",

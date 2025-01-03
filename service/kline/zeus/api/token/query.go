@@ -57,7 +57,7 @@ func (s *Server) GetTokens(ctx context.Context, in *tokenproto.GetTokensRequest)
 		return &tokenproto.GetTokensResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetTokens(ctx)
+	infos, err := handler.GetTokens(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetTokens",
@@ -69,6 +69,5 @@ func (s *Server) GetTokens(ctx context.Context, in *tokenproto.GetTokensRequest)
 
 	return &tokenproto.GetTokensResponse{
 		Infos: infos,
-		Total: total,
 	}, nil
 }

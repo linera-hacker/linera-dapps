@@ -86,9 +86,8 @@ func queryKP(t *testing.T) {
 		WithLimit(1),
 	)
 	assert.Nil(t, err)
-	infos, total, err := handler.GetKPoints(context.Background())
+	infos, err := handler.GetKPoints(context.Background())
 	assert.Nil(t, err)
-	assert.Equal(t, total, uint32(1))
 
 	tokenKPReq.ID = &infos[0].ID
 	tokenKPRet.ID = infos[0].ID

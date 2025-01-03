@@ -234,10 +234,6 @@
             "type": "object",
             "$ref": "#/definitions/tokenpaireTokenPair"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },

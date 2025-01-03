@@ -20,5 +20,4 @@ export interface GetKPointsForLineResponse {
   Offset: number;
   OriginalTime: number;
   TokenPairID: number;
-  Total: number;
 }

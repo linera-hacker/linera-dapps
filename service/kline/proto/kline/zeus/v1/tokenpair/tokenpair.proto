@@ -90,7 +90,6 @@ message GetTokenPairsRequest {
 
 message GetTokenPairsResponse {
   repeated TokenPair Infos = 10;
-  uint32 Total = 20;
 }
 
 message GetTokenPairOnlyRequest { Conds Conds = 10; }

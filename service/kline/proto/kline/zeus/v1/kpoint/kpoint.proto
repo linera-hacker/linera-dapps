@@ -92,7 +92,6 @@ message GetKPointsRequest {
 
 message GetKPointsResponse {
   repeated KPoint Infos = 10;
-  uint32 Total = 20;
 }
 
 message KPointTypeInfo {
@@ -128,7 +127,6 @@ message GetKPointsForLineResponse {
   int32 Offset = 40;
   int32 Limit = 50;
   repeated KPointForLine KPoints = 60;
-  uint32 Total = 70;
 }
 
 message UpdateKPointRequest { KPointReq Info = 10; }

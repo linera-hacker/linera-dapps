@@ -60,7 +60,6 @@ message GetKPricesRequest {
 
 message GetKPricesResponse {
   repeated KPrice Infos = 10;
-  uint32 Total = 20;
 }
 
 message UpdateKPriceRequest { KPriceReq Info = 10; }

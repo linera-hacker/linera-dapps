@@ -48,7 +48,7 @@ func (st *SamplingKPriceTask) loadTPairMap(ctx context.Context) error {
 		return err
 	}
 
-	tpInfos, _, err := tpH.GetTokenPairs(ctx)
+	tpInfos, err := tpH.GetTokenPairs(ctx)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func checkAndCreateToken(ctx context.Context, address string) (*tokenproto.Token
 		return nil, err
 	}
 
-	tokenInfos, _, err := tokenH.GetTokens(ctx)
+	tokenInfos, err := tokenH.GetTokens(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func checkTokenPair(ctx context.Context, poolID uint64, tokenZeroID, tokenOneID 
 		return nil, err
 	}
 
-	tpInfos, _, err := queryH.GetTokenPairs(ctx)
+	tpInfos, err := queryH.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func checkTokenPair(ctx context.Context, poolID uint64, tokenZeroID, tokenOneID 
 		return nil, err
 	}
 
-	tpInfos, _, err = queryH.GetTokenPairs(ctx)
+	tpInfos, err = queryH.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}

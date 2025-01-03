@@ -19,7 +19,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.TransactionSelect
 	infos []*transactionproto.Transaction
-	total uint32
 }
 
 func (h *queryHandler) selectTransaction(stm *ent.TransactionQuery) {
@@ -58,16 +57,6 @@ func (h *queryHandler) queryTransactions(ctx context.Context, cli *ent.Client) e
 		return err
 	}
 
-	stmCount, err := transactioncrud.SetQueryConds(cli.Transaction.Query(), h.Conds)
-	if err != nil {
-		return err
-	}
-	total, err := stmCount.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
-
 	h.selectTransaction(stm)
 	return nil
 }
@@ -103,7 +92,7 @@ func (h *Handler) GetTransaction(ctx context.Context) (*transactionproto.Transac
 }
 
 //nolint:dupl
-func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -119,13 +108,13 @@ func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Tran
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 //nolint:dupl
-func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -141,13 +130,13 @@ func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionpro
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 //nolint:dupl
-func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -163,9 +152,9 @@ func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionprot
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 func (h *Handler) GetLastTransaction(ctx context.Context) (*transactionproto.Transaction, error) {
@@ -286,17 +275,17 @@ func getVolumnFromTransaction(ctx context.Context, cli *ent.Client, startTime, e
 	return _txVolumn, nil
 }
 
-func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	if h.Offset*h.Limit < 0 || h.Limit == 0 {
-		return nil, 0, fmt.Errorf("invalid offset and limit")
+		return nil, fmt.Errorf("invalid offset and limit")
 	}
 
 	tx, err := h.GetLastTransaction(ctx)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	if tx == nil {
-		return nil, 0, nil
+		return nil, nil
 	}
 
 	if h.OriginalTxID == nil || *h.OriginalTxID == 0 {
@@ -317,16 +306,15 @@ func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionpro
 	}
 
 	var transactions []*transactionproto.Transaction
-	var total uint32
 	if forward {
-		transactions, total, err = h.GetEarlistTransactions(ctx)
+		transactions, err = h.GetEarlistTransactions(ctx)
 	} else {
-		transactions, total, err = h.GetLatestTransactions(ctx)
+		transactions, err = h.GetLatestTransactions(ctx)
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return transactions, total, nil
+	return transactions, nil
 }

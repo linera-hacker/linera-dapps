@@ -22,7 +22,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.KPointSelect
 	infos []*kpointproto.KPoint
-	total uint32
 }
 
 func (h *queryHandler) selectKPoint(stm *ent.KPointQuery) {
@@ -65,16 +64,6 @@ func (h *queryHandler) queryKPoints(ctx context.Context, cli *ent.Client) error 
 		return err
 	}
 
-	stmCount, err := kpointcrud.SetQueryConds(cli.KPoint.Query(), h.Conds)
-	if err != nil {
-		return err
-	}
-	total, err := stmCount.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
-
 	h.selectKPoint(stm)
 	return nil
 }
@@ -110,7 +99,7 @@ func (h *Handler) GetKPoint(ctx context.Context) (*kpointproto.KPoint, error) {
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32, error) {
+func (h *Handler) GetKPoints(ctx context.Context) ([]*kpointproto.KPoint, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -126,14 +115,14 @@ func (h *Handler) GetKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	handler.formalize()
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 //nolint:dupl
-func (h *Handler) GetEarlistKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32, error) {
+func (h *Handler) GetEarlistKPoints(ctx context.Context) ([]*kpointproto.KPoint, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -149,13 +138,13 @@ func (h *Handler) GetEarlistKPoints(ctx context.Context) ([]*kpointproto.KPoint,
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 //nolint:dupl
-func (h *Handler) GetLatestKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32, error) {
+func (h *Handler) GetLatestKPoints(ctx context.Context) ([]*kpointproto.KPoint, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -171,9 +160,9 @@ func (h *Handler) GetLatestKPoints(ctx context.Context) ([]*kpointproto.KPoint, 
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 func convKPoint(item *kpointproto.KPoint) *kpointproto.KPointForLine {
@@ -192,9 +181,9 @@ func convKPoints(items []*kpointproto.KPoint) []*kpointproto.KPointForLine {
 	return ret
 }
 
-func (h *Handler) GetKPointsForLine(ctx context.Context) ([]*kpointproto.KPointForLine, uint32, error) {
+func (h *Handler) GetKPointsForLine(ctx context.Context) ([]*kpointproto.KPointForLine, error) {
 	if h.Offset*h.Limit < 0 || h.Limit == 0 {
-		return nil, 0, fmt.Errorf("invalid offset and limit")
+		return nil, fmt.Errorf("invalid offset and limit")
 	}
 
 	if h.OriginalTime == nil || *h.OriginalTime == 0 {
@@ -216,19 +205,18 @@ func (h *Handler) GetKPointsForLine(ctx context.Context) ([]*kpointproto.KPointF
 	}
 
 	var kpoints []*kpointproto.KPoint
-	var total uint32
 	var err error
 	if forward {
-		kpoints, total, err = h.GetEarlistKPoints(ctx)
+		kpoints, err = h.GetEarlistKPoints(ctx)
 	} else {
-		kpoints, total, err = h.GetLatestKPoints(ctx)
+		kpoints, err = h.GetLatestKPoints(ctx)
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return convKPoints(kpoints), total, nil
+	return convKPoints(kpoints), nil
 }
 
 func GetKPointFromKPoint(ctx context.Context, startTime, endTime uint32, kpType, colKPType basetype.KPointType) ([]*kpointproto.KPointReq, error) {

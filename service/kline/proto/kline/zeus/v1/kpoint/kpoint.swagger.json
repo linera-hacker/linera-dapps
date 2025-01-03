@@ -253,10 +253,6 @@
             "type": "object",
             "$ref": "#/definitions/kpointKPointForLine"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },
@@ -269,10 +265,6 @@
             "type": "object",
             "$ref": "#/definitions/kpointKPoint"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },

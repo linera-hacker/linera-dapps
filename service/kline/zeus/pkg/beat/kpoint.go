@@ -145,7 +145,7 @@ func (task *SamplingKPointTask) samplingAndStore(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	kpoints, _, err := kpH.GetLatestKPoints(ctx)
+	kpoints, err := kpH.GetLatestKPoints(ctx)
 	if err != nil {
 		return err
 	}

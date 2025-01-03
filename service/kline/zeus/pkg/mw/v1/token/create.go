@@ -58,6 +58,6 @@ func (h *Handler) CreateTokens(ctx context.Context) ([]*tokenproto.Token, error)
 	h.Offset = 0
 	h.Limit = int32(len(ids))
 
-	infos, _, err := h.GetTokens(ctx)
+	infos, err := h.GetTokens(ctx)
 	return infos, err
 }

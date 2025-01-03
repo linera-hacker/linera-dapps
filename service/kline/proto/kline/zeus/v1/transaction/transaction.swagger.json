@@ -237,10 +237,6 @@
             "type": "object",
             "$ref": "#/definitions/transactionTransaction"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },
@@ -253,10 +249,6 @@
             "type": "object",
             "$ref": "#/definitions/transactionTransaction"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },

@@ -116,7 +116,7 @@ func GetTokenPair(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*t
 		return nil, err
 	}
 
-	infos, _, err := handler.GetTokenPairs(ctx)
+	infos, err := handler.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func GetLastTransaction(ctx context.Context, poolID uint64) (*transactionproto.T
 		return nil, err
 	}
 
-	infos, _, err := handler.GetLatestTransactions(ctx)
+	infos, err := handler.GetLatestTransactions(ctx)
 	if err != nil {
 		return nil, err
 	}

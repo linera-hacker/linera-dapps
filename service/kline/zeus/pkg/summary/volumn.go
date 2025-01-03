@@ -65,7 +65,7 @@ func getVolumnRank(ctx context.Context, start, end uint32, topN int) ([]*summary
 		return nil, err
 	}
 
-	_tokenPairs, _, err := tpH.GetTokenPairs(ctx)
+	_tokenPairs, err := tpH.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.KPriceSelect
 	infos []*kpriceproto.KPrice
-	total uint32
 }
 
 func (h *queryHandler) selectKPrice(stm *ent.KPriceQuery) {
@@ -51,16 +50,6 @@ func (h *queryHandler) queryKPrices(ctx context.Context, cli *ent.Client) error 
 	if err != nil {
 		return err
 	}
-
-	stmCount, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
-	if err != nil {
-		return err
-	}
-	total, err := stmCount.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
 
 	h.selectKPrice(stm)
 	return nil
@@ -96,7 +85,7 @@ func (h *Handler) GetKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32, error) {
+func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -112,9 +101,9 @@ func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 //nolint:dupl

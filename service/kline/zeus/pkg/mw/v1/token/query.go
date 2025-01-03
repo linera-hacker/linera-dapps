@@ -15,7 +15,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.TokenSelect
 	infos []*tokenproto.Token
-	total uint32
 }
 
 func (h *queryHandler) selectToken(stm *ent.TokenQuery) {
@@ -49,12 +48,6 @@ func (h *queryHandler) queryTokens(ctx context.Context, cli *ent.Client) error {
 		return err
 	}
 
-	total, err := stm.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
-
 	h.selectToken(stm)
 	return nil
 }
@@ -87,9 +80,9 @@ func (h *Handler) GetToken(ctx context.Context) (*tokenproto.Token, error) {
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetTokens(ctx context.Context) ([]*tokenproto.Token, uint32, error) {
+func (h *Handler) GetTokens(ctx context.Context) ([]*tokenproto.Token, error) {
 	if h.Conds == nil {
-		return nil, 0, fmt.Errorf("the conds is nil")
+		return nil, fmt.Errorf("the conds is nil")
 	}
 	handler := &queryHandler{
 		Handler: h,
@@ -106,7 +99,7 @@ func (h *Handler) GetTokens(ctx context.Context) ([]*tokenproto.Token, uint32, e
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
