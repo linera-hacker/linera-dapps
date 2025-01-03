@@ -56,7 +56,6 @@ func (h *queryHandler) queryTokenPairs(ctx context.Context, cli *ent.Client) err
 	if err != nil {
 		return err
 	}
-	// stmCount.Modify(h.queryJoinToken)
 	total, err := stmCount.Count(ctx)
 	if err != nil {
 		return err

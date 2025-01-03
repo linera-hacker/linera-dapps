@@ -46,7 +46,8 @@ func (s *Server) GetTokenLastConds(ctx context.Context, in *summaryproto.GetToke
 }
 
 func (s *Server) GetOneDayVolumn(ctx context.Context, in *summaryproto.GetOneDayVolumnRequest) (*summaryproto.GetOneDayVolumnResponse, error) {
-	infos, err := summary.GetOneDayVolumnRank(ctx, 8)
+	defaultNum := 8
+	infos, err := summary.GetOneDayVolumnRank(ctx, defaultNum)
 
 	if err != nil {
 		logger.Sugar().Errorw(

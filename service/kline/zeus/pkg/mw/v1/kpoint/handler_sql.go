@@ -28,7 +28,7 @@ func (h *Handler) newSQLHandler() *sqlHandler {
 	}
 }
 
-//nolint:gocognit
+//nolint:gocognit,funlen,gocyclo
 func (h *sqlHandler) baseKeys() error {
 	if h.ID != nil {
 		strBytes, err := json.Marshal(*h.ID)

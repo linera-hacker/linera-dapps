@@ -90,7 +90,6 @@ func checkAndCreateToken(ctx context.Context, address string) (*tokenproto.Token
 
 	tokenReq, err := GetTokenInfos(address)
 
-	// tokenReq, err := MockGetTokenInfos(address)
 	if tokenReq == nil {
 		return nil, err
 	}
@@ -253,7 +252,6 @@ func createKPrices(ctx context.Context, kpriceReqs []*kpriceproto.KPriceReq) err
 
 func (st *SamplingKPriceTask) samplingAndStore(ctx context.Context) error {
 	kpDataList := GetKPriceDatas()
-	// kpDataList := MockGetKPriceDatas()
 	kpriceReqs := []*kpriceproto.KPriceReq{}
 	for _, kpData := range kpDataList {
 		tpID, err := st.getTokenPairID(ctx, kpData.PoolID, kpData.TokenZeroAddress, kpData.TokenOneAddress)
@@ -327,41 +325,6 @@ func GetKPriceDatas() []*KPriceData {
 	}
 
 	return kpDataList
-}
-
-func MockGetKPriceDatas() []*KPriceData {
-	now := uint32(time.Now().Unix())
-
-	return []*KPriceData{
-		{
-			PoolID:           1,
-			TokenZeroAddress: "A",
-			TokenOneAddress:  "B",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-		{
-			PoolID:           2,
-			TokenZeroAddress: "C",
-			TokenOneAddress:  "D",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-		{
-			PoolID:           3,
-			TokenZeroAddress: "E",
-			TokenOneAddress:  "F",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-		{
-			PoolID:           4,
-			TokenZeroAddress: "G",
-			TokenOneAddress:  "H",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-	}
 }
 
 func calPrice(r0, r1 string) (float64, error) {

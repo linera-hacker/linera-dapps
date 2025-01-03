@@ -87,6 +87,7 @@ type Conds struct {
 	IDs         *cruder.Cond
 }
 
+//nolint:dupl
 func SetQueryConds(q *ent.KPointQuery, conds *Conds) (*ent.KPointQuery, error) { //nolint
 	if conds == nil {
 		return nil, fmt.Errorf("have no any conds")

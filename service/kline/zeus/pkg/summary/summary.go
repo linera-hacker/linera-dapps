@@ -87,12 +87,11 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 				return
 			}
 			tlcCache[poolID] = &TLCCache{
-				updateTime: time.Now().Add(time.Second * 10),
+				updateTime: time.Now().Add(time.Minute),
 				info:       ret,
 			}
 			results[i] = ret
 		}(i)
-
 	}
 	wg.Wait()
 
@@ -182,10 +181,10 @@ func GetOneDayKPrice(ctx context.Context, tpID uint32) (ret [2]*kpriceproto.KPri
 	return ret, nil
 }
 
-func getLatestKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpriceproto.KPrice, error) {
+func getLatestKPrice(ctx context.Context, tpID, timestamp uint32) (*kpriceproto.KPrice, error) {
 	conds := kpriceproto.Conds{
 		TokenPairID: &kline.Uint32Val{Op: cruder.EQ, Value: tpID},
-		Timestamp:   &kline.Uint32Val{Op: cruder.LTE, Value: timestap},
+		Timestamp:   &kline.Uint32Val{Op: cruder.LTE, Value: timestamp},
 	}
 
 	handler, err := kprice.NewHandler(
@@ -211,10 +210,10 @@ func getLatestKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kprice
 	return info, nil
 }
 
-func getEarlistKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpriceproto.KPrice, error) {
+func getEarlistKPrice(ctx context.Context, tpID, timestamp uint32) (*kpriceproto.KPrice, error) {
 	conds := kpriceproto.Conds{
 		TokenPairID: &kline.Uint32Val{Op: cruder.EQ, Value: tpID},
-		Timestamp:   &kline.Uint32Val{Op: cruder.GTE, Value: timestap},
+		Timestamp:   &kline.Uint32Val{Op: cruder.GTE, Value: timestamp},
 	}
 
 	handler, err := kprice.NewHandler(

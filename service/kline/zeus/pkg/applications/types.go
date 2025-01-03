@@ -22,9 +22,12 @@ type TokenPairReserves struct {
 	Reserve1 string `json:"reserve1,omitempty"`
 }
 
-// TODO: will be check when wallet is callable
+//nolint:lll
 var GetTransactionsReq = func(startTxID uint64) string {
-	return fmt.Sprintf(`{"query":"query{\n  getTransactions(startId: %v){\n  \ttransactionId\n    transactionType\n    poolId\n    owner\n    amount0In\n    amount1In\n    amount0Out\n    amount1Out\n    timestamp\n  }\n}"}`, startTxID)
+	return fmt.Sprintf(
+		`{"query":"query{\n  getTransactions(startId: %v){\n  \ttransactionId\n    transactionType\n    poolId\n    owner\n    amount0In\n    amount1In\n    amount0Out\n    amount1Out\n    timestamp\n  }\n}"}`,
+		startTxID,
+	)
 }
 
 type ChainAccountOwner struct {

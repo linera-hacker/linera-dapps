@@ -42,7 +42,7 @@ func (s *Server) UpdateToken(ctx context.Context, in *tokenproto.UpdateTokenRequ
 		return &tokenproto.UpdateTokenResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	token, err := handler.UpdateToken(ctx)
+	info, err := handler.UpdateToken(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"UpdateToken",
@@ -52,5 +52,5 @@ func (s *Server) UpdateToken(ctx context.Context, in *tokenproto.UpdateTokenRequ
 		return &tokenproto.UpdateTokenResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	return &tokenproto.UpdateTokenResponse{Info: token}, nil
+	return &tokenproto.UpdateTokenResponse{Info: info}, nil
 }

@@ -51,7 +51,7 @@ type SampleInfo struct {
 	Secounds      uint32
 }
 
-// sort by time
+// KPTypeSampleSecond sort by time
 var KPTypeSampleSecond = []SampleInfo{
 	{
 		KPType:        basetype.KPointType_FiveSecond,

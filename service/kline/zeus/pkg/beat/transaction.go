@@ -21,11 +21,11 @@ func GetSamplingTransactionTask(ctx context.Context) (*SamplingTransactionTask, 
 	return task, nil
 }
 
-func (st *SamplingTransactionTask) StartSampling(ctx context.Context, interval time.Duration) {
+func (st *SamplingTransactionTask) StartSampling(ctx context.Context, secounds uint32) {
 	st.closeChan = make(chan struct{})
 	for {
 		select {
-		case <-time.NewTimer(interval * time.Second).C:
+		case <-time.NewTimer(time.Second * time.Duration(secounds)).C:
 			err := st.samplingAndStore(ctx)
 			if err != nil {
 				logger.Sugar().Error(err)
@@ -97,7 +97,8 @@ func RunSamplingTransaction(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	samplingTask.StartSampling(ctx, 5)
+	var intervalSecounds uint32 = 5
+	samplingTask.StartSampling(ctx, intervalSecounds)
 }
 
 func GetTransactions(startTxID uint64) []*applications.Transaction {

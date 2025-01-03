@@ -117,6 +117,7 @@ func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32
 	return handler.infos, handler.total, nil
 }
 
+//nolint:dupl
 func (h *Handler) GetEarlistKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -144,6 +145,7 @@ func (h *Handler) GetEarlistKPrice(ctx context.Context) (*kpriceproto.KPrice, er
 	}, nil
 }
 
+//nolint:dupl
 func (h *Handler) GetLatestKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -201,19 +203,20 @@ func GetKPointFromKPrice(ctx context.Context, startTime, endTime uint32, kpType 
 	return ret, nil
 }
 
+//nolint:lll
 func getKPointFromKPrice(ctx context.Context, cli *ent.Client, startTime, endTime uint32, kpType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
-	selectMinMaxSql := fmt.Sprintf(
+	selectMinMaxSQL := fmt.Sprintf(
 		"SELECT token_pair_id,MIN(price) as low,MAX(price) as high FROM  kprices WHERE `timestamp`>=%v AND `timestamp`<=%v  GROUP BY token_pair_id;",
 		startTime,
 		endTime,
 	)
 
-	selectOpenSql := fmt.Sprintf(
+	selectOpenSQL := fmt.Sprintf(
 		"SELECT t1.token_pair_id,t1.price as open FROM kprices t1 INNER JOIN (SELECT MIN(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
 		startTime,
 		endTime,
 	)
-	selectCloseSql := fmt.Sprintf(
+	selectCloseSQL := fmt.Sprintf(
 		"SELECT t1.token_pair_id,t1.price as close FROM kprices t1 INNER JOIN (SELECT MAX(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
 		startTime,
 		endTime,
@@ -234,17 +237,17 @@ func getKPointFromKPrice(ctx context.Context, cli *ent.Client, startTime, endTim
 	}
 
 	var _kpMaxMin []*kpMinMax
-	if err := queryFunc(ctx, cli, selectMinMaxSql, &_kpMaxMin); err != nil {
+	if err := queryFunc(ctx, cli, selectMinMaxSQL, &_kpMaxMin); err != nil {
 		return nil, err
 	}
 
 	var _kpOpen []*kpOpen
-	if err := queryFunc(ctx, cli, selectOpenSql, &_kpOpen); err != nil {
+	if err := queryFunc(ctx, cli, selectOpenSQL, &_kpOpen); err != nil {
 		return nil, err
 	}
 
 	var _kpClose []*kpClose
-	if err := queryFunc(ctx, cli, selectCloseSql, &_kpClose); err != nil {
+	if err := queryFunc(ctx, cli, selectCloseSQL, &_kpClose); err != nil {
 		return nil, err
 	}
 
