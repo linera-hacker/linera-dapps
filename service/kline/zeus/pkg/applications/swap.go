@@ -34,19 +34,20 @@ func (app *SwapApp) GetTransactions(txID uint64) ([]*Transaction, error) {
 			ChainID:         v.Owner.ChainID,
 			Owner:           v.Owner.Owner,
 		}
-		a0in, err := strconv.ParseFloat(v.AmountZeroIn, 64)
+		bitSize := 64
+		a0in, err := strconv.ParseFloat(v.AmountZeroIn, bitSize)
 		if err != nil {
 			return nil, err
 		}
-		a1in, err := strconv.ParseFloat(v.AmountOneIn, 64)
+		a1in, err := strconv.ParseFloat(v.AmountOneIn, bitSize)
 		if err != nil {
 			return nil, err
 		}
-		a0out, err := strconv.ParseFloat(v.AmountZeroOut, 64)
+		a0out, err := strconv.ParseFloat(v.AmountZeroOut, bitSize)
 		if err != nil {
 			return nil, err
 		}
-		a1out, err := strconv.ParseFloat(v.AmountOneOut, 64)
+		a1out, err := strconv.ParseFloat(v.AmountOneOut, bitSize)
 		if err != nil {
 			return nil, err
 		}

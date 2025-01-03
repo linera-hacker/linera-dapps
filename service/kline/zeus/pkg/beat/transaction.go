@@ -21,18 +21,15 @@ func GetSamplingTransactionTask(ctx context.Context) (*SamplingTransactionTask, 
 	return task, nil
 }
 
-func (st *SamplingTransactionTask) StartSampling(ctx context.Context, interval time.Duration) {
+func (st *SamplingTransactionTask) StartSampling(ctx context.Context, secounds uint32) {
 	st.closeChan = make(chan struct{})
 	for {
 		select {
-		// try to start with whole seconds and offset 10 milliseconds
-		case <-time.NewTicker(interval*time.Second + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
-			go func() {
-				err := st.samplingAndStore(ctx)
-				if err != nil {
-					logger.Sugar().Error(err)
-				}
-			}()
+		case <-time.NewTimer(time.Second * time.Duration(secounds)).C:
+			err := st.samplingAndStore(ctx)
+			if err != nil {
+				logger.Sugar().Error(err)
+			}
 		case <-ctx.Done():
 			return
 		case <-st.closeChan:
@@ -46,28 +43,14 @@ func (st *SamplingTransactionTask) Close(ctx context.Context, interval time.Dura
 }
 
 func createTransactions(ctx context.Context, transactionReqs []*transactionproto.TransactionReq) error {
-	for _, req := range transactionReqs {
-		//TODO: will create bulk
-		createH, err := transaction.NewHandler(ctx,
-			transaction.WithPoolID(req.PoolID, true),
-			transaction.WithTransactionID(req.TransactionID, true),
-			transaction.WithTransactionType(req.TransactionType, true),
-			transaction.WithChainID(req.ChainID, true),
-			transaction.WithOwner(req.Owner, true),
-			transaction.WithAmountZeroIn(req.AmountZeroIn, false),
-			transaction.WithAmountOneIn(req.AmountOneIn, false),
-			transaction.WithAmountZeroOut(req.AmountZeroOut, false),
-			transaction.WithAmountOneOut(req.AmountOneOut, false),
-			transaction.WithTimestamp(req.Timestamp, true),
-		)
-		if err != nil {
-			return err
-		}
-		if err := createH.CreateTransaction(ctx); err != nil {
-			return err
-		}
+	if len(transactionReqs) == 0 {
+		return nil
 	}
-	return nil
+	nmcH, err := transaction.NewMultiCreateHandler(ctx, transactionReqs, true)
+	if err != nil {
+		return err
+	}
+	return nmcH.CreateTransactions(ctx)
 }
 
 func (st *SamplingTransactionTask) samplingAndStore(ctx context.Context) error {
@@ -81,11 +64,10 @@ func (st *SamplingTransactionTask) samplingAndStore(ctx context.Context) error {
 	}
 	txID := uint64(0)
 	if tx != nil {
-		txID = tx.TransactionID
+		txID = tx.TransactionID + 1
 	}
 
 	txList := GetTransactions(txID)
-	// txList := MockGetTransactions(txID)
 
 	transactionReqs := []*transactionproto.TransactionReq{}
 	for _, tx := range txList {
@@ -115,35 +97,8 @@ func RunSamplingTransaction(ctx context.Context) {
 	if err != nil {
 		panic(err)
 	}
-	samplingTask.StartSampling(ctx, 1)
-}
-
-func MockGetTransactions(startTxID *uint64) []*applications.Transaction {
-	id := uint64(1)
-	if startTxID == nil {
-		startTxID = &id
-	} else {
-		id = *startTxID
-	}
-
-	ret := []*applications.Transaction{}
-	for i := uint64(1); i < 5; i++ {
-		id++
-		ret = append(ret, &applications.Transaction{
-			PoolID:          i % 5,
-			TransactionID:   id,
-			TransactionType: "Swap",
-			ChainID:         "Swap",
-			Owner:           "Swap",
-			AmountZeroIn:    float64(id),
-			AmountOneIn:     float64(i),
-			AmountZeroOut:   float64(i),
-			AmountOneOut:    float64(id),
-			Timestamp:       uint32(time.Now().Unix()),
-		})
-	}
-
-	return ret
+	var intervalSecounds uint32 = 5
+	samplingTask.StartSampling(ctx, intervalSecounds)
 }
 
 func GetTransactions(startTxID uint64) []*applications.Transaction {

@@ -102,6 +102,7 @@ func (h *Handler) GetTransaction(ctx context.Context) (*transactionproto.Transac
 	return handler.infos[0], nil
 }
 
+//nolint:dupl
 func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -123,6 +124,7 @@ func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Tran
 	return handler.infos, handler.total, nil
 }
 
+//nolint:dupl
 func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -144,6 +146,7 @@ func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionpro
 	return handler.infos, handler.total, nil
 }
 
+//nolint:dupl
 func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -168,7 +171,7 @@ func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionprot
 func (h *Handler) GetLastTransaction(ctx context.Context) (*transactionproto.Transaction, error) {
 	var tx *transactionproto.Transaction
 	var err error
-	db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		tx, err = getLastTransaction(ctx, cli)
 		return err
 	})
@@ -178,10 +181,11 @@ func (h *Handler) GetLastTransaction(ctx context.Context) (*transactionproto.Tra
 	return tx, nil
 }
 
+//nolint:lll
 func getLastTransaction(ctx context.Context, cli *ent.Client) (*transactionproto.Transaction, error) {
-	countVolumnSql := "SELECT id,created_at,updated_at,pool_id,transaction_id,transaction_type,amount_zero_in,amount_one_in,amount_zero_out,amount_one_out,`timestamp` FROM  transactions WHERE transaction_id = (select max(transaction_id) from transactions);"
+	countVolumnSQL := "SELECT id,created_at,updated_at,pool_id,transaction_id,transaction_type,amount_zero_in,amount_one_in,amount_zero_out,amount_one_out,`timestamp` FROM  transactions WHERE transaction_id = (select max(transaction_id) from transactions);"
 	txList := []*transactionproto.Transaction{}
-	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSql)
+	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -232,15 +236,16 @@ func (h *Handler) GetVolumnFromTransactionByPoolID(ctx context.Context, startTim
 	return ret, nil
 }
 
+//nolint:lll
 func getVolumnFromTransactionByPoolID(ctx context.Context, cli *ent.Client, startTime, endTime uint32, poolID uint64) (*TransactionVolumn, error) {
-	countVolumnSql := fmt.Sprintf(
+	countVolumnSQL := fmt.Sprintf(
 		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE `timestamp`>=%v && `timestamp`<=%v  && pool_id='%v';",
 		startTime,
 		endTime,
 		poolID,
 	)
 	_txVolumn := []*TransactionVolumn{}
-	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSql)
+	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -258,15 +263,16 @@ func getVolumnFromTransactionByPoolID(ctx context.Context, cli *ent.Client, star
 	return _txVolumn[0], nil
 }
 
+//nolint:lll
 func getVolumnFromTransaction(ctx context.Context, cli *ent.Client, startTime, endTime uint32) ([]*TransactionVolumn, error) {
-	countVolumnSql := fmt.Sprintf(
+	countVolumnSQL := fmt.Sprintf(
 		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE `timestamp`>=%v && `timestamp`<=%v  GROUP BY pool_id;",
 		startTime,
 		endTime,
 	)
 
 	_txVolumn := []*TransactionVolumn{}
-	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSql)
+	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSQL)
 	if err != nil {
 		return nil, err
 	}

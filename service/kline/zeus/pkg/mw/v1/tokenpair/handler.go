@@ -56,6 +56,7 @@ func WithPoolID(u *uint64, must bool) func(context.Context, *Handler) error {
 	}
 }
 
+//nolint:dupl
 func WithTokenZeroID(id *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
@@ -83,6 +84,7 @@ func WithTokenZeroID(id *uint32, must bool) func(context.Context, *Handler) erro
 	}
 }
 
+//nolint:dupl
 func WithTokenOneID(id *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {

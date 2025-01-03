@@ -19,5 +19,4 @@ func Register(server grpc.ServiceRegistrar) {
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
 	return summary.RegisterManagerHandlerFromEndpoint(context.Background(), mux, endpoint, opts)
-
 }

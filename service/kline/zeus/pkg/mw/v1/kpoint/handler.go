@@ -130,16 +130,16 @@ func WithLow(low *float64, must bool) func(context.Context, *Handler) error {
 	}
 }
 
-func WithClose(close *float64, must bool) func(context.Context, *Handler) error {
+func WithClose(closeV *float64, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		if close == nil {
+		if closeV == nil {
 			if must {
 				return fmt.Errorf("invalid close")
 			}
 			return nil
 		}
 
-		h.Close = close
+		h.Close = closeV
 		return nil
 	}
 }

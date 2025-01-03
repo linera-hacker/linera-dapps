@@ -2,6 +2,7 @@ package applications
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -33,7 +34,7 @@ func (app *baseApp) post(req, resp interface{}) error {
 		return err
 	}
 
-	if ret.StatusCode() != 200 {
+	if ret.StatusCode() != http.StatusOK {
 		return fmt.Errorf("wrong response,status code: %v,response: %v", ret.StatusCode(), string(ret.Body()))
 	}
 	return nil

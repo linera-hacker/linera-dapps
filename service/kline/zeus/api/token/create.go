@@ -42,7 +42,7 @@ func (s *Server) CreateToken(ctx context.Context, in *tokenproto.CreateTokenRequ
 		return &tokenproto.CreateTokenResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	token, err := handler.CreateToken(ctx)
+	info, err := handler.CreateToken(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"CreateToken",
@@ -52,5 +52,5 @@ func (s *Server) CreateToken(ctx context.Context, in *tokenproto.CreateTokenRequ
 		return &tokenproto.CreateTokenResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	return &tokenproto.CreateTokenResponse{Info: token}, nil
+	return &tokenproto.CreateTokenResponse{Info: info}, nil
 }

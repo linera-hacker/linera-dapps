@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"entgo.io/ent/dialect/sql"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
 	basetype "github.com/linera-hacker/linera-dapps/service/kline/proto/kline/basetype/v1"
@@ -68,7 +69,6 @@ func (h *queryHandler) queryKPoints(ctx context.Context, cli *ent.Client) error 
 	if err != nil {
 		return err
 	}
-	// stmCount.Modify(h.queryJoinToken)
 	total, err := stmCount.Count(ctx)
 	if err != nil {
 		return err
@@ -92,7 +92,6 @@ func (h *Handler) GetKPoint(ctx context.Context) (*kpointproto.KPoint, error) {
 		if err := handler.queryKPoint(cli); err != nil {
 			return err
 		}
-		// handler.queryJoin()
 		const singleRowLimit = 2
 		handler.stm.Offset(0).Limit(singleRowLimit)
 		return handler.scan(_ctx)
@@ -120,7 +119,6 @@ func (h *Handler) GetKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32
 		if err := handler.queryKPoints(ctx, cli); err != nil {
 			return err
 		}
-		// handler.queryJoin()
 		handler.stm.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
@@ -134,6 +132,7 @@ func (h *Handler) GetKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32
 	return handler.infos, handler.total, nil
 }
 
+//nolint:dupl
 func (h *Handler) GetEarlistKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -155,6 +154,7 @@ func (h *Handler) GetEarlistKPoints(ctx context.Context) ([]*kpointproto.KPoint,
 	return handler.infos, handler.total, nil
 }
 
+//nolint:dupl
 func (h *Handler) GetLatestKPoints(ctx context.Context) ([]*kpointproto.KPoint, uint32, error) {
 	handler := &queryHandler{
 		Handler: h,
@@ -222,7 +222,6 @@ func (h *Handler) GetKPointsForLine(ctx context.Context) ([]*kpointproto.KPointF
 		kpoints, total, err = h.GetEarlistKPoints(ctx)
 	} else {
 		kpoints, total, err = h.GetLatestKPoints(ctx)
-		// reverse(kpoints)
 	}
 
 	if err != nil {
@@ -230,4 +229,99 @@ func (h *Handler) GetKPointsForLine(ctx context.Context) ([]*kpointproto.KPointF
 	}
 
 	return convKPoints(kpoints), total, nil
+}
+
+func GetKPointFromKPoint(ctx context.Context, startTime, endTime uint32, kpType, colKPType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
+	ret := []*kpointproto.KPointReq{}
+	var err error
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		ret, err = getKPointFromKPoint(ctx, cli, startTime, endTime, kpType, colKPType)
+		return err
+	})
+	if err != nil {
+		return nil, err
+	}
+	return ret, nil
+}
+
+type kpMinMax struct {
+	TokenPairID uint32  `sql:"token_pair_id"`
+	Low         float64 `sql:"low"`
+	High        float64 `sql:"high"`
+}
+
+type kpOpen struct {
+	TokenPairID uint32  `sql:"token_pair_id"`
+	Open        float64 `sql:"open"`
+}
+
+type kpClose struct {
+	TokenPairID uint32  `sql:"token_pair_id"`
+	Close       float64 `sql:"close"`
+}
+
+//nolint:lll
+func getKPointFromKPoint(ctx context.Context, cli *ent.Client, startTime, endTime uint32, kpType, colKPType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
+	selectMinMaxSQL := fmt.Sprintf(
+		"SELECT token_pair_id,MIN(low) as low,MAX(high) as high FROM  zeus.kpoints WHERE k_point_type='%v' AND end_time >%v AND end_time<=%v GROUP BY token_pair_id;",
+		colKPType.String(),
+		startTime,
+		endTime,
+	)
+
+	selectOpenSQL := fmt.Sprintf(
+		"SELECT t1.token_pair_id,t1.price as open FROM kprices t1 INNER JOIN (SELECT MIN(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
+		startTime,
+		endTime,
+	)
+	selectCloseSQL := fmt.Sprintf(
+		"SELECT t1.token_pair_id,t1.price as close FROM kprices t1 INNER JOIN (SELECT MAX(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
+		startTime,
+		endTime,
+	)
+
+	queryFunc := func(ctx context.Context, cli *ent.Client, sqlStr string, v interface{}) error {
+		rows, err := cli.KPoint.QueryContext(ctx, sqlStr)
+		if err != nil {
+			return err
+		}
+		defer rows.Close()
+
+		err = sql.ScanSlice(rows, v)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	var _kpMaxMin []*kpMinMax
+	if err := queryFunc(ctx, cli, selectMinMaxSQL, &_kpMaxMin); err != nil {
+		return nil, err
+	}
+
+	var _kpOpen []*kpOpen
+	if err := queryFunc(ctx, cli, selectOpenSQL, &_kpOpen); err != nil {
+		return nil, err
+	}
+
+	var _kpClose []*kpClose
+	if err := queryFunc(ctx, cli, selectCloseSQL, &_kpClose); err != nil {
+		return nil, err
+	}
+
+	kpReqList := []*kpointproto.KPointReq{}
+	for i := range _kpMaxMin {
+		kpReqList = append(kpReqList, &kpointproto.KPointReq{
+			KPointType:  &kpType,
+			TokenPairID: &_kpMaxMin[i].TokenPairID,
+			Open:        &_kpOpen[i].Open,
+			Close:       &_kpClose[i].Close,
+			High:        &_kpMaxMin[i].High,
+			Low:         &_kpMaxMin[i].Low,
+			StartTime:   &startTime,
+			EndTime:     &endTime,
+		})
+	}
+
+	return kpReqList, nil
 }

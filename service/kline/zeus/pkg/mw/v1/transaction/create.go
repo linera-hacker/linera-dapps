@@ -8,22 +8,20 @@ import (
 )
 
 func (h *Handler) CreateTransaction(ctx context.Context) error {
-	sqlH := h.newSQLHandler()
-
 	return db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
-		sql, err := sqlH.genCreateSQL()
-		if err != nil {
-			return err
-		}
-		_, err = cli.ExecContext(ctx, sql)
-		if err != nil {
-			return err
-		}
-
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return h.CreateTransactionWithCli(ctx, cli)
 	})
+}
+
+func (h *Handler) CreateTransactionWithCli(ctx context.Context, cli *ent.Client) error {
+	sqlH := h.newSQLHandler()
+	sql, err := sqlH.genCreateSQL()
+	if err != nil {
+		return err
+	}
+	_, err = cli.ExecContext(ctx, sql)
+	if err != nil {
+		return err
+	}
+	return nil
 }

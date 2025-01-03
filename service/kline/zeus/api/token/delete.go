@@ -26,7 +26,7 @@ func (s *Server) DeleteToken(ctx context.Context, in *tokenproto.DeleteTokenRequ
 		return &tokenproto.DeleteTokenResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	token, err := handler.DeleteToken(ctx)
+	info, err := handler.DeleteToken(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"DeleteToken",
@@ -36,5 +36,5 @@ func (s *Server) DeleteToken(ctx context.Context, in *tokenproto.DeleteTokenRequ
 		return &tokenproto.DeleteTokenResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	return &tokenproto.DeleteTokenResponse{Info: token}, nil
+	return &tokenproto.DeleteTokenResponse{Info: info}, nil
 }
