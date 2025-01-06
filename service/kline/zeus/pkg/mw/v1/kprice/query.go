@@ -20,7 +20,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.KPriceSelect
 	infos []*kpriceproto.KPrice
-	total uint32
 }
 
 func (h *queryHandler) selectKPrice(stm *ent.KPriceQuery) {
@@ -46,21 +45,11 @@ func (h *queryHandler) queryKPrice(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryKPrices(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryKPrices(_ context.Context, cli *ent.Client) error {
 	stm, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
 	if err != nil {
 		return err
 	}
-
-	stmCount, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
-	if err != nil {
-		return err
-	}
-	total, err := stmCount.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
 
 	h.selectKPrice(stm)
 	return nil
@@ -96,7 +85,7 @@ func (h *Handler) GetKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32, error) {
+func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -112,51 +101,66 @@ func (h *Handler) GetKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
-func (h *Handler) GetEarlistKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32, error) {
+//nolint:dupl
+func (h *Handler) GetEarlistKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
-
+	var info *ent.KPrice
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryKPrices(ctx, cli); err != nil {
+		stm, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
+		if err != nil {
 			return err
 		}
-		handler.stm.
-			Offset(int(h.Offset)).
-			Limit(int(h.Limit)).
-			Order(ent.Asc(kpriceent.FieldTimestamp))
-		return handler.scan(_ctx)
+		handler.selectKPrice(stm)
+		info, err = handler.stm.Order(ent.Asc(kpriceent.FieldTimestamp)).First(ctx)
+		return err
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return &kpriceproto.KPrice{
+		ID:          info.ID,
+		TokenPairID: info.TokenPairID,
+		Price:       info.Price,
+		Timestamp:   info.Timestamp,
+		CreatedAt:   info.CreatedAt,
+		UpdatedAt:   info.UpdatedAt,
+	}, nil
 }
 
-func (h *Handler) GetLatestKPrices(ctx context.Context) ([]*kpriceproto.KPrice, uint32, error) {
+//nolint:dupl
+func (h *Handler) GetLatestKPrice(ctx context.Context) (*kpriceproto.KPrice, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
-
+	var info *ent.KPrice
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryKPrices(ctx, cli); err != nil {
+		stm, err := kpricecrud.SetQueryConds(cli.KPrice.Query(), h.Conds)
+		if err != nil {
 			return err
 		}
-		handler.stm.
-			Offset(int(h.Offset)).
-			Limit(int(h.Limit)).
-			Order(ent.Desc(kpriceent.FieldTimestamp))
-		return handler.scan(_ctx)
+		handler.selectKPrice(stm)
+		info, err = handler.stm.Order(ent.Desc(kpriceent.FieldTimestamp)).First(ctx)
+
+		return err
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return &kpriceproto.KPrice{
+		ID:          info.ID,
+		TokenPairID: info.TokenPairID,
+		Price:       info.Price,
+		Timestamp:   info.Timestamp,
+		CreatedAt:   info.CreatedAt,
+		UpdatedAt:   info.UpdatedAt,
+	}, nil
 }
 
 type kpMinMax struct {
@@ -175,7 +179,7 @@ type kpClose struct {
 	Close       float64 `sql:"close"`
 }
 
-func (h *Handler) GetKPointFromKPrice(ctx context.Context, startTime, endTime uint32, kpType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
+func GetKPointFromKPrice(ctx context.Context, startTime, endTime uint32, kpType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
 	ret := []*kpointproto.KPointReq{}
 	var err error
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
@@ -188,18 +192,20 @@ func (h *Handler) GetKPointFromKPrice(ctx context.Context, startTime, endTime ui
 	return ret, nil
 }
 
+//nolint:lll
 func getKPointFromKPrice(ctx context.Context, cli *ent.Client, startTime, endTime uint32, kpType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
-	selectMinMaxSql := fmt.Sprintf(
+	selectMinMaxSQL := fmt.Sprintf(
 		"SELECT token_pair_id,MIN(price) as low,MAX(price) as high FROM  kprices WHERE `timestamp`>=%v AND `timestamp`<=%v  GROUP BY token_pair_id;",
 		startTime,
 		endTime,
 	)
-	selectOpenSql := fmt.Sprintf(
+
+	selectOpenSQL := fmt.Sprintf(
 		"SELECT t1.token_pair_id,t1.price as open FROM kprices t1 INNER JOIN (SELECT MIN(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
 		startTime,
 		endTime,
 	)
-	selectCloseSql := fmt.Sprintf(
+	selectCloseSQL := fmt.Sprintf(
 		"SELECT t1.token_pair_id,t1.price as close FROM kprices t1 INNER JOIN (SELECT MAX(`timestamp`) as `timestamp` ,token_pair_id FROM kprices WHERE `timestamp`>=%v AND `timestamp`<=%v GROUP BY token_pair_id ) t2 ON t2.token_pair_id = t1.token_pair_id AND t2.`timestamp` = t1.`timestamp`;",
 		startTime,
 		endTime,
@@ -220,17 +226,17 @@ func getKPointFromKPrice(ctx context.Context, cli *ent.Client, startTime, endTim
 	}
 
 	var _kpMaxMin []*kpMinMax
-	if err := queryFunc(ctx, cli, selectMinMaxSql, &_kpMaxMin); err != nil {
+	if err := queryFunc(ctx, cli, selectMinMaxSQL, &_kpMaxMin); err != nil {
 		return nil, err
 	}
 
 	var _kpOpen []*kpOpen
-	if err := queryFunc(ctx, cli, selectOpenSql, &_kpOpen); err != nil {
+	if err := queryFunc(ctx, cli, selectOpenSQL, &_kpOpen); err != nil {
 		return nil, err
 	}
 
 	var _kpClose []*kpClose
-	if err := queryFunc(ctx, cli, selectCloseSql, &_kpClose); err != nil {
+	if err := queryFunc(ctx, cli, selectCloseSQL, &_kpClose); err != nil {
 		return nil, err
 	}
 

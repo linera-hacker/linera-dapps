@@ -31,13 +31,18 @@ var (
 		Indexes: []*schema.Index{
 			{
 				Name:    "kpoint_token_pair_id_k_point_type_end_time",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{KpointsColumns[4], KpointsColumns[5], KpointsColumns[11]},
 			},
 			{
 				Name:    "kpoint_end_time",
 				Unique:  false,
 				Columns: []*schema.Column{KpointsColumns[11]},
+			},
+			{
+				Name:    "kpoint_token_pair_id",
+				Unique:  false,
+				Columns: []*schema.Column{KpointsColumns[4]},
 			},
 		},
 	}
@@ -58,14 +63,24 @@ var (
 		PrimaryKey: []*schema.Column{KpricesColumns[0]},
 		Indexes: []*schema.Index{
 			{
-				Name:    "kprice_timestamp",
+				Name:    "kprice_token_pair_id",
 				Unique:  false,
-				Columns: []*schema.Column{KpricesColumns[6]},
+				Columns: []*schema.Column{KpricesColumns[4]},
 			},
 			{
 				Name:    "kprice_token_pair_id_timestamp",
-				Unique:  false,
+				Unique:  true,
 				Columns: []*schema.Column{KpricesColumns[4], KpricesColumns[6]},
+			},
+			{
+				Name:    "kprice_timestamp_token_pair_id",
+				Unique:  false,
+				Columns: []*schema.Column{KpricesColumns[6], KpricesColumns[4]},
+			},
+			{
+				Name:    "kprice_timestamp",
+				Unique:  false,
+				Columns: []*schema.Column{KpricesColumns[6]},
 			},
 		},
 	}
@@ -135,7 +150,7 @@ var (
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
 		{Name: "pool_id", Type: field.TypeUint64},
-		{Name: "transaction_id", Type: field.TypeUint64},
+		{Name: "transaction_id", Type: field.TypeUint64, Unique: true},
 		{Name: "transaction_type", Type: field.TypeString},
 		{Name: "chain_id", Type: field.TypeString},
 		{Name: "owner", Type: field.TypeString},
@@ -162,9 +177,9 @@ var (
 				Columns: []*schema.Column{TransactionsColumns[5]},
 			},
 			{
-				Name:    "transaction_pool_id_timestamp_transaction_id",
+				Name:    "transaction_pool_id_timestamp",
 				Unique:  false,
-				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13], TransactionsColumns[5]},
+				Columns: []*schema.Column{TransactionsColumns[4], TransactionsColumns[13]},
 			},
 		},
 	}

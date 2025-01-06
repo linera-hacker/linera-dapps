@@ -22,7 +22,7 @@ func (Transaction) Fields() []ent.Field {
 	return []ent.Field{
 		field.Uint32("id"),
 		field.Uint64("pool_id"),
-		field.Uint64("transaction_id"),
+		field.Uint64("transaction_id").Unique(),
 		field.String("transaction_type"),
 		field.String("chain_id"),
 		field.String("owner"),
@@ -38,6 +38,6 @@ func (Transaction) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("timestamp"),
 		index.Fields("transaction_id"),
-		index.Fields("pool_id", "timestamp", "transaction_id"),
+		index.Fields("pool_id", "timestamp"),
 	}
 }

@@ -61,7 +61,7 @@ func (s *Server) GetKPoints(ctx context.Context, in *kpointproto.GetKPointsReque
 		return &kpointproto.GetKPointsResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetKPoints(ctx)
+	infos, err := handler.GetKPoints(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetKPoints",
@@ -73,7 +73,6 @@ func (s *Server) GetKPoints(ctx context.Context, in *kpointproto.GetKPointsReque
 
 	return &kpointproto.GetKPointsResponse{
 		Infos: infos,
-		Total: total,
 	}, nil
 }
 
@@ -112,7 +111,7 @@ func (s *Server) GetKPointsForLine(ctx context.Context, in *kpointproto.GetKPoin
 		return &kpointproto.GetKPointsForLineResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetKPointsForLine(ctx)
+	infos, err := handler.GetKPointsForLine(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetKPointForLine",
@@ -128,6 +127,5 @@ func (s *Server) GetKPointsForLine(ctx context.Context, in *kpointproto.GetKPoin
 		Offset:       in.Offset,
 		Limit:        in.Limit,
 		KPoints:      infos,
-		Total:        total,
 	}, nil
 }

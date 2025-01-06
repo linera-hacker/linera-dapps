@@ -8,22 +8,21 @@ import (
 )
 
 func (h *Handler) CreateKPrice(ctx context.Context) error {
-	sqlH := h.newSQLHandler()
-
 	return db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
-		sql, err := sqlH.genCreateSQL()
-		if err != nil {
-			return err
-		}
-		_, err = cli.ExecContext(ctx, sql)
-		if err != nil {
-			return err
-		}
-
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return h.CreateKPriceWithCli(ctx, cli)
 	})
+}
+
+func (h *Handler) CreateKPriceWithCli(ctx context.Context, cli *ent.Client) error {
+	sqlH := h.newSQLHandler()
+	sql, err := sqlH.genCreateSQL()
+	if err != nil {
+		return err
+	}
+	_, err = cli.ExecContext(ctx, sql)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -102,7 +102,7 @@ func query(t *testing.T) {
 		WithConds(&tokenproto.Conds{
 			Site: &kline.StringVal{
 				Op:    cruder.EQ,
-				Value: string(*tokenReq.Site),
+				Value: *tokenReq.Site,
 			},
 			Icon: &kline.StringVal{
 				Op:    cruder.EQ,
@@ -118,13 +118,12 @@ func query(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	infos, total, err := handler.GetTokens(context.Background())
+	infos, err := handler.GetTokens(context.Background())
 	assert.Nil(t, err)
-	assert.Equal(t, total, uint32(1))
 	assert.Equal(t, infos[0], info)
 }
 
-func delete(t *testing.T) {
+func deleteToken(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(tokenReq.ID, true),
@@ -150,5 +149,5 @@ func TestTx(t *testing.T) {
 	t.Run("create", create)
 	t.Run("update", update)
 	t.Run("query", query)
-	t.Run("query", delete)
+	t.Run("query", deleteToken)
 }

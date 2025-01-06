@@ -57,7 +57,7 @@ func (s *Server) GetTokenPairs(ctx context.Context, in *tokenpairproto.GetTokenP
 		return &tokenpairproto.GetTokenPairsResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetTokenPairs(ctx)
+	infos, err := handler.GetTokenPairs(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetTokenPairs",
@@ -69,6 +69,5 @@ func (s *Server) GetTokenPairs(ctx context.Context, in *tokenpairproto.GetTokenP
 
 	return &tokenpairproto.GetTokenPairsResponse{
 		Infos: infos,
-		Total: total,
 	}, nil
 }

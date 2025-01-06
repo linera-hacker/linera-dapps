@@ -207,10 +207,6 @@
             "type": "object",
             "$ref": "#/definitions/tokenToken"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },

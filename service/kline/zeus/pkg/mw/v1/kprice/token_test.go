@@ -51,6 +51,7 @@ var token2Req = &tokenproto.TokenReq{
 	Symbol:  &token1Ret.Symbol,
 }
 
+//nolint:dupl
 func createToken1(t *testing.T) {
 	handler, err := token.NewHandler(
 		context.Background(),
@@ -69,6 +70,8 @@ func createToken1(t *testing.T) {
 		token1Req.Address = &info.Address
 	}
 }
+
+//nolint:dupl
 func createToken2(t *testing.T) {
 	handler, err := token.NewHandler(
 		context.Background(),

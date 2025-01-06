@@ -69,9 +69,8 @@ func createTP(t *testing.T) {
 		tokenpair.WithLimit(1),
 	)
 	assert.Nil(t, err)
-	infos, total, err := handler.GetTokenPairs(context.Background())
+	infos, err := handler.GetTokenPairs(context.Background())
 	assert.Nil(t, err)
-	assert.Equal(t, total, uint32(1))
 
 	tokenPTReq.ID = &infos[0].ID
 	tokenPTRet.ID = infos[0].ID

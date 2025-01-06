@@ -59,7 +59,7 @@ func (s *Server) GetTransactions(ctx context.Context, in *transactionproto.GetTr
 		return &transactionproto.GetTransactionsResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetTransactions(ctx)
+	infos, err := handler.GetTransactions(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetTransactions",
@@ -71,7 +71,6 @@ func (s *Server) GetTransactions(ctx context.Context, in *transactionproto.GetTr
 
 	return &transactionproto.GetTransactionsResponse{
 		Infos: infos,
-		Total: total,
 	}, nil
 }
 
@@ -96,7 +95,7 @@ func (s *Server) GetTransactionsForLine(ctx context.Context, in *transactionprot
 		return &transactionproto.GetTransactionsForLineResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetTransactionsForLine(ctx)
+	infos, err := handler.GetTransactionsForLine(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetTransactionForLine",
@@ -111,6 +110,5 @@ func (s *Server) GetTransactionsForLine(ctx context.Context, in *transactionprot
 		Offset:       in.Offset,
 		Limit:        in.Limit,
 		Transactions: infos,
-		Total:        total,
 	}, nil
 }

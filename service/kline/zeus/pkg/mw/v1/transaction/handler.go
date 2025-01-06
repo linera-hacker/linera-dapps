@@ -99,16 +99,16 @@ func WithTransactionType(txType *string, must bool) func(context.Context, *Handl
 	}
 }
 
-func WithChainID(chainId *string, must bool) func(context.Context, *Handler) error {
+func WithChainID(chainID *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		if chainId == nil {
+		if chainID == nil {
 			if must {
 				return fmt.Errorf("invalid chainid")
 			}
 			return nil
 		}
 
-		h.ChainID = chainId
+		h.ChainID = chainID
 		return nil
 	}
 }

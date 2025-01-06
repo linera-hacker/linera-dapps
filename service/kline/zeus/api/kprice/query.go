@@ -57,7 +57,7 @@ func (s *Server) GetKPrices(ctx context.Context, in *kpriceproto.GetKPricesReque
 		return &kpriceproto.GetKPricesResponse{}, status.Error(codes.Internal, "internal server err")
 	}
 
-	infos, total, err := handler.GetKPrices(ctx)
+	infos, err := handler.GetKPrices(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"GetKPrices",
@@ -69,6 +69,5 @@ func (s *Server) GetKPrices(ctx context.Context, in *kpriceproto.GetKPricesReque
 
 	return &kpriceproto.GetKPricesResponse{
 		Infos: infos,
-		Total: total,
 	}, nil
 }

@@ -74,7 +74,6 @@ message GetTokensRequest {
 
 message GetTokensResponse {
   repeated Token Infos = 10;
-  uint32 Total = 20;
 }
 
 message UpdateTokenRequest { TokenReq Info = 10; }

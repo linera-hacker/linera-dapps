@@ -48,7 +48,7 @@ func (st *SamplingKPriceTask) loadTPairMap(ctx context.Context) error {
 		return err
 	}
 
-	tpInfos, _, err := tpH.GetTokenPairs(ctx)
+	tpInfos, err := tpH.GetTokenPairs(ctx)
 	if err != nil {
 		return err
 	}
@@ -79,7 +79,7 @@ func checkAndCreateToken(ctx context.Context, address string) (*tokenproto.Token
 		return nil, err
 	}
 
-	tokenInfos, _, err := tokenH.GetTokens(ctx)
+	tokenInfos, err := tokenH.GetTokens(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,6 @@ func checkAndCreateToken(ctx context.Context, address string) (*tokenproto.Token
 
 	tokenReq, err := GetTokenInfos(address)
 
-	// tokenReq, err := MockGetTokenInfos(address)
 	if tokenReq == nil {
 		return nil, err
 	}
@@ -132,7 +131,7 @@ func checkTokenPair(ctx context.Context, poolID uint64, tokenZeroID, tokenOneID 
 		return nil, err
 	}
 
-	tpInfos, _, err := queryH.GetTokenPairs(ctx)
+	tpInfos, err := queryH.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -153,7 +152,7 @@ func checkTokenPair(ctx context.Context, poolID uint64, tokenZeroID, tokenOneID 
 		return nil, err
 	}
 
-	tpInfos, _, err = queryH.GetTokenPairs(ctx)
+	tpInfos, err = queryH.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -211,7 +210,7 @@ func (st *SamplingKPriceTask) StartSampling(ctx context.Context, seconds uint32)
 	for {
 		select {
 		// try to start with whole seconds and offset 10 milliseconds
-		case <-time.NewTicker(time.Second*time.Duration(seconds) + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
+		case <-time.NewTimer(time.Second*time.Duration(seconds) + time.Millisecond*10 - time.Duration(time.Now().Nanosecond())%time.Second).C:
 			go func() {
 				err := st.samplingAndStore(ctx)
 				if err != nil {
@@ -239,25 +238,20 @@ type KPriceData struct {
 }
 
 func createKPrices(ctx context.Context, kpriceReqs []*kpriceproto.KPriceReq) error {
-	for _, req := range kpriceReqs {
-		createH, err := kprice.NewHandler(ctx,
-			kprice.WithTokenPairID(req.TokenPairID, true),
-			kprice.WithPrice(req.Price, true),
-			kprice.WithTime(req.Timestamp, true),
-		)
-		if err != nil {
-			return err
-		}
-		if err := createH.CreateKPrice(ctx); err != nil {
-			return err
-		}
+	if len(kpriceReqs) == 0 {
+		return nil
 	}
-	return nil
+
+	nmcH, err := kprice.NewMultiCreateHandler(ctx, kpriceReqs, true)
+	if err != nil {
+		return err
+	}
+
+	return nmcH.CreateKPrices(ctx)
 }
 
 func (st *SamplingKPriceTask) samplingAndStore(ctx context.Context) error {
 	kpDataList := GetKPriceDatas()
-	// kpDataList := MockGetKPriceDatas()
 	kpriceReqs := []*kpriceproto.KPriceReq{}
 	for _, kpData := range kpDataList {
 		tpID, err := st.getTokenPairID(ctx, kpData.PoolID, kpData.TokenZeroAddress, kpData.TokenOneAddress)
@@ -331,41 +325,6 @@ func GetKPriceDatas() []*KPriceData {
 	}
 
 	return kpDataList
-}
-
-func MockGetKPriceDatas() []*KPriceData {
-	now := uint32(time.Now().Unix())
-
-	return []*KPriceData{
-		{
-			PoolID:           1,
-			TokenZeroAddress: "A",
-			TokenOneAddress:  "B",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-		{
-			PoolID:           2,
-			TokenZeroAddress: "C",
-			TokenOneAddress:  "D",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-		{
-			PoolID:           3,
-			TokenZeroAddress: "E",
-			TokenOneAddress:  "F",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-		{
-			PoolID:           4,
-			TokenZeroAddress: "G",
-			TokenOneAddress:  "H",
-			Price:            float64(now - 1732502402),
-			Timestamp:        now,
-		},
-	}
 }
 
 func calPrice(r0, r1 string) (float64, error) {

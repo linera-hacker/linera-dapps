@@ -5,7 +5,7 @@ set -o nounset
 set -o pipefail
 
 # cd to the repo root
-REPO_ROOT=$(git rev-parse --show-toplevel)
+REPO_ROOT=$(git rev-parse --show-toplevel)/service/kline
 cd "${REPO_ROOT}"
 
 # Some useful colors.

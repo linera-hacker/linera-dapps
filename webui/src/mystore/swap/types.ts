@@ -18,7 +18,6 @@ export interface Token {
 
 export interface GetTokensResponse {
   Infos: Token[];
-  Total: number;
 }
 
 export interface TokenPair {
@@ -41,7 +40,6 @@ export interface TokenPair {
 
 export interface GetTokenPairsResponse {
   Infos: TokenPair[];
-  Total: number;
 }
 
 export interface Balance {

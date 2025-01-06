@@ -22,5 +22,4 @@ export interface GetTransactionsForLineResponse {
   Transactions: Transaction[];
   Limit: number;
   Offset: number;
-  Total: number;
 }

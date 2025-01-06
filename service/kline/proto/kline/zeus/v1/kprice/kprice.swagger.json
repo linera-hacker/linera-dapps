@@ -110,10 +110,6 @@
             "type": "object",
             "$ref": "#/definitions/kpriceKPrice"
           }
-        },
-        "Total": {
-          "type": "integer",
-          "format": "int64"
         }
       }
     },

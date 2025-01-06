@@ -19,7 +19,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.TransactionSelect
 	infos []*transactionproto.Transaction
-	total uint32
 }
 
 func (h *queryHandler) selectTransaction(stm *ent.TransactionQuery) {
@@ -52,21 +51,11 @@ func (h *queryHandler) queryTransaction(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryTransactions(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryTransactions(_ context.Context, cli *ent.Client) error {
 	stm, err := transactioncrud.SetQueryConds(cli.Transaction.Query(), h.Conds)
 	if err != nil {
 		return err
 	}
-
-	stmCount, err := transactioncrud.SetQueryConds(cli.Transaction.Query(), h.Conds)
-	if err != nil {
-		return err
-	}
-	total, err := stmCount.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
 
 	h.selectTransaction(stm)
 	return nil
@@ -102,7 +91,8 @@ func (h *Handler) GetTransaction(ctx context.Context) (*transactionproto.Transac
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+//nolint:dupl
+func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -118,12 +108,13 @@ func (h *Handler) GetTransactions(ctx context.Context) ([]*transactionproto.Tran
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
-func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+//nolint:dupl
+func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -139,12 +130,13 @@ func (h *Handler) GetEarlistTransactions(ctx context.Context) ([]*transactionpro
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
-func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+//nolint:dupl
+func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -160,15 +152,15 @@ func (h *Handler) GetLatestTransactions(ctx context.Context) ([]*transactionprot
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }
 
 func (h *Handler) GetLastTransaction(ctx context.Context) (*transactionproto.Transaction, error) {
 	var tx *transactionproto.Transaction
 	var err error
-	db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		tx, err = getLastTransaction(ctx, cli)
 		return err
 	})
@@ -178,10 +170,11 @@ func (h *Handler) GetLastTransaction(ctx context.Context) (*transactionproto.Tra
 	return tx, nil
 }
 
+//nolint:lll
 func getLastTransaction(ctx context.Context, cli *ent.Client) (*transactionproto.Transaction, error) {
-	countVolumnSql := "SELECT id,created_at,updated_at,pool_id,transaction_id,transaction_type,amount_zero_in,amount_one_in,amount_zero_out,amount_one_out,`timestamp` FROM  transactions WHERE transaction_id = (select max(transaction_id) from transactions);"
+	countVolumnSQL := "SELECT id,created_at,updated_at,pool_id,transaction_id,transaction_type,amount_zero_in,amount_one_in,amount_zero_out,amount_one_out,`timestamp` FROM  transactions WHERE transaction_id = (select max(transaction_id) from transactions);"
 	txList := []*transactionproto.Transaction{}
-	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSql)
+	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -232,15 +225,16 @@ func (h *Handler) GetVolumnFromTransactionByPoolID(ctx context.Context, startTim
 	return ret, nil
 }
 
+//nolint:lll
 func getVolumnFromTransactionByPoolID(ctx context.Context, cli *ent.Client, startTime, endTime uint32, poolID uint64) (*TransactionVolumn, error) {
-	countVolumnSql := fmt.Sprintf(
+	countVolumnSQL := fmt.Sprintf(
 		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE `timestamp`>=%v && `timestamp`<=%v  && pool_id='%v';",
 		startTime,
 		endTime,
 		poolID,
 	)
 	_txVolumn := []*TransactionVolumn{}
-	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSql)
+	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -258,15 +252,16 @@ func getVolumnFromTransactionByPoolID(ctx context.Context, cli *ent.Client, star
 	return _txVolumn[0], nil
 }
 
+//nolint:lll
 func getVolumnFromTransaction(ctx context.Context, cli *ent.Client, startTime, endTime uint32) ([]*TransactionVolumn, error) {
-	countVolumnSql := fmt.Sprintf(
+	countVolumnSQL := fmt.Sprintf(
 		"SELECT pool_id,count(*) as num_volumn,sum(amount_zero_in) as amount_zero_volumn,sum(amount_one_in) as amount_one_volumn FROM  transactions WHERE `timestamp`>=%v && `timestamp`<=%v  GROUP BY pool_id;",
 		startTime,
 		endTime,
 	)
 
 	_txVolumn := []*TransactionVolumn{}
-	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSql)
+	rows, err := cli.Transaction.QueryContext(ctx, countVolumnSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -280,17 +275,17 @@ func getVolumnFromTransaction(ctx context.Context, cli *ent.Client, startTime, e
 	return _txVolumn, nil
 }
 
-func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionproto.Transaction, uint32, error) {
+func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionproto.Transaction, error) {
 	if h.Offset*h.Limit < 0 || h.Limit == 0 {
-		return nil, 0, fmt.Errorf("invalid offset and limit")
+		return nil, fmt.Errorf("invalid offset and limit")
 	}
 
 	tx, err := h.GetLastTransaction(ctx)
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 	if tx == nil {
-		return nil, 0, nil
+		return nil, nil
 	}
 
 	if h.OriginalTxID == nil || *h.OriginalTxID == 0 {
@@ -311,16 +306,15 @@ func (h *Handler) GetTransactionsForLine(ctx context.Context) ([]*transactionpro
 	}
 
 	var transactions []*transactionproto.Transaction
-	var total uint32
 	if forward {
-		transactions, total, err = h.GetEarlistTransactions(ctx)
+		transactions, err = h.GetEarlistTransactions(ctx)
 	} else {
-		transactions, total, err = h.GetLatestTransactions(ctx)
+		transactions, err = h.GetLatestTransactions(ctx)
 	}
 
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return transactions, total, nil
+	return transactions, nil
 }

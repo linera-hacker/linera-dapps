@@ -19,7 +19,6 @@ type queryHandler struct {
 	*Handler
 	stm   *ent.TokenPairSelect
 	infos []*tokenpairproto.TokenPair
-	total uint32
 }
 
 func (h *queryHandler) selectTokenPair(stm *ent.TokenPairQuery) {
@@ -46,22 +45,11 @@ func (h *queryHandler) queryTokenPair(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryTokenPairs(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryTokenPairs(_ context.Context, cli *ent.Client) error {
 	stm, err := tokenpaircrud.SetQueryConds(cli.TokenPair.Query(), h.Conds)
 	if err != nil {
 		return err
 	}
-
-	stmCount, err := tokenpaircrud.SetQueryConds(cli.TokenPair.Query(), h.Conds)
-	if err != nil {
-		return err
-	}
-	// stmCount.Modify(h.queryJoinToken)
-	total, err := stmCount.Count(ctx)
-	if err != nil {
-		return err
-	}
-	h.total = uint32(total)
 
 	h.selectTokenPair(stm)
 	return nil
@@ -127,7 +115,7 @@ func (h *Handler) GetTokenPair(ctx context.Context) (*tokenpairproto.TokenPair, 
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetTokenPairs(ctx context.Context) ([]*tokenpairproto.TokenPair, uint32, error) {
+func (h *Handler) GetTokenPairs(ctx context.Context) ([]*tokenpairproto.TokenPair, error) {
 	handler := &queryHandler{
 		Handler: h,
 	}
@@ -144,8 +132,8 @@ func (h *Handler) GetTokenPairs(ctx context.Context) ([]*tokenpairproto.TokenPai
 		return handler.scan(_ctx)
 	})
 	if err != nil {
-		return nil, 0, err
+		return nil, err
 	}
 
-	return handler.infos, handler.total, nil
+	return handler.infos, nil
 }

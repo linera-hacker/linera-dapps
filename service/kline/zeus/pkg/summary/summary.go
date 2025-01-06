@@ -3,8 +3,8 @@ package summary
 import (
 	"context"
 	"fmt"
-	"time"
 	"sync"
+	"time"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/linera-hacker/linera-dapps/service/kline/common/kptype"
@@ -17,9 +17,19 @@ import (
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/kprice"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/tokenpair"
 	"github.com/linera-hacker/linera-dapps/service/kline/zeus/pkg/mw/v1/transaction"
-
-	"github.com/google/uuid"
 )
+
+// TokenLastCond cache
+type TLCCache struct {
+	updateTime time.Time
+	info       *summaryproto.TokenLastCond
+}
+
+var tlcCache map[uint64]*TLCCache
+
+func init() {
+	tlcCache = make(map[uint64]*TLCCache)
+}
 
 func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*summaryproto.TokenLastCond, error) {
 	tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
@@ -56,8 +66,6 @@ func GetTokenLastCond(ctx context.Context, poolID uint64, t0Addr, t1Addr string)
 func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolTokenCond) ([]*summaryproto.TokenLastCond, error) {
 	results := make([]*summaryproto.TokenLastCond, len(poolTokens))
 	var wg sync.WaitGroup
-	uid := uuid.New()
-	start := time.Now()
 	var retErr error
 
 	for i := 0; i < len(poolTokens); i++ {
@@ -67,54 +75,29 @@ func GetTokenLastConds(ctx context.Context, poolTokens []*summaryproto.PoolToken
 			poolID := poolTokens[i].PoolID
 			t0Addr := poolTokens[i].TokenZeroAddress
 			t1Addr := poolTokens[i].TokenOneAddress
-			tokenPair, err := GetTokenPair(ctx, poolID, t0Addr, t1Addr)
-			if err != nil {
-				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
+
+			if tlcCache[poolID] != nil && tlcCache[poolID].updateTime.After(time.Now()) {
+				results[i] = tlcCache[poolID].info
 				return
 			}
-			fmt.Println("Pool request 1", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			lastTx, err := GetLastTransaction(ctx, poolID)
-			if err != nil {
-				fmt.Printf("poolID: %v, t0Addr: %v, t1Addr: %v, err: %v\n", poolID, t0Addr, t1Addr, err)
-				return
-			}
-			fmt.Println("Pool request 2", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			oneDayPrices, err := GetOneDayKPrice(ctx, tokenPair.ID)
+
+			ret, err := GetTokenLastCond(ctx, poolID, t0Addr, t1Addr)
 			if err != nil {
 				retErr = err
 				return
 			}
-			fmt.Println("Pool request 3", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			txVolumn, err := GetOneDayVolumn(ctx, poolID)
-			if err != nil {
-				retErr = err
-				return
+			tlcCache[poolID] = &TLCCache{
+				updateTime: time.Now().Add(time.Minute),
+				info:       ret,
 			}
-			fmt.Println("Pool request 4", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
-			tokenLastCond := &summaryproto.TokenLastCond{
-				PoolID:                 poolID,
-				TokenZeroAddress:       t0Addr,
-				TokenOneAddress:        t1Addr,
-				LastTxAt:               lastTx.Timestamp,
-				LastTxZeroAmount:       lastTx.AmountZeroIn,
-				LastTxOneAmount:        lastTx.AmountOneIn,
-				OneDayZeroAmountVolumn: txVolumn.AmountZeroVolumn,
-				OneDayOneAmountVolumn:  txVolumn.AmountOneVolumn,
-				NowPrice:               oneDayPrices[1].Price,
-				OneDayIncresePercent:   (oneDayPrices[1].Price - oneDayPrices[0].Price) / oneDayPrices[0].Price * 100,
-			}
-			results[i] = tokenLastCond
-			fmt.Println("Pool request", i, poolID, t0Addr, t1Addr, uid, time.Now().Sub(start))
+			results[i] = ret
 		}(i)
 	}
-
 	wg.Wait()
 
 	if retErr != nil {
 		return nil, retErr
 	}
-
-	fmt.Println("Pools request", uid, time.Now().Sub(start))
 	return results, nil
 }
 
@@ -133,7 +116,7 @@ func GetTokenPair(ctx context.Context, poolID uint64, t0Addr, t1Addr string) (*t
 		return nil, err
 	}
 
-	infos, _, err := handler.GetTokenPairs(ctx)
+	infos, err := handler.GetTokenPairs(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -169,7 +152,7 @@ func GetLastTransaction(ctx context.Context, poolID uint64) (*transactionproto.T
 		return nil, err
 	}
 
-	infos, _, err := handler.GetLatestTransactions(ctx)
+	infos, err := handler.GetLatestTransactions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -190,20 +173,18 @@ func GetOneDayKPrice(ctx context.Context, tpID uint32) (ret [2]*kpriceproto.KPri
 		return ret, err
 	}
 	ret[0] = info
-
 	info, err = getLatestKPrice(ctx, tpID, nowTimestap)
 	if err != nil {
 		return ret, err
 	}
 	ret[1] = info
-
 	return ret, nil
 }
 
-func getLatestKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpriceproto.KPrice, error) {
+func getLatestKPrice(ctx context.Context, tpID, timestamp uint32) (*kpriceproto.KPrice, error) {
 	conds := kpriceproto.Conds{
 		TokenPairID: &kline.Uint32Val{Op: cruder.EQ, Value: tpID},
-		Timestamp:   &kline.Uint32Val{Op: cruder.LTE, Value: timestap},
+		Timestamp:   &kline.Uint32Val{Op: cruder.LTE, Value: timestamp},
 	}
 
 	handler, err := kprice.NewHandler(
@@ -217,22 +198,22 @@ func getLatestKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kprice
 		return nil, err
 	}
 
-	infos, _, err := handler.GetLatestKPrices(ctx)
+	info, err := handler.GetLatestKPrice(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(infos) == 0 {
+	if info == nil {
 		return nil, nil
 	}
 
-	return infos[0], nil
+	return info, nil
 }
 
-func getEarlistKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpriceproto.KPrice, error) {
+func getEarlistKPrice(ctx context.Context, tpID, timestamp uint32) (*kpriceproto.KPrice, error) {
 	conds := kpriceproto.Conds{
 		TokenPairID: &kline.Uint32Val{Op: cruder.EQ, Value: tpID},
-		Timestamp:   &kline.Uint32Val{Op: cruder.GTE, Value: timestap},
+		Timestamp:   &kline.Uint32Val{Op: cruder.GTE, Value: timestamp},
 	}
 
 	handler, err := kprice.NewHandler(
@@ -246,16 +227,16 @@ func getEarlistKPrice(ctx context.Context, tpID uint32, timestap uint32) (*kpric
 		return nil, err
 	}
 
-	infos, _, err := handler.GetEarlistKPrices(ctx)
+	info, err := handler.GetEarlistKPrice(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(infos) == 0 {
+	if info == nil {
 		return nil, fmt.Errorf("cannot get earlist price")
 	}
 
-	return infos[0], nil
+	return info, nil
 }
 
 func GetOneDayVolumn(ctx context.Context, poolID uint64) (*transaction.TransactionVolumn, error) {
