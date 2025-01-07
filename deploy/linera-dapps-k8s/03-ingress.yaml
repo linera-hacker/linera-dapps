@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: linera-dapps-service-traefik-app-ingress
+  namespace: kube-system
+  annotations:
+    k8s.kuboard.cn/displayName: linera-dapps-service-traefik-app
+    k8s.kuboard.cn/workload: linera-dapps-service-traefik-app
+    kubernetes.io/ingress.class: "traefik-internet"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares:
+      kube-system-strip-linera-dapps-service-prefix@kubernetescrd,
+      kube-system-http-redirect-https@kubernetescrd,
+      kube-system-common-headers@kubernetescrd
+
+spec:
+  rules:
+    - host: hk.testnet-archimedes.lineraswap.fun
+      http: &swap_rules
+        paths:
+          - path: /api/swap
+            backend:
+              serviceName: linera-dapps-service
+              servicePort: 30092
+    - host: hk.testnet-archimedes.respeer.ai
+      http: &ams_rules
+        paths:
+          - path: /api/ams
+            backend:
+              serviceName: linera-dapps-service
+              servicePort: 30094
+    - host: testnet-archimedes.lineraswap.fun
+      http: *swap_rules
+    - host: testnet-archimedes.respeer.ai
+      http: *ams_rules

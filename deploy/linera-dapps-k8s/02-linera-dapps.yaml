@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linera-dapps-service
+  namespace: kube-system
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: linera-dapps-service
+  template:
+    metadata:
+      labels:
+        app: linera-dapps-service
+    spec:
+      containers:
+        - name: linera-dapps-service
+          image: DOCKER_REGISTRY/linera/linera-dapps:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: workdir
+              mountPath: /root/linera-project
+          env:
+            - name: ENV_ENVIRONMENT_TARGET
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.target
+            - name: ENV_CONSUL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_host
+            - name: ENV_CONSUL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_port
+            - name: ENV_CLUSTER_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-password-secret
+                  key: rootpassword
+            - name: ENV_BLOB_CHAIN_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: dapps-service-environment
+                  key: environment.blob_chain_id
+            - name: ENV_BLOB_APP_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: dapps-service-environment
+                  key: environment.blob_app_id
+      imagePullSecrets:
+        - name: regcred
+      volumes:
+        - name: workdir
+          persistentVolumeClaim:
+            claimName: linera-dapps-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: linera-dapps-service
+  namespace: kube-system
+spec:
+  ports:
+    - name: tla
+      port: 30090
+      targetPort: 30090
+    - name: wlinera
+      port: 30091
+      targetPort: 30091
+    - name: swap
+      port: 30092
+      targetPort: 30092
+    - name: app
+      port: 30093
+      targetPort: 30093
+    - name: ams
+      port: 30094
+      targetPort: 30094
+  selector:
+    app: linera-dapps-service
