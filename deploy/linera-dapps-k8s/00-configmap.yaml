@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dapps-service-environment
+  namespace: kube-system
+data:
+  environment.blob_chain_id: "$ENV_BLOB_CHAIN_ID"
+  environment.blob_app_id: "$ENV_BLOB_APP_ID"
