@@ -2,7 +2,7 @@
 
 mod state;
 
-use self::state::Proxy;
+use self::state::ProxyState;
 use linera_sdk::{
     base::WithServiceAbi,
     views::{View, ViewStorageContext},
@@ -10,7 +10,7 @@ use linera_sdk::{
 };
 
 pub struct ProxyService {
-    state: Proxy,
+    state: ProxyState,
     runtime: ServiceRuntime<Self>,
 }
 
@@ -24,7 +24,7 @@ impl Service for ProxyService {
     type Parameters = ();
 
     async fn new(runtime: ServiceRuntime<Self>) -> Self {
-        let state = Proxy::load(runtime.root_view_storage_context())
+        let state = ProxyState::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
         ProxyService { state, runtime }

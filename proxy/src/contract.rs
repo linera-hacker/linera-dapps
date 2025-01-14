@@ -8,10 +8,10 @@ use linera_sdk::{
     Contract, ContractRuntime,
 };
 
-use self::state::Proxy;
+use self::state::ProxyState;
 
 pub struct ProxyContract {
-    state: Proxy,
+    state: ProxyState,
     runtime: ContractRuntime<Self>,
 }
 
@@ -27,7 +27,7 @@ impl Contract for ProxyContract {
     type InstantiationArgument = ();
 
     async fn load(runtime: ContractRuntime<Self>) -> Self {
-        let state = Proxy::load(runtime.root_view_storage_context())
+        let state = ProxyState::load(runtime.root_view_storage_context())
             .await
             .expect("Failed to load state");
         ProxyContract { state, runtime }
