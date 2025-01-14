@@ -1,26 +1,19 @@
 [package]
-name = "erc20"
+name = "proxy"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
 async-graphql.workspace = true
 linera-sdk.workspace = true
-spec.workspace = true
-thiserror.workspace = true
-serde.workspace = true
-bcs.workspace = true
-serde_json.workspace = true
-log.workspace = true
 
 [dev-dependencies]
 linera-sdk = { workspace = true, features = ["test"] }
 
 [[bin]]
-name = "erc20_contract"
+name = "proxy_contract"
 path = "src/contract.rs"
 
 [[bin]]
-name = "erc20_service"
+name = "proxy_service"
 path = "src/service.rs"
-
