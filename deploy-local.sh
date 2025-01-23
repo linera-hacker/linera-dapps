@@ -151,18 +151,18 @@ wallet_10_default_chain=`linera --with-wallet 10 wallet show | grep "Public Key"
 wallet_10_owner=`linera --with-wallet 10 wallet show | grep "Owner" | awk '{print $4}'`
 
 print $'\U01F4AB' $YELLOW " Deploying AMS application ..."
-ams_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 14 publish-bytecode ./target/wasm32-unknown-unknown/release/ams_{contract,service}.wasm`
-ams_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 14 create-application $ams_bid \
+ams_bid=`linera --wait-for-outgoing-messages --with-wallet 14 publish-bytecode ./target/wasm32-unknown-unknown/release/ams_{contract,service}.wasm`
+ams_appid=`linera --wait-for-outgoing-messages --with-wallet 14 create-application $ams_bid \
     --json-argument '{"application_types": ["SWAP", "ERC20", "AMS"]}' \
     `
 print $'\U01f499' $LIGHTGREEN " AMS application deployed"
 echo -e "    Bytecode ID:    $BLUE$ams_bid$NC"
 echo -e "    Application ID: $BLUE$ams_appid$NC"
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 request-application $ams_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 request-application $ams_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 request-application $ams_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-application $ams_appid
+linera --wait-for-outgoing-messages --with-wallet 10 request-application $ams_appid
+linera --wait-for-outgoing-messages --with-wallet 11 request-application $ams_appid
+linera --wait-for-outgoing-messages --with-wallet 12 request-application $ams_appid
+linera --wait-for-outgoing-messages --with-wallet 13 request-application $ams_appid
 
 # logo_blob_hash=`linera --with-wallet 10 publish-data-blob $app_logo_path`
 logo_content=`base64 -w 0 assets/HackerLogoDark.svg`
@@ -173,18 +173,18 @@ sleep 10
 echo -e "    Blog Hash: $BLUE$logo_blob_hash$NC"
 
 echo -e "    Blog Gateway Application ID: $BLUE$blob_gateway_app_id$NC"
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 request-application $blob_gateway_app_id
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 request-application $blob_gateway_app_id
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 request-application $blob_gateway_app_id
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-application $blob_gateway_app_id
+linera --wait-for-outgoing-messages --with-wallet 10 request-application $blob_gateway_app_id
+linera --wait-for-outgoing-messages --with-wallet 11 request-application $blob_gateway_app_id
+linera --wait-for-outgoing-messages --with-wallet 12 request-application $blob_gateway_app_id
+linera --wait-for-outgoing-messages --with-wallet 13 request-application $blob_gateway_app_id
 
 sleep 10
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 14 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
 
 sleep 15
 
@@ -193,8 +193,8 @@ sleep 15
 ####
 
 print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
-erc20_2_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_2_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 create-application $erc20_2_bid \
+erc20_2_bid=`linera --wait-for-outgoing-messages --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
+erc20_2_appid=`linera --wait-for-outgoing-messages --with-wallet 11 create-application $erc20_2_bid \
     --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
     --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000.","{\"chain_id\":\"'$wallet_10_default_chain'\",\"owner\":\"User:'$wallet_10_owner'\"}":"5000000."}, "token_metadata":{"logo_store_type": "S3","logo":"'$logo_blob_hash'","twitter":"https://x.com/home2","telegram":"https://t.me/mysite2","discord":"https://discord.com/invite/mysite2","website":"https://mysite2.com","github":"https://github.com/mysite2","description":"mysite2 description","mintable":true}}' \
     `
@@ -203,17 +203,17 @@ echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_2_appid$NC"
 
 print $'\U01F4AB' $YELLOW " Deploying Swap application ..."
-swap_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_{contract,service}.wasm`
-swap_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 create-application $swap_bid \
-    --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo_store_type":"S3","logo":"","description":"","application_name":"Linera Swap (CheCko)"}' \
+swap_bid=`linera --wait-for-outgoing-messages --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_{contract,service}.wasm`
+swap_appid=`linera --wait-for-outgoing-messages --with-wallet 12 create-application $swap_bid \
+    --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo":"","description":"","application_name":"Linera Swap (CheCko)"}' \
     `
 print $'\U01f499' $LIGHTGREEN " Swap application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_bid$NC"
 echo -e "    Application ID: $BLUE$swap_appid$NC"
 
 print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
-erc20_1_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
-erc20_1_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 create-application $erc20_1_bid \
+erc20_1_bid=`linera --wait-for-outgoing-messages --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
+erc20_1_appid=`linera --wait-for-outgoing-messages --with-wallet 10 create-application $erc20_1_bid \
     --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
     --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'", "token_metadata":{"logo_store_type": "S3", "logo":"'$logo_blob_hash'","twitter":"https://x.com/mysite","telegram":"https://t.me/mysite","discord":"https://discord.com/invite/mysite","website":"https://mysite.com","github":"https://github.com/mysite","description":"mysite description","mintable":true}}' \
     `
@@ -221,30 +221,30 @@ print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 14 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
 
 sleep 15
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 request-application $erc20_1_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 request-application $erc20_2_appid
+linera --wait-for-outgoing-messages --with-wallet 12 request-application $erc20_1_appid
+linera --wait-for-outgoing-messages --with-wallet 12 request-application $erc20_2_appid
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 request-application $swap_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 request-application $erc20_2_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 request-application $swap_appid
+linera --wait-for-outgoing-messages --with-wallet 10 request-application $swap_appid
+linera --wait-for-outgoing-messages --with-wallet 10 request-application $erc20_2_appid
+linera --wait-for-outgoing-messages --with-wallet 10 request-application $swap_appid
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-application $erc20_1_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-application $erc20_2_appid
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-application $swap_appid
+linera --wait-for-outgoing-messages --with-wallet 13 request-application $erc20_1_appid
+linera --wait-for-outgoing-messages --with-wallet 13 request-application $erc20_2_appid
+linera --wait-for-outgoing-messages --with-wallet 13 request-application $swap_appid
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 14 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
 
 sleep 15
 
@@ -358,11 +358,11 @@ ams_creation_owner=$owner
 ## Swap will subscribe to chain directly when it's pool is created
 ####
 
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 process-inbox
-linera --max-retries 100 --retry-delay-ms 10 --with-wallet 14 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
 
 sleep 15
 
