@@ -205,7 +205,7 @@ echo -e "    Application ID: $BLUE$erc20_2_appid$NC"
 print $'\U01F4AB' $YELLOW " Deploying Swap application ..."
 swap_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 publish-bytecode ./target/wasm32-unknown-unknown/release/swap_{contract,service}.wasm`
 swap_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 create-application $swap_bid \
-    --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo":"","description":"","application_name":"Linera Swap (CheCko)"}' \
+    --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo_store_type":"S3","logo":"","description":"","application_name":"Linera Swap (CheCko)"}' \
     `
 print $'\U01f499' $LIGHTGREEN " Swap application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_bid$NC"

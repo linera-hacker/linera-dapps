@@ -127,6 +127,7 @@ impl ApplicationContract {
                     "Linera".to_string(),
                 ]
                 .to_vec(),
+                logo_store_type: parameters.logo_store_type,
                 logo: parameters.logo,
                 spec: None,
                 description: parameters.description,

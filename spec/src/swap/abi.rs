@@ -1,6 +1,7 @@
 use crate::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation},
+    blob_gateway::StoreType,
     swap::{
         pool::{Pool, PoolMessage, PoolOperation, PoolResponse},
         router::{RouterMessage, RouterOperation, RouterResponse},
@@ -22,6 +23,7 @@ pub struct SwapParameters {
     pub wlinera_application_id: Option<ApplicationId>,
     pub ams_application_id: Option<ApplicationId>,
     pub application_name: String,
+    pub logo_store_type: StoreType,
     pub logo: String,
     pub description: String,
 }
