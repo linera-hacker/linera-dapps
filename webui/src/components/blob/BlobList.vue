@@ -64,6 +64,7 @@ const getBlobLists = (url: string) => {
   const { /* result, refetch, fetchMore, */ onResult /*, onError */ } = provideApolloClient(appApolloClient)(() => useQuery(gql`
     query list($createdAfter: Int!,$limit: Int!){
       list(createdAfter: $createdAfter, limit: $limit){
+        storeType
         blobHash
         dataType
         createdAt
@@ -87,7 +88,7 @@ const getBlobLists = (url: string) => {
         dataType: apps[i].dataType,
         createdAt: apps[i].createdAt,
         creator: apps[i].creator,
-        thumbnail: apps[i].dataType === 'IMAGE' ? useHostStore().blobDataPath(apps[i].blobHash) : ''
+        thumbnail: apps[i].dataType === 'IMAGE' ? useHostStore().blobDataPath(apps[i].storeType, apps[i].blobHash) : ''
       } as BlobInfo
       blobId.value += 1
       blobList.value.push(blob)

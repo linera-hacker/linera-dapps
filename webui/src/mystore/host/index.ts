@@ -67,8 +67,11 @@ export const useHostStore = defineStore('hosts', {
         return this.formalizeBlobGatewayPath(`/chains/${this.blobGatewayCreationChainId}/applications/${this.blobGatewayApplicationId}`)
       }
     },
-    blobDataPath (): (blobHash: string) => string {
-      return (blobHash: string) => {
+    blobDataPath (): (storeType: string, blobHash: string) => string {
+      return (storeType: string, blobHash: string) => {
+        if (storeType === 'S3') {
+          return `http://minio.respeer.ai/api/file/v1/images/${blobHash}`
+        }
         return this.blobGatewayApplicationPath() + `/images/${blobHash}`
       }
     },

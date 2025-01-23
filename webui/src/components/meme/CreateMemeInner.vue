@@ -92,6 +92,7 @@ import gql from 'graphql-tag'
 import { graphqlResult } from 'src/utils'
 import { useUserStore } from 'src/mystore/user'
 import { useHostStore } from 'src/mystore/host'
+import axios from 'axios'
 
 const user = useUserStore()
 const account = computed(() => user.account?.trim())
@@ -205,6 +206,7 @@ const onFileChange = (event: Event): void => {
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const publishDataBlob = (): Promise<unknown> => {
   return new Promise((resolve, reject) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -221,6 +223,7 @@ const publishDataBlob = (): Promise<unknown> => {
       }
     }).then((result) => {
       const blobHash = graphqlResult.keyValue(result, 'blobHash') as string
+      memeInfo.value.logoStoreType = 'Blob'
       memeInfo.value.logo = blobHash
       resolve(result)
     }).catch((e) => {
@@ -229,8 +232,23 @@ const publishDataBlob = (): Promise<unknown> => {
   })
 }
 
+const uploadS3Blob = (): Promise<unknown> => {
+  return new Promise((resolve, reject) => {
+    axios.post('https://minio.respeer.ai/api/file/v1/upload', {
+      Payload: logoByteArray
+    }).then((resp) => {
+      memeInfo.value.logo = (resp.data as Record<string, string>).Info
+      memeInfo.value.logoStoreType = 'S3'
+      resolve(resp)
+    }).catch((e) => {
+      reject(e)
+    })
+  })
+}
+
 const onPublishDataBlob = () => {
-  publishDataBlob()
+  uploadS3Blob()
+  // publishDataBlob()
     .then(() => {
       setTimeout(() => {
         void onCreateMemeToken()
@@ -331,6 +349,8 @@ interface ChainAccount {
 }
 
 interface TokenMetadata {
+  // eslint-disable-next-line camelcase
+  logo_store_type: string
   logo: string
   twitter: string
   discord: string
@@ -375,6 +395,7 @@ const createApplication = async (): Promise<any> => {
     ]),
     swap_application_id: useHostStore().swapApplicationId,
     token_metadata: {
+      logo_store_type: memeInfo.value.logoStoreType,
       logo: memeInfo.value.logo,
       twitter: memeInfo.value.twitter,
       telegram: memeInfo.value.telegram,
