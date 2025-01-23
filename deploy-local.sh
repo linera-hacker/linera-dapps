@@ -32,6 +32,7 @@ blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e
 blob_gateway_app_id="b348f8039b02f685b8f90c147a650ea4ff590f74513c8080205836debcd7df6c69f4f4c55c769e3465e3f80c89c4d557a5ed748c1c41c1d2c19bf8e26389fbb31db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
 
 app_logo_path='./assets/HackerLogoDark.png'
+app_logo=`base64 -w 0 $app_logo_path`
 
 while getopts $options opt; do
   case ${opt} in
@@ -163,7 +164,10 @@ linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 request-applicatio
 linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 request-application $ams_appid
 linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-application $ams_appid
 
-logo_blob_hash=`linera --with-wallet 10 publish-data-blob $app_logo_path`
+# logo_blob_hash=`linera --with-wallet 10 publish-data-blob $app_logo_path`
+logo_content=`base64 -w 0 assets/HackerLogoDark.svg`
+logo_blob_hash=`curl -X POST -d "{\"Payload\": \"$logo_content\"}" https://hk.testnet-archimedes.blobgateway.com/api/file/v1/upload | jq '.FileId'`
+logo_blob_hash=`echo $logo_blob_hash`
 sleep 10
 
 echo -e "    Blog Hash: $BLUE$logo_blob_hash$NC"
@@ -192,7 +196,7 @@ print $'\U01F4AB' $YELLOW " Deploying WTLINERA application ..."
 erc20_2_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_2_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 create-application $erc20_2_bid \
     --json-argument '{"initial_supply":"21000000","name":"Wrapper Testnet LINERA Token","symbol":"WTLINERA","decimals":18,"initial_currency":"1","fixed_currency":true,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000.","{\"chain_id\":\"'$wallet_10_default_chain'\",\"owner\":\"User:'$wallet_10_owner'\"}":"5000000."}, "token_metadata":{"logo":"'$logo_blob_hash'","twitter":"https://x.com/home2","telegram":"https://t.me/mysite2","discord":"https://discord.com/invite/mysite2","website":"https://mysite2.com","github":"https://github.com/mysite2","description":"mysite2 description","mintable":true}}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000.","{\"chain_id\":\"'$wallet_10_default_chain'\",\"owner\":\"User:'$wallet_10_owner'\"}":"5000000."}, "token_metadata":{"logo_store_type": "S3","logo":"'$logo_blob_hash'","twitter":"https://x.com/home2","telegram":"https://t.me/mysite2","discord":"https://discord.com/invite/mysite2","website":"https://mysite2.com","github":"https://github.com/mysite2","description":"mysite2 description","mintable":true}}' \
     `
 print $'\U01f499' $LIGHTGREEN " WLINERA application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_2_bid$NC"
@@ -211,7 +215,7 @@ print $'\U01F4AB' $YELLOW " Deploying ERC20 application ..."
 erc20_1_bid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 publish-bytecode ./target/wasm32-unknown-unknown/release/erc20_{contract,service}.wasm`
 erc20_1_appid=`linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 create-application $erc20_1_bid \
     --json-argument '{"initial_supply":"21000000","name":"Test Linera ERC20 Token","symbol":"TLA","decimals":18,"initial_currency":"0.00001","fixed_currency":false,"fee_percent":"0","ams_application_id":"'$ams_appid'","blob_gateway_application_id":"'$blob_gateway_app_id'"}' \
-    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'", "token_metadata":{"logo":"'$logo_blob_hash'","twitter":"https://x.com/mysite","telegram":"https://t.me/mysite","discord":"https://discord.com/invite/mysite","website":"https://mysite.com","github":"https://github.com/mysite","description":"mysite description","mintable":true}}' \
+    --json-parameters '{"initial_balances":{"{\"chain_id\":\"'$wallet_13_default_chain'\",\"owner\":\"User:'$wallet_13_owner'\"}":"5000000."},"swap_application_id":"'$swap_appid'", "token_metadata":{"logo_store_type": "S3", "logo":"'$logo_blob_hash'","twitter":"https://x.com/mysite","telegram":"https://t.me/mysite","discord":"https://discord.com/invite/mysite","website":"https://mysite.com","github":"https://github.com/mysite","description":"mysite description","mintable":true}}' \
     `
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
