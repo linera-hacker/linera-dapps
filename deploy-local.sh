@@ -167,12 +167,12 @@ linera --max-retries 100 --retry-delay-ms 10 --with-wallet 13 request-applicatio
 # logo_blob_hash=`linera --with-wallet 10 publish-data-blob $app_logo_path`
 logo_content=`base64 -w 0 assets/HackerLogoDark.svg`
 logo_blob_hash=`curl -X POST -d "{\"Payload\": \"$logo_content\"}" https://hk.testnet-archimedes.blobgateway.com/api/file/v1/upload | jq '.FileId'`
-logo_blob_hash=`echo $logo_blob_hash`
+logo_blob_hash=`echo $logo_blob_hash | sed 's/"//g'`
 sleep 10
 
-echo -e "    Blog Hash: $BLUE$logo_blob_hash$NC"
+echo -e "    Blob Hash: $BLUE$logo_blob_hash$NC"
 
-echo -e "    Blog Gateway Application ID: $BLUE$blob_gateway_app_id$NC"
+echo -e "    Blob Gateway Application ID: $BLUE$blob_gateway_app_id$NC"
 linera --max-retries 100 --retry-delay-ms 10 --with-wallet 10 request-application $blob_gateway_app_id
 linera --max-retries 100 --retry-delay-ms 10 --with-wallet 11 request-application $blob_gateway_app_id
 linera --max-retries 100 --retry-delay-ms 10 --with-wallet 12 request-application $blob_gateway_app_id
