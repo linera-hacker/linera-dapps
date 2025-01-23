@@ -45,10 +45,11 @@ user root
 ARG ALL_PROXY
 RUN chmod 777 /tmp
 RUN apt-get update -y
-RUN apt-get install socat curl -y
+RUN apt-get install socat curl git -y
 
-RUN mkdir -p /opt/linera-project/linera-dapps
-RUN mkdir -p /opt/linera-project/linera-dapps/assets
+
+RUN mkdir -p /opt/linera-project
+RUN git clone https://github.com/linera-hacker/linera-dapps.git /opt/linera-project/linera-dapps
 RUN mkdir -p /opt/linera-project/linera-dapps/target/wasm32-unknown-unknown/release
 COPY --from=0 /root/.cargo/bin/linera /usr/local/bin/linera
 COPY --from=0 /opt/linera-project/linera-dapps/run-local.sh /opt/linera-project/linera-dapps
