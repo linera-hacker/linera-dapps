@@ -349,6 +349,8 @@ interface ChainAccount {
 }
 
 interface TokenMetadata {
+  // eslint-disable-next-line camelcase
+  logo_store_type: string
   logo: string
   twitter: string
   discord: string
@@ -393,7 +395,7 @@ const createApplication = async (): Promise<any> => {
     ]),
     swap_application_id: useHostStore().swapApplicationId,
     token_metadata: {
-      logoStoreType: memeInfo.value.logoStoreType,
+      logo_store_type: memeInfo.value.logoStoreType,
       logo: memeInfo.value.logo,
       twitter: memeInfo.value.twitter,
       telegram: memeInfo.value.telegram,
