@@ -52,8 +52,6 @@ RUN mkdir -p /opt/linera-project
 RUN git clone https://github.com/linera-hacker/linera-dapps.git /opt/linera-project/linera-dapps
 RUN mkdir -p /opt/linera-project/linera-dapps/target/wasm32-unknown-unknown/release
 COPY --from=0 /root/.cargo/bin/linera /usr/local/bin/linera
-COPY --from=0 /opt/linera-project/linera-dapps/run-local.sh /opt/linera-project/linera-dapps
-COPY --from=0 /opt/linera-project/linera-dapps/deploy-local.sh /opt/linera-project/linera-dapps
 COPY --from=0 /opt/linera-project/linera-dapps/assets/HackerLogoDark.png /opt/linera-project/linera-dapps/assets
 COPY --from=0 /opt/linera-project/linera-dapps/target/wasm32-unknown-unknown/release/ams_contract.wasm /opt/linera-project/linera-dapps/target/wasm32-unknown-unknown/release
 COPY --from=0 /opt/linera-project/linera-dapps/target/wasm32-unknown-unknown/release/ams_service.wasm /opt/linera-project/linera-dapps/target/wasm32-unknown-unknown/release
