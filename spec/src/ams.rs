@@ -1,6 +1,7 @@
 use crate::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation},
+    blob_gateway::StoreType,
 };
 use async_graphql::scalar;
 use async_graphql::{Context, Error, Request, Response};
@@ -24,6 +25,7 @@ pub struct Metadata {
     pub application_id: ApplicationId,
     pub application_type: String,
     pub key_words: Vec<String>,
+    pub logo_store_type: StoreType,
     pub logo: String,
     pub description: String,
     pub twitter: Option<String>,

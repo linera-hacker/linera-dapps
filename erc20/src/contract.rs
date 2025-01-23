@@ -245,6 +245,7 @@ impl ApplicationContract {
                     "Linera".to_string(),
                 ]
                 .to_vec(),
+                logo_store_type: token_metadata.logo_store_type,
                 logo: token_metadata.logo,
                 spec: Some(format!(
                     "{}\"ticker\":\"{}\",\"initial_supply\":\"{}\",\"mintable\":{}{}",
