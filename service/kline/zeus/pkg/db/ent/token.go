@@ -25,6 +25,8 @@ type Token struct {
 	Address string `json:"address,omitempty"`
 	// Site holds the value of the "site" field.
 	Site string `json:"site,omitempty"`
+	// IconStoreType holds the value of the "icon_store_type" field.
+	IconStoreType string `json:"icon_store_type,omitempty"`
 	// Icon holds the value of the "icon" field.
 	Icon string `json:"icon,omitempty"`
 	// Name holds the value of the "name" field.
@@ -40,7 +42,7 @@ func (*Token) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case token.FieldID, token.FieldCreatedAt, token.FieldUpdatedAt, token.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
-		case token.FieldAddress, token.FieldSite, token.FieldIcon, token.FieldName, token.FieldSymbol:
+		case token.FieldAddress, token.FieldSite, token.FieldIconStoreType, token.FieldIcon, token.FieldName, token.FieldSymbol:
 			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Token", columns[i])
@@ -92,6 +94,12 @@ func (t *Token) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field site", values[i])
 			} else if value.Valid {
 				t.Site = value.String
+			}
+		case token.FieldIconStoreType:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field icon_store_type", values[i])
+			} else if value.Valid {
+				t.IconStoreType = value.String
 			}
 		case token.FieldIcon:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -153,6 +161,9 @@ func (t *Token) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("site=")
 	builder.WriteString(t.Site)
+	builder.WriteString(", ")
+	builder.WriteString("icon_store_type=")
+	builder.WriteString(t.IconStoreType)
 	builder.WriteString(", ")
 	builder.WriteString("icon=")
 	builder.WriteString(t.Icon)

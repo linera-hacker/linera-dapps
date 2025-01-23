@@ -23,6 +23,7 @@ func (Token) Fields() []ent.Field {
 		field.Uint32("id"),
 		field.String("address"),
 		field.String("site"),
+		field.String("icon_store_type").Default("Blob"),
 		field.Text("icon"),
 		field.String("name"),
 		field.String("symbol"),

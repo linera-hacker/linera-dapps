@@ -263,6 +263,10 @@
           "type": "string",
           "title": "@inject_tag: sql:\"token_zero_address\""
         },
+        "TokenZeroIconStoreType": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_zero_icon_store_type\""
+        },
         "TokenZeroIcon": {
           "type": "string",
           "title": "@inject_tag: sql:\"token_zero_icon\""
@@ -283,6 +287,10 @@
         "TokenOneAddress": {
           "type": "string",
           "title": "@inject_tag: sql:\"token_one_address\""
+        },
+        "TokenOneIconStoreType": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"token_one_icon_store_type\""
         },
         "TokenOneIcon": {
           "type": "string",

@@ -75,10 +75,12 @@ func (h *queryHandler) queryJoinToken(s *sql.Selector) {
 	).AppendSelect(
 		sql.As(tokenZeroT.C(token.FieldName), "token_zero_name"),
 		sql.As(tokenZeroT.C(token.FieldAddress), "token_zero_address"),
+		sql.As(tokenZeroT.C(token.FieldIconStoreType), "token_zero_icon_store_type"),
 		sql.As(tokenZeroT.C(token.FieldIcon), "token_zero_icon"),
 		sql.As(tokenZeroT.C(token.FieldSymbol), "token_zero_symbol"),
 		sql.As(tokenOneT.C(token.FieldName), "token_one_name"),
 		sql.As(tokenOneT.C(token.FieldAddress), "token_one_address"),
+		sql.As(tokenOneT.C(token.FieldIconStoreType), "token_one_icon_store_type"),
 		sql.As(tokenOneT.C(token.FieldIcon), "token_one_icon"),
 		sql.As(tokenOneT.C(token.FieldSymbol), "token_one_symbol"),
 	).Distinct()

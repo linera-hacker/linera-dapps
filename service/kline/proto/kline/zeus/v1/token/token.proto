@@ -26,6 +26,7 @@ message TokenReq {
   optional uint32 ID = 10;
   optional string Address = 20;
   optional string Site = 30;
+  optional string IconStoreType = 41;
   optional string Icon = 40;
   optional string Name = 50;
   optional string Symbol = 60;
@@ -38,6 +39,8 @@ message Token {
   string Address = 20;
   // @inject_tag: sql:"site"
   string Site = 30;
+  // @inject_tag: sql:"icon_store_type"
+  string IconStoreType = 31;
   // @inject_tag: sql:"icon"
   string Icon = 40;
   // @inject_tag: sql:"name"

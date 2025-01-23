@@ -29,6 +29,7 @@ func (s *Server) UpdateToken(ctx context.Context, in *tokenproto.UpdateTokenRequ
 		ctx,
 		token.WithID(req.ID, true),
 		token.WithSite(req.Site, false),
+		token.WithIconStoreType(req.IconStoreType, false),
 		token.WithIcon(req.Icon, false),
 		token.WithIcon(req.Name, false),
 		token.WithSymbol(req.Symbol, false),

@@ -21,6 +21,8 @@ const (
 	FieldAddress = "address"
 	// FieldSite holds the string denoting the site field in the database.
 	FieldSite = "site"
+	// FieldIconStoreType holds the string denoting the icon_store_type field in the database.
+	FieldIconStoreType = "icon_store_type"
 	// FieldIcon holds the string denoting the icon field in the database.
 	FieldIcon = "icon"
 	// FieldName holds the string denoting the name field in the database.
@@ -39,6 +41,7 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldAddress,
 	FieldSite,
+	FieldIconStoreType,
 	FieldIcon,
 	FieldName,
 	FieldSymbol,
@@ -70,4 +73,6 @@ var (
 	UpdateDefaultUpdatedAt func() uint32
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
 	DefaultDeletedAt func() uint32
+	// DefaultIconStoreType holds the default value on creation for the "icon_store_type" field.
+	DefaultIconStoreType string
 )

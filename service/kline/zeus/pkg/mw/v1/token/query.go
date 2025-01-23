@@ -22,6 +22,7 @@ func (h *queryHandler) selectToken(stm *ent.TokenQuery) {
 		tokenent.FieldID,
 		tokenent.FieldAddress,
 		tokenent.FieldSite,
+		tokenent.FieldIconStoreType,
 		tokenent.FieldIcon,
 		tokenent.FieldName,
 		tokenent.FieldSymbol,

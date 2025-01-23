@@ -31,11 +31,12 @@ func (h *Handler) UpdateToken(ctx context.Context) (*tokenproto.Token, error) {
 		stm, err := tokencrud.UpdateSet(
 			info.Update(),
 			&tokencrud.Req{
-				Address: h.Address,
-				Site:    h.Site,
-				Icon:    h.Icon,
-				Name:    h.Name,
-				Symbol:  h.Symbol,
+				Address:       h.Address,
+				Site:          h.Site,
+				IconStoreType: h.IconStoreType,
+				Icon:          h.Icon,
+				Name:          h.Name,
+				Symbol:        h.Symbol,
 			},
 		)
 		if err != nil {

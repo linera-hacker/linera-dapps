@@ -113,6 +113,13 @@ func Site(v string) predicate.Token {
 	})
 }
 
+// IconStoreType applies equality check predicate on the "icon_store_type" field. It's identical to IconStoreTypeEQ.
+func IconStoreType(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIconStoreType), v))
+	})
+}
+
 // Icon applies equality check predicate on the "icon" field. It's identical to IconEQ.
 func Icon(v string) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
@@ -521,6 +528,105 @@ func SiteEqualFold(v string) predicate.Token {
 func SiteContainsFold(v string) predicate.Token {
 	return predicate.Token(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldSite), v))
+	})
+}
+
+// IconStoreTypeEQ applies the EQ predicate on the "icon_store_type" field.
+func IconStoreTypeEQ(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeNEQ applies the NEQ predicate on the "icon_store_type" field.
+func IconStoreTypeNEQ(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeIn applies the In predicate on the "icon_store_type" field.
+func IconStoreTypeIn(vs ...string) predicate.Token {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.In(s.C(FieldIconStoreType), v...))
+	})
+}
+
+// IconStoreTypeNotIn applies the NotIn predicate on the "icon_store_type" field.
+func IconStoreTypeNotIn(vs ...string) predicate.Token {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.NotIn(s.C(FieldIconStoreType), v...))
+	})
+}
+
+// IconStoreTypeGT applies the GT predicate on the "icon_store_type" field.
+func IconStoreTypeGT(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeGTE applies the GTE predicate on the "icon_store_type" field.
+func IconStoreTypeGTE(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeLT applies the LT predicate on the "icon_store_type" field.
+func IconStoreTypeLT(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeLTE applies the LTE predicate on the "icon_store_type" field.
+func IconStoreTypeLTE(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeContains applies the Contains predicate on the "icon_store_type" field.
+func IconStoreTypeContains(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeHasPrefix applies the HasPrefix predicate on the "icon_store_type" field.
+func IconStoreTypeHasPrefix(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeHasSuffix applies the HasSuffix predicate on the "icon_store_type" field.
+func IconStoreTypeHasSuffix(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeEqualFold applies the EqualFold predicate on the "icon_store_type" field.
+func IconStoreTypeEqualFold(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldIconStoreType), v))
+	})
+}
+
+// IconStoreTypeContainsFold applies the ContainsFold predicate on the "icon_store_type" field.
+func IconStoreTypeContainsFold(v string) predicate.Token {
+	return predicate.Token(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldIconStoreType), v))
 	})
 }
 

@@ -15,11 +15,12 @@ func (h *Handler) CreateToken(ctx context.Context) (*tokenproto.Token, error) {
 		info, err := tokencrud.CreateSet(
 			cli.Token.Create(),
 			&tokencrud.Req{
-				Address: h.Address,
-				Site:    h.Site,
-				Icon:    h.Icon,
-				Name:    h.Name,
-				Symbol:  h.Symbol,
+				Address:       h.Address,
+				Site:          h.Site,
+				IconStoreType: h.IconStoreType,
+				Icon:          h.Icon,
+				Name:          h.Name,
+				Symbol:        h.Symbol,
 			},
 		).Save(ctx)
 		if err != nil {

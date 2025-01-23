@@ -75,6 +75,20 @@ func (tc *TokenCreate) SetSite(s string) *TokenCreate {
 	return tc
 }
 
+// SetIconStoreType sets the "icon_store_type" field.
+func (tc *TokenCreate) SetIconStoreType(s string) *TokenCreate {
+	tc.mutation.SetIconStoreType(s)
+	return tc
+}
+
+// SetNillableIconStoreType sets the "icon_store_type" field if the given value is not nil.
+func (tc *TokenCreate) SetNillableIconStoreType(s *string) *TokenCreate {
+	if s != nil {
+		tc.SetIconStoreType(*s)
+	}
+	return tc
+}
+
 // SetIcon sets the "icon" field.
 func (tc *TokenCreate) SetIcon(s string) *TokenCreate {
 	tc.mutation.SetIcon(s)
@@ -199,6 +213,10 @@ func (tc *TokenCreate) defaults() error {
 		v := token.DefaultDeletedAt()
 		tc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := tc.mutation.IconStoreType(); !ok {
+		v := token.DefaultIconStoreType
+		tc.mutation.SetIconStoreType(v)
+	}
 	return nil
 }
 
@@ -218,6 +236,9 @@ func (tc *TokenCreate) check() error {
 	}
 	if _, ok := tc.mutation.Site(); !ok {
 		return &ValidationError{Name: "site", err: errors.New(`ent: missing required field "Token.site"`)}
+	}
+	if _, ok := tc.mutation.IconStoreType(); !ok {
+		return &ValidationError{Name: "icon_store_type", err: errors.New(`ent: missing required field "Token.icon_store_type"`)}
 	}
 	if _, ok := tc.mutation.Icon(); !ok {
 		return &ValidationError{Name: "icon", err: errors.New(`ent: missing required field "Token.icon"`)}
@@ -301,6 +322,14 @@ func (tc *TokenCreate) createSpec() (*Token, *sqlgraph.CreateSpec) {
 			Column: token.FieldSite,
 		})
 		_node.Site = value
+	}
+	if value, ok := tc.mutation.IconStoreType(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldIconStoreType,
+		})
+		_node.IconStoreType = value
 	}
 	if value, ok := tc.mutation.Icon(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -453,6 +482,18 @@ func (u *TokenUpsert) SetSite(v string) *TokenUpsert {
 // UpdateSite sets the "site" field to the value that was provided on create.
 func (u *TokenUpsert) UpdateSite() *TokenUpsert {
 	u.SetExcluded(token.FieldSite)
+	return u
+}
+
+// SetIconStoreType sets the "icon_store_type" field.
+func (u *TokenUpsert) SetIconStoreType(v string) *TokenUpsert {
+	u.Set(token.FieldIconStoreType, v)
+	return u
+}
+
+// UpdateIconStoreType sets the "icon_store_type" field to the value that was provided on create.
+func (u *TokenUpsert) UpdateIconStoreType() *TokenUpsert {
+	u.SetExcluded(token.FieldIconStoreType)
 	return u
 }
 
@@ -628,6 +669,20 @@ func (u *TokenUpsertOne) SetSite(v string) *TokenUpsertOne {
 func (u *TokenUpsertOne) UpdateSite() *TokenUpsertOne {
 	return u.Update(func(s *TokenUpsert) {
 		s.UpdateSite()
+	})
+}
+
+// SetIconStoreType sets the "icon_store_type" field.
+func (u *TokenUpsertOne) SetIconStoreType(v string) *TokenUpsertOne {
+	return u.Update(func(s *TokenUpsert) {
+		s.SetIconStoreType(v)
+	})
+}
+
+// UpdateIconStoreType sets the "icon_store_type" field to the value that was provided on create.
+func (u *TokenUpsertOne) UpdateIconStoreType() *TokenUpsertOne {
+	return u.Update(func(s *TokenUpsert) {
+		s.UpdateIconStoreType()
 	})
 }
 
@@ -972,6 +1027,20 @@ func (u *TokenUpsertBulk) SetSite(v string) *TokenUpsertBulk {
 func (u *TokenUpsertBulk) UpdateSite() *TokenUpsertBulk {
 	return u.Update(func(s *TokenUpsert) {
 		s.UpdateSite()
+	})
+}
+
+// SetIconStoreType sets the "icon_store_type" field.
+func (u *TokenUpsertBulk) SetIconStoreType(v string) *TokenUpsertBulk {
+	return u.Update(func(s *TokenUpsert) {
+		s.SetIconStoreType(v)
+	})
+}
+
+// UpdateIconStoreType sets the "icon_store_type" field to the value that was provided on create.
+func (u *TokenUpsertBulk) UpdateIconStoreType() *TokenUpsertBulk {
+	return u.Update(func(s *TokenUpsert) {
+		s.UpdateIconStoreType()
 	})
 }
 

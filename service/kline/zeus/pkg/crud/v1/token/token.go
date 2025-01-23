@@ -9,13 +9,14 @@ import (
 )
 
 type Req struct {
-	ID        *uint32
-	Address   *string
-	Site      *string
-	Icon      *string
-	Name      *string
-	Symbol    *string
-	DeletedAt *uint32
+	ID            *uint32
+	Address       *string
+	Site          *string
+	IconStoreType *string
+	Icon          *string
+	Name          *string
+	Symbol        *string
+	DeletedAt     *uint32
 }
 
 func CreateSet(c *ent.TokenCreate, req *Req) *ent.TokenCreate {
@@ -24,6 +25,9 @@ func CreateSet(c *ent.TokenCreate, req *Req) *ent.TokenCreate {
 	}
 	if req.Site != nil {
 		c.SetSite(*req.Site)
+	}
+	if req.IconStoreType != nil {
+		c.SetIconStoreType(*req.IconStoreType)
 	}
 	if req.Icon != nil {
 		c.SetIcon(*req.Icon)
@@ -43,6 +47,9 @@ func UpdateSet(u *ent.TokenUpdateOne, req *Req) (*ent.TokenUpdateOne, error) {
 	}
 	if req.Site != nil {
 		u.SetSite(*req.Site)
+	}
+	if req.IconStoreType != nil {
+		u.SetIconStoreType(*req.IconStoreType)
 	}
 	if req.Icon != nil {
 		u.SetIcon(*req.Icon)

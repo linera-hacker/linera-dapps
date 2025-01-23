@@ -108,6 +108,10 @@ func init() {
 	tokenDescDeletedAt := tokenMixinFields0[2].Descriptor()
 	// token.DefaultDeletedAt holds the default value on creation for the deleted_at field.
 	token.DefaultDeletedAt = tokenDescDeletedAt.Default.(func() uint32)
+	// tokenDescIconStoreType is the schema descriptor for icon_store_type field.
+	tokenDescIconStoreType := tokenFields[3].Descriptor()
+	// token.DefaultIconStoreType holds the default value on creation for the icon_store_type field.
+	token.DefaultIconStoreType = tokenDescIconStoreType.Default.(string)
 	tokenpairMixin := schema.TokenPair{}.Mixin()
 	tokenpair.Policy = privacy.NewPolicies(tokenpairMixin[0], schema.TokenPair{})
 	tokenpair.Hooks[0] = func(next ent.Mutator) ent.Mutator {

@@ -92,6 +92,7 @@ var (
 		{Name: "deleted_at", Type: field.TypeUint32},
 		{Name: "address", Type: field.TypeString},
 		{Name: "site", Type: field.TypeString},
+		{Name: "icon_store_type", Type: field.TypeString, Default: "Blob"},
 		{Name: "icon", Type: field.TypeString, Size: 2147483647},
 		{Name: "name", Type: field.TypeString},
 		{Name: "symbol", Type: field.TypeString},
@@ -110,7 +111,7 @@ var (
 			{
 				Name:    "token_symbol",
 				Unique:  false,
-				Columns: []*schema.Column{TokensColumns[8]},
+				Columns: []*schema.Column{TokensColumns[9]},
 			},
 		},
 	}

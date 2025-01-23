@@ -12,16 +12,17 @@ import (
 )
 
 type Handler struct {
-	ID      *uint32
-	Address *string
-	Site    *string
-	Icon    *string
-	Name    *string
-	Symbol  *string
-	Reqs    []*tokencrud.Req
-	Conds   *tokencrud.Conds
-	Offset  int32
-	Limit   int32
+	ID            *uint32
+	Address       *string
+	Site          *string
+	IconStoreType *string
+	Icon          *string
+	Name          *string
+	Symbol        *string
+	Reqs          []*tokencrud.Req
+	Conds         *tokencrud.Conds
+	Offset        int32
+	Limit         int32
 }
 
 func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) error) (*Handler, error) {
@@ -73,6 +74,20 @@ func WithSite(u *string, must bool) func(context.Context, *Handler) error {
 		return nil
 	}
 }
+
+func WithIconStoreType(u *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid iconStoreType")
+			}
+			return nil
+		}
+		h.IconStoreType = u
+		return nil
+	}
+}
+
 func WithIcon(u *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if u == nil {
@@ -85,6 +100,7 @@ func WithIcon(u *string, must bool) func(context.Context, *Handler) error {
 		return nil
 	}
 }
+
 func WithName(u *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if u == nil {

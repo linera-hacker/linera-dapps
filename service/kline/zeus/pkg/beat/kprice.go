@@ -372,6 +372,7 @@ func GetTokenInfos(address string) (*tokenproto.TokenReq, error) {
 
 	site := ""
 	icon := ""
+	iconStoreType := ""
 
 	if _site, ok := resp.Data.TokenMetadata["website"].(string); ok {
 		site = _site
@@ -379,12 +380,16 @@ func GetTokenInfos(address string) (*tokenproto.TokenReq, error) {
 	if _icon, ok := resp.Data.TokenMetadata["logo"].(string); ok {
 		icon = _icon
 	}
+	if _iconStoreType, ok := resp.Data.TokenMetadata["logoStoreType"].(string); ok {
+		iconStoreType = _iconStoreType
+	}
 
 	return &tokenproto.TokenReq{
-		Symbol:  &resp.Data.Symbol,
-		Address: &address,
-		Site:    &site,
-		Icon:    &icon,
-		Name:    &resp.Data.Name,
+		Symbol:        &resp.Data.Symbol,
+		Address:       &address,
+		Site:          &site,
+		IconStoreType: &iconStoreType,
+		Icon:          &icon,
+		Name:          &resp.Data.Name,
 	}, nil
 }

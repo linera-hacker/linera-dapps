@@ -95,6 +95,20 @@ func (tu *TokenUpdate) SetSite(s string) *TokenUpdate {
 	return tu
 }
 
+// SetIconStoreType sets the "icon_store_type" field.
+func (tu *TokenUpdate) SetIconStoreType(s string) *TokenUpdate {
+	tu.mutation.SetIconStoreType(s)
+	return tu
+}
+
+// SetNillableIconStoreType sets the "icon_store_type" field if the given value is not nil.
+func (tu *TokenUpdate) SetNillableIconStoreType(s *string) *TokenUpdate {
+	if s != nil {
+		tu.SetIconStoreType(*s)
+	}
+	return tu
+}
+
 // SetIcon sets the "icon" field.
 func (tu *TokenUpdate) SetIcon(s string) *TokenUpdate {
 	tu.mutation.SetIcon(s)
@@ -267,6 +281,13 @@ func (tu *TokenUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: token.FieldSite,
 		})
 	}
+	if value, ok := tu.mutation.IconStoreType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldIconStoreType,
+		})
+	}
 	if value, ok := tu.mutation.Icon(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -373,6 +394,20 @@ func (tuo *TokenUpdateOne) SetAddress(s string) *TokenUpdateOne {
 // SetSite sets the "site" field.
 func (tuo *TokenUpdateOne) SetSite(s string) *TokenUpdateOne {
 	tuo.mutation.SetSite(s)
+	return tuo
+}
+
+// SetIconStoreType sets the "icon_store_type" field.
+func (tuo *TokenUpdateOne) SetIconStoreType(s string) *TokenUpdateOne {
+	tuo.mutation.SetIconStoreType(s)
+	return tuo
+}
+
+// SetNillableIconStoreType sets the "icon_store_type" field if the given value is not nil.
+func (tuo *TokenUpdateOne) SetNillableIconStoreType(s *string) *TokenUpdateOne {
+	if s != nil {
+		tuo.SetIconStoreType(*s)
+	}
 	return tuo
 }
 
@@ -576,6 +611,13 @@ func (tuo *TokenUpdateOne) sqlSave(ctx context.Context) (_node *Token, err error
 			Type:   field.TypeString,
 			Value:  value,
 			Column: token.FieldSite,
+		})
+	}
+	if value, ok := tuo.mutation.IconStoreType(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: token.FieldIconStoreType,
 		})
 	}
 	if value, ok := tuo.mutation.Icon(); ok {

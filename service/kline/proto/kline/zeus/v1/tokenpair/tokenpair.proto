@@ -44,6 +44,8 @@ message TokenPair {
   string TokenZeroName = 21;
   // @inject_tag: sql:"token_zero_address"
   string TokenZeroAddress = 22;
+  // @inject_tag: sql:"token_zero_icon_store_type"
+  string TokenZeroIconStoreType = 101;
   // @inject_tag: sql:"token_zero_icon"
   string TokenZeroIcon = 23;
   // @inject_tag: sql:"token_zero_symbol"
@@ -54,6 +56,8 @@ message TokenPair {
   string TokenOneName = 31;
   // @inject_tag: sql:"token_one_address"
   string TokenOneAddress = 32;
+  // @inject_tag: sql:"token_one_icon_store_type"
+  string TokenOneIconStoreType = 102;
   // @inject_tag: sql:"token_one_icon"
   string TokenOneIcon = 33;
   // @inject_tag: sql:"token_one_symbol"

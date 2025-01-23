@@ -72,14 +72,15 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Token",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			token.FieldCreatedAt: {Type: field.TypeUint32, Column: token.FieldCreatedAt},
-			token.FieldUpdatedAt: {Type: field.TypeUint32, Column: token.FieldUpdatedAt},
-			token.FieldDeletedAt: {Type: field.TypeUint32, Column: token.FieldDeletedAt},
-			token.FieldAddress:   {Type: field.TypeString, Column: token.FieldAddress},
-			token.FieldSite:      {Type: field.TypeString, Column: token.FieldSite},
-			token.FieldIcon:      {Type: field.TypeString, Column: token.FieldIcon},
-			token.FieldName:      {Type: field.TypeString, Column: token.FieldName},
-			token.FieldSymbol:    {Type: field.TypeString, Column: token.FieldSymbol},
+			token.FieldCreatedAt:     {Type: field.TypeUint32, Column: token.FieldCreatedAt},
+			token.FieldUpdatedAt:     {Type: field.TypeUint32, Column: token.FieldUpdatedAt},
+			token.FieldDeletedAt:     {Type: field.TypeUint32, Column: token.FieldDeletedAt},
+			token.FieldAddress:       {Type: field.TypeString, Column: token.FieldAddress},
+			token.FieldSite:          {Type: field.TypeString, Column: token.FieldSite},
+			token.FieldIconStoreType: {Type: field.TypeString, Column: token.FieldIconStoreType},
+			token.FieldIcon:          {Type: field.TypeString, Column: token.FieldIcon},
+			token.FieldName:          {Type: field.TypeString, Column: token.FieldName},
+			token.FieldSymbol:        {Type: field.TypeString, Column: token.FieldSymbol},
 		},
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
@@ -365,6 +366,11 @@ func (f *TokenFilter) WhereAddress(p entql.StringP) {
 // WhereSite applies the entql string predicate on the site field.
 func (f *TokenFilter) WhereSite(p entql.StringP) {
 	f.Where(p.Field(token.FieldSite))
+}
+
+// WhereIconStoreType applies the entql string predicate on the icon_store_type field.
+func (f *TokenFilter) WhereIconStoreType(p entql.StringP) {
+	f.Where(p.Field(token.FieldIconStoreType))
 }
 
 // WhereIcon applies the entql string predicate on the icon field.

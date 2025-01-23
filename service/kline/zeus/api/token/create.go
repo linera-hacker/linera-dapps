@@ -29,6 +29,7 @@ func (s *Server) CreateToken(ctx context.Context, in *tokenproto.CreateTokenRequ
 		ctx,
 		token.WithAddress(req.Address, true),
 		token.WithSite(req.Site, false),
+		token.WithIconStoreType(req.IconStoreType, false),
 		token.WithIcon(req.Icon, false),
 		token.WithName(req.Name, false),
 		token.WithSymbol(req.Symbol, false),

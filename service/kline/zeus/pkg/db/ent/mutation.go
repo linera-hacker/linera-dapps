@@ -2037,24 +2037,25 @@ func (m *KPriceMutation) ResetEdge(name string) error {
 // TokenMutation represents an operation that mutates the Token nodes in the graph.
 type TokenMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uint32
-	created_at    *uint32
-	addcreated_at *int32
-	updated_at    *uint32
-	addupdated_at *int32
-	deleted_at    *uint32
-	adddeleted_at *int32
-	address       *string
-	site          *string
-	icon          *string
-	name          *string
-	symbol        *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Token, error)
-	predicates    []predicate.Token
+	op              Op
+	typ             string
+	id              *uint32
+	created_at      *uint32
+	addcreated_at   *int32
+	updated_at      *uint32
+	addupdated_at   *int32
+	deleted_at      *uint32
+	adddeleted_at   *int32
+	address         *string
+	site            *string
+	icon_store_type *string
+	icon            *string
+	name            *string
+	symbol          *string
+	clearedFields   map[string]struct{}
+	done            bool
+	oldValue        func(context.Context) (*Token, error)
+	predicates      []predicate.Token
 }
 
 var _ ent.Mutation = (*TokenMutation)(nil)
@@ -2401,6 +2402,42 @@ func (m *TokenMutation) ResetSite() {
 	m.site = nil
 }
 
+// SetIconStoreType sets the "icon_store_type" field.
+func (m *TokenMutation) SetIconStoreType(s string) {
+	m.icon_store_type = &s
+}
+
+// IconStoreType returns the value of the "icon_store_type" field in the mutation.
+func (m *TokenMutation) IconStoreType() (r string, exists bool) {
+	v := m.icon_store_type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIconStoreType returns the old "icon_store_type" field's value of the Token entity.
+// If the Token object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TokenMutation) OldIconStoreType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIconStoreType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIconStoreType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIconStoreType: %w", err)
+	}
+	return oldValue.IconStoreType, nil
+}
+
+// ResetIconStoreType resets all changes to the "icon_store_type" field.
+func (m *TokenMutation) ResetIconStoreType() {
+	m.icon_store_type = nil
+}
+
 // SetIcon sets the "icon" field.
 func (m *TokenMutation) SetIcon(s string) {
 	m.icon = &s
@@ -2528,7 +2565,7 @@ func (m *TokenMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TokenMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, token.FieldCreatedAt)
 	}
@@ -2543,6 +2580,9 @@ func (m *TokenMutation) Fields() []string {
 	}
 	if m.site != nil {
 		fields = append(fields, token.FieldSite)
+	}
+	if m.icon_store_type != nil {
+		fields = append(fields, token.FieldIconStoreType)
 	}
 	if m.icon != nil {
 		fields = append(fields, token.FieldIcon)
@@ -2571,6 +2611,8 @@ func (m *TokenMutation) Field(name string) (ent.Value, bool) {
 		return m.Address()
 	case token.FieldSite:
 		return m.Site()
+	case token.FieldIconStoreType:
+		return m.IconStoreType()
 	case token.FieldIcon:
 		return m.Icon()
 	case token.FieldName:
@@ -2596,6 +2638,8 @@ func (m *TokenMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldAddress(ctx)
 	case token.FieldSite:
 		return m.OldSite(ctx)
+	case token.FieldIconStoreType:
+		return m.OldIconStoreType(ctx)
 	case token.FieldIcon:
 		return m.OldIcon(ctx)
 	case token.FieldName:
@@ -2645,6 +2689,13 @@ func (m *TokenMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSite(v)
+		return nil
+	case token.FieldIconStoreType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIconStoreType(v)
 		return nil
 	case token.FieldIcon:
 		v, ok := value.(string)
@@ -2769,6 +2820,9 @@ func (m *TokenMutation) ResetField(name string) error {
 		return nil
 	case token.FieldSite:
 		m.ResetSite()
+		return nil
+	case token.FieldIconStoreType:
+		m.ResetIconStoreType()
 		return nil
 	case token.FieldIcon:
 		m.ResetIcon()

@@ -226,6 +226,10 @@
           "type": "string",
           "title": "@inject_tag: sql:\"site\""
         },
+        "IconStoreType": {
+          "type": "string",
+          "title": "@inject_tag: sql:\"icon_store_type\""
+        },
         "Icon": {
           "type": "string",
           "title": "@inject_tag: sql:\"icon\""
@@ -261,6 +265,9 @@
           "type": "string"
         },
         "Site": {
+          "type": "string"
+        },
+        "IconStoreType": {
           "type": "string"
         },
         "Icon": {
