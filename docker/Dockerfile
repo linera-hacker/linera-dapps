@@ -45,7 +45,7 @@ user root
 ARG ALL_PROXY
 RUN chmod 777 /tmp
 RUN apt-get update -y
-RUN apt-get install socat curl git -y
+RUN apt-get install socat curl git jq -y
 
 
 RUN mkdir -p /opt/linera-project
