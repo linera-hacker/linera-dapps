@@ -2,7 +2,7 @@
   <q-card flat :class='newTx ? "meme-card cursor-pointer shake" : "meme-card cursor-pointer"' @click='onSwap(memeInfo.appID)'>
     <q-item>
       <div class='horizontal-inner-x-margin-right vertical-card-align' avatar>
-        <q-img :src='processImg(memeInfo.logo)' width='128px' />
+        <q-img :src='processImg(memeInfo.logoStoreType, memeInfo.logo)' width='128px' />
       </div>
 
       <div>
@@ -117,6 +117,7 @@ const _copyToClipboard = (
 }
 
 const onSwap = (token0: string) => {
+<<<<<<< HEAD
   if (memeInfo.value.poolCreated) {
     void router.push({
       path: '/swap',
@@ -134,6 +135,15 @@ const onSwap = (token0: string) => {
       }
     })
   }
+=======
+  void router.push({
+    path: 'swap',
+    query: {
+      token0,
+      token1: useHostStore().wlineraApplicationId
+    }
+  })
+>>>>>>> 8c1ba0598ede6fc73a5d2a4008bf8af677aaf286
 }
 
 const goLink = (url: string, event: MouseEvent) => {
@@ -141,8 +151,8 @@ const goLink = (url: string, event: MouseEvent) => {
   window.open(url, '_blank')
 }
 
-const processImg = (imageHash: string): string => {
-  return useHostStore().blobDataPath(imageHash)
+const processImg = (storeType: string, imageHash: string): string => {
+  return useHostStore().blobDataPath(storeType, imageHash)
 }
 
 const timeAgo = (timestamp: number): string => {

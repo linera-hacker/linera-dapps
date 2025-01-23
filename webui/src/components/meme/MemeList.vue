@@ -138,6 +138,7 @@ const getApplicationInfos = (url: string) => {
         description: apps[i].description,
         discord: apps[i].discord,
         github: apps[i].github,
+        logoStoreType: apps[i].logo_store_type,
         logo: apps[i].logo,
         telegram: apps[i].telegram,
         twitter: apps[i].twitter,
