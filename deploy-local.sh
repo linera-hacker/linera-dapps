@@ -188,6 +188,22 @@ linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
 
 sleep 15
 
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
+
+sleep 15
+
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
+
+sleep 15
+
 ####
 ## Mint ERC20 token and WLINERA token initial liquidity to wallet 14 default chain directly
 ####
@@ -220,6 +236,22 @@ erc20_1_appid=`linera --wait-for-outgoing-messages --with-wallet 10 create-appli
 print $'\U01f499' $LIGHTGREEN " ERC20 application deployed"
 echo -e "    Bytecode ID:    $BLUE$erc20_1_bid$NC"
 echo -e "    Application ID: $BLUE$erc20_1_appid$NC"
+
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
+
+sleep 15
+
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
+
+sleep 15
 
 linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
 linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
@@ -357,6 +389,22 @@ ams_creation_owner=$owner
 ##   2 authorize balance from wallet 13 default chain to swap pool
 ## Swap will subscribe to chain directly when it's pool is created
 ####
+
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
+
+sleep 15
+
+linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 12 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 13 process-inbox
+linera --wait-for-outgoing-messages --with-wallet 14 process-inbox
+
+sleep 15
 
 linera --wait-for-outgoing-messages --with-wallet 10 process-inbox
 linera --wait-for-outgoing-messages --with-wallet 11 process-inbox
