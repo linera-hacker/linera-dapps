@@ -3,7 +3,7 @@ use linera_sdk::{
     views::{linera_views, MapView, RegisterView, RootView, ViewStorageContext},
 };
 
-use proxy::InstantiateArgument;
+use proxy::InstantiationArgument;
 
 // State is only on creation chain
 
@@ -17,23 +17,13 @@ pub struct ProxyState {
 
 #[allow(dead_code)]
 impl ProxyState {
-    pub(crate) async fn initialize(&mut self, argument: InstantiateArgument) {
+    pub(crate) async fn initialize(&mut self, argument: InstantiationArgument) {}
 
-    }
+    pub(crate) async fn set_operator(&mut self, operator: Owner) {}
 
-    pub(crate) async fn set_operator(&mut self, operator: Owner) {
+    pub(crate) async fn set_child_bytecode_id(&mut self, bytecode_id: BytecodeId) {}
 
-    }
+    pub(crate) async fn register_validator(&mut self, owner: Owner) {}
 
-    pub(crate) async fn set_child_bytecode_id(&mut self, bytecode_id: BytecodeId) {
-
-    }
-
-    pub(crate) async fn register_validator(&mut self, owner: Owner) {
-
-    }
-
-    pub(crate) async fn deregister_validator(&mut self, owner: Owner) {
-
-    }
+    pub(crate) async fn deregister_validator(&mut self, owner: Owner) {}
 }

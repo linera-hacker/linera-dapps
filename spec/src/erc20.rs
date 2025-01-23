@@ -1,9 +1,9 @@
 use crate::{
     account::ChainAccountOwner,
     base::{BaseMessage, BaseOperation},
+    blob_gateway::StoreType,
 };
-use async_graphql::scalar;
-use async_graphql::{Context, Error, Request, Response, SimpleObject};
+use async_graphql::{scalar, Context, Error, Request, Response, SimpleObject};
 use linera_sdk::{
     abi::{ContractAbi, ServiceAbi},
     base::{Amount, ApplicationId},
@@ -18,6 +18,7 @@ pub struct ERC20Parameters {
     pub swap_application_id: Option<ApplicationId>,
     pub token_metadata: Option<TokenMetadata>,
 }
+scalar!(ERC20Parameters);
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub struct InstantiationArgument {
@@ -32,8 +33,11 @@ pub struct InstantiationArgument {
     pub blob_gateway_application_id: Option<ApplicationId>,
 }
 
+scalar!(InstantiationArgument);
+
 #[derive(Default, Debug, Clone, Deserialize, Serialize, Eq, PartialEq)]
 pub struct TokenMetadata {
+    pub logo_store_type: StoreType,
     pub logo: String,
     pub description: String,
     pub twitter: Option<String>,

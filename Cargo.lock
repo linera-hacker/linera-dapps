@@ -1848,7 +1848,6 @@ checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
 dependencies = [
  "autocfg",
  "hashbrown 0.12.3",
- "serde",
 ]
 
 [[package]]
@@ -1953,8 +1952,8 @@ checksum = "4ec2a862134d2a7d32d7983ddcdd1c4923530833c9f2ea1a44fc5fa473989058"
 
 [[package]]
 name = "linera-base"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -1967,7 +1966,6 @@ dependencies = [
  "chrono",
  "custom_debug_derive",
  "ed25519-dalek",
- "futures",
  "generic-array",
  "hex",
  "is-terminal",
@@ -1985,7 +1983,6 @@ dependencies = [
  "test-strategy",
  "thiserror",
  "tokio",
- "tokio-stream",
  "tracing",
  "tracing-subscriber",
  "zstd",
@@ -1993,13 +1990,12 @@ dependencies = [
 
 [[package]]
 name = "linera-chain"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "async-graphql",
  "async-trait",
  "cfg_aliases",
- "custom_debug_derive",
  "futures",
  "hex",
  "linera-base",
@@ -2009,7 +2005,6 @@ dependencies = [
  "rand_chacha",
  "rand_distr",
  "serde",
- "serde_bytes",
  "thiserror",
  "tokio",
  "tracing",
@@ -2017,8 +2012,8 @@ dependencies = [
 
 [[package]]
 name = "linera-core"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2026,7 +2021,6 @@ dependencies = [
  "bcs",
  "cfg_aliases",
  "clap",
- "custom_debug_derive",
  "dashmap 5.5.3",
  "futures",
  "linera-base",
@@ -2054,13 +2048,14 @@ dependencies = [
 
 [[package]]
 name = "linera-execution"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-graphql",
  "async-trait",
  "bcs",
+ "bytes",
  "cfg-if",
  "cfg_aliases",
  "clap",
@@ -2078,7 +2073,6 @@ dependencies = [
  "lru",
  "oneshot",
  "prometheus",
- "proptest",
  "reqwest",
  "serde",
  "serde_bytes",
@@ -2093,8 +2087,8 @@ dependencies = [
 
 [[package]]
 name = "linera-sdk"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2123,8 +2117,8 @@ dependencies = [
 
 [[package]]
 name = "linera-sdk-derive"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "convert_case",
  "proc-macro2",
@@ -2133,8 +2127,8 @@ dependencies = [
 
 [[package]]
 name = "linera-storage"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "async-trait",
  "bcs",
@@ -2151,8 +2145,8 @@ dependencies = [
 
 [[package]]
 name = "linera-storage-service"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-lock",
@@ -2174,8 +2168,8 @@ dependencies = [
 
 [[package]]
 name = "linera-version"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2195,8 +2189,8 @@ dependencies = [
 
 [[package]]
 name = "linera-views"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "async-graphql",
@@ -2227,8 +2221,8 @@ dependencies = [
 
 [[package]]
 name = "linera-views-derive"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "cfg_aliases",
  "proc-macro2",
@@ -2286,8 +2280,6 @@ dependencies = [
  "region",
  "rkyv",
  "self_cell",
- "serde",
- "serde_bytes",
  "shared-buffer",
  "smallvec",
  "thiserror",
@@ -2358,7 +2350,6 @@ dependencies = [
  "more-asserts",
  "region",
  "scopeguard",
- "serde",
  "thiserror",
  "wasmer-types",
  "windows-sys 0.59.0",
@@ -2366,8 +2357,8 @@ dependencies = [
 
 [[package]]
 name = "linera-witty"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "anyhow",
  "cfg_aliases",
@@ -2382,8 +2373,8 @@ dependencies = [
 
 [[package]]
 name = "linera-witty-macros"
-version = "0.14.0"
-source = "git+https://github.com/linera-io/linera-protocol.git?rev=3a611116254955331ae4c73ca19b3fcc63fdc347#3a611116254955331ae4c73ca19b3fcc63fdc347"
+version = "0.13.1"
+source = "git+https://github.com/linera-io/linera-protocol.git?rev=v0.13.1#f84b66720b92b2eab86622e26b56c3aa2adbc0c0"
 dependencies = [
  "cfg_aliases",
  "heck 0.4.1",
@@ -2994,6 +2985,7 @@ dependencies = [
  "async-graphql",
  "linera-sdk",
  "serde",
+ "spec",
 ]
 
 [[package]]
@@ -4478,8 +4470,6 @@ dependencies = [
  "indexmap 1.9.3",
  "more-asserts",
  "rkyv",
- "serde",
- "serde_bytes",
  "sha2",
  "target-lexicon",
  "thiserror",

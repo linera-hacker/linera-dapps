@@ -15,6 +15,7 @@ pub enum BlobDataType {
 #[derive(Debug, Deserialize, Serialize, GraphQLMutationRoot)]
 pub enum BlobOperation {
     Register {
+        store_type: StoreType,
         data_type: BlobDataType,
         blob_hash: CryptoHash,
     },
@@ -29,12 +30,21 @@ pub enum BlobGatewayResponse {
 #[derive(Debug, Deserialize, Serialize)]
 pub enum BlobMessage {
     Register {
+        store_type: StoreType,
         data_type: BlobDataType,
         blob_hash: CryptoHash,
     },
 }
 
 pub struct BlobGatewayApplicationAbi;
+
+#[derive(Default, Debug, Deserialize, Serialize, Clone, Eq, PartialEq, Enum, Copy)]
+pub enum StoreType {
+    #[default]
+    Blob,
+    Ipfs,
+    S3,
+}
 
 impl ContractAbi for BlobGatewayApplicationAbi {
     type Operation = BlobOperation;

@@ -164,19 +164,17 @@ impl SwapQueryRoot for QueryRoot {
         let mut _liquidity = Amount::ZERO;
         let pools = context.state.get_pool(pool_id).await.expect("Invalid pool");
         match pools {
-            Some(pool) => {
-                match pool.erc20.balances.get(&owner) {
-                    Some(amount) => {
-                        _liquidity = *amount;
-                    }
-                    None => {
-                        _liquidity = Amount::ZERO;
-                    },
+            Some(pool) => match pool.erc20.balances.get(&owner) {
+                Some(amount) => {
+                    _liquidity = *amount;
+                }
+                None => {
+                    _liquidity = Amount::ZERO;
                 }
             },
             None => {
                 _liquidity = Amount::ZERO;
-            },
+            }
         }
         _liquidity
     }

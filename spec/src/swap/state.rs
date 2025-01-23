@@ -114,19 +114,19 @@ impl SwapApplicationState {
         };
         self.erc20_erc20_pools
             .for_each_index_value(|index, pools| {
-                state.erc20_erc20_pools.insert(index, pools);
+                state.erc20_erc20_pools.insert(index, pools.clone());
                 Ok(())
             })
             .await?;
         self.erc20_native_pools
             .for_each_index_value(|index, pool| {
-                state.erc20_native_pools.insert(index, pool);
+                state.erc20_native_pools.insert(index, pool.clone());
                 Ok(())
             })
             .await?;
         self.pool_erc20_erc20s
             .for_each_index_value(|index, tokens| {
-                state.pool_erc20_erc20s.insert(index, tokens);
+                state.pool_erc20_erc20s.insert(index, tokens.to_vec());
                 Ok(())
             })
             .await?;

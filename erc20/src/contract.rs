@@ -19,7 +19,7 @@ use spec::{
     account::ChainAccountOwner,
     ams::{AMSApplicationAbi, AMSOperation, Metadata},
     base::{BaseMessage, BaseOperation, CREATOR_CHAIN_CHANNEL},
-    blob_gateway::{BlobDataType, BlobGatewayApplicationAbi, BlobOperation},
+    blob_gateway::{BlobDataType, BlobGatewayApplicationAbi, BlobOperation, StoreType},
     erc20::{
         ERC20Message, ERC20Operation, ERC20Parameters, ERC20Response, InstantiationArgument,
         SubscriberSyncState, TokenMetadata,
@@ -77,7 +77,11 @@ impl Contract for ApplicationContract {
             CryptoHash::from_str(token_metadata.logo.as_str()).expect("Invalid logo hash");
         match argument.blob_gateway_application_id {
             Some(application_id) => {
-                self.register_blob_gateway(application_id, logo_hash);
+                self.register_blob_gateway(
+                    application_id,
+                    token_metadata.logo_store_type,
+                    logo_hash,
+                );
             }
             _ => {}
         }
@@ -207,9 +211,11 @@ impl ApplicationContract {
     fn register_blob_gateway(
         &mut self,
         blob_gateway_application_id: ApplicationId,
+        store_type: StoreType,
         blob_hash: CryptoHash,
     ) {
         let call = BlobOperation::Register {
+            store_type,
             data_type: BlobDataType::Image,
             blob_hash: blob_hash,
         };
