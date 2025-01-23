@@ -9,6 +9,7 @@ export interface Token {
   ID: number;
   Address: string;
   Site: string;
+  IconStoreType: string
   Icon: string;
   Name: string;
   Symbol: string;
@@ -27,11 +28,13 @@ export interface TokenPair {
   TokenZeroID: number;
   TokenZeroName: string;
   TokenZeroAddress: string;
+  TokenZeroIconStoreType: string
   TokenZeroIcon: string;
   TokenZeroSymbol: string;
   TokenOneID: number;
   TokenOneName: string;
   TokenOneAddress: string;
+  TokenOneIconStoreType: string
   TokenOneIcon: string;
   TokenOneSymbol: string;
   Remark: string;

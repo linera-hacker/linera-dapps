@@ -6,7 +6,7 @@
     >
       <template #option='scope'>
         <q-item dense v-bind='scope.itemProps'>
-          <q-img :src='processImg(scope.opt.Icon)' width='24px' height='24px' fit='contain' />
+          <q-img :src='processImg(scope.opt.IconStoreType, scope.opt.Icon)' width='24px' height='24px' fit='contain' />
           <div class='swap-token-list horizontal-inner-x-margin-left'>
             <div class='row'>
               <div class='swap-token-name text-bold'>
@@ -20,7 +20,7 @@
       </template>
       <template #selected>
         <div class='row'>
-          <q-img :src='processImg(swapStore.SelectedToken?.Icon)' width='24px' height='24px' fit='contain' />
+          <q-img :src='processImg(swapStore.SelectedToken?.IconStoreType, swapStore.SelectedToken?.Icon)' width='24px' height='24px' fit='contain' />
           <div class='swap-token-name text-bold swap-token-label flex items-center justify-center'>
             {{ swapStore.SelectedToken?.Symbol }}
           </div>
@@ -36,7 +36,7 @@
     >
       <template #option='scope'>
         <q-item dense v-bind='scope.itemProps'>
-          <q-img :src='processImg(scope.opt.TokenOneIcon)' width='24px' height='24px' fit='contain' />
+          <q-img :src='processImg(scope.opt.TokenOneIconStoreType, scope.opt.TokenOneIcon)' width='24px' height='24px' fit='contain' />
           <div class='swap-token-list horizontal-inner-x-margin-left'>
             <div class='row'>
               <div class='swap-token-name text-bold'>
@@ -50,7 +50,7 @@
       </template>
       <template #selected>
         <div class='row'>
-          <q-img :src='processImg(swapStore.SelectedTokenPair?.TokenOneIcon)' width='24px' height='24px' fit='contain' />
+          <q-img :src='processImg(swapStore.SelectedTokenPair?.TokenOneIconStoreType, swapStore.SelectedTokenPair?.TokenOneIcon)' width='24px' height='24px' fit='contain' />
           <div class='swap-token-name text-bold swap-token-label flex items-center justify-center'>
             {{ swapStore.SelectedTokenPair?.TokenOneSymbol }}
           </div>
@@ -73,11 +73,11 @@ const router = useRouter()
 const t0Addr = router.currentRoute.value.query.token0
 const t1Addr = router.currentRoute.value.query.token1
 
-const processImg = (imageHash: string | undefined): string => {
-  if (imageHash === undefined) {
+const processImg = (storeType: string | undefined, imageHash: string | undefined): string => {
+  if (storeType === undefined || imageHash === undefined) {
     return ''
   }
-  return useHostStore().blobDataPath(imageHash)
+  return useHostStore().blobDataPath(storeType, imageHash)
 }
 
 watch(() => swapStore.SelectedToken, () => {

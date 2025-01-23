@@ -27,6 +27,7 @@ export interface NewMemeInfo {
   name: string
   symbol: string
   decimals: string
+  logoStoreType: string
   logo: string
   discord: string
   telegram: string
@@ -60,6 +61,8 @@ export interface MemeAppRespInfo {
   description: string
   discord: string
   github: string
+  // eslint-disable-next-line camelcase
+  logo_store_type: string
   logo: string
   spec: string
   telegram: string
@@ -76,6 +79,7 @@ export interface MemeAppInfoDisplay {
   description: string
   discord: string
   github: string
+  logoStoreType: string
   logo: string
   telegram: string
   twitter: string
@@ -117,6 +121,7 @@ export interface ChainApp {
 
 export interface BlobInfo {
   id: number
+  storeType: string
   blobHash: string
   dataType: string
   createdAt: number

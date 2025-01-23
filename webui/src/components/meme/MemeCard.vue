@@ -2,7 +2,7 @@
   <q-card flat :class='newTx ? "meme-card cursor-pointer shake" : "meme-card cursor-pointer"' @click='onSwap(memeInfo.appID)'>
     <q-item>
       <div class='horizontal-inner-x-margin-right vertical-card-align' avatar>
-        <q-img :src='processImg(memeInfo.logo)' width='128px' />
+        <q-img :src='processImg(memeInfo.logoStoreType, memeInfo.logo)' width='128px' />
       </div>
 
       <div>
@@ -97,8 +97,8 @@ const goLink = (url: string, event: MouseEvent) => {
   window.open(url, '_blank')
 }
 
-const processImg = (imageHash: string): string => {
-  return useHostStore().blobDataPath(imageHash)
+const processImg = (storeType: string, imageHash: string): string => {
+  return useHostStore().blobDataPath(storeType, imageHash)
 }
 
 const timeAgo = (timestamp: number): string => {
