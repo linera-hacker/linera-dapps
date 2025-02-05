@@ -28,8 +28,8 @@ NETWORK_ID=1
 NETWORK_TYPE=devnet
 K8S=0
 
-blob_gateway_creation_chain_id="1db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d03"
-blob_gateway_app_id="b348f8039b02f685b8f90c147a650ea4ff590f74513c8080205836debcd7df6c69f4f4c55c769e3465e3f80c89c4d557a5ed748c1c41c1d2c19bf8e26389fbb31db1936dad0717597a7743a8353c9c0191c14c3a129b258e9743aec2b4f05d030d0000000000000000000000"
+blob_gateway_creation_chain_id="b98000531786032fddb8f518b31c6f338a486b0a6b2b1c67c2d7aa19a96b9802"
+blob_gateway_app_id="cf2f040970768c6822c14c9a7183a17556b30d1d98cf202eec9fd1b2b3ba65a249de46874274296b257fdd8d5cb3db4c7dbc9aeffde4100be5f407293f140d43b98000531786032fddb8f518b31c6f338a486b0a6b2b1c67c2d7aa19a96b98020f0000000000000000000000"
 
 app_logo_path='./assets/HackerLogoDark.png'
 app_logo=`base64 -w 0 $app_logo_path`
@@ -230,7 +230,7 @@ while true; do
   [ x"$swap_bid" != x ] && break
 done
 swap_appid=`linera --with-wallet 12 create-application $swap_bid \
-    --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo":"","description":"","application_name":"Linera Swap (CheCko)"}' \
+    --json-parameters '{"wlinera_application_id": "'$erc20_2_appid'","ams_application_id":"'$ams_appid'","logo":"'$logo_blob_hash'","logo_store_type":"S3","description":"","application_name":"Linera Swap (CheCko)"}' \
     `
 print $'\U01f499' $LIGHTGREEN " Swap application deployed"
 echo -e "    Bytecode ID:    $BLUE$swap_bid$NC"
