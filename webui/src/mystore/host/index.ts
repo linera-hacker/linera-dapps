@@ -9,6 +9,7 @@ export const useHostStore = defineStore('hosts', {
     klineDomainApiHost: 'hk.testnet-archimedes.lineraswap.fun/api/kline',
     blobGatewayDomainApiHost: 'hk.testnet-archimedes.blobgateway.com/api/blobs',
     swapDomainApiHost: 'hk.testnet-archimedes.lineraswap.fun/api/swap',
+    fileGatewayDomainApiHost: 'hk.testnet-archimedes.blobgateway.com/api/file',
 
     windowHost: 'localhost:8080',
 
@@ -46,6 +47,12 @@ export const useHostStore = defineStore('hosts', {
         return this.apiSchema + '://' + (this.useDomainApi ? this.blobGatewayDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/blobs') : this.blobGatewayDebugApiHost) + '/' + path
       }
     },
+    formalizeFileGatewayPath (): (path: string) => string {
+      return (path: string) => {
+        if (path.startsWith('/')) path = path.substring(1)
+        return this.apiSchema + '://' + (this.useDomainApi ? this.fileGatewayDomainApiHost : process.env.NODE_ENV === 'development' ? (this.windowHost + '/api/file') : this.fileGatewayDomainApiHost) + '/' + path
+      }
+    },
     formalizeSwapPath (): (path: string) => string {
       return (path: string) => {
         if (path.startsWith('/')) path = path.substring(1)
@@ -70,7 +77,7 @@ export const useHostStore = defineStore('hosts', {
     blobDataPath (): (storeType: string, blobHash: string) => string {
       return (storeType: string, blobHash: string) => {
         if (storeType === 'S3') {
-          return `http://minio.respeer.ai/api/file/v1/images/${blobHash}`
+          return this.formalizeFileGatewayPath(`/v1/images/${blobHash}`)
         }
         return this.blobGatewayApplicationPath() + `/images/${blobHash}`
       }
