@@ -93,6 +93,7 @@ import { graphqlResult } from 'src/utils'
 import { useUserStore } from 'src/mystore/user'
 import { useHostStore } from 'src/mystore/host'
 import axios from 'axios'
+import { Buffer } from 'buffer'
 
 const user = useUserStore()
 const account = computed(() => user.account?.trim())
@@ -234,10 +235,10 @@ const publishDataBlob = (): Promise<unknown> => {
 
 const uploadS3Blob = (): Promise<unknown> => {
   return new Promise((resolve, reject) => {
-    axios.post('https://minio.respeer.ai/api/file/v1/upload', {
-      Payload: logoByteArray
+    axios.post(useHostStore().formalizeFileGatewayPath('/v1/upload'), {
+      Payload: Buffer.from(logoByteArray).toString('base64')
     }).then((resp) => {
-      memeInfo.value.logo = (resp.data as Record<string, string>).Info
+      memeInfo.value.logo = (resp.data as Record<string, string>).FileId
       memeInfo.value.logoStoreType = 'S3'
       resolve(resp)
     }).catch((e) => {

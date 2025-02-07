@@ -114,6 +114,14 @@ module.exports = configure(function (ctx) {
           },
           secure: false,
           changeOrigin: true
+        },
+        '/api/file': {
+          target: 'https://hk.testnet-archimedes.blobgateway.com',
+          pathRewrite: {
+            '^/api/file': '/api/file'
+          },
+          secure: false,
+          changeOrigin: true
         }
       },
 
