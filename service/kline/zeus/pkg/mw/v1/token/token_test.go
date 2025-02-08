@@ -45,6 +45,7 @@ func create(t *testing.T) {
 		context.Background(),
 		WithAddress(tokenReq.Address, true),
 		WithSite(tokenReq.Site, true),
+		WithIconStoreType(tokenReq.IconStoreType, true),
 		WithIcon(tokenReq.Icon, true),
 		WithName(tokenReq.Name, true),
 		WithSymbol(tokenReq.Symbol, true),
@@ -66,7 +67,6 @@ func update(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(tokenReq.ID, true),
-		WithSite(tokenReq.Site, false),
 		WithIcon(tokenReq.Icon, false),
 	)
 	assert.Nil(t, err)
