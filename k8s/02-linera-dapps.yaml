@@ -57,6 +57,11 @@ spec:
                 configMapKeyRef:
                   name: dapps-service-environment
                   key: environment.blob_app_id
+            - name: ENV_BLOB_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: dapps-service-environment
+                  key: environment.blob_url
       imagePullSecrets:
         - name: regcred
       volumes:

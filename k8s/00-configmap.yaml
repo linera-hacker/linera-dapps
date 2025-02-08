@@ -6,3 +6,4 @@ metadata:
 data:
   environment.blob_chain_id: "$ENV_BLOB_CHAIN_ID"
   environment.blob_app_id: "$ENV_BLOB_APP_ID"
+  environment.blob_url: "$ENV_BLOB_URL"
