@@ -5,11 +5,11 @@ export const useHostStore = defineStore('hosts', {
     useDomainApi: process.env.NODE_ENV === 'production',
     apiSchema: process.env.NODE_ENV === 'production' ? 'https' : 'http',
 
-    amsDomainApiHost: 'hk.testnet-archimedes.respeer.ai/api/ams',
-    klineDomainApiHost: 'hk.testnet-archimedes.lineraswap.fun/api/kline',
-    blobGatewayDomainApiHost: 'hk.testnet-archimedes.blobgateway.com/api/blobs',
-    swapDomainApiHost: 'hk.testnet-archimedes.lineraswap.fun/api/swap',
-    fileGatewayDomainApiHost: 'hk.testnet-archimedes.blobgateway.com/api/file',
+    amsDomainApiHost: 'testnet-archimedes.respeer.ai/api/ams',
+    klineDomainApiHost: 'testnet-archimedes.lineraswap.fun/api/kline',
+    blobGatewayDomainApiHost: 'testnet-archimedes.blobgateway.com/api/blobs',
+    swapDomainApiHost: 'testnet-archimedes.lineraswap.fun/api/swap',
+    fileGatewayDomainApiHost: 'testnet-archimedes.blobgateway.com/api/file',
 
     windowHost: 'localhost:8080',
 
@@ -19,14 +19,14 @@ export const useHostStore = defineStore('hosts', {
     swapDebugApiHost: '/api/swap',
 
     erc20BytecodeId: '8f35d0a1a1ecec3406ce05f9b58809204c4b81a60512f42983950e077392eb03e09686709ef93e02de5689565008be6b57555877c8ea663fc039718d85f3ad2a',
-    swapCreationChainId: '6e677651a05d090e15061875582a355b1d86b1156ab508e019060b925f979f3c',
-    swapCreationOwner: '41ef4716e818fe9ec0acd638e4ba5c13fa78012e520da7bf11295d8e3600c6e2',
-    swapApplicationId: '0a53c50a4012157bccba877b890b778f684b58da172605da49d357c732f1361eaabeee56a723e29481416b86a8ba18a4d7012dfda927d56339b96fdc3d25b89b6e677651a05d090e15061875582a355b1d86b1156ab508e019060b925f979f3c060000000000000000000000',
-    wlineraApplicationId: '8f35d0a1a1ecec3406ce05f9b58809204c4b81a60512f42983950e077392eb03e09686709ef93e02de5689565008be6b57555877c8ea663fc039718d85f3ad2a525571956c2b3ded3e66e8dcbc42349af0e5639dcd949fe9f3be13b7e8601d01060000000000000000000000',
-    amsCreationChainId: '051ede2da9b4f83554243d590656e4c1a9b032965a7b09b4b6af3043b29f802b',
-    amsApplicationId: 'bf9b75f4ad24a9940b1f0dc4dec6cbb89e72ca8b391ef4e8dd6357a84d28e5566478527ea66be16313d7ec46334a8293b8254ffc87e1267f1bf6d2e899e220d1051ede2da9b4f83554243d590656e4c1a9b032965a7b09b4b6af3043b29f802b030000000000000000000000',
-    blobGatewayCreationChainId: '1ed416a3a48a0bc76c53a29e35b55758e609a377da17e51e85e8dd09343fc1b8',
-    blobGatewayApplicationId: '9e44878bc356390f539f3361720551e96c20c3f80566275d3a4e332c7425603b3b93ed75913ae0768755f68c161e57600cf4747b44e8301a1b8c037582571a191ed416a3a48a0bc76c53a29e35b55758e609a377da17e51e85e8dd09343fc1b80f0000000000000000000000'
+    swapCreationChainId: '7f430ede6a5fbf9a8aa59286fb94e3b3490c0451826583a6a98b20b8cba1a0ab',
+    swapCreationOwner: '9ddb97dd256d6cd4efd58256c2b9afe926962321c733afcde34e7566ecc9459c',
+    swapApplicationId: '0a53c50a4012157bccba877b890b778f684b58da172605da49d357c732f1361eaabeee56a723e29481416b86a8ba18a4d7012dfda927d56339b96fdc3d25b89b7f430ede6a5fbf9a8aa59286fb94e3b3490c0451826583a6a98b20b8cba1a0ab060000000000000000000000',
+    wlineraApplicationId: '8f35d0a1a1ecec3406ce05f9b58809204c4b81a60512f42983950e077392eb03e09686709ef93e02de5689565008be6b57555877c8ea663fc039718d85f3ad2ad2040af57277cbc64d4d585535d0ec0a4e28fdbf58eba23c7d769673e541352c060000000000000000000000',
+    amsCreationChainId: 'a7fcebee0c372daafeec2cdb76b34e32caa9d8be1d2d6e9d9d597d6a314d52a2',
+    amsApplicationId: 'bf9b75f4ad24a9940b1f0dc4dec6cbb89e72ca8b391ef4e8dd6357a84d28e5566478527ea66be16313d7ec46334a8293b8254ffc87e1267f1bf6d2e899e220d1a7fcebee0c372daafeec2cdb76b34e32caa9d8be1d2d6e9d9d597d6a314d52a2030000000000000000000000',
+    blobGatewayCreationChainId: 'e24f3d30875f3f7e6e9830536b98b48a9b0538ee0ffcf8bf0722f9b8a724b2f2',
+    blobGatewayApplicationId: '1792c2f3699e48288081499b0455b494cb5883eb9423aa186c89714ed106c6043af42487fe70116e7375c88c4fb24743bd734d209f53b952937148e726fa7041e24f3d30875f3f7e6e9830536b98b48a9b0538ee0ffcf8bf0722f9b8a724b2f20f0000000000000000000000'
   }),
   getters: {
     formalizeAmsPath (): (path: string) => string {
