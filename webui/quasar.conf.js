@@ -84,7 +84,7 @@ module.exports = configure(function (ctx) {
     devServer: {
       proxy: {
         '/api/ams': {
-          target: 'https://hk.testnet-archimedes.respeer.ai',
+          target: 'https://testnet-archimedes.respeer.ai',
           pathRewrite: {
             '^/api/ams': '/api/ams'
           },
@@ -92,7 +92,7 @@ module.exports = configure(function (ctx) {
           changeOrigin: true
         },
         '/api/kline': {
-          target: 'https://hk.testnet-archimedes.lineraswap.fun',
+          target: 'https://testnet-archimedes.lineraswap.fun',
           pathRewrite: {
             '^/api/kline': '/api/kline'
           },
@@ -100,7 +100,7 @@ module.exports = configure(function (ctx) {
           changeOrigin: true
         },
         '/api/blobs': {
-          target: 'https://hk.testnet-archimedes.blobgateway.com',
+          target: 'https://testnet-archimedes.blobgateway.com',
           pathRewrite: {
             '^/api/blobs': '/api/blobs'
           },
@@ -108,7 +108,7 @@ module.exports = configure(function (ctx) {
           changeOrigin: true
         },
         '/api/swap': {
-          target: 'https://hk.testnet-archimedes.lineraswap.fun',
+          target: 'https://testnet-archimedes.lineraswap.fun',
           pathRewrite: {
             '^/api/swap': '/api/swap'
           },
@@ -116,7 +116,7 @@ module.exports = configure(function (ctx) {
           changeOrigin: true
         },
         '/api/file': {
-          target: 'https://hk.testnet-archimedes.blobgateway.com',
+          target: 'https://testnet-archimedes.blobgateway.com',
           pathRewrite: {
             '^/api/file': '/api/file'
           },

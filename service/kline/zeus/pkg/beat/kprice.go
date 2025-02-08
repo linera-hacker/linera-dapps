@@ -96,6 +96,7 @@ func checkAndCreateToken(ctx context.Context, address string) (*tokenproto.Token
 	tokenH, err = token.NewHandler(ctx,
 		token.WithAddress(&address, true),
 		token.WithSite(tokenReq.Site, true),
+		token.WithIconStoreType(tokenReq.IconStoreType, true),
 		token.WithIcon(tokenReq.Icon, true),
 		token.WithName(tokenReq.Name, true),
 		token.WithSymbol(tokenReq.Symbol, true),
