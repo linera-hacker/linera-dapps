@@ -35,7 +35,7 @@ function __run_service() {
   export LINERA_STORAGE_$1=rocksdb:$WALLET_BASE/client_$1.db
 
   linera -w $1 wallet show
-  linera --max-retries 100 --retry-delay-ms 10 -w $1 service --port $2
+  linera -w $1 service --port $2
 }
 
 function run_service () {
