@@ -381,7 +381,7 @@ func GetTokenInfos(address string) (*tokenproto.TokenReq, error) {
 	if _icon, ok := resp.Data.TokenMetadata["logo"].(string); ok {
 		icon = _icon
 	}
-	if _iconStoreType, ok := resp.Data.TokenMetadata["logoStoreType"].(string); ok {
+	if _iconStoreType, ok := resp.Data.TokenMetadata["logo_store_type"].(string); ok {
 		iconStoreType = _iconStoreType
 	}
 
