@@ -11,7 +11,7 @@ cd linera-dapps/service/kline
 
 export GOROOT=/usr/go/
 export PATH=/usr/go/bin:$PATH
-export GOPROXY=https://goproxy.cn,direct
+# export GOPROXY=https://goproxy.cn,direct
 
 while true
 do
