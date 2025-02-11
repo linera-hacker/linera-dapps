@@ -34,10 +34,10 @@
         />
       </div>
     </q-card>
-    <div class='row vertical-card-align'>
+    <div class='row vertical-card-align cursor-pointer' @click='onReverseSwap'>
       <div class='decorate-border-bottom-bold exchange-separator' />
-      <div class='exchange-symbol' size='28px'>
-        <q-icon name='bi-arrow-down-up' size='14px' class='text-grey-6' />
+      <div class='exchange-symbol' size='24px'>
+        <q-icon name='bi-arrow-down-up' size='14px' class='text-black' />
       </div>
       <div class='decorate-border-bottom-bold exchange-separator' />
     </div>
@@ -402,6 +402,45 @@ const SwapAmount = async () => {
   })
 }
 
+const getTokenPairs = (t0Addr: string, t1Addr: string) => {
+  if (!swapStore.SelectedToken) {
+    swapStore.SelectedTokenPair = null
+    return
+  }
+  swapStore.getTokenPairsByTokenZeroID((error) => {
+    if (error) return
+    if (swapStore.TokenPairs.length === 0) {
+      swapStore.SelectedTokenPair = null
+      return
+    }
+
+    const _t0Addr = t0Addr
+    const _t1Addr = t1Addr
+
+    if (_t0Addr) {
+      for (const info of swapStore.TokenPairs) {
+        if (_t0Addr !== info.TokenZeroAddress && _t0Addr !== info.TokenOneAddress) {
+          continue
+        }
+        if (_t1Addr !== info.TokenZeroAddress && _t1Addr !== info.TokenOneAddress) {
+          continue
+        }
+        swapStore.SelectedTokenPair = info
+        return
+      }
+    }
+
+    if (!swapStore.SelectedTokenPair) {
+      swapStore.SelectedTokenPair = swapStore.TokenPairs[0]
+    }
+  })
+}
+
+const onReverseSwap = () => {
+  swapStore.SelectedToken = swapStore.Tokens.find((el) => el.Address === swapStore.SelectedTokenPair?.TokenOneAddress) || swapStore.SelectedToken
+  getTokenPairs(swapStore.SelectedToken?.Address as string, swapStore.SelectedTokenPair?.TokenZeroAddress as string)
+}
+
 watch(() => swapStore.SelectedToken, (selected) => {
   if (!selected) {
     swapStore.SelectedTokenPair = null
@@ -596,7 +635,7 @@ onUnmounted(() => {
   width: calc(100% - 160px)
 
 .exchange-symbol
-  border: 2px solid $grey-4
+  border: 2px solid $grey-6
   border-radius: 50%
   width: 28px
   height: 28px
