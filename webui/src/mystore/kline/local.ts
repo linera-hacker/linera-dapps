@@ -75,7 +75,7 @@ export const useKLineStore = defineStore('useKLineStore', {
         useHostStore().formalizeKlinePath(API.GetKPointsForLine),
         {
           KPointType: this.SelectedKPType,
-          Limit: -100,
+          Limit: -720,
           Offset: -this.EchartPoinsData.CategoryItems.length,
           OriginalTime: this.OriginalTime,
           TokenPairID: this.SelectedTokenPairID
