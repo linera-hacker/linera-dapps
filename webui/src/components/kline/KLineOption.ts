@@ -172,7 +172,7 @@ const option: EChartsOption = {
       splitArea: {
         show: true
       },
-      boundaryGap: ["5%","5%"]
+      boundaryGap: ['5%', '5%']
     }
   ],
   dataZoom: [
@@ -259,6 +259,7 @@ export const initEchart = (elementID: string): (echarts.ECharts) => {
 }
 
 export const setKPointsToEchart = (myChart: echarts.ECharts, data: EchartKPoints) => {
+  const nums = data.Nums.map((_nums) => _nums.map((num) => Number(num.toFixed(8))))
   const addOption = {
     xAxis: [
       {
@@ -276,19 +277,19 @@ export const setKPointsToEchart = (myChart: echarts.ECharts, data: EchartKPoints
     // ],
     series: [
       {
-        data: data.Nums
+        data: nums
       },
       {
-        data: calculateMA(5, data.Nums)
+        data: calculateMA(5, nums)
       },
       {
-        data: calculateMA(10, data.Nums)
+        data: calculateMA(10, nums)
       },
       {
-        data: calculateMA(20, data.Nums)
+        data: calculateMA(20, nums)
       },
       {
-        data: calculateMA(30, data.Nums)
+        data: calculateMA(30, nums)
       }
     ]
   }
