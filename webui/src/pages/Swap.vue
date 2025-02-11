@@ -97,19 +97,23 @@ const swapService = ref(swapEndPoint.value + '/chains/' + swapChainID.value + '/
 const selectedToken = computed(() => useSwapStore().SelectedToken)
 const pools = ref([] as Array<Pool>)
 
-watch(selectedToken, () => {
+const switchTab = async () => {
+  if (pools.value.length === 0) {
+    pools.value = await getPools(swapService.value)
+  }
   if (pools.value.findIndex((el) => el.token0 === selectedToken.value?.Address || el.token1 === selectedToken.value?.Address) < 0) {
     tab.value = 'addLiquidity'
   } else {
     tab.value = 'swap'
   }
+}
+
+watch(selectedToken, async () => {
+  await switchTab()
 })
 
 onMounted(async () => {
-  pools.value = await getPools(swapService.value)
-  if (pools.value.findIndex((el) => el.token0 === selectedToken.value?.Address || el.token1 === selectedToken.value?.Address) < 0) {
-    tab.value = 'addLiquidity'
-  }
+  await switchTab()
 })
 
 </script>
