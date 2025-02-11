@@ -78,6 +78,7 @@ export const calculateZoomStart = (itemsLen: number) => {
   } else {
     result = 100 - 50.0 / itemsLen * 100
   }
+  result = 1
   return result
 }
 
