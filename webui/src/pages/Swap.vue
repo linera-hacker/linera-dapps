@@ -38,7 +38,7 @@
 </template>
 
 <script setup lang='ts'>
-import { defineAsyncComponent, ref, onMounted, computed } from 'vue'
+import { defineAsyncComponent, ref, onMounted, computed, watch } from 'vue'
 import { ApolloClient } from '@apollo/client/core'
 import gql from 'graphql-tag'
 import { graphqlResult } from 'src/utils'
@@ -95,10 +95,19 @@ const swapEndPoint = ref(useHostStore()._swapEndpoint())
 const swapAppID = ref(useHostStore().swapApplicationId)
 const swapService = ref(swapEndPoint.value + '/chains/' + swapChainID.value + '/applications/' + swapAppID.value)
 const selectedToken = computed(() => useSwapStore().SelectedToken)
+const pools = ref([] as Array<Pool>)
+
+watch(selectedToken, () => {
+  if (pools.value.findIndex((el) => el.token0 === selectedToken.value?.Address || el.token1 === selectedToken.value?.Address) < 0) {
+    tab.value = 'addLiquidity'
+  } else {
+    tab.value = 'swap'
+  }
+})
 
 onMounted(async () => {
-  const pools = await getPools(swapService.value)
-  if (pools.findIndex((el) => el.token0 === selectedToken.value?.Address || el.token1 === selectedToken.value?.Address) < 0) {
+  pools.value = await getPools(swapService.value)
+  if (pools.value.findIndex((el) => el.token0 === selectedToken.value?.Address || el.token1 === selectedToken.value?.Address) < 0) {
     tab.value = 'addLiquidity'
   }
 })
