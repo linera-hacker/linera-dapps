@@ -251,7 +251,7 @@ type kpClose struct {
 //nolint:lll
 func getKPointFromKPoint(ctx context.Context, cli *ent.Client, startTime, endTime uint32, kpType, colKPType basetype.KPointType) ([]*kpointproto.KPointReq, error) {
 	selectMinMaxSQL := fmt.Sprintf(
-		"SELECT token_pair_id,MIN(low) as low,MAX(high) as high FROM  zeus.kpoints WHERE k_point_type='%v' AND end_time >%v AND end_time<=%v GROUP BY token_pair_id;",
+		"SELECT token_pair_id,MIN(low) as low,MAX(high) as high FROM  kpoints WHERE k_point_type='%v' AND end_time >%v AND end_time<=%v GROUP BY token_pair_id;",
 		colKPType.String(),
 		startTime,
 		endTime,
