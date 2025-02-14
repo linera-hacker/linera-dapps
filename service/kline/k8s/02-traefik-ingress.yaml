@@ -47,7 +47,6 @@ kind: IngressRoute
 metadata:
   name: kline-service-traefik-app-ingress-route
   namespace: kube-system
-  annotations:
 
 spec:
   entryPoints:
@@ -59,13 +58,16 @@ spec:
       services:
         - name: hk-kline-service
           port: 443
+          passHostHeader: false
     - match: Host(`testnet-archimedes.lineraswap.fun`) && PathPrefix(`/api/kline/v1`)
       kind: Rule
       services:
         - name: hk-kline-service
           port: 443
+          passHostHeader: false
     - match: Host(`testnet-archimedes.blobgateway.fun`) && PathPrefix(`/api/kline/v1`)
       kind: Rule
       services:
         - name: hk-kline-service
           port: 443
+          passHostHeader: false
